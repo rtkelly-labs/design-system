@@ -166,7 +166,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="border-2 border-edge-strong bg-surface-raised px-2 font-mono text-lg font-bold text-content-primary transition-colors hover:bg-surface-base hover:text-accent-tertiary focus:outline-none focus:ring-2 focus:ring-accent-primary"
+            className="border-2 border-edge-strong bg-surface-raised px-2 font-mono text-lg font-bold text-content-primary transition-colors hover:bg-surface-base hover:text-accent-tertiary focus-visible:ring-2 focus-visible:ring-accent-primary"
             aria-label="Close dialog"
           >
             &times;
