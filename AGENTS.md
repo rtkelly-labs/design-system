@@ -441,6 +441,16 @@ The suite covers `src/lib/`, `src/hooks/`, the generated `theme.css`, and — so
 `Input` and `StatCard` under `src/components/`. Prefer asserting behaviour (is the
 label wired to the control? does the error replace the helper text?) over markup.
 
+Two tests are cross-cutting rather than co-located, because what they cover is a
+property of the package and not of one file: `src/lint.test.ts` pins the two lint
+rules, and `src/focus-ring.test.ts` rejects any `outline-none` / `outline-hidden`
+/ `outline-0` utility in a component. The second guards the global
+`:focus-visible` rule in `styles.css`, which a utility silently outranks — a
+class plus a pseudo-class is (0,2,0) against that rule's (0,1,0), so
+`focus:outline-none` removes the outline on precisely the keyboard focus it
+exists for. Writing it `focus-visible:` does not help; it is the same
+specificity aimed at the same case. `Input`, `Modal` and `Tag` all had it.
+
 **Where a runtime value is involved, assert the value and not the class.** `Input`
 takes its accent as a prop, so it cannot be a utility — Tailwind's scanner reads
 source text and would generate nothing for `border-${role}`. The accent travels as

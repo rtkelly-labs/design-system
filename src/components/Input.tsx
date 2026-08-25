@@ -30,8 +30,16 @@ const field = recipe({
   slots: {
     root: 'flex w-full flex-col gap-1.5 font-mono',
     label: 'text-xs font-bold uppercase tracking-wider text-content-secondary',
+    /**
+     * No `outline-none` here, deliberately. The focus accent is a *border*
+     * swap, and a border swap is invisible under forced-colors — which is why
+     * `styles.css` declares a global `:focus-visible` outline. Suppressing the
+     * outline from this slot defeats that rule: the utility carries a class and
+     * a pseudo-class, so it outranks the bare `:focus-visible` selector and
+     * wins on exactly the keyboard focus the rule exists to cover.
+     */
     control:
-      'w-full border-2 border-edge-strong bg-surface-base font-mono text-sm text-content-primary transition-colors placeholder:text-content-muted focus:border-[var(--field-accent)] focus:outline-none',
+      'w-full border-2 border-edge-strong bg-surface-base font-mono text-sm text-content-primary transition-colors placeholder:text-content-muted focus:border-[var(--field-accent)]',
     message: 'font-mono text-xs',
   },
   variants: {

@@ -45,7 +45,7 @@ export function Tag({
   prefix = '#',
 }: TagProps) {
   const baseClasses =
-    'inline-block font-mono text-xs font-bold uppercase border-2 border-edge-strong px-2 py-1 hover:shadow-hard-sm transition-all focus:outline-none focus:ring-2 focus:ring-accent-primary';
+    'inline-block font-mono text-xs font-bold uppercase border-2 border-edge-strong px-2 py-1 hover:shadow-hard-sm transition-all focus-visible:ring-2 focus-visible:ring-accent-primary';
   const accentClass = ACCENT_CLASSES[accent] ?? ACCENT_CLASSES.secondary;
   const combinedClasses = cn(baseClasses, accentClass, className);
   const label = text.startsWith(prefix) ? text : `${prefix}${text.split(' ').join('-')}`;
