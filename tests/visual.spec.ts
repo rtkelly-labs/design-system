@@ -49,4 +49,22 @@ test.describe('Design System Visual Regression - Components', () => {
     await waitForStoryReady(page);
     await expect(page).toHaveScreenshot('blog-post-foundational.png', { fullPage: true });
   });
+
+  test('modal component default story', async ({ page }) => {
+    await page.goto('/iframe.html?id=foundations-modal--default&viewMode=story');
+    await waitForStoryReady(page);
+    await expect(page).toHaveScreenshot('modal-default.png');
+  });
+
+  test('modal component compound story', async ({ page }) => {
+    await page.goto('/iframe.html?id=foundations-modal--compound-modal&viewMode=story');
+    await waitForStoryReady(page);
+    await expect(page).toHaveScreenshot('modal-compound.png');
+  });
+
+  test('modal confirmation dialog story', async ({ page }) => {
+    await page.goto('/iframe.html?id=foundations-modal--confirmation-dialog&viewMode=story');
+    await waitForStoryReady(page);
+    await expect(page).toHaveScreenshot('modal-confirmation.png');
+  });
 });

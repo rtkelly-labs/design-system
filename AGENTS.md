@@ -54,3 +54,24 @@ Package manager is **pnpm** (`node >=22`).
 4. **Direct Push Protection**: Non-force direct pushes to `main` are blocked; PR mechanism required (force pushes permitted when needed).
 5. **Local Temp & Worktree Directory**: All temporary files, local databases, scratch files, and git worktrees MUST go inside the root `/temp/` directory (gitignored).
 6. **Gitignored Local TODO File**: A root `TODO.md` file MUST exist for local task tracking and be gitignored.
+
+---
+
+## 🖼️ Third-Party Reference Material
+
+`reference/bookofshapes/` holds a local, **gitignored** copy of the 57 SVG patterns from
+[bookofshapes.com](https://bookofshapes.com/) (Nikolaj Sokolowski), kept as inspiration
+for background and geometric-pattern work.
+
+1. **Reference only — not shippable.** The source site publishes **no licence**, so the
+   artwork is all rights reserved. Nothing in `reference/bookofshapes/svg/` may be
+   committed, bundled, or shipped in `src/`, and attribution alone does not make it
+   permissible. Ask the author first (`nikolaj@creasurf.net`).
+2. **Keep the ignore rule.** `.gitignore` excludes `reference/bookofshapes/svg/`; never
+   remove it. `manifest.json` and `ATTRIBUTION.md` are the committed catalogue, and stay
+   browsable without the artwork present.
+3. **Repopulate with `python3 reference/bookofshapes/fetch.py`** — stdlib only, rate
+   limited, and it must never touch the site's `/api/` path (robots-disallowed).
+4. **Read `reference/bookofshapes/README.md` before using any of it.** It covers the
+   licensing position and the `--fill-color` / `--stroke-color` / `--background-color` /
+   `--occlusion-color` theming contract worth adopting for our own generated patterns.

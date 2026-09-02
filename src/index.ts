@@ -21,6 +21,8 @@ export * from './components/Input';
 export * from './components/StatCard';
 export * from './components/DataTable';
 export * from './components/Modal';
+export * from './components/useModal';
+export * from './components/ModalProvider';
 
 // Slides & Presentation Deck Engine
 export * from './components/slides/Slide';

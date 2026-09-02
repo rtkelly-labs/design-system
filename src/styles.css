@@ -1,6 +1,5 @@
 /* @rtkelly/design-system - Brutalist Dual-Mode Theme Stylesheet */
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700;800&family=VT323&display=swap');
-@import "tailwindcss";
 @import "./theme.css";
 
 body, html {
@@ -89,4 +88,33 @@ code, pre, .font-mono {
   color: var(--brutalist-cyan);
   letter-spacing: 0.2em;
   user-select: none;
+}
+
+/* Brutalist Modal & Overlay Animations */
+@keyframes brutalist-modal-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes brutalist-fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-modal-in {
+  animation: brutalist-modal-in 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fadeIn {
+  animation: brutalist-fade-in 0.15s ease-out forwards;
 }

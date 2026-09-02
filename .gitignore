@@ -11,3 +11,13 @@ temp/
 # Local TODO file
 todo.md
 TODO.md
+
+# Test results and Playwright reports
+test-results/
+playwright-report/
+
+# Book of Shapes reference SVGs - third-party artwork, no published license.
+# Local inspiration material only; re-fetch with reference/bookofshapes/fetch.py.
+reference/bookofshapes/svg/
+reference/bookofshapes/contact-sheet.html
+.vercel
