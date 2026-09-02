@@ -1,0 +1,302 @@
+{
+  "_comment": "Every Book of Shapes pattern judged against the 17 generators in blog#138. verdict: covered = shipped | variation = a parameter away from something we have | port = a mechanism nothing has, worth building | skip = mismatch. `family` names the mechanism, which is what separates a variation from a new generator. See EVALUATION.md.",
+  "families": {
+    "iso-cubes": "iso-cubes + a height-field source, a carve mask, or a face treatment",
+    "mesh-mode": "any lattice, drawn as a connected wireframe instead of as marks",
+    "radial-ring": "radial-spokes / broken-ring / modular-circle with different cell counts and weights",
+    "disorder": "already covered \u2014 the disorder ramp on an existing lattice generator",
+    "truchet": "truchet-arcs + arcs-per-tile",
+    "wave-envelope": "contour + an amplitude/frequency envelope across the frame",
+    "interference": "interference + mark type and source count",
+    "field-source": "flow-field / flow-lines + a field built from poles instead of a formula",
+    "distinct": "a mechanism nothing in the set has",
+    "reject": "aesthetic or technical mismatch"
+  },
+  "verdicts": {
+    "arcs_1": {
+      "verdict": "variation",
+      "family": "truchet",
+      "why": "truchet-arcs + arcs-per-tile"
+    },
+    "backpack-grid": {
+      "verdict": "skip",
+      "family": "reject",
+      "why": "aesthetic or technical mismatch"
+    },
+    "brockmann_arcs": {
+      "verdict": "variation",
+      "family": "radial-ring",
+      "why": "Corrected: a few very thick concentric arc segments \u2014 broken-ring with 3-4 cells per band."
+    },
+    "chaos_circles": {
+      "verdict": "skip",
+      "family": "reject",
+      "why": "aesthetic or technical mismatch"
+    },
+    "chevron_blocks": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "Corrected: not 'ruled hexagons' but striped-face isometric cubes. Face treatment on iso-cubes."
+    },
+    "concentric_arc_truchet_2": {
+      "verdict": "variation",
+      "family": "truchet",
+      "why": "truchet-arcs + arcs-per-tile"
+    },
+    "concentric_arc_truchet_3": {
+      "verdict": "variation",
+      "family": "truchet",
+      "why": "truchet-arcs + arcs-per-tile"
+    },
+    "concentric_noise_rings": {
+      "verdict": "variation",
+      "family": "radial-ring",
+      "why": "radial-spokes / broken-ring / modular-circle with different cell counts and weights"
+    },
+    "deformed_grid_mesh": {
+      "verdict": "variation",
+      "family": "mesh-mode",
+      "why": "any lattice, drawn as a connected wireframe instead of as marks"
+    },
+    "deformed_grid_mesh_2": {
+      "verdict": "variation",
+      "family": "mesh-mode",
+      "why": "any lattice, drawn as a connected wireframe instead of as marks"
+    },
+    "dna_helix": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "iso-cubes + a height-field source, a carve mask, or a face treatment"
+    },
+    "flow_dots": {
+      "verdict": "variation",
+      "family": "disorder",
+      "why": "already covered \u2014 the disorder ramp on an existing lattice generator"
+    },
+    "flow_lines": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `flow-lines`."
+    },
+    "flow_poles": {
+      "verdict": "variation",
+      "family": "field-source",
+      "why": "Vortices and sinks rather than crossed sines. The field is the only difference."
+    },
+    "halftone_sphere": {
+      "verdict": "skip",
+      "family": "reject",
+      "why": "aesthetic or technical mismatch"
+    },
+    "hiding-squares": {
+      "verdict": "variation",
+      "family": "disorder",
+      "why": "already covered \u2014 the disorder ramp on an existing lattice generator"
+    },
+    "interference-mesh": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `interference`."
+    },
+    "iso-cross": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "iso-cubes + a height-field source, a carve mask, or a face treatment"
+    },
+    "iso-cube-wireframe": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "iso-cubes + a height-field source, a carve mask, or a face treatment"
+    },
+    "iso-sphere": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "Carving a solid out of the cube lattice \u2014 the mask param, at 1.76 MB."
+    },
+    "iso_test_noise_field": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "iso-cubes + a height-field source, a carve mask, or a face treatment"
+    },
+    "iso_test_noise_field_2": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "iso-cubes + a height-field source, a carve mask, or a face treatment"
+    },
+    "isometric-cube-grid": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `iso-cubes`."
+    },
+    "isometric_cubes": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "iso-cubes + a height-field source, a carve mask, or a face treatment"
+    },
+    "isometric_ribbon_grid": {
+      "verdict": "variation",
+      "family": "mesh-mode",
+      "why": "any lattice, drawn as a connected wireframe instead of as marks"
+    },
+    "jittery_squares_grid": {
+      "verdict": "variation",
+      "family": "disorder",
+      "why": "already covered \u2014 the disorder ramp on an existing lattice generator"
+    },
+    "joy_division": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `ridgeline`."
+    },
+    "joy_division_mesh": {
+      "verdict": "variation",
+      "family": "mesh-mode",
+      "why": "any lattice, drawn as a connected wireframe instead of as marks"
+    },
+    "line_based_circles": {
+      "verdict": "variation",
+      "family": "radial-ring",
+      "why": "radial-spokes / broken-ring / modular-circle with different cell counts and weights"
+    },
+    "lissajous_field": {
+      "verdict": "port",
+      "family": "distinct",
+      "why": "Parametric curve family whose integer frequency ratios close the loop natively."
+    },
+    "masked_letter_grid": {
+      "verdict": "skip",
+      "family": "reject",
+      "why": "Needs font metrics a pure-string generator cannot get."
+    },
+    "modular_circle": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `modular-circle`."
+    },
+    "nested_polygons": {
+      "verdict": "variation",
+      "family": "radial-ring",
+      "why": "Concentric polygons joined by swept parallel lines; the moire between them is the effect."
+    },
+    "nested_polygons_filled": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `broken-ring`."
+    },
+    "node_garden": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `node-network`."
+    },
+    "noise_circle_1": {
+      "verdict": "skip",
+      "family": "reject",
+      "why": "aesthetic or technical mismatch"
+    },
+    "noise_landscape_1": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `contour`."
+    },
+    "phyllotaxis-bloom": {
+      "verdict": "port",
+      "family": "distinct",
+      "why": "Golden-angle placement. Every generator we have places by lattice, scatter or ring."
+    },
+    "polar_mesh": {
+      "verdict": "variation",
+      "family": "mesh-mode",
+      "why": "The clearest case for mesh mode: a polar lattice with its neighbours joined."
+    },
+    "quarter_circles_grid": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `truchet-arcs`."
+    },
+    "radial_harmony": {
+      "verdict": "variation",
+      "family": "radial-ring",
+      "why": "Corrected: not circles+divisions but a ring of short radial dashes \u2014 radial-spokes with a high inner radius."
+    },
+    "radial_spokes": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `radial-spokes`."
+    },
+    "rect_field_void": {
+      "verdict": "port",
+      "family": "distinct",
+      "why": "The void is the composition. Wants a cross-cutting mask, not a generator."
+    },
+    "resonance_field": {
+      "verdict": "variation",
+      "family": "interference",
+      "why": "interference + mark type and source count"
+    },
+    "ripple_grid": {
+      "verdict": "variation",
+      "family": "interference",
+      "why": "A dot grid displaced by concentric waves \u2014 interference's mechanism, drawn as marks."
+    },
+    "rose_mesh": {
+      "verdict": "variation",
+      "family": "mesh-mode",
+      "why": "any lattice, drawn as a connected wireframe instead of as marks"
+    },
+    "scattered-cube-grid": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "iso-cubes + a height-field source, a carve mask, or a face treatment"
+    },
+    "scattered-cube-grid-v3": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "iso-cubes + a height-field source, a carve mask, or a face treatment"
+    },
+    "signal_decay": {
+      "verdict": "variation",
+      "family": "wave-envelope",
+      "why": "Stacked oscillating rules under a lens-shaped envelope. contour already stacks them."
+    },
+    "sine-cube": {
+      "verdict": "variation",
+      "family": "iso-cubes",
+      "why": "iso-cubes + a height-field source, a carve mask, or a face treatment"
+    },
+    "spiral_dot_field": {
+      "verdict": "port",
+      "family": "distinct",
+      "why": "Same placement family as phyllotaxis; build one, get both."
+    },
+    "spiral_mesh": {
+      "verdict": "variation",
+      "family": "mesh-mode",
+      "why": "any lattice, drawn as a connected wireframe instead of as marks"
+    },
+    "spiral_morph": {
+      "verdict": "variation",
+      "family": "disorder",
+      "why": "already covered \u2014 the disorder ramp on an existing lattice generator"
+    },
+    "triangular_mosaic": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `triangle-grid`."
+    },
+    "wave-field": {
+      "verdict": "covered",
+      "family": "built",
+      "why": "Shipped as `flow-field`."
+    },
+    "wavy_fabric": {
+      "verdict": "variation",
+      "family": "mesh-mode",
+      "why": "Corrected: not over/under weaving but a quad mesh under wave displacement."
+    },
+    "wavy_lines_converging": {
+      "verdict": "variation",
+      "family": "wave-envelope",
+      "why": "contour + an amplitude/frequency envelope across the frame"
+    }
+  }
+}

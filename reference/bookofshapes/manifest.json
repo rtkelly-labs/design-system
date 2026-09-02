@@ -1,0 +1,1265 @@
+{
+  "source": "https://bookofshapes.com",
+  "author": "Nikolaj Sokolowski",
+  "author_links": {
+    "site": "https://nikolaj-sokolowski.de/",
+    "x": "https://x.com/Threeaio",
+    "instagram": "https://www.instagram.com/nikobremen/",
+    "email": "nikolaj@creasurf.net"
+  },
+  "license": "UNSPECIFIED - no license published on the source site; treat as all rights reserved. See README.md.",
+  "note": "Local reference material only. SVGs are gitignored and must not be redistributed or shipped without permission.",
+  "pattern_count": 57,
+  "patterns": [
+    {
+      "slug": "arcs_1",
+      "title": "Rotating Arc Grid",
+      "description": "A grid of arcs rotating at varying angles, creating rhythmic visual interference.",
+      "tags": [
+        "grid"
+      ],
+      "page": "https://bookofshapes.com/patterns/arcs_1/",
+      "preview_svg": "https://bookofshapes.com/previews/arcs_1.svg",
+      "poster": "https://bookofshapes.com/patterns/arcs_1/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 27841,
+      "view_box": "0 0 259 259",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "backpack-grid",
+      "title": "Backpack Grid",
+      "description": "Dense mosaic of randomly-sized rounded rectangles with uniform gaps.",
+      "tags": [
+        "grid",
+        "organic"
+      ],
+      "page": "https://bookofshapes.com/patterns/backpack-grid/",
+      "preview_svg": "https://bookofshapes.com/previews/backpack-grid.svg",
+      "poster": "https://bookofshapes.com/patterns/backpack-grid/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 48155,
+      "view_box": "0 0 1630 1630",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "brockmann_arcs",
+      "title": "Brockmann Beethoven Arcs",
+      "description": "Concentric arcs with growing thickness, quantized angles, and directional bias inspired by Brockmann's Beethoven poster.",
+      "tags": [
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/brockmann_arcs/",
+      "preview_svg": "https://bookofshapes.com/previews/brockmann_arcs.svg",
+      "poster": "https://bookofshapes.com/patterns/brockmann_arcs/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 2372,
+      "view_box": "0 0 8572.2775 8572.2775",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "chaos_circles",
+      "title": "Chaos Circles",
+      "description": "Jittered circular forms creating an organic, hand-drawn aesthetic.",
+      "tags": [
+        "organic",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/chaos_circles/",
+      "preview_svg": "https://bookofshapes.com/previews/chaos_circles.svg",
+      "poster": "https://bookofshapes.com/patterns/chaos_circles/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 163504,
+      "view_box": "0 0 309.7474060058594 305.18182373046875",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "chevron_blocks",
+      "title": "Chevron Blocks",
+      "description": "A heap of ruled hexagons in which solid blocks surface only here and there.",
+      "tags": [
+        "grid",
+        "isometric"
+      ],
+      "page": "https://bookofshapes.com/patterns/chevron_blocks/",
+      "preview_svg": "https://bookofshapes.com/previews/chevron_blocks.svg",
+      "poster": "https://bookofshapes.com/patterns/chevron_blocks/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 96351,
+      "view_box": "0 0 423.71999999999997 540",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "concentric_arc_truchet_2",
+      "title": "Quarter Arc Truchet",
+      "description": "Thick concentric quarter-arcs in randomly rotated tiles forming flowing curves.",
+      "tags": [
+        "flow",
+        "grid"
+      ],
+      "page": "https://bookofshapes.com/patterns/concentric_arc_truchet_2/",
+      "preview_svg": "https://bookofshapes.com/previews/concentric_arc_truchet_2.svg",
+      "poster": "https://bookofshapes.com/patterns/concentric_arc_truchet_2/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 175963,
+      "view_box": "0 0 2000 2000",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "concentric_arc_truchet_3",
+      "title": "Arc Truchet Butterfly",
+      "description": "Butterfly tiles of mirrored concentric semicircular arcs with oscillator-driven rotation.",
+      "tags": [
+        "flow",
+        "grid"
+      ],
+      "page": "https://bookofshapes.com/patterns/concentric_arc_truchet_3/",
+      "preview_svg": "https://bookofshapes.com/previews/concentric_arc_truchet_3.svg",
+      "poster": "https://bookofshapes.com/patterns/concentric_arc_truchet_3/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 68210,
+      "view_box": "0 0 1000 1000",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "concentric_noise_rings",
+      "title": "Concentric Noise Rings",
+      "description": "Nested circles with noise-driven distortions creating organic radial patterns.",
+      "tags": [
+        "noise",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/concentric_noise_rings/",
+      "preview_svg": "https://bookofshapes.com/previews/concentric_noise_rings.svg",
+      "poster": "https://bookofshapes.com/patterns/concentric_noise_rings/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 202587,
+      "view_box": "0 0 491.7832336425781 491.8226318359375",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "deformed_grid_mesh",
+      "title": "Deformed Grid Mesh",
+      "description": "A regular grid distorted through noise, creating fluid mesh deformations.",
+      "tags": [
+        "distortion",
+        "grid",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/deformed_grid_mesh/",
+      "preview_svg": "https://bookofshapes.com/previews/deformed_grid_mesh.svg",
+      "poster": "https://bookofshapes.com/patterns/deformed_grid_mesh/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 314815,
+      "view_box": "0 0 641.5662231445312 643.40478515625",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "deformed_grid_mesh_2",
+      "title": "Deformed Grid Mesh II",
+      "description": "An alternate grid mesh with different noise parameters for varied deformation.",
+      "tags": [
+        "distortion",
+        "grid",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/deformed_grid_mesh_2/",
+      "preview_svg": "https://bookofshapes.com/previews/deformed_grid_mesh_2.svg",
+      "poster": "https://bookofshapes.com/patterns/deformed_grid_mesh_2/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 1362919,
+      "view_box": "0 0 667.7061767578125 674.7000732421875",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "dna_helix",
+      "title": "Cube Helix",
+      "description": "Isometric cubes arranged in a sine-wave helix with noise-driven rotation.",
+      "tags": [
+        "flow",
+        "isometric"
+      ],
+      "page": "https://bookofshapes.com/patterns/dna_helix/",
+      "preview_svg": "https://bookofshapes.com/previews/dna_helix.svg",
+      "poster": "https://bookofshapes.com/patterns/dna_helix/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 339051,
+      "view_box": "0 0 990.1901245117188 1131.617431640625",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "flow_dots",
+      "title": "Flow Dots",
+      "description": "A strict dot grid at the top edge, coming apart into strands as it falls.",
+      "tags": [
+        "flow",
+        "grid"
+      ],
+      "page": "https://bookofshapes.com/patterns/flow_dots/",
+      "preview_svg": "https://bookofshapes.com/previews/flow_dots.svg",
+      "poster": "https://bookofshapes.com/patterns/flow_dots/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 444414,
+      "view_box": "0 0 498.95001220703125 638.6799926757812",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "flow_lines",
+      "title": "Flow Lines",
+      "description": "Evenly spaced streamlines tracing a vector field written as two formulas.",
+      "tags": [
+        "flow",
+        "physics"
+      ],
+      "page": "https://bookofshapes.com/patterns/flow_lines/",
+      "preview_svg": "https://bookofshapes.com/previews/flow_lines.svg",
+      "poster": "https://bookofshapes.com/patterns/flow_lines/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 101598,
+      "view_box": "-250.4600067138672 -250.4600067138672 501 501",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "flow_poles",
+      "title": "Flow Poles",
+      "description": "Streamlines through a field built from vortices and sinks instead of a formula.",
+      "tags": [
+        "flow",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/flow_poles/",
+      "preview_svg": "https://bookofshapes.com/previews/flow_poles.svg",
+      "poster": "https://bookofshapes.com/patterns/flow_poles/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 236695,
+      "view_box": "-250.49000549316406 -250.49000549316406 501 501",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "halftone_sphere",
+      "title": "Halftone Sphere",
+      "description": "A sphere rendered using halftone dots that vary in size to simulate shading.",
+      "tags": [
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/halftone_sphere/",
+      "preview_svg": "https://bookofshapes.com/previews/halftone_sphere.svg",
+      "poster": "https://bookofshapes.com/patterns/halftone_sphere/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 425381,
+      "view_box": "0 0 1466.2120361328125 1466.2120361328125",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "hiding-squares",
+      "title": "Hiding Squares",
+      "description": "Squares transformed by noise, partially hidden by grid cell masks.",
+      "tags": [
+        "grid",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/hiding-squares/",
+      "preview_svg": "https://bookofshapes.com/previews/hiding-squares.svg",
+      "poster": "https://bookofshapes.com/patterns/hiding-squares/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 146748,
+      "view_box": "0 0 850 850",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "interference-mesh",
+      "title": "Interference Mesh",
+      "description": "Two-source wave interference as displaced horizontal lines.",
+      "tags": [
+        "grid",
+        "physics"
+      ],
+      "page": "https://bookofshapes.com/patterns/interference-mesh/",
+      "preview_svg": "https://bookofshapes.com/previews/interference-mesh.svg",
+      "poster": "https://bookofshapes.com/patterns/interference-mesh/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 309084,
+      "view_box": "-280 -300 560 600",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "iso-cross",
+      "title": "Iso Cross",
+      "description": "Isometric cube grid with corners carved away to reveal a cross.",
+      "tags": [
+        "isometric"
+      ],
+      "page": "https://bookofshapes.com/patterns/iso-cross/",
+      "preview_svg": "https://bookofshapes.com/previews/iso-cross.svg",
+      "poster": "https://bookofshapes.com/patterns/iso-cross/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 397893,
+      "view_box": "0 0 360.8600158691406 347.300048828125",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "iso-cube-wireframe",
+      "title": "Iso Cube Wireframe",
+      "description": "Wireframe cube built from small isometric cubes.",
+      "tags": [
+        "isometric"
+      ],
+      "page": "https://bookofshapes.com/patterns/iso-cube-wireframe/",
+      "preview_svg": "https://bookofshapes.com/previews/iso-cube-wireframe.svg",
+      "poster": "https://bookofshapes.com/patterns/iso-cube-wireframe/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 1000708,
+      "view_box": "0 0 227.8400421142578 260",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "iso-sphere",
+      "title": "Iso Sphere",
+      "description": "Sphere carved from an isometric cube grid.",
+      "tags": [
+        "isometric",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/iso-sphere/",
+      "preview_svg": "https://bookofshapes.com/previews/iso-sphere.svg",
+      "poster": "https://bookofshapes.com/patterns/iso-sphere/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 1800315,
+      "view_box": "0 0 403.5600280761719 414",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "iso_test_noise_field",
+      "title": "Isometric Noise Field",
+      "description": "Isometric cubes with noise-driven height variations creating a landscape.",
+      "tags": [
+        "isometric",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/iso_test_noise_field/",
+      "preview_svg": "https://bookofshapes.com/previews/iso_test_noise_field.svg",
+      "poster": "https://bookofshapes.com/patterns/iso_test_noise_field/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 632440,
+      "view_box": "0 0 1485.64013671875 990.5399780273438",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "iso_test_noise_field_2",
+      "title": "Isometric Noise Field II",
+      "description": "A second isometric landscape with different noise characteristics.",
+      "tags": [
+        "isometric",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/iso_test_noise_field_2/",
+      "preview_svg": "https://bookofshapes.com/previews/iso_test_noise_field_2.svg",
+      "poster": "https://bookofshapes.com/patterns/iso_test_noise_field_2/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 218927,
+      "view_box": "0 0 589.0599975585938 379.95001220703125",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "isometric-cube-grid",
+      "title": "Isometric Cube Grid",
+      "description": "A structured grid of isometric cubes creating a repeating 3D tessellation.",
+      "tags": [
+        "grid",
+        "isometric"
+      ],
+      "page": "https://bookofshapes.com/patterns/isometric-cube-grid/",
+      "preview_svg": "https://bookofshapes.com/previews/isometric-cube-grid.svg",
+      "poster": "https://bookofshapes.com/patterns/isometric-cube-grid/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 136673,
+      "view_box": "0 0 332.44000244140625 378",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "isometric_cubes",
+      "title": "Isometric Cubes",
+      "description": "Stacked isometric cubes with parametric control over arrangement and spacing.",
+      "tags": [
+        "isometric"
+      ],
+      "page": "https://bookofshapes.com/patterns/isometric_cubes/",
+      "preview_svg": "https://bookofshapes.com/previews/isometric_cubes.svg",
+      "poster": "https://bookofshapes.com/patterns/isometric_cubes/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 105267,
+      "view_box": "0 0 804.5652465820312 800",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "isometric_ribbon_grid",
+      "title": "Isometric Ribbon Grid",
+      "description": "Triangular grid with noise-driven parallelogram cells.",
+      "tags": [
+        "grid",
+        "isometric",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/isometric_ribbon_grid/",
+      "preview_svg": "https://bookofshapes.com/previews/isometric_ribbon_grid.svg",
+      "poster": "https://bookofshapes.com/patterns/isometric_ribbon_grid/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 254281,
+      "view_box": "0 0 309.75 321.9016418457031",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "jittery_squares_grid",
+      "title": "Jittery Squares Grid",
+      "description": "Grid of squares transitioning from stable alignment to chaotic jitter.",
+      "tags": [
+        "distortion",
+        "grid",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/jittery_squares_grid/",
+      "preview_svg": "https://bookofshapes.com/previews/jittery_squares_grid.svg",
+      "poster": "https://bookofshapes.com/patterns/jittery_squares_grid/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 84634,
+      "view_box": "0 0 453.908447265625 496.3125305175781",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "joy_division",
+      "title": "Joy Division",
+      "description": "Stacked noise waves with envelope-shaped amplitude, inspired by the Unknown Pleasures cover.",
+      "tags": [
+        "flow",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/joy_division/",
+      "preview_svg": "https://bookofshapes.com/previews/joy_division.svg",
+      "poster": "https://bookofshapes.com/patterns/joy_division/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 63545,
+      "view_box": "0 0 525 521.6157836914062",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "joy_division_mesh",
+      "title": "Joy Division Mesh",
+      "description": "Wireframe terrain grid with bell-curve noise displacement, a mesh reinterpretation of Unknown Pleasures.",
+      "tags": [
+        "grid",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/joy_division_mesh/",
+      "preview_svg": "https://bookofshapes.com/previews/joy_division_mesh.svg",
+      "poster": "https://bookofshapes.com/patterns/joy_division_mesh/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 598201,
+      "view_box": "0 0 430 430",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "line_based_circles",
+      "title": "Line-Based Circles",
+      "description": "Circles constructed from individual line segments for a deconstructed aesthetic.",
+      "tags": [
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/line_based_circles/",
+      "preview_svg": "https://bookofshapes.com/previews/line_based_circles.svg",
+      "poster": "https://bookofshapes.com/patterns/line_based_circles/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 82244,
+      "view_box": "0 0 46882 46882",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "lissajous_field",
+      "title": "Lissajous Field",
+      "description": "A field of Lissajous curves creating harmonious, oscillating patterns.",
+      "tags": [
+        "flow",
+        "physics"
+      ],
+      "page": "https://bookofshapes.com/patterns/lissajous_field/",
+      "preview_svg": "https://bookofshapes.com/previews/lissajous_field.svg",
+      "poster": "https://bookofshapes.com/patterns/lissajous_field/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 85509,
+      "view_box": "0 0 424.8981628417969 368.0801086425781",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "masked_letter_grid",
+      "title": "Masked Letter Grid",
+      "description": "Typography used as a mask to selectively reveal an underlying grid pattern.",
+      "tags": [
+        "distortion",
+        "grid"
+      ],
+      "page": "https://bookofshapes.com/patterns/masked_letter_grid/",
+      "preview_svg": "https://bookofshapes.com/previews/masked_letter_grid.svg",
+      "poster": "https://bookofshapes.com/patterns/masked_letter_grid/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 98428,
+      "view_box": "0 0 10395 10395",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "modular_circle",
+      "title": "Modular Circle",
+      "description": "Concentric circular elements arranged in a modular, parametric structure.",
+      "tags": [
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/modular_circle/",
+      "preview_svg": "https://bookofshapes.com/previews/modular_circle.svg",
+      "poster": "https://bookofshapes.com/patterns/modular_circle/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 24368,
+      "view_box": "0 0 400 400",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "nested_polygons",
+      "title": "Nested Polygons",
+      "description": "Polygons inscribed within each other, creating radiating geometric harmony.",
+      "tags": [
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/nested_polygons/",
+      "preview_svg": "https://bookofshapes.com/previews/nested_polygons.svg",
+      "poster": "https://bookofshapes.com/patterns/nested_polygons/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 55667,
+      "view_box": "0 0 427.1610412597656 433.576416015625",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "nested_polygons_filled",
+      "title": "Broken Ring",
+      "description": "Concentric polygon ring with noise-masked filled cells.",
+      "tags": [
+        "noise",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/nested_polygons_filled/",
+      "preview_svg": "https://bookofshapes.com/previews/nested_polygons_filled.svg",
+      "poster": "https://bookofshapes.com/patterns/nested_polygons_filled/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 711074,
+      "view_box": "0 0 417.53948974609375 415.19677734375",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "node_garden",
+      "title": "Node Garden",
+      "description": "Neural network-style node garden with configurable connection density and noise displacement.",
+      "tags": [
+        "noise",
+        "organic"
+      ],
+      "page": "https://bookofshapes.com/patterns/node_garden/",
+      "preview_svg": "https://bookofshapes.com/previews/node_garden.svg",
+      "poster": "https://bookofshapes.com/patterns/node_garden/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 116764,
+      "view_box": "0 0 373.8500061035156 396.4900207519531",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "noise_circle_1",
+      "title": "Noise Circle",
+      "description": "A circular form whose edge is distorted by noise functions for organic irregularity.",
+      "tags": [
+        "noise",
+        "organic",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/noise_circle_1/",
+      "preview_svg": "https://bookofshapes.com/previews/noise_circle_1.svg",
+      "poster": "https://bookofshapes.com/patterns/noise_circle_1/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 137053,
+      "view_box": "0 0 4141934.5 4311813.5",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "noise_landscape_1",
+      "title": "Noise Landscape",
+      "description": "Horizontal lines modulated by noise to create a topographic map aesthetic.",
+      "tags": [
+        "flow",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/noise_landscape_1/",
+      "preview_svg": "https://bookofshapes.com/previews/noise_landscape_1.svg",
+      "poster": "https://bookofshapes.com/patterns/noise_landscape_1/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 22616,
+      "view_box": "0 0 300 264.6992492675781",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "phyllotaxis-bloom",
+      "title": "Phyllotaxis Bloom",
+      "description": "Elements arranged using the golden angle, mimicking natural plant growth patterns.",
+      "tags": [
+        "organic",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/phyllotaxis-bloom/",
+      "preview_svg": "https://bookofshapes.com/previews/phyllotaxis-bloom.svg",
+      "poster": "https://bookofshapes.com/patterns/phyllotaxis-bloom/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 226814,
+      "view_box": "0 0 1462.515380859375 1458.957275390625",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "polar_mesh",
+      "title": "Polar Mesh",
+      "description": "A mesh grid defined in polar coordinates creating radial network structure.",
+      "tags": [
+        "grid",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/polar_mesh/",
+      "preview_svg": "https://bookofshapes.com/previews/polar_mesh.svg",
+      "poster": "https://bookofshapes.com/patterns/polar_mesh/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 100120,
+      "view_box": "0 0 353.763427734375 353.3811950683594",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "quarter_circles_grid",
+      "title": "Quarter Circles Grid",
+      "description": "Grid of quarter circle arcs with random visibility per tile.",
+      "tags": [
+        "grid"
+      ],
+      "page": "https://bookofshapes.com/patterns/quarter_circles_grid/",
+      "preview_svg": "https://bookofshapes.com/previews/quarter_circles_grid.svg",
+      "poster": "https://bookofshapes.com/patterns/quarter_circles_grid/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 85747,
+      "view_box": "0 0 442.20001220703125 442.20001220703125",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "radial_harmony",
+      "title": "Radial Harmony",
+      "description": "Concentric circles with radial divisions creating balanced circular geometry.",
+      "tags": [
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/radial_harmony/",
+      "preview_svg": "https://bookofshapes.com/previews/radial_harmony.svg",
+      "poster": "https://bookofshapes.com/patterns/radial_harmony/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 35725,
+      "view_box": "0 0 400 400",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "radial_spokes",
+      "title": "Radial Spokes",
+      "description": "Evenly-spaced lines radiating from center creating a spoke wheel pattern.",
+      "tags": [
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/radial_spokes/",
+      "preview_svg": "https://bookofshapes.com/previews/radial_spokes.svg",
+      "poster": "https://bookofshapes.com/patterns/radial_spokes/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 25085,
+      "view_box": "0 0 500 500",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "rect_field_void",
+      "title": "Rectangle Field Void",
+      "description": "A dense field of rectangles with a central void creating negative space composition.",
+      "tags": [
+        "grid"
+      ],
+      "page": "https://bookofshapes.com/patterns/rect_field_void/",
+      "preview_svg": "https://bookofshapes.com/previews/rect_field_void.svg",
+      "poster": "https://bookofshapes.com/patterns/rect_field_void/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 452238,
+      "view_box": "0 0 618.3999633789062 692.6925659179688",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "resonance_field",
+      "title": "Resonance Field",
+      "description": "Elements responding to multiple wave sources creating interference patterns.",
+      "tags": [
+        "distortion",
+        "flow",
+        "physics"
+      ],
+      "page": "https://bookofshapes.com/patterns/resonance_field/",
+      "preview_svg": "https://bookofshapes.com/previews/resonance_field.svg",
+      "poster": "https://bookofshapes.com/patterns/resonance_field/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 1042600,
+      "view_box": "0 0 539 540",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "ripple_grid",
+      "title": "Ripple Grid",
+      "description": "A grid distorted by concentric wave functions creating ripple effects.",
+      "tags": [
+        "flow",
+        "grid",
+        "physics"
+      ],
+      "page": "https://bookofshapes.com/patterns/ripple_grid/",
+      "preview_svg": "https://bookofshapes.com/previews/ripple_grid.svg",
+      "poster": "https://bookofshapes.com/patterns/ripple_grid/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 343387,
+      "view_box": "0 0 2461.671630859375 2461.671630859375",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "rose_mesh",
+      "title": "Rose Mesh",
+      "description": "A mesh generated using rose curve equations for petal-like structures.",
+      "tags": [
+        "organic",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/rose_mesh/",
+      "preview_svg": "https://bookofshapes.com/previews/rose_mesh.svg",
+      "poster": "https://bookofshapes.com/patterns/rose_mesh/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 177280,
+      "view_box": "0 0 619.0115356445312 609.430908203125",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "scattered-cube-grid",
+      "title": "Scattered Cube Grid",
+      "description": "Randomly distributed isometric cubes forming an organic 3D structure.",
+      "tags": [
+        "distortion",
+        "isometric",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/scattered-cube-grid/",
+      "preview_svg": "https://bookofshapes.com/previews/scattered-cube-grid.svg",
+      "poster": "https://bookofshapes.com/patterns/scattered-cube-grid/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 991848,
+      "view_box": "0 0 246.90000915527344 282",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "scattered-cube-grid-v3",
+      "title": "Scattered Cube Grid v3",
+      "description": "Isometric cube grid with noise-driven outward displacement from center.",
+      "tags": [
+        "distortion",
+        "isometric",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/scattered-cube-grid-v3/",
+      "preview_svg": "https://bookofshapes.com/previews/scattered-cube-grid-v3.svg",
+      "poster": "https://bookofshapes.com/patterns/scattered-cube-grid-v3/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 1379797,
+      "view_box": "-180 -280 360 420",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "signal_decay",
+      "title": "Signal Decay",
+      "description": "Oscillating lines with decreasing frequency and amplitude simulating signal fade.",
+      "tags": [
+        "flow"
+      ],
+      "page": "https://bookofshapes.com/patterns/signal_decay/",
+      "preview_svg": "https://bookofshapes.com/previews/signal_decay.svg",
+      "poster": "https://bookofshapes.com/patterns/signal_decay/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 494801,
+      "view_box": "0 0 681.155029296875 540",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "sine-cube",
+      "title": "Sine Cube",
+      "description": "Isometric cubes with positions modulated by sine waves creating rhythmic flow.",
+      "tags": [
+        "flow",
+        "isometric"
+      ],
+      "page": "https://bookofshapes.com/patterns/sine-cube/",
+      "preview_svg": "https://bookofshapes.com/previews/sine-cube.svg",
+      "poster": "https://bookofshapes.com/patterns/sine-cube/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 206951,
+      "view_box": "0 0 1957.21826171875 621.0167236328125",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "spiral_dot_field",
+      "title": "Spiral Dot Field",
+      "description": "Dots arranged in spiral patterns creating swirling, hypnotic compositions.",
+      "tags": [
+        "organic",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/spiral_dot_field/",
+      "preview_svg": "https://bookofshapes.com/previews/spiral_dot_field.svg",
+      "poster": "https://bookofshapes.com/patterns/spiral_dot_field/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 51327,
+      "view_box": "0 0 516.2879638671875 508.525146484375",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "spiral_mesh",
+      "title": "Spiral Mesh",
+      "description": "A mesh structure following spiral trajectories for organic circular flow.",
+      "tags": [
+        "flow",
+        "radial"
+      ],
+      "page": "https://bookofshapes.com/patterns/spiral_mesh/",
+      "preview_svg": "https://bookofshapes.com/previews/spiral_mesh.svg",
+      "poster": "https://bookofshapes.com/patterns/spiral_mesh/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 437943,
+      "view_box": "0 0 458.9276123046875 459.0645446777344",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "spiral_morph",
+      "title": "Spiral Morph",
+      "description": "Rectangular mesh warped toward an Archimedean spiral, modulated by noise.",
+      "tags": [
+        "distortion",
+        "grid"
+      ],
+      "page": "https://bookofshapes.com/patterns/spiral_morph/",
+      "preview_svg": "https://bookofshapes.com/previews/spiral_morph.svg",
+      "poster": "https://bookofshapes.com/patterns/spiral_morph/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 59586,
+      "view_box": "0 0 592.3665771484375 576.4755859375",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "triangular_mosaic",
+      "title": "Triangular Mosaic",
+      "description": "A tiled field of triangles that dissolves from strict order into randomness.",
+      "tags": [
+        "grid",
+        "noise"
+      ],
+      "page": "https://bookofshapes.com/patterns/triangular_mosaic/",
+      "preview_svg": "https://bookofshapes.com/previews/triangular_mosaic.svg",
+      "poster": "https://bookofshapes.com/patterns/triangular_mosaic/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 374750,
+      "view_box": "0 0 880 1108.56",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "wave-field",
+      "title": "Wave Field",
+      "description": "A dense grid of short lines whose angles follow smooth noise, creating visible flow streams.",
+      "tags": [
+        "flow",
+        "noise",
+        "organic"
+      ],
+      "page": "https://bookofshapes.com/patterns/wave-field/",
+      "preview_svg": "https://bookofshapes.com/previews/wave-field.svg",
+      "poster": "https://bookofshapes.com/patterns/wave-field/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 304271,
+      "view_box": "0 0 523.5394287109375 523.5394287109375",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "wavy_fabric",
+      "title": "Wavy Fabric",
+      "description": "Interwoven lines with wave modulation creating textile-like patterns.",
+      "tags": [
+        "flow",
+        "grid"
+      ],
+      "page": "https://bookofshapes.com/patterns/wavy_fabric/",
+      "preview_svg": "https://bookofshapes.com/previews/wavy_fabric.svg",
+      "poster": "https://bookofshapes.com/patterns/wavy_fabric/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 83278,
+      "view_box": "0 0 504.5384216308594 165.7022247314453",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    },
+    {
+      "slug": "wavy_lines_converging",
+      "title": "Wavy Lines Converging",
+      "description": "Five sine waves with increasing frequencies interweaving horizontally.",
+      "tags": [
+        "flow",
+        "organic"
+      ],
+      "page": "https://bookofshapes.com/patterns/wavy_lines_converging/",
+      "preview_svg": "https://bookofshapes.com/previews/wavy_lines_converging.svg",
+      "poster": "https://bookofshapes.com/patterns/wavy_lines_converging/poster/",
+      "author": "Nikolaj Sokolowski",
+      "source": "https://bookofshapes.com",
+      "bytes": 74582,
+      "view_box": "0 0 296 302.8028564453125",
+      "themeable_vars": [
+        "--background-color",
+        "--fill-color",
+        "--occlusion-color",
+        "--stroke-color"
+      ]
+    }
+  ]
+}
