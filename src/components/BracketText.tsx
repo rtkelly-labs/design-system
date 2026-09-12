@@ -23,7 +23,12 @@ export function BracketText({
   ...props
 }: BracketTextProps) {
   // No per-render object: the map lives in `lib/accentClasses`, written once.
-  const accentClass = accent ? accentTextClass(accent) : '';
+  // The fallback is the default ink as a token class, not bare inheritance:
+  // the JSDoc promises "omit `accent` for the default ink", and a component
+  // that carries no theme reference of its own renders whatever the host
+  // paints — which is how a docs page (no decorator, no level) turned it
+  // white-on-white. `text-content-primary` survives an unthemed ancestor.
+  const accentClass = accent ? accentTextClass(accent) : 'text-content-primary';
 
   return (
     <span className={cn(accentClass, className)} {...props}>

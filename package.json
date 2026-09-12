@@ -68,6 +68,7 @@
     "check:component-contract": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-component-contract.mjs",
     "check:component-contract:list": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-component-contract.mjs --list",
     "check:deployed": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-deployed.mjs",
+    "release:train": "node scripts/release-train.mjs",
     "check:story-conventions": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-story-conventions.mjs",
     "check:story-conventions:list": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-story-conventions.mjs --list",
     "check:docgen-props": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-docgen-props.mjs",

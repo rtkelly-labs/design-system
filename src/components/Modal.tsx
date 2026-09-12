@@ -107,7 +107,15 @@ export function Modal({
   );
 
   useEffect(() => {
-    if (!isOpen) return;
+    // `mounted` gates this as well as the render below. Without it, a dialog
+    // that mounts already open ran this effect while the tree was still
+    // `null`, so `dialogRef.current` was null and the focus move was a no-op —
+    // and because nothing in the deps changed when `mounted` flipped, it never
+    // ran again. Focus stayed on whatever was behind the dialog, and the
+    // restore on close then fired against an element that had never lost it.
+    // The false -> true path always worked, which is why it survived: every
+    // story and every consumer opens from a button.
+    if (!isOpen || !mounted) return;
 
     returnFocusRef.current = document.activeElement as HTMLElement | null;
 
@@ -127,7 +135,7 @@ export function Modal({
       body.style.overflow = previousOverflow;
       returnFocusRef.current?.focus();
     };
-  }, [isOpen, handleKeyDown]);
+  }, [isOpen, mounted, handleKeyDown]);
 
   if (!isOpen || !mounted) return null;
 
