@@ -161,6 +161,11 @@ export * from './components/NerdIcon';
 export * from './components/SocialIcon';
 export * from './components/Glyph';
 
+// Terminal & Monospace Telemetry Primitives
+export * from './components/AsciiGauge';
+export * from './components/TelemetryGauge';
+export * from './components/TickerTape';
+
 // Chart Primitives & Trend Visualizers
 export * from './components/BarChart';
 export * from './components/Sparkline';
@@ -174,6 +179,9 @@ export * from './components/slides/SlideDeck';
 // Blog & Editorial Post Foundations
 export * from './components/blog/BlogPost';
 export * from './components/blog/LoremIpsumPost';
+export * from './components/MetadataGrid';
+export * from './components/TrackCard';
+export * from './components/ColophonCard';
 
 // Experiments Page & Design System Sandbox
 export * from './components/experiments/ExperimentsView';
