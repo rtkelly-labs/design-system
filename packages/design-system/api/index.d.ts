@@ -1,5 +1,5 @@
 import * as react from 'react';
-import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, SVGProps } from 'react';
+import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, SVGProps } from 'react';
 import { Table as Table$1, ColumnDef } from '@tanstack/react-table';
 import { RegisterableHotkey } from '@tanstack/react-hotkeys';
 export { ParentSize as ResponsiveChartContainer } from '@visx/responsive';
@@ -755,18 +755,43 @@ declare function TextArea({ label, error, helperText,
 accent,
 
 className, id, ...props }: TextAreaProps): react.JSX.Element;
+
 interface SelectOption {
+
     label: string;
+
     value: string;
+
+    disabled?: boolean;
 }
-interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'className'>, FieldProps {
+interface SelectProps extends Omit<HTMLAttributes<HTMLElement>, 'className' | 'defaultValue' | 'onChange' | 'children'>, FieldProps {
+
     options: SelectOption[];
+
+    value?: string;
+
+    defaultValue?: string;
+
+    onValueChange?: (value: string) => void;
+
+    placeholder?: string;
+
+    name?: string;
+
+    form?: string;
+
+    autoComplete?: string;
+
+    disabled?: boolean;
+
+    required?: boolean;
+
+    id?: string;
+
+    native?: boolean;
 }
-declare function Select({ label, error, helperText, options,
 
-accent,
-
-className, id, ...props }: SelectProps): react.JSX.Element;
+declare const Select: react.ForwardRefExoticComponent<SelectProps & react.RefAttributes<HTMLElement>>;
 
 interface CheckboxProps extends BooleanFieldProps {
 

@@ -146,9 +146,7 @@ const UNSTORIED = {
   AsciiDivider:
     'Deprecated alias of `Divider`, kept for existing call sites. A story is a recommendation, and this is not one — `Foundations/Divider` documents the alias in its description.',
   TextArea:
-    'Documented on `Foundations/Input` beside `Input` and `Select`: the three share one label/error/helper contract and one recipe, so three pages would be one component described three times.',
-  Select:
-    'Same as `TextArea` — a shape of the field contract documented on `Foundations/Input`, not a component of its own.',
+    'Documented on `Foundations/Input` beside `Input`: the two share one label/error/helper contract and one recipe, so two pages would be one component described twice. `Select` shares them too, but has its own page since #164 — its open list is a surface the other two do not have.',
   ReportSection:
     'A part of the report frame, documented and asserted on `Foundations/ReportDocument`. It is meaningless outside one — a section with no document around it has no measure, no rhythm and nothing to be a section of — so a page of its own would show it in a context no consumer will ever build.',
   ReportDetails:

@@ -83,6 +83,13 @@ by showing the toast with `timeout: 0` — which is what its asserted story does
 than the reset below; the reset is still what a capture harness should use, because it does not
 depend on the component having remembered.
 
+`Select`'s open list (#164) adds no transition of its own: it is mounted and unmounted rather than
+faded or scaled, so it is whole in the first frame it exists — the closed trigger is the text
+field's recipe and brings only that field's colour transition with it. What a capture of an open
+list has to pin instead is the *highlight*, which follows the pointer; the asserted rows open it
+from the keyboard for that reason, so the highlighted row is chosen by a key press rather than by
+wherever the cursor was left.
+
 A transition also fires on *any* change to the named property, from any cause — so a consumer
 animating a prop that lands on one gets a 150–300ms wall-clock interpolation it did not ask for and
 cannot see. Between two captures taken milliseconds apart, the transition barely advances and then

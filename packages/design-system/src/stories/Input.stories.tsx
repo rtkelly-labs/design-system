@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Input, TextArea, Select } from '../components/Input';
+import { Input, TextArea } from '../components/Input';
+import { Select } from '../components/Select';
 
 const meta: Meta<typeof Input> = {
   title: 'Foundations/Input',
@@ -53,10 +54,10 @@ export const TextAreaStory: StoryObj<typeof TextArea> = {
 };
 
 /**
- * One of a fixed set, on the native control. Native because it is what a
- * mobile keyboard, a screen reader and a keyboard user all already know — the
- * system's richer listbox is #164, and until it lands this is the honest
- * choice rather than a half-built one.
+ * One of a fixed set, on the same field contract. The closed control is drawn
+ * by the same recipe as the two above; the list it opens is this system's
+ * rather than the operating system's. Its states, the open list and the
+ * `native` escape hatch are on the `Select` page.
  */
 export const SelectStory: StoryObj<typeof Select> = {
   render: () => (

@@ -69,7 +69,14 @@ export * from './components/ThemeProvider';
 export * from './components/BracketText';
 export * from './components/NoteBlock';
 export * from './components/TLDR';
-export * from './components/Input';
+// Named rather than `export *`: `Input.tsx` also exports the field recipe
+// `Select` draws its trigger with, and a recipe's type is `tailwind-variants`'.
+export { Input, TextArea } from './components/Input';
+export type { InputProps, TextAreaProps } from './components/Input';
+// One of a fixed set (#164): the same field as `Input`, with a listbox this
+// system paints instead of the operating system's, and `native` for the
+// platform picker when that is the better phone experience.
+export * from './components/Select';
 // The booleans, added together: one capability in two presentations,
 // composing the same Field as the text controls above.
 export * from './components/Checkbox';

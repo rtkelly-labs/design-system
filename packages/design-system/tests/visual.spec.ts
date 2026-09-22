@@ -114,6 +114,10 @@ const CASES: readonly VisualCase[] = [
   // disabled in one reviewed PNG each. `Fieldset`'s row is a checkbox set and
   // an input pair, so the frame is asserted around something other than radios.
   { id: 'foundations-radiogroup--all-states', snapshot: 'radiogroup-all-states.png' },
+  // `Select` at rest (#164): chosen, placeholder, invalid, disabled, native
+  // and a second accent. The open list is an interaction row below, since a
+  // list that is open on mount would steal focus on the docs page.
+  { id: 'foundations-select--all-states', snapshot: 'select-all-states.png' },
   { id: 'foundations-fieldset--all-states', snapshot: 'fieldset-all-states.png' },
   { id: 'foundations-statcard--system-health', snapshot: 'statcard-system-health.png' },
   { id: 'foundations-datatable--virtualized', snapshot: 'datatable-virtualized.png' },
@@ -187,10 +191,22 @@ const CASES: readonly VisualCase[] = [
  * an accessibility guarantee — not every state of every component.
  */
 interface InteractionCase extends VisualCase {
-  /** What to do before capturing. `target` is resolved inside the story frame. */
-  act: 'hover' | 'keyboard-focus' | 'press';
+  /**
+   * What to do before capturing. `target` is resolved inside the story frame.
+   * `open` focuses the target and presses ArrowDown, then `keys` — the
+   * keyboard path, so what is highlighted does not depend on where the
+   * pointer happens to rest.
+   */
+  act: 'hover' | 'keyboard-focus' | 'press' | 'open';
   /** CSS selector for the control to drive. */
   target: string;
+  /** Pressed after an `open`, inside the list. */
+  keys?: readonly string[];
+  /**
+   * The Level to render on, for a surface whose whole point is that it is
+   * painted by the Level. Omitted, the story's default (`midnight`).
+   */
+  level?: 'sketch';
 }
 
 const INTERACTIONS: readonly InteractionCase[] = [
@@ -211,6 +227,26 @@ const INTERACTIONS: readonly InteractionCase[] = [
     snapshot: 'input-keyboard-focus.png',
     act: 'keyboard-focus',
     target: '#storybook-root input',
+  },
+  // `Select`'s open list (#164), the surface the operating system used to
+  // paint. Opened on the chosen row, then one ArrowDown, so a single frame
+  // holds all four row states: the chosen row's mark, the highlighted fill
+  // (the next row), the disabled row it stepped over, and plain rows. Both
+  // Levels, because being drawn by the Level is the issue.
+  {
+    id: 'foundations-select--disabled-option',
+    snapshot: 'select-open-midnight.png',
+    act: 'open',
+    target: '#storybook-root [role="combobox"]',
+    keys: ['ArrowDown'],
+  },
+  {
+    id: 'foundations-select--disabled-option',
+    snapshot: 'select-open-sketch.png',
+    act: 'open',
+    target: '#storybook-root [role="combobox"]',
+    keys: ['ArrowDown'],
+    level: 'sketch',
   },
 ];
 
@@ -263,10 +299,10 @@ test.describe('Design System Visual Regression - Narrow viewport', () => {
 });
 
 test.describe('Design System Visual Regression - Interaction states', () => {
-  for (const { id, snapshot, act, target } of INTERACTIONS) {
-    test(`${id} — ${act}`, async ({ page }, testInfo) => {
+  for (const { id, snapshot, act, target, keys, level } of INTERACTIONS) {
+    test(`${id} — ${act}${level ? ` — ${level}` : ''}`, async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== 'chromium', 'Interaction baselines are the chromium project');
-      await page.goto(`/iframe.html?id=${id}&viewMode=story`);
+      await page.goto(`/iframe.html?id=${id}&viewMode=story${level ? `&globals=level:${level}` : ''}`);
       await waitForStoryReady(page, id);
 
       /*
@@ -295,6 +331,15 @@ test.describe('Design System Visual Regression - Interaction states', () => {
         // a passing test of the ring.
         await page.keyboard.press('Tab');
         await expect(el).toBeFocused();
+      } else if (act === 'open') {
+        // `.focus()` rather than Tab: the trigger's own ring is not in this
+        // frame (focus moves into the list), and Tab raced the story mounting
+        // often enough locally to be the flake this suite cannot afford.
+        await el.focus();
+        await expect(el).toBeFocused();
+        await page.keyboard.press('ArrowDown');
+        await expect(page.getByRole('listbox')).toBeVisible();
+        for (const key of keys ?? []) await page.keyboard.press(key);
       } else {
         await el.hover();
         await page.mouse.down();

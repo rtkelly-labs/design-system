@@ -60,7 +60,7 @@ Four rules follow from that, and they are what keep hand-authored levels maintai
    `midnight` and `light:` means `sketch`, and both remain for non-colour utilities.
 4. **Every level colour is a literal.** No `color-mix` derivation, because percentages tuned
    against near-black do not hold at the light end — and because literals make
-   `pnpm check:contrast` able to audit all 222 pairs without a browser — including every
+   `pnpm check:contrast` able to audit all 260 pairs without a browser — including every
    Hue in `palette` against every ground, at a 5.5:1 floor rather than 4.5:1, so an editor
    still has headroom to tint the ground behind a token.
 

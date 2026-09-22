@@ -137,3 +137,46 @@ test.describe('Accessibility', () => {
     }
   }
 });
+
+/**
+ * Popups, open, over the whole document.
+ *
+ * The pass above scans `#storybook-root` (#273), and a listbox is portalled to
+ * `document.body` — so an open `Select` is outside the region it scans, and
+ * the one surface #164 moved from the operating system to this palette would
+ * be the one surface axe never saw. This opens it the way a keyboard user
+ * does and scans everything. No `KNOWN` budget: this is new, and starts at
+ * zero.
+ */
+const OPEN_POPUPS = [
+  { id: 'foundations-select--disabled-option', trigger: '#storybook-root [role="combobox"]', popup: 'listbox' },
+] as const;
+
+test.describe('Accessibility — open popups, whole document', () => {
+  for (const level of LEVELS) {
+    for (const { id, trigger, popup } of OPEN_POPUPS) {
+      test(`${id} open — ${level}`, async ({ page }) => {
+        await page.goto(`/iframe.html?id=${id}&viewMode=story&globals=level:${level}`);
+        await waitForStoryRendered(page, id);
+        await page.evaluate(() => document.fonts.ready);
+        await page.addStyleTag({
+          content: '*,*::before,*::after{transition:none!important;animation:none!important}',
+        });
+
+        await page.locator(trigger).focus();
+        await page.keyboard.press('ArrowDown');
+        await expect(page.getByRole(popup)).toBeVisible();
+        await page.keyboard.press('ArrowDown');
+
+        const { violations } = await new AxeBuilder({ page })
+          .options({ resultTypes: ['violations'] })
+          .analyze();
+
+        const serious = violations.filter(
+          (v) => v.impact === 'serious' || v.impact === 'critical',
+        );
+        expect(serious.map((v) => `${v.id} (${v.impact}, ${v.nodes.length}): ${v.help}`)).toEqual([]);
+      });
+    }
+  }
+});

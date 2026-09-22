@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Input, Select, TextArea } from './Input';
+import { Input, TextArea } from './Input';
+import { Select } from './Select';
 
 describe('Input', () => {
   it('associates the label with the control', () => {
@@ -121,46 +122,6 @@ describe('TextArea', () => {
   });
 });
 
-describe('Select', () => {
-  const options = [
-    { label: 'Alpha', value: 'a' },
-    { label: 'Beta', value: 'b' },
-  ];
-
-  it('renders every option', () => {
-    render(<Select label="Mode" options={options} />);
-
-    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(['Alpha', 'Beta']);
-  });
-
-  it('associates the label with the control', () => {
-    render(<Select label="Mode" options={options} />);
-
-    expect(screen.getByLabelText('Mode').tagName).toBe('SELECT');
-  });
-
-  // Same regression as TextArea.
-  it('honours the accent prop', () => {
-    const { container } = render(<Select label="Mode" options={options} accent="success" />);
-
-    expect(container.querySelector('select')?.style.getPropertyValue('--field-accent')).toBe(
-      'var(--ds-intent-success)',
-    );
-  });
-
-  it('renders an empty option list without crashing', () => {
-    render(<Select label="Mode" options={[]} />);
-
-    expect(screen.queryAllByRole('option')).toHaveLength(0);
-  });
-
-  it('forwards select attributes', () => {
-    render(<Select label="Mode" options={options} defaultValue="b" />);
-
-    expect((screen.getByLabelText('Mode') as HTMLSelectElement).value).toBe('b');
-  });
-});
-
 /**
  * The gap-1 invariant, asserted where it is cheapest to check. AGENTS.md
  * forbids components from naming a palette entry; these three are the ones the
@@ -177,8 +138,10 @@ describe('form controls address roles, not colours', () => {
   ])('%s emits no palette-pinned class', (_name, element) => {
     const { container } = render(element);
 
-    for (const node of container.querySelectorAll<HTMLElement>('*')) {
-      expect(node.className, `${node.tagName} pins a palette entry`).not.toMatch(FORBIDDEN);
+    // `getAttribute`, not `className`: `Select`'s chevron is an SVG, whose
+    // `className` is an `SVGAnimatedString` rather than the class list.
+    for (const node of container.querySelectorAll<Element>('*')) {
+      expect(node.getAttribute('class') ?? '', `${node.tagName} pins a palette entry`).not.toMatch(FORBIDDEN);
     }
   });
 });

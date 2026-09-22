@@ -395,6 +395,30 @@ export function auditContrast(
         floor.role,
       );
     }
+    // `Select`'s open list (#164), named for the component because it used to
+    // be the one surface the palette did not reach: the operating system
+    // painted it. The rows are `text.primary` on `surface.raised`; a disabled
+    // row is `text.muted`; the highlighted row is `text.inverse` on the field's
+    // accent fill, and the chosen row's mark is that accent on the list. The
+    // accent is whichever the caller passes, so every Emphasis and Intent is
+    // measured rather than only the default. The values repeat pairs above —
+    // the point is that removing one of those cannot silently un-gate the list.
+    check('select.option: text.primary on surface.raised', def.text.primary, def.surface.raised, floor.role);
+    check('select.option disabled: text.muted on surface.raised', def.text.muted, def.surface.raised, floor.role);
+    check('select.placeholder: text.muted on surface.base', def.text.muted, def.surface.base, floor.role);
+    const listAccents = [
+      ...(['primary', 'secondary', 'tertiary', 'quiet'] as const satisfies readonly Emphasis[]).map(
+        (tone) => [`accent.${tone}`, def.accent[tone]] as const,
+      ),
+      ...(['info', 'success', 'warning', 'danger'] as const satisfies readonly Intent[]).map(
+        (tone) => [`intent.${tone}`, def.intent[tone]] as const,
+      ),
+    ];
+    for (const [name, fill] of listAccents) {
+      check(`select.option highlighted: text.inverse on ${name}`, def.text.inverse, fill, floor.role);
+      check(`select.option selected mark: ${name} on surface.raised`, fill, def.surface.raised, floor.role);
+    }
+
     // A scrim's job is to separate the dialog from the page behind it. Nothing
     // renders text on the scrim, so the assertion is about separation — and it
     // can be satisfied by either edge of the dialog, because this system draws

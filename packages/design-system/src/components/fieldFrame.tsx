@@ -178,6 +178,15 @@ export interface FieldFrameProps
   className?: string;
   /** Merged onto the label, for the row a boolean control lays out. */
   labelClassName?: string;
+  /**
+   * Whether the label is a native `<label>`. `false` renders it as a `div`
+   * that names the control by `aria-labelledby` and focuses it on click — for
+   * a control that is a button, where a native label's click would activate
+   * it. `Select`'s listbox trigger is that case (#164).
+   */
+  nativeLabel?: boolean;
+  /** An explicit id for the label, for a second element that must be named by it. */
+  labelId?: string;
   children: ReactNode;
 }
 
@@ -207,10 +216,25 @@ export interface FieldFrameProps
  * prop that appears to do nothing.
  */
 export const FieldFrame = forwardRef<HTMLDivElement, FieldFrameProps>(function FieldFrame(
-  { label, error, helperText, disabled, layout = 'stack', className, labelClassName, children, ...props },
+  {
+    label,
+    error,
+    helperText,
+    disabled,
+    layout = 'stack',
+    className,
+    labelClassName,
+    nativeLabel = true,
+    labelId,
+    children,
+    ...props
+  },
   ref,
 ) {
   const styles = frame({ invalid: Boolean(error), layout });
+  // Base UI warns when a non-native label renders a `<label>`, so the element
+  // follows the flag.
+  const labelElement = nativeLabel ? undefined : <div />;
 
   return (
     <BaseField.Root
@@ -237,7 +261,13 @@ export const FieldFrame = forwardRef<HTMLDivElement, FieldFrameProps>(function F
       ) : (
         <>
           {label && (
-            <BaseField.Label data-slot="field-label" className={styles.label({ class: labelClassName })}>
+            <BaseField.Label
+              id={labelId}
+              nativeLabel={nativeLabel}
+              render={labelElement}
+              data-slot="field-label"
+              className={styles.label({ class: labelClassName })}
+            >
               {label}
             </BaseField.Label>
           )}

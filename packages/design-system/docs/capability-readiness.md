@@ -32,7 +32,8 @@ icon/control* row. A row is `ready` only against what is on `main`, never agains
 
 ## The matrix
 
-Assessed against `main` after #271 (`Pagination`); *Notify* moved to `ready` with #243.
+Assessed against `main` after #271 (`Pagination`); *Notify* moved to `ready` with #243, and *Choose
+one* with #164 (`Select`'s list painted by the palette, with `native` kept for the platform picker).
 
 | Capability | System answer | Status | Issue |
 |---|---|---|---|
@@ -44,7 +45,7 @@ Assessed against `main` after #271 (`Pagination`); *Notify* moved to `ready` wit
 | Explain an icon/control | `Tooltip` | `absent` | [#166](https://github.com/rtkelly13/design-system/issues/166) |
 | Show contextual content | `Popover` | `absent` | [#166](https://github.com/rtkelly13/design-system/issues/166) |
 | Enter text | `Input` / `TextArea` | `ready` | |
-| Choose one | `Select` / `RadioGroup` | `partial` — `RadioGroup` covers a visible set; `Select` is still the native list | [#164](https://github.com/rtkelly13/design-system/issues/164) |
+| Choose one | `Select` / `RadioGroup` | `ready` | |
 | Choose many | `Checkbox` | `ready` | |
 | Toggle state | `Switch` | `ready` | |
 | Group fields | `Fieldset` + `Legend` | `ready` | |
