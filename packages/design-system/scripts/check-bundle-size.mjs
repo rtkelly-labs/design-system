@@ -130,16 +130,26 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  * are `@base-ui/react/toast`, external to this bundle and weighed by
  * `check:dep-cost` — the alternative, hand-rolling a live region and a timer
  * that yields to the reader, is exactly the part #243 says not to write.
+ *
+ * Raised again for `Select`'s listbox (#164): +6,361 B raw, +1,369 B gzip on
+ * the ESM bundle over `main` (269,885 B / 63,568 B; CommonJS +6,899 B /
+ * +1,329 B, 296,605 B / 65,791 B). That is `Select.tsx` itself — two
+ * presentations of one field, the listbox and the `native` escape hatch the
+ * issue asks to keep, the list recipe, and the keydown filter that steps
+ * over disabled rows where Base UI's default would stop on them. The trigger
+ * reuses `Input`'s recipe rather than restating it. The listbox, typeahead
+ * and positioning are `@base-ui/react/select`, external to this bundle and
+ * weighed by `check:dep-cost`.
  */
 const BUDGETS = {
   'dist/index.mjs': {
-    maxRaw: 263_800,
-    maxGzip: 62_200,
+    maxRaw: 271_300,
+    maxGzip: 63_900,
     desc: 'ESM bundle',
   },
   'dist/index.js': {
-    maxRaw: 290_100,
-    maxGzip: 64_500,
+    maxRaw: 298_100,
+    maxGzip: 66_200,
     desc: 'CommonJS bundle',
   },
   'src/theme.css': {
