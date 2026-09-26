@@ -147,15 +147,37 @@ measurements rather than a guess:
   already did. The group includes the event name so rule 8's manual
   `workflow_dispatch` re-run is never cancelled by a push or queued behind one.
 
-Not done, and the largest lever left: **re-run only the stories a change can
-reach.** The verdict cache above is all-or-nothing. Replaying the last 100 merged
-PRs against the story import graph, 80 touched a rendering input; 27 of those
-touched something every story depends on (the lockfile, the theme ladder, the
-Storybook preview, a stylesheet), and the other 53 reached a median of **5 of
-119** asserted stories (p90 37). Scanning only those would be ~40% of today's
-visual and a11y work on rendering PRs, ~32% across all PRs. It needs a per-story
-key rather than a per-tree one, with snapshot files and `CASES` rows mapped to
-their story, and `main` still running everything as the check on the graph.
+**Per-story selection runs in shadow mode.** `visual` ends with
+`scripts/select-stories.mjs shadow`, which says which asserted stories the change
+can reach and why, in the job summary and `telemetry/story-selection.json`. It skips
+nothing. Its graph is the union of what Vite bundled (`preview-stats.json` — `pnpm
+build-storybook` passes `--stats-json` for it) and the source imports: the bundle
+graph has no CSS `@import` or JSON edges, the source graph cannot see what a plugin
+adds, and with type-only imports left out the two agree on 118 of 120 stories. Files
+outside any graph — the lockfile, `ci.yml`'s `visual` job, a snapshot, a `CASES` row,
+`package.json`'s dependency fields — have rules in `story-selection.mjs`, and a path
+no rule names reaches every story.
+
+`pnpm stories:replay` runs the same code over the last 100 merged PRs: 34 reached no
+asserted story, 35 reached all of them, and 31 reached a median of 6 (p90 28) —
+**39% of today's story scans across all PRs**. It uses today's graph for old PRs, so
+it is an estimate; `pnpm stories:graphs` prints where the two graphs disagree.
+
+**What would let it decide.** The detector is the point of shadow mode: every
+failing visual or a11y test is checked against the selection, and one outside it is
+a **selection miss**. Enforcement — running only the selected stories on a pull
+request — is justified when all of these hold:
+
+- **at least 50 pull-request runs** with a partial selection, and **zero misses**
+  across them and across every `main` run in the same period;
+- every miss ever recorded has a rule or graph fix and a test in
+  `story-selection.test.mjs` that pins it;
+- the runner image is compared with the one `main` last verified (the key
+  `visual` already records) and a change selects everything — today it is only
+  reported.
+
+Even then **`main` keeps running everything**: it is what checks the graph, and a red
+`main` holds the release train (rule 5), so a miss cannot reach production.
 
 Not done, and the next lever if the story count doubles again: sharding the
 walkthrough across runners with `--shard` and `merge-reports`. Worth roughly
