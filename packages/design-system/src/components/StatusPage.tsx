@@ -197,20 +197,28 @@ export const NotFoundPage = forwardRef<HTMLElement, NotFoundPageProps>(function 
 export interface ServerErrorPageProps extends StatusPagePresetProps {
   /** The page's `<h1>`. "Something went wrong" by default; `code` is `500`. */
   title?: string;
+  /**
+   * `true` by default, unlike `StatusPage` and `NotFoundPage`. A 500 is usually
+   * served because the application failed, and the shell that would frame it
+   * may be what failed. Pass `standalone={false}` for an error the shell
+   * survived, inside the consumer's own `<main>`.
+   */
+  standalone?: boolean;
 }
 
 /**
  * The 500 page: `StatusPage` with the copy every site writes identically.
  *
  * Code `500`, the title "Something went wrong", a sentence saying it is not
- * the reader's fault, and a link home. Pass `standalone` when the page is
- * served because the application failed — the shell that would have framed it
- * is the thing that may not render. A request or incident id to quote to
+ * the reader's fault, and a link home. It is standalone by default, since the
+ * page is usually served because the application failed and the shell that
+ * would have framed it is what may not render. Pass `standalone={false}` to
+ * place it inside the site chrome. A request or incident id to quote to
  * support belongs in `children`.
  *
  * @example
  * ```tsx
- * <ServerErrorPage standalone>
+ * <ServerErrorPage>
  *   <p>Reference: {requestId}</p>
  * </ServerErrorPage>
  * ```
@@ -223,6 +231,7 @@ export const ServerErrorPage = forwardRef<HTMLElement, ServerErrorPageProps>(fun
     homeHref = '/',
     homeLabel = 'GO HOME',
     action,
+    standalone = true,
     ...props
   },
   ref,
@@ -234,6 +243,7 @@ export const ServerErrorPage = forwardRef<HTMLElement, ServerErrorPageProps>(fun
       code={code}
       description={description}
       action={action ?? homeAction(homeHref, homeLabel)}
+      standalone={standalone}
       {...props}
     />
   );

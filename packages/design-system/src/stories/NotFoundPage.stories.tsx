@@ -6,7 +6,7 @@ import { SitePage, blog, projectSite } from './siteChrome/fixtures';
 const meta: Meta<typeof NotFoundPage> = {
   title: 'Components/Feedback/NotFoundPage',
   component: NotFoundPage,
-  tags: ['autodocs', 'stable'],
+  tags: ['autodocs', 'preview'],
   parameters: { layout: 'fullscreen' },
   argTypes: {
     action: { control: false },

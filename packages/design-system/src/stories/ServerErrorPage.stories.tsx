@@ -6,7 +6,7 @@ import { SitePage, marketing } from './siteChrome/fixtures';
 const meta: Meta<typeof ServerErrorPage> = {
   title: 'Components/Feedback/ServerErrorPage',
   component: ServerErrorPage,
-  tags: ['autodocs', 'stable'],
+  tags: ['autodocs', 'preview'],
   parameters: { layout: 'fullscreen' },
   argTypes: {
     action: { control: false },
@@ -20,11 +20,11 @@ type Story = StoryObj<typeof ServerErrorPage>;
 /**
  * **Standalone**, the form a 500 most needs: served because the application
  * failed, possibly while rendering the very header and footer that would have
- * framed it. `standalone` makes the page the `<main>` and paints its own
- * ground, so it depends on nothing but the stylesheet.
+ * framed it. That is why it is the default: the page is the `<main>` and paints
+ * its own ground, so it depends on nothing but the stylesheet.
  */
 export const Standalone: Story = {
-  args: { standalone: true, id: 'main-content' },
+  args: { id: 'main-content' },
   parameters: { docs: { story: { inline: false, height: '560px' } } },
 };
 
@@ -36,7 +36,7 @@ export const Standalone: Story = {
 export const InSiteChrome: Story = {
   render: (args) => (
     <SitePage site={marketing}>
-      <ServerErrorPage {...args} />
+      <ServerErrorPage {...args} standalone={false} />
     </SitePage>
   ),
 };
@@ -49,7 +49,6 @@ export const InSiteChrome: Story = {
  */
 export const WithReference: Story = {
   args: {
-    standalone: true,
     id: 'main-content',
     action: (
       <>

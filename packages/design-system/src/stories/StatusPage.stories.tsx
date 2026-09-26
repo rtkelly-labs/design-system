@@ -6,7 +6,7 @@ import { SitePage, portfolio } from './siteChrome/fixtures';
 const meta: Meta<typeof StatusPage> = {
   title: 'Components/Feedback/StatusPage',
   component: StatusPage,
-  tags: ['autodocs', 'stable'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     layout: 'fullscreen',
     docs: {

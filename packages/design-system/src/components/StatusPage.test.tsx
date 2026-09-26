@@ -98,9 +98,14 @@ describe('ServerErrorPage', () => {
     expect(screen.getByRole('link', { name: /GO HOME/ })).toBeDefined();
   });
 
-  it('stands in for the shell when standalone', () => {
-    render(<ServerErrorPage standalone />);
+  it('stands in for the shell by default', () => {
+    render(<ServerErrorPage />);
     expect(screen.getByRole('main')).toBeDefined();
+  });
+
+  it('sits inside the consumer shell when standalone is false', () => {
+    render(<ServerErrorPage standalone={false} />);
+    expect(screen.queryByRole('main')).toBeNull();
   });
 
   it('overrides its copy', () => {

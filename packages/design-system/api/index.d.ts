@@ -1233,6 +1233,8 @@ declare const NotFoundPage: react.ForwardRefExoticComponent<NotFoundPageProps & 
 interface ServerErrorPageProps extends StatusPagePresetProps {
 
     title?: string;
+
+    standalone?: boolean;
 }
 
 declare const ServerErrorPage: react.ForwardRefExoticComponent<ServerErrorPageProps & react.RefAttributes<HTMLElement>>;
