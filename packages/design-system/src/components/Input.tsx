@@ -91,6 +91,10 @@ export interface InputProps
  * generated `id` when the caller gives none, and `error` does three things at
  * once — the message, `aria-invalid`, and the danger border — so an invalid
  * field cannot end up looking wrong while announcing nothing.
+ *
+ * The message joins the control's `aria-describedby` and is read when the
+ * field takes focus. It is not a live region. Pair a form with `ErrorSummary`,
+ * which is what announces a failed submit.
  */
 export function Input({
   label,

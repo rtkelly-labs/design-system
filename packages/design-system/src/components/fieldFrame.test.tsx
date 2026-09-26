@@ -1,6 +1,13 @@
 import { render, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
+import { Checkbox } from './Checkbox';
 import { FieldFrame, FieldItem, FieldMessage, GroupFrame, accentStyle } from './fieldFrame';
+import { Fieldset } from './Fieldset';
+import { Input, TextArea } from './Input';
+import { Radio, RadioGroup } from './RadioGroup';
+import { Select } from './Select';
+import { Switch } from './Switch';
 
 /**
  * The frame is shared by every field control, so what is asserted here is the part
@@ -53,14 +60,15 @@ describe('FieldFrame', () => {
     expect(screen.getByText('> 32 characters')).toBeDefined();
   });
 
-  it('replaces helper text with the error, announced', () => {
+  it('replaces helper text with the error', () => {
     render(
       <FieldFrame label="Api Key" helperText="32 characters" error="Too short">
         <input aria-label="control" />
       </FieldFrame>,
     );
 
-    expect(screen.getByRole('alert').textContent).toBe('> Too short');
+    // Described rather than announced: see the field error contract below.
+    expect(screen.getByText('> Too short').hasAttribute('role')).toBe(false);
     expect(screen.queryByText('> 32 characters')).toBeNull();
   });
 
@@ -104,10 +112,10 @@ describe('GroupFrame', () => {
     );
 
     const fieldset = container.querySelector('fieldset');
-    const alert = screen.getByRole('alert');
+    const error = screen.getByText('> Choose one');
     expect(fieldset).not.toBeNull();
-    expect(fieldset?.contains(alert)).toBe(false);
-    expect(fieldset?.getAttribute('aria-describedby')).toBe(alert.id);
+    expect(fieldset?.contains(error)).toBe(false);
+    expect(fieldset?.getAttribute('aria-describedby')).toBe(error.id);
   });
 
   it('points at no message when there is none', () => {
@@ -184,4 +192,75 @@ describe('FieldMessage', () => {
     expect(container.querySelector('[data-slot="field-description"]')?.textContent).toBe('> One control');
     expect(container.querySelector('[data-slot="fieldset-description"]')?.textContent).toBe('> A set');
   });
+});
+
+/**
+ * The field error contract (#299): an error is described, never announced.
+ *
+ * It was `role="alert"`, and a failed submit then read every invalid field on
+ * top of `ErrorSummary` taking focus. The error now reaches a screen reader
+ * only as the control's description, read when the reader lands on the field.
+ * Every control built on the frame is checked, because each one wires the
+ * description to a different element: an `input`, a `textarea`, a listbox
+ * trigger, a checkbox or switch span, a `radiogroup`, a `fieldset`.
+ */
+describe('field error contract', () => {
+  const REGIONS = [
+    { value: 'eu', label: 'Europe' },
+    { value: 'us', label: 'North America' },
+  ];
+
+  const cases: Array<[string, ReactElement, () => HTMLElement]> = [
+    ['Input', <Input key="i" label="Key" error="Broken" />, () => screen.getByRole('textbox')],
+    ['TextArea', <TextArea key="t" label="Notes" error="Broken" />, () => screen.getByRole('textbox')],
+    ['Select', <Select key="s" label="Region" options={REGIONS} error="Broken" />, () => screen.getByRole('combobox')],
+    ['Checkbox', <Checkbox key="c" label="Accept" error="Broken" />, () => screen.getByRole('checkbox')],
+    ['Switch', <Switch key="w" label="Telemetry" error="Broken" />, () => screen.getByRole('switch')],
+    [
+      'RadioGroup',
+      <RadioGroup key="r" legend="Deployment" name="deployment" error="Broken">
+        <Radio value="cloud" label="Cloud" />
+        <Radio value="hybrid" label="Hybrid" />
+      </RadioGroup>,
+      () => screen.getByRole('radiogroup'),
+    ],
+    [
+      'Fieldset',
+      <Fieldset key="f" legend="Regions" error="Broken">
+        <Checkbox name="region" value="eu" label="Europe" />
+      </Fieldset>,
+      () => screen.getByRole('group'),
+    ],
+  ];
+
+  /** A live region on the element or any ancestor would announce it on insertion. */
+  function liveAncestor(element: HTMLElement): Element | null {
+    return element.closest('[role="alert"], [role="status"], [role="log"], [aria-live]:not([aria-live="off"])');
+  }
+
+  it.each(cases)('%s: the error is not a live region, and describes the control', (_name, ui, control) => {
+    const { container } = render(ui);
+
+    const error = screen.getByText('> Broken');
+    expect(error.hasAttribute('role')).toBe(false);
+    expect(error.hasAttribute('aria-live')).toBe(false);
+    expect(liveAncestor(error)).toBeNull();
+    expect(container.querySelector('[role="alert"], [role="status"], [aria-live]')).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.queryByRole('status')).toBeNull();
+
+    expect(error.id).not.toBe('');
+    expect((control().getAttribute('aria-describedby') ?? '').split(' ')).toContain(error.id);
+  });
+
+  it.each(cases.filter(([name]) => name !== 'Fieldset'))(
+    '%s: the control is marked invalid while it has an error',
+    (_name, ui, control) => {
+      render(ui);
+      const el = control();
+      // `aria-invalid` where the role permits it; Base UI's `data-invalid` on
+      // the span controls, whose hidden input carries the native state.
+      expect(el.getAttribute('aria-invalid') === 'true' || el.hasAttribute('data-invalid')).toBe(true);
+    },
+  );
 });

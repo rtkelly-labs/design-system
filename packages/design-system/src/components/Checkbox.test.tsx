@@ -132,7 +132,7 @@ describe('Checkbox', () => {
   it('replaces helper text with the error, and marks the control invalid', () => {
     render(<Checkbox label="Accept terms" helperText="Standing guidance" error="Required to continue" />);
 
-    expect(screen.getByRole('alert').textContent).toBe('> Required to continue');
+    expect(screen.getByText(/^> /).textContent).toBe('> Required to continue');
     expect(screen.queryByText('> Standing guidance')).toBeNull();
     expect(control().hasAttribute('data-invalid')).toBe(true);
   });

@@ -169,6 +169,12 @@ function followError(event: MouseEvent<HTMLAnchorElement>, id: string) {
  * - Doing both double-announces: the alert fires and the focus change reads
  *   the same content again.
  *
+ * The fields keep to the same rule. A field's `error` is not a live region
+ * either: it describes its control through `aria-describedby`, so it is read
+ * when a link here moves focus to the field, and not at the moment the
+ * summary appears. Before #299 every field error was `role="alert"`, and a
+ * failed submit read each one on top of the summary.
+ *
  * So there is no `role="alert"` here, and `focusOnAppear` is on by default. It
  * fires when `errors` goes from empty to non-empty. A second failed submit
  * while errors are still listed does not re-fire it; remount the summary with

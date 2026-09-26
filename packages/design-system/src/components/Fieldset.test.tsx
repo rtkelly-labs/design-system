@@ -66,12 +66,12 @@ describe('Fieldset', () => {
   it('describes the group — and each control in it — with the group error', () => {
     render(<Regions error="Choose at least one region" helperText="Standing guidance" />);
 
-    const alert = screen.getByRole('alert');
-    expect(alert.textContent).toBe('> Choose at least one region');
+    const error = screen.getByText('> Choose at least one region');
+    expect(error.textContent).toBe('> Choose at least one region');
     expect(screen.queryByText('> Standing guidance')).toBeNull();
     expect(referencedText(screen.getByRole('group'), 'aria-describedby')).toBe('> Choose at least one region');
     for (const box of screen.getAllByRole('checkbox')) {
-      expect((box.getAttribute('aria-describedby') ?? '').split(' ')).toContain(alert.id);
+      expect((box.getAttribute('aria-describedby') ?? '').split(' ')).toContain(error.id);
     }
   });
 

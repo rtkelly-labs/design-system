@@ -27,6 +27,19 @@ It found both of those on its first run. Two icon-only controls had no name, and
 blocks scrolled horizontally with no way to focus them — content simply unreachable without a
 pointer.
 
+## Measured by behaviour
+
+Some failures are only visible across a whole task, not in any single story. `tests/a11y.spec.ts`
+completes four account flows from the keyboard, and after every failed submit it checks what a
+screen reader would hear.
+
+**A form error is announced once.** `ErrorSummary` takes focus, and that is the announcement. A
+field's `error` is not a live region: it is in the control's `aria-describedby` and marked with
+`aria-invalid`, so it is read when a summary link moves focus to the field. Field errors used to be
+`role="alert"`, so a four-error form read four alerts and then the same four messages in the summary
+([#299](https://github.com/rtkelly13/design-system/issues/299)). The flow tests now fail if any live
+region is carrying text when the summary takes focus, or if a field error describes no control.
+
 ## What neither catches
 
 **`opacity` on text.** Contrast is computed from the *declared* foreground, and `opacity`

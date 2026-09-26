@@ -113,7 +113,7 @@ describe('Switch', () => {
   it('replaces helper text with the error, and marks the control invalid', () => {
     render(<Switch label="Send telemetry" helperText="Standing guidance" error="Turn this on to continue" />);
 
-    expect(screen.getByRole('alert').textContent).toBe('> Turn this on to continue');
+    expect(screen.getByText(/^> /).textContent).toBe('> Turn this on to continue');
     expect(screen.queryByText('> Standing guidance')).toBeNull();
     expect(control().hasAttribute('data-invalid')).toBe(true);
   });
