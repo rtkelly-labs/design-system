@@ -773,7 +773,22 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
           'A verdict recorded before every shard passed is a verdict nobody earned.',
       );
     }
-    note('verdict', needs && gated, `ci.yml ${job.id} — records the verdict after every visual shard`);
+    // The job's outputs carry one leg's key. During an image rollout the legs
+    // can compute different keys, or one can hit while another misses, so the
+    // recorder must compare every leg's decision and save only on agreement.
+    const collects = /uses:\s*actions\/download-artifact@[^\n]*\n(?:\s+[^\n]*\n)*?\s+pattern:\s*verdict-key-\*/.test(job.body);
+    const compares = /- name: Agreed Key\n\s+id: agreed\n/.test(job.body);
+    const saveGated = /- name: Save Verdict\n\s+if: steps\.agreed\.outputs\.ok == 'true'\n/.test(job.body);
+    const published = visual && /name:\s*verdict-key-\$\{\{\s*matrix\.shard\s*\}\}/.test(visual.body);
+    if (!collects || !compares || !saveGated || !published) {
+      problems.push(
+        `ci.yml \`${job.id}\` saves the visual verdict without confirming every shard agreed on it ` +
+          `(${[!published && 'visual uploads no `verdict-key-${{ matrix.shard }}`', !collects && 'no download of `verdict-key-*`',
+            !compares && 'no `Agreed Key` step (id: agreed)', !saveGated && "`Save Verdict` not gated on `steps.agreed.outputs.ok == 'true'`"]
+            .filter(Boolean).join('; ')}). A job output holds one leg's key; legs on different runner images disagree.`,
+      );
+    }
+    note('verdict', needs && gated && collects && compares && saveGated && published, `ci.yml ${job.id} — records the verdict after every visual shard, only when all legs agree`);
   }
   if (visual && /steps\.verdict\./.test(visual.body) && !recorders.length) {
     problems.push(

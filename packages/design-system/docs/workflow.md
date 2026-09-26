@@ -30,7 +30,7 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    skipped rather than re-run. Only on a pull request; a push to `main` always
    runs them in full, which is what checks the key. `visual` is sharded, so the
    verdict is recorded by the `record` job, which needs every shard to have
-   passed — never by a shard. `pnpm check:governance`
+   passed and to have computed the same key, as a miss — never by a shard. `pnpm check:governance`
    holds the exception to that shape: no other job may read the verdict, the
    lookup is pull-request-only, and the key names both the input hash and the
    image.

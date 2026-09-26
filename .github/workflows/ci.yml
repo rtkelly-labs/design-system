@@ -377,6 +377,7 @@ jobs:
     outputs:
       key: ${{ steps.inputs.outputs.key }}
       hit: ${{ steps.verdict.outputs.cache-hit }}
+      legs: ${{ strategy.job-total }}
     defaults:
       run:
         # Every `pnpm` step below is this package's. The workspace root holds
@@ -449,6 +450,24 @@ jobs:
             echo "Nothing this job reads changed, so the build and both browser suites were skipped."
             echo "\`node scripts/render-inputs.mjs --list\` shows what the key leaves out."
           } >> "$GITHUB_STEP_SUMMARY"
+
+      # What this leg decided, for `record` to compare across legs. The job's
+      # `outputs` hold only one leg's value, and during an `ubuntu-latest`
+      # rollout the legs can land on different images — so different keys, or
+      # one hitting while another misses. `record` saves only when all three
+      # agree. Written on the hit path too, so a mixed decision is visible.
+      - name: Shard Key
+        run: |
+          mkdir -p telemetry/shard-key
+          printf '%s %s\n' "${{ steps.inputs.outputs.key }}" "${{ steps.verdict.outputs.cache-hit == 'true' && 'hit' || 'miss' }}" > "telemetry/shard-key/${{ matrix.shard }}"
+
+      - name: Upload Shard Key
+        if: success() || failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: verdict-key-${{ matrix.shard }}
+          path: packages/design-system/telemetry/shard-key/
+          retention-days: 1
 
       - name: Setup
         if: steps.verdict.outputs.cache-hit != 'true'
@@ -592,12 +611,44 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Shard Keys
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: verdict-key-*
+          merge-multiple: true
+          path: shard-keys
+
+      # Fails closed. Saves only when every leg computed the same key and every
+      # leg ran the suite (a miss) — so the verdict under that key was earned
+      # on one image, by all three thirds. Anything else is a notice, not a
+      # failure: the next run on a settled image records it.
+      - name: Agreed Key
+        id: agreed
+        env:
+          LEGS: ${{ needs.visual.outputs.legs }}
+          EXPECTED: ${{ needs.visual.outputs.key }}
+        run: |
+          set -uo pipefail
+          count=$(find shard-keys -type f | wc -l | tr -d ' ')
+          distinct=$(cat shard-keys/* | sort -u)
+          echo "legs reporting: ${count}"; echo "${distinct}"
+          if [ "$(printf '%s\n' "${distinct}" | wc -l | tr -d ' ')" = "1" ] \
+             && [ "${distinct}" = "${EXPECTED} miss" ] \
+             && [ "${count}" = "${LEGS}" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Shards disagreed on the verdict key or on hit/miss; not recording a verdict."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Record Verdict
+        if: steps.agreed.outputs.ok == 'true'
         run: |
           mkdir -p packages/design-system/telemetry/verdict
           echo "${GITHUB_SHA}" > packages/design-system/telemetry/verdict/sha
 
       - name: Save Verdict
+        if: steps.agreed.outputs.ok == 'true'
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: packages/design-system/telemetry/verdict
