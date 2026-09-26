@@ -22,6 +22,9 @@ project's `grepInvert` leaves the other's out at collection, which split the sam
 work 103 / 102 / 102 a11y and 44 / 44 / 43 visual tests. A new test that belongs
 to one project takes its tag, not only a `test.skip`.
 
+A reused verdict skips on **every** shard: each leg does its own lookup, so the
+three `visual` jobs each finish in seconds, and `record` does not run.
+
 **It runs on every pull request, whatever the base branch.** `pull_request` used
 to carry `branches: [main]`, which filters on the PR's *base* — so a PR aimed at
 another branch got no CI at all. Not a failure, not a pending check: nothing.
