@@ -751,10 +751,12 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
     id: job.id,
     body: job.body.map(({ text }) => text).join('\n'),
   }));
-  const saves = (body) => /uses:\s*actions\/cache\/save@[\s\S]*?key:\s*\$\{\{\s*(?:needs\.visual\.outputs\.key|steps\.inputs\.outputs\.key)\s*\}\}/.test(body)
-    && /visual-verdict|needs\.visual\.outputs\.key/.test(body);
+  // A job saves the verdict when it has a cache-save step keyed on the
+  // verdict key: `visual`'s own step output, or the one it exports.
+  const saves = (body) =>
+    /uses:\s*actions\/cache\/save@[^\n]*\n(?:\s+[^\n]*\n)*?\s+key:\s*\$\{\{\s*(?:needs\.visual\.outputs\.key|steps\.inputs\.outputs\.key)\s*\}\}/.test(body);
   const visual = ciJobsFull.find((job) => job.id === 'visual');
-  const recorders = ciJobsFull.filter((job) => job.id !== 'visual' && /needs\.visual\.outputs\.key/.test(job.body) && saves(job.body));
+  const recorders = ciJobsFull.filter((job) => job.id !== 'visual' && saves(job.body));
   if (visual && saves(visual.body)) {
     problems.push(
       'ci.yml `visual` saves the verdict itself. It is sharded, so one leg finishing says ' +
@@ -766,7 +768,7 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
     const gated = /^\s{4}if:[^\n]*needs\.visual\.result == 'success'/m.test(job.body);
     if (!needs || !gated) {
       problems.push(
-        `ci.yml \`${job.id}\` records the visual verdict but ${!needs ? 'does not `need` visual' : ''}` +
+        `ci.yml \`${job.id}\` saves the visual verdict but ${!needs ? 'does not `need` visual' : ''}` +
           `${!needs && !gated ? ' and ' : ''}${!gated ? "is not gated on `needs.visual.result == 'success'`" : ''}. ` +
           'A verdict recorded before every shard passed is a verdict nobody earned.',
       );
