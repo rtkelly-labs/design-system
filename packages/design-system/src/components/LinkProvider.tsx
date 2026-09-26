@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, forwardRef, useContext, useMemo } from 'react';
 import type { AnchorHTMLAttributes, ElementType, ReactNode } from 'react';
 import { cn } from '../lib/recipe';

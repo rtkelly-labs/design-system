@@ -1,5 +1,7 @@
+'use client';
+
 import { useContext } from 'react';
-import { THEME_ATTRIBUTE } from './ThemeProvider';
+import { THEME_ATTRIBUTE } from './themeInitScript';
 import { ScopedLevelContext } from './themeScope';
 
 // The Level for a surface portalled out of its provider's subtree.

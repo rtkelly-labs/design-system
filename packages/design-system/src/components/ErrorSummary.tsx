@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, useCallback, useEffect, useId, useRef } from 'react';
 import type { ForwardedRef, HTMLAttributes, MouseEvent, ReactNode } from 'react';
 import { recipe } from '../lib/recipe';

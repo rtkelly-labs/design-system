@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, forwardRef, useCallback, useContext, useId, useMemo, useState } from 'react';
 import type {
   ButtonHTMLAttributes,

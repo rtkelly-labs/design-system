@@ -102,37 +102,56 @@ const packageOf = (specifier) =>
 const scopeOf = (name) => (name.startsWith('@') ? `${name.split('/')[0]}/*` : name);
 
 /**
- * What `dist/index.mjs` imports, and the bindings it takes from each specifier.
+ * Every ESM file the build emitted. Since #301 that is one per source module,
+ * with `dist/index.mjs` a barrel over the rest.
+ */
+function bundleFiles() {
+  const walk = (dir) =>
+    readdirSync(dir).flatMap((entry) => {
+      const full = path.join(dir, entry);
+      return statSync(full).isDirectory() ? walk(full) : [full];
+    });
+  return walk(path.dirname(BUNDLE))
+    .filter((file) => file.endsWith('.mjs'))
+    .sort();
+}
+
+/**
+ * What the ESM output imports from packages, and the bindings it takes from
+ * each specifier — summed over every emitted module.
  *
- * Read from the built bundle rather than from `src/`, because the build is what
+ * Read from the build rather than from `src/`, because the build is what
  * decides: a re-export that nothing reaches, or an import esbuild shook out,
- * costs a consumer nothing and must not appear here.
+ * costs a consumer nothing and must not appear here. Imports between the
+ * package's own modules are relative and are skipped.
  */
 function readBundleImports() {
   if (!existsSync(BUNDLE)) {
     console.error('dist/index.mjs is missing — run `pnpm build` first.');
     process.exit(1);
   }
-  const source = readFileSync(BUNDLE, 'utf8');
-  const sf = ts.createSourceFile(BUNDLE, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
   const bySpecifier = new Map();
 
-  for (const statement of sf.statements) {
-    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
-    const specifier = statement.moduleSpecifier.text;
-    if (!bySpecifier.has(specifier)) bySpecifier.set(specifier, new Set());
-    const bindings = bySpecifier.get(specifier);
-    const clause = statement.importClause;
-    if (!clause) continue;
-    // Bindings are held as strings, not objects: `dist/index.mjs` imports from
-    // `lucide-react` in several statements and a Set of objects would keep one
-    // entry per occurrence, then emit the same local name twice.
-    if (clause.name) bindings.add('default');
-    const named = clause.namedBindings;
-    if (named && ts.isNamespaceImport(named)) bindings.add('namespace');
-    if (named && ts.isNamedImports(named)) {
-      for (const element of named.elements) {
-        bindings.add(`named:${(element.propertyName ?? element.name).text}`);
+  for (const file of bundleFiles()) {
+    const sf = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+    for (const statement of sf.statements) {
+      if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
+      const specifier = statement.moduleSpecifier.text;
+      if (specifier.startsWith('.')) continue;
+      if (!bySpecifier.has(specifier)) bySpecifier.set(specifier, new Set());
+      const bindings = bySpecifier.get(specifier);
+      const clause = statement.importClause;
+      if (!clause) continue;
+      // Bindings are held as strings, not objects: the output imports from
+      // `lucide-react` in several statements and a Set of objects would keep one
+      // entry per occurrence, then emit the same local name twice.
+      if (clause.name) bindings.add('default');
+      const named = clause.namedBindings;
+      if (named && ts.isNamespaceImport(named)) bindings.add('namespace');
+      if (named && ts.isNamedImports(named)) {
+        for (const element of named.elements) {
+          bindings.add(`named:${(element.propertyName ?? element.name).text}`);
+        }
       }
     }
   }
@@ -262,9 +281,9 @@ async function measure() {
   }
   rows.sort((a, b) => b.marginal.gzip - a.marginal.gzip || a.name.localeCompare(b.name));
 
-  const own = existsSync(path.join(ROOT, 'dist', 'index.mjs'))
+  const own = existsSync(BUNDLE)
     ? (() => {
-        const bytes = readFileSync(BUNDLE);
+        const bytes = Buffer.concat(bundleFiles().map((file) => readFileSync(file)));
         return { raw: bytes.length, gzip: gzipSync(bytes).length };
       })()
     : { raw: 0, gzip: 0 };
@@ -283,7 +302,7 @@ const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;
 
 function printTable(result) {
   console.log(
-    `\nAuthored code (dist/index.mjs): ${kb(result.own.gzip)} gzip` +
+    `\nAuthored code (dist/**/*.mjs):  ${kb(result.own.gzip)} gzip` +
       `\nDependencies, all together:     ${kb(result.total.gzip)} gzip` +
       `\nA consumer importing everything pays ${kb(result.own.gzip + result.total.gzip)} gzip.\n`,
   );
@@ -338,7 +357,7 @@ function renderReport(result) {
   lines.push('');
   lines.push('| | gzip |');
   lines.push('|---|---|');
-  lines.push(`| Authored code — \`dist/index.mjs\` | ${kb(result.own.gzip)} |`);
+  lines.push(`| Authored code — every \`.mjs\` in \`dist/\` | ${kb(result.own.gzip)} |`);
   lines.push(`| Dependencies, all together | ${kb(result.total.gzip)} |`);
   lines.push(`| A consumer importing everything | ${kb(result.own.gzip + result.total.gzip)} |`);
   lines.push('');

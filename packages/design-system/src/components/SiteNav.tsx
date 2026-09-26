@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef, useMemo } from 'react';
 import type { AnchorHTMLAttributes, HTMLAttributes, MouseEvent, ReactNode, Ref } from 'react';
 import { Menu as BaseMenu } from '@base-ui/react/menu';

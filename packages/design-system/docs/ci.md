@@ -36,7 +36,7 @@ trigger is the post-merge signal for the default branch specifically.
 | --- | --- | --- | --- |
 | `gates` | `tokens:check`, `tokens:design:check`, `check:contrast`, `check:docs`, `check:doc-snippets`, `check:skills`, `check:component-docs`, `check:story-docs`, `check:component-contract`, `check:licences`, `check:reference-material`, `check:lint-budget`, `check:css`, `check:tokens`, `ansi:check`, `check:fonts`, `check:deps`, `check:governance` | 55s | 10m |
 | `unit` | `typecheck`, `test:coverage` | 95s | 10m |
-| `package` | `build`, `check:bundle-size`, `check:dep-cost`, `check:api`, and the report generator | 85s | 10m |
+| `package` | `build`, `check:bundle-size`, `check:dep-cost`, `check:import-cost`, `check:api`, and the report generator | 85s | 10m |
 | `visual` | `build-storybook`, `check:visual-coverage`, `check:docgen-props`, `check:story-conventions`, `test:visual`, `test:a11y` | 430s | 25m |
 | `record` | nothing — saves the verdict key once every `visual` shard passed; not in `verify`'s `needs` | 5s | 5m |
 | `verify` | nothing — fails unless the four above succeeded | 10s | 5m |

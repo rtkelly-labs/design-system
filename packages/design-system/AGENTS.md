@@ -25,6 +25,7 @@ Everything is a `pnpm` script; these are the ones whose names do not give them a
 | `pnpm check:lint-budget` | `react-hooks`, `jsx-a11y` and `no-explicit-any` as a per-rule ratchet |
 | `pnpm check:api` | the built type surface against the committed `api/index.d.ts` |
 | `pnpm check:dep-cost` | what each runtime dependency costs a consumer, against the recorded baseline — `--list` for the table |
+| `pnpm check:import-cost` | what a consumer pays for a *subset* of imports, bundled through the package name — `--list` for the breakdown |
 | `pnpm check:governance` | the repo's own rules: pinned SHAs, job ceilings, every gate wired, `rule N` resolving — `--list` for the census |
 | `pnpm check:visual-coverage` | every component has an asserted story, or a stated reason |
 | `pnpm check:docgen-props` | every documented component publishes its props, and the components manifest carries them |

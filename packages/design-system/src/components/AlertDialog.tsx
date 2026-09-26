@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog';

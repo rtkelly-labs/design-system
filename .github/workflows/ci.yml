@@ -341,6 +341,14 @@ jobs:
       - name: Dependency Cost
         run: pnpm check:dep-cost
 
+      # The question a consumer's build asks: import `Button`, what arrives?
+      # Bundles a handful of real import sets through the package's own name
+      # with esbuild, so `exports` and `sideEffects` decide what is reachable.
+      # 0.12.0 answered 515 KB for every one of them (#301) and no gate above
+      # could see it — they weigh what ships, not what a subset costs.
+      - name: Import Cost
+        run: pnpm check:import-cost
+
       # Reads dist/index.d.ts, so it belongs in this job, after the build.
       # Fails if the published type surface moved without api/index.d.ts being
       # updated — the diff in that file *is* the API change under review.

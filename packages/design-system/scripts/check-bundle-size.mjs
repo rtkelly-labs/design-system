@@ -9,9 +9,15 @@
  * without notice.
  *
  * This checks the uncompressed (raw) and gzipped sizes of:
- *   - dist/index.mjs  (ESM bundle)
- *   - dist/index.js   (CommonJS bundle)
+ *   - every `.mjs` file under dist/  (ESM output, one file per module)
+ *   - every `.js` file under dist/   (CommonJS output, one file per module)
  *   - src/theme.css   (Generated design token & theme ladder CSS)
+ *
+ * Since #301 `dist/` is one file per source module, so each format is weighed
+ * as all of its files concatenated in path order — the same bytes the single
+ * `dist/index.mjs` used to hold, plus the per-file import lines. This gate
+ * weighs what the package *ships*; what a consumer pays for the parts it
+ * imports is `check:import-cost`.
  *
  * ## A ratchet, not an arbitrary guess
  *
@@ -24,7 +30,7 @@
  *   node scripts/check-bundle-size.mjs --list    print current sizes and ceilings
  */
 
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -232,36 +238,28 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  * 362,938 B raw / 84,112 B gzip, CommonJS 397,911 B raw / 86,900 B gzip
  * locally; the ceilings allow a small Linux gzip variance.
  *
- * Raised again for the page-level states (issue 251): +2,898 B raw, +773 B
- * gzip on the ESM bundle over `main` with the figures in it, measured
- * locally (363,194 B / 84,187 B → 366,092 B / 84,960 B; CommonJS 398,167 B /
- * 86,971 B → 401,391 B / 87,784 B, +3,224 B / +813 B). Three exported
- * components — `StatusPage` and its two presets, `NotFoundPage` and
- * `ServerErrorPage` — which are one recipe, the presets' default copy and
- * `EmptyState`'s new `headingLevel`. Everything drawn is `EmptyState` and
- * `Button`, already paid for, and no dependency moves. The gzip ceiling
- * keeps ~0.6% over the local figure, above the 149-byte macOS-to-runner
- * spread noted above.
- *
- * Raised for `Button`'s `pending` state: +1,842 B raw, +533 B gzip on the
- * ESM bundle over #303's branch (363,764 B / 84,379 B → 365,606 B /
- * 84,912 B; CommonJS 398,737 B / 87,147 B → 400,706 B / 87,658 B, +1,969 B /
- * +511 B), measured locally. That is the pending recipe variant, the press
- * classes re-gated on `not-aria-disabled`, the cancelled-click handler, the
- * spinner overlay and the status region beside the button. No dependency
- * moves: the activation guard is hand-rolled rather than `@base-ui/react/button`,
- * and the spinner is this package's own `Spinner`.
+ * Re-keyed for the per-module output (#301). The flat `dist/index.mjs` is now
+ * a 4 KB barrel, so a ceiling on that file alone would have stopped weighing
+ * anything. Measured on the new layout, locally on macOS: ESM 387,723 B raw
+ * / 89,050 B gzip across 117 files, CommonJS 565,563 B / 98,414 B. The ESM
+ * rise over the flat file (362,938 B → 387,723 B) is the import and export
+ * lines each module now carries for its neighbours, and the barrels' export
+ * lists written out by name (`scripts/expand-star-exports.mjs`). The CommonJS rise is
+ * larger because esbuild writes its interop preamble (`__defProp`,
+ * `__export`, `__toCommonJS`, `__toESM`) into every file rather than once —
+ * about 1.5 KB a file, boilerplate rather than behaviour, and most of it
+ * absorbed by gzip. The ceilings carry about 2% for the Linux gzip spread.
  */
 const BUDGETS = {
-  'dist/index.mjs': {
-    maxRaw: 370_000,
-    maxGzip: 86_200,
-    desc: 'ESM bundle',
+  'dist/**/*.mjs': {
+    maxRaw: 395_000,
+    maxGzip: 91_000,
+    desc: 'ESM output, every module',
   },
-  'dist/index.js': {
-    maxRaw: 406_000,
-    maxGzip: 89_200,
-    desc: 'CommonJS bundle',
+  'dist/**/*.js': {
+    maxRaw: 577_000,
+    maxGzip: 100_500,
+    desc: 'CommonJS output, every module',
   },
   'src/theme.css': {
     // #339 adds shipped symbol faces to all four role stacks and explains
@@ -277,17 +275,38 @@ function formatBytes(bytes) {
   return `${(bytes / 1024).toFixed(2).padStart(6)} KB (${bytes.toLocaleString('en-US')} B)`;
 }
 
+/** Every emitted file under `dist/` ending in `ext`, in path order. */
+function outputFiles(ext) {
+  const walk = (dir) =>
+    readdirSync(dir).flatMap((entry) => {
+      const full = path.join(dir, entry);
+      return statSync(full).isDirectory() ? walk(full) : [full];
+    });
+  const dist = path.join(ROOT, 'dist');
+  return existsSync(dist) ? walk(dist).filter((file) => file.endsWith(ext)).sort() : [];
+}
+
+/** The bytes a budget key weighs: one file, or a format's whole output. */
+function contentOf(rel) {
+  const glob = rel.match(/^dist\/\*\*\/\*(\.m?js)$/);
+  if (!glob) {
+    const full = path.join(ROOT, rel);
+    return existsSync(full) ? readFileSync(full) : null;
+  }
+  const files = outputFiles(glob[1]);
+  return files.length ? Buffer.concat(files.map((file) => readFileSync(file))) : null;
+}
+
 const problems = [];
 const rows = [];
 
 for (const [rel, budget] of Object.entries(BUDGETS)) {
-  const full = path.join(ROOT, rel);
-  if (!existsSync(full)) {
+  const content = contentOf(rel);
+  if (!content) {
     problems.push(`${rel} does not exist. Run 'pnpm build' first.`);
     continue;
   }
 
-  const content = readFileSync(full);
   const rawSize = content.length;
   const gzipSize = gzipSync(content).length;
 

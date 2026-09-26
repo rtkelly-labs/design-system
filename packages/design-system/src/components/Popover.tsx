@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
 import { Popover as BasePopover } from '@base-ui/react/popover';

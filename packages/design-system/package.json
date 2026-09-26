@@ -110,6 +110,8 @@
     "check:api": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-api.mjs",
     "check:bundle-size": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-bundle-size.mjs",
     "check:bundle-size:list": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-bundle-size.mjs --list",
+    "check:import-cost": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-import-cost.mjs",
+    "check:import-cost:list": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-import-cost.mjs --list",
     "api:update": "pnpm build && node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-api.mjs --update",
     "check:fonts": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-fonts.mjs",
     "check:fonts:list": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-fonts.mjs --list",

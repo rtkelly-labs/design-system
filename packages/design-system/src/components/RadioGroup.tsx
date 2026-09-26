@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode, Ref } from 'react';
 import { Radio as BaseRadio } from '@base-ui/react/radio';

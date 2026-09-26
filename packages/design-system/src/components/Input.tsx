@@ -1,3 +1,5 @@
+'use client';
+
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from 'react';
 import { recipe } from '../lib/recipe';
 import { Field as BaseField } from '@base-ui/react/field';

@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 import type { ElementType, ReactNode } from 'react';
 import { Menu as MenuIcon, Palette, Search, X } from 'lucide-react';
