@@ -42,6 +42,7 @@ export function DocsShell({
           nav={[
             { label: 'Docs', href: '/docs', active: pathname === '/docs' || pathname === '/docs/installation' },
             { label: 'Components', href: '/docs/components', active: pathname.startsWith('/docs/components') },
+            { label: 'Examples', href: '/examples' },
             { label: 'Storybook', href: STORYBOOK_URL, external: true },
           ]}
           onSearch={search.open}

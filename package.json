@@ -18,6 +18,8 @@
     "walkthrough": "pnpm --filter @rtkelly13/design-system walkthrough",
     "report": "pnpm --filter @rtkelly13/design-system-report report",
     "site": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-site dev",
-    "site:build": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-site build"
+    "site:build": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-site build",
+    "build:deploy": "node scripts/assemble-deploy.mjs",
+    "serve:deploy": "node scripts/serve-deploy.mjs"
   }
 }

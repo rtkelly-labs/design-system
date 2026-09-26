@@ -11,7 +11,7 @@
     "generate": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/generate-docs-data.mts",
     "dev": "pnpm generate && next dev",
     "build": "pnpm generate && next build",
-    "start": "npx serve out -l 3100",
+    "start": "node ../../scripts/serve-deploy.mjs out --mount /site --port 3100",
     "typecheck": "pnpm generate && tsc --noEmit",
     "check:tokens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-tokens.mjs",
     "lint": "eslint --max-warnings 0 ."

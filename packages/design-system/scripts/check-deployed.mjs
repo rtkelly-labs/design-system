@@ -76,10 +76,8 @@ console.log(`  built:    ${localIds.size} stories`);
 console.log(`  deployed: ${deployedIds.size} stories`);
 if (builtAt) console.log(`  built at: ${builtAt}`);
 
-if (!missing.length && !stale.length) {
-  console.log('\nThe deployment matches this build.');
-  process.exit(0);
-}
+const storiesDrift = missing.length > 0 || stale.length > 0;
+if (!storiesDrift) console.log('\nThe deployment matches this build.');
 
 if (missing.length) {
   /*
@@ -111,10 +109,55 @@ if (stale.length) {
   console.log('    (a renamed story leaves its old id behind until the next deploy)');
 }
 
+if (storiesDrift) {
 console.log(
   '\nThe domain deploys the `production` branch, which the release train moves. Built from\n' +
     '`main`, a gap here only means a train is due. Built from `production`, it means the\n' +
     'deploy failed or is stuck, usually the Vercel account build quota; see docs/hosting.md.',
 );
+}
 
-if (process.argv.includes('--strict')) process.exit(1);
+/*
+ * The applied site rides in the same deployment, under `/site`, and
+ * `index.json` says nothing about it: a deploy whose assembly step dropped the
+ * site, or whose basePath broke, still serves every story. So ask for the
+ * pages themselves — the home page and one deep page, which is what
+ * `cleanUrls: false` and the trailing-slash redirect decide — and for one
+ * hashed asset the home page names, because HTML that loads no JavaScript is
+ * a blank page served with a 200.
+ */
+const SITE_PAGES = ['/site/', '/site/docs/components/button/'];
+const siteProblems = [];
+let homeHtml = '';
+for (const page of SITE_PAGES) {
+  try {
+    const response = await fetch(`${SITE}${page}`);
+    const type = response.headers.get('content-type') ?? '';
+    if (!response.ok) siteProblems.push(`${page} answered ${response.status} ${response.statusText}`);
+    else if (!type.includes('text/html')) siteProblems.push(`${page} answered ${type || 'no content type'}, not HTML`);
+    else if (page === '/site/') homeHtml = await response.text();
+  } catch (error) {
+    siteProblems.push(`${page} could not be fetched — ${error.message}`);
+  }
+}
+const asset = /(?:src|href)="(\/site\/_next\/static\/[^"?#]+)"/.exec(homeHtml)?.[1];
+if (homeHtml && !asset) siteProblems.push('/site/ names no /site/_next/static/ asset — is basePath set?');
+if (asset) {
+  const response = await fetch(`${SITE}${asset}`, { method: 'HEAD' }).catch((error) => ({ ok: false, statusText: error.message }));
+  if (!response.ok) siteProblems.push(`${asset}, named by /site/, answered ${response.status ?? ''} ${response.statusText}`.trim());
+}
+
+console.log(`\nApplied site — ${SITE}/site/`);
+if (siteProblems.length) {
+  console.log('  NOT served as built:');
+  for (const problem of siteProblems) console.log(`    ${problem}`);
+  console.log(
+    '  Storybook and the site are one deployment (docs/hosting.md, "The applied site,\n' +
+      '  embedded"). A site missing beside current stories means the assembly step or the\n' +
+      '  basePath, not the quota; on a production older than the embed it means a train is due.',
+  );
+} else {
+  console.log(`  served: ${SITE_PAGES.join(', ')} and ${asset}`);
+}
+
+if (process.argv.includes('--strict') && (storiesDrift || siteProblems.length)) process.exit(1);

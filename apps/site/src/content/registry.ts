@@ -7,6 +7,7 @@ import { button } from './components/button';
 import { dataTable } from './components/data-table';
 import { input } from './components/input';
 import { modal } from './components/modal';
+import { SAMPLES, sampleHref } from './samples';
 import type { ComponentPageDef, Section } from './types';
 
 /**
@@ -137,6 +138,15 @@ export function searchIndex(): SearchEntry[] {
         text: example ? plain(example.description) : '',
       });
     }
+  }
+  for (const sample of SAMPLES) {
+    entries.push({
+      id: sampleHref(sample),
+      title: sample.title,
+      trail: 'Examples',
+      href: sampleHref(sample),
+      text: `${sample.lede} ${sample.components.join(' ')}`,
+    });
   }
   return entries;
 }

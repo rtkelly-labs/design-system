@@ -10,6 +10,7 @@ const items = (
   <>
     <SiteNavItem href="/docs">Docs</SiteNavItem>
     <SiteNavItem href="/docs/components">Components</SiteNavItem>
+    <SiteNavItem href="/examples">Examples</SiteNavItem>
     <SiteNavItem href={STORYBOOK_URL}>Storybook ↗</SiteNavItem>
     <SiteNavItem href={REPO_URL}>GitHub ↗</SiteNavItem>
   </>
@@ -47,6 +48,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
               <SiteNavItem href="/docs/components">All components</SiteNavItem>
               <SiteNavItem href="/docs/components/button">Button</SiteNavItem>
               <SiteNavItem href="/docs/components/data-table">DataTable</SiteNavItem>
+              <SiteNavItem href="/examples">Examples</SiteNavItem>
             </SiteNav>
             <SiteNav label="Project" orientation="vertical">
               <SiteNavItem href={STORYBOOK_URL}>Storybook ↗</SiteNavItem>

@@ -47,3 +47,7 @@ apps/site/out/
 apps/site/next-env.d.ts
 apps/site/src/generated/
 apps/site/*.tsbuildinfo
+
+# The assembled Vercel output: Storybook at the root and the site under
+# site/, written by scripts/assemble-deploy.mjs.
+deploy-output/

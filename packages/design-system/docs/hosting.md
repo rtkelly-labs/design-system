@@ -12,8 +12,9 @@ The deployed Storybook, its domains, and the build quota that governs them.
 | --- | --- | --- |
 | [design-system.ryankelly.dev](https://design-system.ryankelly.dev) | the `production` branch | Production domain |
 | [preview.design-system.ryankelly.dev](https://preview.design-system.ryankelly.dev) | the `preview` branch | Branch domain (`gitBranch`) |
+| `p1`, `p2`, `p3`.design-system.ryankelly.dev | the `slot/1` to `slot/3` branches | Branch domains (`gitBranch`) |
 
-Both domains are declared **outside this repo**, in `rtkelly13/shared-utilities` at
+These domains are declared **outside this repo**, in `rtkelly13/shared-utilities` at
 [`infra/vercel/`](https://github.com/rtkelly13/shared-utilities/tree/main/infra/vercel) —
 one Pulumi stack covering every ryankelly.dev site rather than a per-repo copy. Add or
 change a domain in that repo's `sites.ts` (site key `design-system-storybook`).
@@ -26,6 +27,111 @@ shared stack declares only identity, domains and env vars. Repos own how they bu
 `serve.json` is (see below): clean URLs rewrite `/iframe.html` to `/iframe`, breaking
 Storybook's asset preloading and yielding an empty preview pane. Storybook is one of
 the few static sites where clean URLs are actively wrong.
+
+### The applied site, embedded
+
+The applied site (`apps/site`) has no Vercel project of its own. The Storybook project serves
+it from the same deployment, under a path, on every domain the project has — production,
+`preview` and the `p1`–`p3` slot domains:
+
+| Path | Serves |
+| --- | --- |
+| `/` | Storybook, unchanged |
+| `/site/` | the applied site: home, `/site/docs/…`, `/site/docs/components/<slug>/` |
+| `/site/examples/<slug>/` | the sample projects, full-page, with only a thin bar of site around them |
+
+**How it is built.** `vercel.json`'s `buildCommand` is `pnpm build:deploy`, which runs
+`scripts/assemble-deploy.mjs` at the workspace root: it builds the package (the site resolves
+it through the exports map, so `dist/` comes first), Storybook, and the site's static export,
+then copies `storybook-static/` to `deploy-output/` and the site's `out/` to
+`deploy-output/site/`. `outputDirectory` is `deploy-output`. It is a directory of its own
+rather than a copy into `storybook-static/`, because CI, `check:visual-coverage` and
+`check:deployed` read `storybook-static/index.json` as the catalogue. The script ends by
+checking that no exported page asks for `/_next/` at the root and that every
+`/site/_next/…` asset a page names was exported — a broken basePath otherwise serves a blank
+page with a 200. `installCommand` is filtered to `@rtkelly13/design-system-site...`, which
+selects the site and, through its `workspace:*` dependency, the package with its dev
+dependencies. The report package is not installed.
+
+**The basePath and the trailing slash.** `apps/site/next.config.ts` sets `basePath: '/site'`
+and `trailingSlash: true`. `cleanUrls: false` (above) means an extensionless URL can only
+resolve to a directory index, so the export has to write `docs/index.html` rather than
+`docs.html`. `vercel.json` keeps `trailingSlash: false`, so `/site/docs/` answers 308 to
+`/site/docs`, which serves `site/docs/index.html`. It works, with two costs: a hard load of a
+slash URL takes one redirect, and so does each route Next prefetches, since Next fetches the
+page URL alongside its segment files. After a redirect the address bar shows the slashless
+form. Removing `trailingSlash` from `vercel.json` would remove the hop. Only `cleanUrls` is
+known to matter to Storybook, but that change was left for a real deployment to confirm.
+
+**Cache policy.** `/site/_next/static/(.*)` is `immutable` for a year: Next writes a content
+hash into every name under it. The HTML and the RSC payloads (`index.txt`, `__next.*.txt`)
+keep their names from build to build, so they get no rule and Vercel's static default,
+`public, max-age=0, must-revalidate`. `scripts/vercel-config.test.mjs` pins both halves, and
+checks that no path is matched by two rules setting the same header, so nothing depends on
+Vercel's precedence between them.
+
+**Cross-links are root-relative**, so one build is right on every domain. The site builds
+Storybook links with `storybookUrl()` (`/?path=…`), and `RouterLink` renders them as plain
+anchors so `next/link` does not add the basePath. Each component page links to its Storybook
+docs page, and each example to its story. In the other direction, Storybook's
+**Guides/Introduction** links to `/site/` with `target="_top"`, because docs render inside
+`iframe.html`. Under `pnpm storybook` or `next dev` only one half is running, so the link
+into the other half 404s (the site's `next dev` points at production Storybook instead).
+
+**Checking it before a deploy.** `pnpm build:deploy`, then `pnpm serve:deploy`, which serves
+`deploy-output/` on :3200 with the three settings that change whether a URL resolves:
+`cleanUrls: false`, the `trailingSlash: false` redirect, and the `headers` from `vercel.json`
+through the same matcher the config test uses (`scripts/vercel-headers.mjs`). It has no
+dependency: `serve` must stay out of the lockfile (apps/site/AGENTS.md, rule 6).
+
+**Checking it on a slot domain.** Push the branch to `slot/1` (or 2, 3). That is a real
+deployment and uses the build quota. Then check `https://p1.design-system.ryankelly.dev/`
+renders a story, `/site/` and `/site/docs/components/button/` load with no 404s in the
+network panel, `curl -sI …/site/_next/static/<a chunk>` says `immutable`, and
+`curl -sI …/site/docs/` answers 308 to `/site/docs` and that URL answers 200. Then run
+`DS_SITE=https://p1.design-system.ryankelly.dev pnpm check:deployed`.
+
+**Drift covers it.** `index.json` says nothing about the site, so `check:deployed` also
+fetches `/site/` and `/site/docs/components/button/`, checks both are HTML, and fetches one
+`/site/_next/static/` asset the home page names. A site missing beside current stories means
+the assembly step or the basePath. On a production older than the embed, it means a train is
+due, like any other drift.
+
+**Sample projects.** An example is a composition the package exports, rendered by the site:
+today the `SaasLandingPage` (`SaaS/LandingPage`) and `AdminDashboardLayout`
+(`SaaS/AdminDashboardLayout`). The story-only compositions (the `ProductLaunch` and
+`ProjectSite` landing pages in `src/stories/marketing/fixtures.tsx` and the
+`AccountSettingsForm` in `src/stories/forms/`) are not included. They import components from
+source by relative path, and the site consumes `dist/` as an npm consumer would. Importing them
+would compile a second copy of the library into the site, with its own React contexts, so the
+site's `LinkProvider` and `ThemeProvider` would not reach them. They should move to a private
+workspace package, say `packages/fixtures`, that imports only `@rtkelly13/design-system`.
+Storybook aliases that specifier to `src/index.ts` in `viteFinal`, and the site resolves it to
+`dist/`, so both render the same fixture from one file.
+
+### Subdomain options for later
+
+Embedding under a path was chosen to avoid a second project, domain and quota line for now.
+Both alternatives need a change in `rtkelly13/shared-utilities`
+([`infra/vercel/sites.ts`](https://github.com/rtkelly13/shared-utilities/blob/main/infra/vercel/sites.ts)),
+outside this repo:
+
+- **(a) `site.design-system.ryankelly.dev` as a separate Vercel project.** A second
+  `sites.ts` entry on this repo with its own `vercel.json` (Vercel reads one per project root,
+  so the site would get `apps/site` as its root directory), and `basePath` dropped. Clean
+  separation, but a second build per push against the same account quota, and the
+  cross-links become absolute URLs that differ per environment.
+- **(b) The Tailwind model: the site at the root domain, Storybook moved to
+  `storybook.design-system.ryankelly.dev`**, once the site covers the catalogue. The site is
+  what a visitor wants from `design-system.ryankelly.dev`, and Storybook becomes the workshop
+  it links into, the way tailwindcss.com keeps its docs at the root and its playground at
+  `play.tailwindcss.com`. This needs a new domain on the
+  storybook project, the production domain moved to a site project, and
+  `STORYBOOK_REF_BLOG_URL`-style build-time URLs rechecked.
+
+**Recommended: (b), eventually.** Until the site documents most of the catalogue, Storybook
+is the better front door and the path embed costs nothing extra. Once it does, the root
+domain should be the site.
 
 ### Drift — production stopped updating for three days and nothing said so
 
