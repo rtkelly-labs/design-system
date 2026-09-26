@@ -434,7 +434,7 @@ const MOBILE_CASES: readonly VisualCase[] = [
 
 test.describe('Design System Visual Regression - Narrow viewport', () => {
   for (const { id, snapshot, fullPage, onScreen } of MOBILE_CASES) {
-    test(`${id} — mobile`, async ({ page }, testInfo) => {
+    test(`${id} — mobile`, { tag: '@mobile-only' }, async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== 'mobile', 'Narrow-viewport cases run in the mobile project');
       await page.goto(`/iframe.html?id=${id}&viewMode=story`);
       await waitForStoryReady(page, id);
@@ -470,7 +470,7 @@ test.describe('Design System Visual Regression - Narrow viewport', () => {
 
 test.describe('Design System Visual Regression - Interaction states', () => {
   for (const { id, snapshot, act, target, keys, level } of INTERACTIONS) {
-    test(`${id} — ${act}${level ? ` — ${level}` : ''}`, async ({ page }, testInfo) => {
+    test(`${id} — ${act}${level ? ` — ${level}` : ''}`, { tag: '@chromium-only' }, async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== 'chromium', 'Interaction baselines are the chromium project');
       await page.goto(`/iframe.html?id=${id}&viewMode=story${level ? `&globals=level:${level}` : ''}`);
       await waitForStoryReady(page, id);
@@ -523,7 +523,7 @@ test.describe('Design System Visual Regression - Interaction states', () => {
 
 test.describe('Design System Visual Regression - Components', () => {
   for (const { id, snapshot, fullPage } of CASES) {
-    test(`${id}`, async ({ page }, testInfo) => {
+    test(`${id}`, { tag: '@chromium-only' }, async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== 'chromium', 'Desktop baselines are the chromium project');
       await page.goto(`/iframe.html?id=${id}&viewMode=story`);
       await waitForStoryReady(page, id);

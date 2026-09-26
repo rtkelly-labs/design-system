@@ -738,6 +738,89 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   note('verdict', !readsVerdict || (lookup && key), `ci.yml visual — ${readsVerdict ? 'reuses a verdict; PR-only lookup, keyed on inputs and image' : 'no verdict reuse'}`);
 }
 
+/*
+ * Who may *record* the verdict. `visual` is sharded, so a leg reaching its
+ * last step means only that its own slice passed — a marker saved there would
+ * claim a verdict the other legs had not reached. So `visual` must not save
+ * it; the job that does must `need` it and run only on its success, which for
+ * a matrix is every leg succeeding. And if `visual` reuses a verdict, some job
+ * has to record one, or the reuse is dead code that reads as a feature.
+ */
+{
+  /*
+   * The lines of each step in a job body, split at `      - ` — a linear scan.
+   * These used to be one regex per question with a nested lazy quantifier over
+   * whitespace-and-line, which backtracked catastrophically: a download step
+   * whose `pattern:` did not match spun `check:governance` at 100% CPU for
+   * sixteen minutes. A gate that can hang on malformed input is a gate that
+   * waits out its job ceiling and reports `cancelled`.
+   */
+  const stepsOf = (body) => {
+    const out = [];
+    for (const line of body.split('\n')) {
+      if (/^ {6}- /.test(line)) out.push([]);
+      if (out.length) out.at(-1).push(line.trim());
+    }
+    return out;
+  };
+  const stepUses = (step, action) => step.some((l) => l.replace(/^- /, '').startsWith(`uses: ${action}@`));
+  const stepHas = (step, re) => step.some((l) => re.test(l));
+  const ciJobsFull = jobsOf('.github/workflows/ci.yml').map((job) => ({
+    id: job.id,
+    body: job.body.map(({ text }) => text).join('\n'),
+  }));
+  // A job saves the verdict when it has a cache-save step keyed on the
+  // verdict key: `visual`'s own step output, or the one it exports.
+  const saves = (body) =>
+    stepsOf(body).some(
+      (step) =>
+        stepUses(step, 'actions/cache/save') &&
+        stepHas(step, /^key:\s*\$\{\{\s*(?:needs\.visual\.outputs\.key|steps\.inputs\.outputs\.key)\s*\}\}$/),
+    );
+  const visual = ciJobsFull.find((job) => job.id === 'visual');
+  const recorders = ciJobsFull.filter((job) => job.id !== 'visual' && saves(job.body));
+  if (visual && saves(visual.body)) {
+    problems.push(
+      'ci.yml `visual` saves the verdict itself. It is sharded, so one leg finishing says ' +
+        'nothing about the others — record it in a job that `needs: [visual]`.',
+    );
+  }
+  for (const job of recorders) {
+    const needs = /^\s{4}needs:\s*\[?[^\n]*\bvisual\b/m.test(job.body);
+    const gated = /^\s{4}if:[^\n]*needs\.visual\.result == 'success'/m.test(job.body);
+    if (!needs || !gated) {
+      problems.push(
+        `ci.yml \`${job.id}\` saves the visual verdict but ${!needs ? 'does not `need` visual' : ''}` +
+          `${!needs && !gated ? ' and ' : ''}${!gated ? "is not gated on `needs.visual.result == 'success'`" : ''}. ` +
+          'A verdict recorded before every shard passed is a verdict nobody earned.',
+      );
+    }
+    // The job's outputs carry one leg's key. During an image rollout the legs
+    // can compute different keys, or one can hit while another misses, so the
+    // recorder must compare every leg's decision and save only on agreement.
+    const collects = stepsOf(job.body).some(
+      (step) => stepUses(step, 'actions/download-artifact') && stepHas(step, /^pattern:\s*verdict-key-\*$/),
+    );
+    const compares = /- name: Agreed Key\n\s+id: agreed\n/.test(job.body);
+    const saveGated = /- name: Save Verdict\n\s+if: steps\.agreed\.outputs\.ok == 'true'\n/.test(job.body);
+    const published = visual && /name:\s*verdict-key-\$\{\{\s*matrix\.shard\s*\}\}/.test(visual.body);
+    if (!collects || !compares || !saveGated || !published) {
+      problems.push(
+        `ci.yml \`${job.id}\` saves the visual verdict without confirming every shard agreed on it ` +
+          `(${[!published && 'visual uploads no `verdict-key-${{ matrix.shard }}`', !collects && 'no download of `verdict-key-*`',
+            !compares && 'no `Agreed Key` step (id: agreed)', !saveGated && "`Save Verdict` not gated on `steps.agreed.outputs.ok == 'true'`"]
+            .filter(Boolean).join('; ')}). A job output holds one leg's key; legs on different runner images disagree.`,
+      );
+    }
+    note('verdict', needs && gated && collects && compares && saveGated && published, `ci.yml ${job.id} — records the verdict after every visual shard, only when all legs agree`);
+  }
+  if (visual && /steps\.verdict\./.test(visual.body) && !recorders.length) {
+    problems.push(
+      'ci.yml `visual` looks a verdict up, but no job records one — the reuse can never hit.',
+    );
+  }
+}
+
 /* ------------------------------------------------------------------ */
 
 if (listing) {

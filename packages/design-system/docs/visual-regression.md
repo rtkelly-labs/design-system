@@ -346,7 +346,7 @@ and run" click before the PR shows a green check.
 1. **A story did not render.** The error names the story and says which
    Storybook state it reached. Not a visual problem — the Storybook build is
    stale, the id is wrong, or the story throws. Nothing to re-baseline.
-2. **Pixels moved and you meant it.** Download the `playwright-report` artifact
+2. **Pixels moved and you meant it.** Download the `playwright-report-<shard>` artifact of the failing shard
    and look at the expected / actual / diff triad. If it is the change you
    intended, re-baseline with `changed`.
 3. **Pixels moved and you did not.** This is the suite paying for itself. Do not
