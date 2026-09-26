@@ -48,7 +48,21 @@ jobs:
       # what most pull requests restore from.
       - name: Rendering Inputs
         id: inputs
-        run: echo "key=walkthrough-report-${ImageOS}-${ImageVersion}-$(node scripts/render-inputs.mjs)" >> "$GITHUB_OUTPUT"
+        # Fail closed. A bare `$(...)` inside `echo` swallows a failing script and
+        # yields a key ending in `-` with no hash: one constant key that every
+        # later pull request would match, skipping the job on a verdict nothing
+        # earned. So the hash is taken on its own line under `set -e`, checked for
+        # shape, and only then written. The image variables must be non-empty
+        # for the same reason.
+        run: |
+          set -euo pipefail
+          : "${ImageOS:?}" "${ImageVersion:?}"
+          inputs="$(node scripts/render-inputs.mjs)"
+          if ! [[ "${inputs}" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::render-inputs.mjs printed '${inputs}', not a hash. Refusing to key a verdict on it."
+            exit 1
+          fi
+          echo "key=walkthrough-report-${ImageOS}-${ImageVersion}-${inputs}" >> "$GITHUB_OUTPUT"
 
       - name: Previous Report
         id: report

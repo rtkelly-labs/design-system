@@ -713,7 +713,14 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   }
   if (job.id !== 'visual') continue;
   const lookup = /- name: Previous Verdict\n\s+id: verdict\n\s+if: github\.event_name == 'pull_request'\n/.test(body);
-  const key = /key=visual-verdict-\$\{ImageOS\}-\$\{ImageVersion\}-\$\(node scripts\/render-inputs\.mjs\)/.test(body);
+  // The hash is taken on its own line and shape-checked before the key is
+  // written: inlined as `$(...)` inside `echo`, a failing script yields a key
+  // with no hash, which every later pull request would match.
+  const key =
+    /inputs="\$\(node scripts\/render-inputs\.mjs\)"/.test(body) &&
+    /\[\[ "\$\{inputs\}" =~ \^\[0-9a-f\]\{64\}\$ \]\]/.test(body) &&
+    /key=visual-verdict-\$\{ImageOS\}-\$\{ImageVersion\}-\$\{inputs\}/.test(body) &&
+    /set -euo pipefail/.test(body);
   if (readsVerdict && !lookup) {
     problems.push(
       'ci.yml `visual`: the `Previous Verdict` lookup must be `if: github.event_name == ' +
@@ -722,8 +729,10 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   }
   if (readsVerdict && !key) {
     problems.push(
-      'ci.yml `visual`: the verdict key must be `visual-verdict-${ImageOS}-${ImageVersion}-` ' +
-        'plus `node scripts/render-inputs.mjs`. Without the image, a new runner reuses an old verdict.',
+      'ci.yml `visual`: the verdict key must be `visual-verdict-${ImageOS}-${ImageVersion}-${inputs}`, ' +
+        'with `inputs` taken from `node scripts/render-inputs.mjs` on its own line under `set -euo pipefail` ' +
+        'and checked to be a 64-hex hash. Without the image a new runner reuses an old verdict; without ' +
+        'the check a failing script keys every PR to the same verdict.',
     );
   }
   note('verdict', !readsVerdict || (lookup && key), `ci.yml visual — ${readsVerdict ? 'reuses a verdict; PR-only lookup, keyed on inputs and image' : 'no verdict reuse'}`);
