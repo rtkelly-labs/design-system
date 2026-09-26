@@ -29,6 +29,16 @@
  * errors and one the warnings. The pass is the cost; reading both severities
  * out of it is free. `pnpm lint` stays for the editor-shaped output and `--fix`.
  *
+ * ## A cache, when asked for one
+ *
+ * With `ESLINT_CACHE_DIR` set — CI sets it, restoring the directory with
+ * `actions/cache` — the pass runs with `--cache --cache-strategy content`, so a
+ * file is re-linted only when it or the config changed. Content, not mtime: a
+ * fresh checkout touches every file. `eslint-cache.mjs` fingerprints what the
+ * rules read *besides* the file (stylesheets, the rule code, the plugins) and
+ * empties the cache when that moves, which ESLint's own cache would not notice.
+ * Unset, nothing changes: `pnpm lint` and a local run lint everything.
+ *
  *   node scripts/check-lint-budget.mjs           verify
  *   node scripts/check-lint-budget.mjs --list    print the census with locations
  */
@@ -36,6 +46,8 @@
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { fingerprint, prepareCache, ruleInputs } from './eslint-cache.mjs';
+import { REPO_ROOT } from './repo-root.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -57,6 +69,13 @@ const BUDGET = {
 // not a crash, so the report is taken from the exception's stdout.
 function eslint() {
   const args = ['eslint', 'src', '--format', 'json'];
+  const cacheDir = process.env.ESLINT_CACHE_DIR ? path.resolve(ROOT, process.env.ESLINT_CACHE_DIR) : null;
+  if (cacheDir) {
+    const inputs = ruleInputs(ROOT, path.join(REPO_ROOT, 'pnpm-lock.yaml'));
+    const kept = prepareCache(cacheDir, fingerprint(inputs, REPO_ROOT));
+    console.log(`ESLint cache ${kept ? 'reused' : 'cleared — rule inputs changed or none recorded'} (${inputs.length} inputs fingerprinted).`);
+    args.push('--cache', '--cache-strategy', 'content', '--cache-location', `${cacheDir}/`);
+  }
   const opts = { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 };
   try {
     return execFileSync('npx', args, opts);

@@ -77,6 +77,14 @@ everything else had also run.
 **Where the time actually goes**, so the next person optimising this starts from
 measurements rather than a guess:
 
+- **`lint` lints only what changed.** `check:lint-budget` runs ESLint with
+  `--cache --cache-strategy content` when `ESLINT_CACHE_DIR` is set, which only
+  CI does. ESLint's cache notices a changed file or config, not a changed input
+  the rules read — `tailwindcss/no-custom-classname` loads the stylesheets and
+  `no-colour-literals` lives in `src/lib/tokenRules.ts` — so
+  `scripts/eslint-cache.mjs` fingerprints those and empties the cache when they
+  move. A pnpm store cache was measured and not added: the whole install is
+  ~5s, the download ~3.6s of it, and restoring a ~380 MB store is no faster.
 - **Measure first: `pnpm ci:history`.** It reads the job and step timings GitHub
   already keeps for every run and prints p50/p90 per job and step, queue time,
   runner minutes, the critical path and a per-step trend (`--workflow`,

@@ -184,7 +184,24 @@ jobs:
       # errors). `pnpm lint` used to be a second step, and a second full pass
       # over `src/` with the same config: ~25s spent reading the other severity
       # out of an identical run.
+      # ESLint re-lints only the files that changed. The key moves with `src/`
+      # so each tree saves its own cache, and restores from the newest one.
+      # That restore can be stale in a way ESLint cannot see: a stylesheet or a
+      # rule's code changes the verdict on an untouched file. It is not trusted
+      # for that — `scripts/eslint-cache.mjs` fingerprints what the rules read
+      # and empties the directory when it moves, so a stale restore costs a
+      # cold pass, never a wrong answer.
+      - name: ESLint Cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: packages/design-system/node_modules/.cache/eslint-ci
+          key: eslint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'packages/design-system/src/**', 'packages/design-system/eslint.config.mjs', 'packages/design-system/scripts/*.mjs') }}
+          restore-keys: |
+            eslint-${{ runner.os }}-
+
       - name: Lint
+        env:
+          ESLINT_CACHE_DIR: node_modules/.cache/eslint-ci
         run: pnpm check:lint-budget
 
       # Ratchet: fails if styling moves back into a stylesheet.
