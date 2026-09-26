@@ -151,7 +151,8 @@ measurements rather than a guess:
 `scripts/select-stories.mjs shadow`, which says which asserted stories the change
 can reach and why, in the job summary and `telemetry/story-selection.json`. It skips
 nothing. Its graph is the union of what Vite bundled (`preview-stats.json` — `pnpm
-build-storybook` passes `--stats-json` for it) and the source imports: the bundle
+build-storybook` passes `--stats-json` for it; `vercel.json` deletes the 2.4 MB file
+after the build, because the published Storybook has no use for it) and the source imports: the bundle
 graph has no CSS `@import` or JSON edges, the source graph cannot see what a plugin
 adds, and with type-only imports left out the two agree on 118 of 120 stories. Files
 outside any graph — the lockfile, `ci.yml`'s `visual` job, a snapshot, a `CASES` row,

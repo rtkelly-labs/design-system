@@ -171,7 +171,7 @@ function shadow(opts) {
   const selection = selectStories(changesBetween(base, head), ctx, { asserted, image: { current: image } });
 
   const reports = (opts.playwright ?? [])
-    .map((file) => path.join(PACKAGE_ROOT, file))
+    .map((file) => path.resolve(PACKAGE_ROOT, file))
     .filter(existsSync)
     .map((file) => JSON.parse(readFileSync(file, 'utf8')));
   const detection = reports.length ? detect(selection, reports) : null;
@@ -190,7 +190,7 @@ function shadow(opts) {
     failures: detection?.failures ?? null,
     misses: detection?.misses ?? null,
   };
-  const out = path.join(PACKAGE_ROOT, opts.out ?? 'telemetry/story-selection.json');
+  const out = path.resolve(PACKAGE_ROOT, opts.out ?? 'telemetry/story-selection.json');
   mkdirSync(path.dirname(out), { recursive: true });
   writeFileSync(out, `${JSON.stringify(record, null, 2)}\n`);
 
