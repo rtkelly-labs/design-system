@@ -101,6 +101,11 @@ function restoreAttributes(el: Element, original: ReadonlyArray<readonly [string
 
 function restoreProperties(target: object, original: PropertyDescriptorMap) {
   for (const key of Reflect.ownKeys(target)) {
+    // The baseline itself sits on `globalThis`, which is `window`: it was not
+    // there when `window` was captured, so without this the first reset
+    // deletes it and the next file re-baselines on top of its predecessor's
+    // leaks. `src/test-setup.test.ts` fails if this line goes.
+    if (key === KEY) continue;
     if (!(key in original)) Reflect.deleteProperty(target, key);
   }
   for (const [key, descriptor] of Object.entries(original)) {
