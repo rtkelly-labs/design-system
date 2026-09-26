@@ -718,7 +718,7 @@ const images = new Map();
 for (const job of ALL_JOBS) {
   const at = `${job.file}:${job.line}`;
   const texts = job.body.map(({ text }) => text);
-  if (texts.some((text) => /install-playwright|playwright\s+install/.test(text))) {
+  if (texts.some((text) => /^\s*(?:-\s+)?(?:uses:.*install-playwright|run:.*playwright\s+install)/.test(text))) {
     problems.push(
       `${at}: job \`${job.id}\` installs a browser. Rule 9: jobs that render run in the ` +
         `pinned Playwright image, which carries Chromium; a second install is a second Chromium.`,
@@ -795,7 +795,7 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   const key =
     /inputs="\$\(node scripts\/render-inputs\.mjs\)"/.test(body) &&
     /\[\[ "\$\{inputs\}" =~ \^\[0-9a-f\]\{64\}\$ \]\]/.test(body) &&
-    /key=visual-verdict-\$\{ImageOS\}-\$\{ImageVersion\}-\$\{inputs\}/.test(body) &&
+    /key=visual-verdict-[0-9a-f]{64}-\$\{inputs\}/.test(body) &&
     /set -euo pipefail/.test(body);
   if (readsVerdict && !lookup) {
     problems.push(
@@ -805,7 +805,7 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   }
   if (readsVerdict && !key) {
     problems.push(
-      'ci.yml `visual`: the verdict key must be `visual-verdict-${ImageOS}-${ImageVersion}-${inputs}`, ' +
+      'ci.yml `visual`: the verdict key must be `visual-verdict-<image digest>-${inputs}`, ' +
         'with `inputs` taken from `node scripts/render-inputs.mjs` on its own line under `set -euo pipefail` ' +
         'and checked to be a 64-hex hash. Without the image a new runner reuses an old verdict; without ' +
         'the check a failing script keys every PR to the same verdict.',
