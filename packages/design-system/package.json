@@ -95,6 +95,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:leaks": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/vitest-leaks.mjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
     "test:a11y": "playwright test tests/a11y.spec.ts",
