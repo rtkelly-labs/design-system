@@ -170,16 +170,25 @@ the opposite of `midnight`. No gate can currently see this; it is tracked in #81
 
 | Role | Stack |
 |---|---|
-| Display | Space Grotesk → Inter → sans-serif |
-| Body | Inter → system sans |
-| Mono | IBM Plex Mono → Symbols Nerd Font Mono → Courier New |
-| Pixel | VT323 → monospace |
+| Display | Space Grotesk → Inter → symbols → sans-serif |
+| Body | Inter → symbols → system sans |
+| Mono | IBM Plex Mono → symbols → Courier New |
+| Pixel | VT323 → symbols → monospace |
+
+"Symbols" is the same pair of shipped faces in every stack: Symbols Nerd Font Mono (icons, the
+private-use area) then DS Symbols (arrows, box drawing, blocks, geometric shapes, dingbats, `⌘`,
+Greek; a subset of JetBrains Mono, OFL-1.1). Both are `unicode-range` bounded, so they draw only
+what the text face lacks.
 
 Fallback chains are load-bearing: when the web font has not loaded, the next entry decides the
 metrics, and a different fallback reflows the page.
 
-**The mono face is latin-only.** Box-drawing and block characters fall through to Symbols Nerd
-Font Mono — which is why ASCII art needs testing rather than assuming.
+**The text faces are latin-only, and no symbol reaches the operating system.** IBM Plex Mono has
+no box drawing and Nerd Fonts' symbol set has none either, so every ASCII-art rule, `✓` and `⌘`
+used to be drawn by whatever font the machine had — Courier New on the CI runner, no glyph at all
+for `⌘` there. DS Symbols draws them now, at the same 600/1000 advance as IBM Plex Mono so box
+drawing keeps the mono column width. `pnpm check:fonts` fails when a character rendered in `src/`
+has no shipped glyph in any of the four stacks; `--list` prints the census.
 
 **Geometry and time are the second axis, and they are declared.** A Level varies colour and is
 picked at runtime; a **Medium** varies geometry and time and is picked at build time by which

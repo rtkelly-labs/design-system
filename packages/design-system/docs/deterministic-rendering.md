@@ -42,7 +42,7 @@ second.
 `styles.css` self-hosts four families and `theme.css` resolves them **by name**:
 
 ```css
---ds-font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono"), "Courier New", monospace;
+--ds-font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono"), "Symbols Nerd Font Mono", "DS Symbols", "Courier New", monospace;
 ```
 
 A name only resolves once the face is registered with the document. Capture before that and you get
