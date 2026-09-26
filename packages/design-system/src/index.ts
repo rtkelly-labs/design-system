@@ -176,9 +176,8 @@ export * from './components/blog/LoremIpsumPost';
 export * from './components/experiments/ExperimentsView';
 export * from './components/experiments/DesignSandbox';
 
-// SaaS Landing Pages & Admin Sites Foundations
+// SaaS Landing Pages
 export * from './components/saas/SaasLandingPage';
-export * from './components/admin/AdminDashboardLayout';
 
 // Documentation Portal Chrome & MDX Rendering
 export * from './components/docs';

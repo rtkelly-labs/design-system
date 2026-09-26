@@ -36,7 +36,7 @@ export const MANIFEST = {
   },
   'lucide-react': {
     kind: 'runtime',
-    why: 'Icon set rendered by DocsHeader, AdminDashboardLayout and the sandbox. Runtime rather than peer so a consumer gets working icons without opting in — at the cost of a possible duplicate copy for consumers already using lucide. Worth revisiting if that bites.',
+    why: 'Icon set rendered by DocsHeader, AppShell and the sandbox. Runtime rather than peer so a consumer gets working icons without opting in — at the cost of a possible duplicate copy for consumers already using lucide. Worth revisiting if that bites.',
   },
   'tailwind-variants': {
     kind: 'runtime',
