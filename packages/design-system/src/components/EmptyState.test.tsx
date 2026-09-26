@@ -71,6 +71,14 @@ describe('EmptyState', () => {
     expect(screen.queryByRole('heading')).toBeNull();
   });
 
+  // Where the caller does know — the empty state is the section, or the page —
+  // `headingLevel` says so, and the title is that heading.
+  it('renders the title as a heading at the level it is given', () => {
+    render(<EmptyState title="Page not found" headingLevel={1} />);
+
+    expect(screen.getByRole('heading', { level: 1, name: '[ Page not found ]' })).toBeDefined();
+  });
+
   it('forwards its ref and spreads unrecognised props onto the box', () => {
     const ref = createRef<HTMLDivElement>();
     render(<EmptyState ref={ref} title="No results" data-testid="empty" />);

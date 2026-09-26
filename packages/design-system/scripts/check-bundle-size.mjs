@@ -231,16 +231,27 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  * runtime dependency was added. Re-measured against the 0.11.0 base: ESM
  * 362,938 B raw / 84,112 B gzip, CommonJS 397,911 B raw / 86,900 B gzip
  * locally; the ceilings allow a small Linux gzip variance.
+ *
+ * Raised again for the page-level states (issue 251): +2,898 B raw, +773 B
+ * gzip on the ESM bundle over `main` with the figures in it, measured
+ * locally (363,194 B / 84,187 B → 366,092 B / 84,960 B; CommonJS 398,167 B /
+ * 86,971 B → 401,391 B / 87,784 B, +3,224 B / +813 B). Three exported
+ * components — `StatusPage` and its two presets, `NotFoundPage` and
+ * `ServerErrorPage` — which are one recipe, the presets' default copy and
+ * `EmptyState`'s new `headingLevel`. Everything drawn is `EmptyState` and
+ * `Button`, already paid for, and no dependency moves. The gzip ceiling
+ * keeps ~0.6% over the local figure, above the 149-byte macOS-to-runner
+ * spread noted above.
  */
 const BUDGETS = {
   'dist/index.mjs': {
-    maxRaw: 365_000,
-    maxGzip: 85_000,
+    maxRaw: 368_000,
+    maxGzip: 85_500,
     desc: 'ESM bundle',
   },
   'dist/index.js': {
-    maxRaw: 400_000,
-    maxGzip: 88_000,
+    maxRaw: 404_000,
+    maxGzip: 88_400,
     desc: 'CommonJS bundle',
   },
   'src/theme.css': {

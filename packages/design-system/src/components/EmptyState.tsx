@@ -37,6 +37,13 @@ export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
    */
   title: string;
   /**
+   * Render the title as a heading at this level instead of a paragraph. Leave
+   * it unset inside a card, table or panel — the right level there depends on
+   * the page around it. Set it where the empty state *is* the section or the
+   * page: `StatusPage` passes `1`, because its title is the page's only `<h1>`.
+   */
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+  /**
    * Why it is empty, and what would change that. This is where the difference
    * between "your filter matched nothing" and "you have not created anything
    * yet" is actually said, and it is the difference that decides what the
@@ -76,19 +83,20 @@ export interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
  * is to create the first thing. Same component, different copy and a different
  * action — which is the argument for the slots.
  *
- * ## The title is a paragraph, not a heading
+ * ## The title is a paragraph unless you say otherwise
  *
- * Deliberate. This drops into a card body, a table, a panel, a dialog; the
+ * By default. This drops into a card body, a table, a panel, a dialog; the
  * right heading level is different in each and the component cannot know it.
  * A wrong level is worse than none — it breaks the document outline a screen
- * reader user navigates by. Where the empty state *is* the section, put a
- * `PageTitle` or a heading above it and let this one carry the prose.
+ * reader user navigates by. Where the empty state *is* the section or the page,
+ * say so with `headingLevel`, and the title becomes that heading.
  */
 export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function EmptyState(
-  { icon, title, description, action, children, className, ...props },
+  { icon, title, headingLevel, description, action, children, className, ...props },
   ref,
 ) {
   const styles = emptyState();
+  const Title = headingLevel ? (`h${headingLevel}` as const) : 'p';
 
   return (
     <div ref={ref} data-slot="empty-state" className={styles.root({ class: className })} {...props}>
@@ -97,9 +105,9 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function E
           {icon}
         </div>
       )}
-      <p data-slot="empty-state-title" className={styles.title()}>
+      <Title data-slot="empty-state-title" className={styles.title()}>
         [ {title} ]
-      </p>
+      </Title>
       {description && (
         // A `div`, not a `p`, for the reason `AlertDialog`'s body gives: the
         // slot takes arbitrary nodes, and a block element inside a paragraph is

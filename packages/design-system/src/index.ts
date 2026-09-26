@@ -109,6 +109,9 @@ export * from './components/Spinner';
 export * from './components/Skeleton';
 export * from './components/Progress';
 export * from './components/EmptyState';
+// The page-level states (#251) — 404, 500, maintenance, offline, unauthorized
+// — as `EmptyState` in a page frame, not a component family of their own.
+export * from './components/StatusPage';
 
 // The floating set (#166): anchored to a trigger, positioned by the same
 // engine, dismissed by the same stack as the dialogs above. `Tooltip` labels,
