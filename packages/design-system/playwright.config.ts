@@ -1,5 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
+function parseShard(value: string | undefined) {
+  if (!value) return null;
+  const match = /^(\d+)\/(\d+)$/.exec(value);
+  if (!match) throw new Error(`PLAYWRIGHT_SHARD must be "current/total", got "${value}"`);
+  return { current: Number(match[1]), total: Number(match[2]) };
+}
+
 export default defineConfig({
   testDir: './tests',
   testMatch: /.*\.spec\.ts$/,
@@ -37,6 +44,16 @@ export default defineConfig({
   // in `docs/visual-regression.md` — a real non-determinism found here is worth
   // more than the 24 seconds.
   workers: process.env.CI ? 4 : undefined,
+  // Which slice of the suite this runner takes, as `current/total` — set per
+  // matrix leg in `ci.yml`'s `visual` job. An environment variable rather than
+  // `--shard` on the command line so the step stays `run: pnpm test:visual`,
+  // which is the string `check:governance` and `render-inputs.mjs` read the
+  // roster from. Unset, locally and in the snapshot workflows, it runs whole.
+  //
+  // Sharding is safe here for the same reason four workers are: no test reads
+  // another's result. The a11y `KNOWN` budget is per test, not a suite total,
+  // so a shard cannot pass a violation another shard would have counted.
+  shard: parseShard(process.env.PLAYWRIGHT_SHARD),
   // On CI, a JSON report beside the HTML one, for `scripts/ci-telemetry.mjs`:
   // GitHub times steps, not tests, and one step here is hundreds of tests. The
   // file comes from `PLAYWRIGHT_JSON_OUTPUT_FILE`, set per step in `ci.yml`,
@@ -114,9 +131,15 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [
+    /*
+     * Each project leaves out the other's tests at collection, not at runtime:
+     * a runtime `test.skip` still counts toward a shard, and shards are cut by
+     * count — see `projectTag` in `tests/a11y.spec.ts`.
+     */
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      grepInvert: /@mobile-only/,
     },
     /*
      * A narrow viewport, for the behaviour that only exists there: the docs
@@ -134,6 +157,7 @@ export default defineConfig({
     {
       name: 'mobile',
       use: { ...devices['Pixel 7'] },
+      grepInvert: /@chromium-only/,
     },
   ],
   webServer: {

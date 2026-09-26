@@ -738,6 +738,48 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   note('verdict', !readsVerdict || (lookup && key), `ci.yml visual — ${readsVerdict ? 'reuses a verdict; PR-only lookup, keyed on inputs and image' : 'no verdict reuse'}`);
 }
 
+/*
+ * Who may *record* the verdict. `visual` is sharded, so a leg reaching its
+ * last step means only that its own slice passed — a marker saved there would
+ * claim a verdict the other legs had not reached. So `visual` must not save
+ * it; the job that does must `need` it and run only on its success, which for
+ * a matrix is every leg succeeding. And if `visual` reuses a verdict, some job
+ * has to record one, or the reuse is dead code that reads as a feature.
+ */
+{
+  const ciJobsFull = jobsOf('.github/workflows/ci.yml').map((job) => ({
+    id: job.id,
+    body: job.body.map(({ text }) => text).join('\n'),
+  }));
+  const saves = (body) => /uses:\s*actions\/cache\/save@[\s\S]*?key:\s*\$\{\{\s*(?:needs\.visual\.outputs\.key|steps\.inputs\.outputs\.key)\s*\}\}/.test(body)
+    && /visual-verdict|needs\.visual\.outputs\.key/.test(body);
+  const visual = ciJobsFull.find((job) => job.id === 'visual');
+  const recorders = ciJobsFull.filter((job) => job.id !== 'visual' && /needs\.visual\.outputs\.key/.test(job.body) && saves(job.body));
+  if (visual && saves(visual.body)) {
+    problems.push(
+      'ci.yml `visual` saves the verdict itself. It is sharded, so one leg finishing says ' +
+        'nothing about the others — record it in a job that `needs: [visual]`.',
+    );
+  }
+  for (const job of recorders) {
+    const needs = /^\s{4}needs:\s*\[?[^\n]*\bvisual\b/m.test(job.body);
+    const gated = /^\s{4}if:[^\n]*needs\.visual\.result == 'success'/m.test(job.body);
+    if (!needs || !gated) {
+      problems.push(
+        `ci.yml \`${job.id}\` records the visual verdict but ${!needs ? 'does not `need` visual' : ''}` +
+          `${!needs && !gated ? ' and ' : ''}${!gated ? "is not gated on `needs.visual.result == 'success'`" : ''}. ` +
+          'A verdict recorded before every shard passed is a verdict nobody earned.',
+      );
+    }
+    note('verdict', needs && gated, `ci.yml ${job.id} — records the verdict after every visual shard`);
+  }
+  if (visual && /steps\.verdict\./.test(visual.body) && !recorders.length) {
+    problems.push(
+      'ci.yml `visual` looks a verdict up, but no job records one — the reuse can never hit.',
+    );
+  }
+}
+
 /* ------------------------------------------------------------------ */
 
 if (listing) {

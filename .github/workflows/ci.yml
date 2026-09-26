@@ -349,6 +349,34 @@ jobs:
   visual:
     name: visual
     runs-on: ubuntu-latest
+    # Three runners, each taking a third of both browser suites. The work is
+    # ~620s of test time on a pull request and ~1,040s on `main` (the full a11y
+    # matrix), at four workers a runner and ~95% utilisation, so one runner was
+    # the critical path of every PR by minutes. Each shard pays ~45s of fixed
+    # cost — checkout, install, Storybook build, browser — which is why three
+    # rather than more: a fourth shard saves ~15s and spends another of the
+    # Free plan's 20 concurrent jobs, shared by every open PR in the account.
+    #
+    # One step list for every shard; the shard is `PLAYWRIGHT_SHARD`, read by
+    # `playwright.config.ts`, so each suite step stays `run: pnpm test:visual`
+    # — the string the roster gate and `render-inputs.mjs` read. The total is
+    # `strategy.job-total`, so the matrix list is the only place N is written.
+    #
+    # `fail-fast: false`, so one shard's failure does not cancel the others: a
+    # regression in two stories should report both in one push. The `ci`
+    # aggregate still fails, because a matrix job succeeds only if every leg
+    # did — the same rule that makes `record` below safe.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    env:
+      PLAYWRIGHT_SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
+    # The key and the hit are the same on every leg, so it does not matter
+    # which leg's value a matrix output ends up holding.
+    outputs:
+      key: ${{ steps.inputs.outputs.key }}
+      hit: ${{ steps.verdict.outputs.cache-hit }}
     defaults:
       run:
         # Every `pnpm` step below is this package's. The workspace root holds
@@ -450,22 +478,25 @@ jobs:
         if: steps.verdict.outputs.cache-hit != 'true'
         run: pnpm build-storybook
 
+      # The three index gates read the build, not the browser, so they run on
+      # one shard only — the same answer three times is not three checks.
+      #
       # Reads storybook-static/index.json, so it has to follow the build. Fails
       # if a story lands without being asserted or explicitly excluded.
       - name: Visual Coverage
-        if: steps.verdict.outputs.cache-hit != 'true'
+        if: steps.verdict.outputs.cache-hit != 'true' && matrix.shard == 1
         run: pnpm check:visual-coverage
 
       # Same build, same index.json: does every documented component publish its
       # props, or carry a stated reason not to. An empty table errors nowhere.
       - name: Docgen Props
-        if: steps.verdict.outputs.cache-hit != 'true'
+        if: steps.verdict.outputs.cache-hit != 'true' && matrix.shard == 1
         run: pnpm check:docgen-props
 
       # Title vocabulary, one-level-deep titles, and an autodocs decision per
       # component. A retitled story orphans its committed baseline.
       - name: Story Conventions
-        if: steps.verdict.outputs.cache-hit != 'true'
+        if: steps.verdict.outputs.cache-hit != 'true' && matrix.shard == 1
         run: pnpm check:story-conventions
 
       - name: Install Playwright Browsers
@@ -494,19 +525,6 @@ jobs:
           A11Y_FULL_MATRIX: ${{ github.event_name == 'pull_request' && '0' || '1' }}
         run: pnpm test:a11y
 
-      # Reached only when everything above passed, so the marker means exactly
-      # that. Its content is the commit, for anyone asking where it came from.
-      - name: Record Verdict
-        if: steps.verdict.outputs.cache-hit != 'true'
-        run: mkdir -p telemetry/verdict && echo "${GITHUB_SHA}" > telemetry/verdict/sha
-
-      - name: Save Verdict
-        if: steps.verdict.outputs.cache-hit != 'true'
-        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
-        with:
-          path: packages/design-system/telemetry/verdict
-          key: ${{ steps.inputs.outputs.key }}
-
       # Per-test and per-file timings, one level below the step — see
       # `scripts/ci-telemetry.mjs`. Not a gate: it exits 0 on a missing report,
       # and `continue-on-error` covers the rest, because telemetry that can turn
@@ -527,7 +545,7 @@ jobs:
         continue-on-error: true
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: ci-telemetry-${{ github.job }}
+          name: ci-telemetry-${{ github.job }}-${{ matrix.shard }}
           path: packages/design-system/telemetry/
           retention-days: 30
 
@@ -535,7 +553,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: packages/design-system/playwright-report/
           retention-days: 7
 
@@ -549,9 +567,41 @@ jobs:
         if: (success() || failure()) && steps.verdict.outputs.cache-hit != 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: playwright-snapshots
+          name: playwright-snapshots-${{ matrix.shard }}
           path: packages/design-system/tests/__snapshots__/
           retention-days: 7
+
+
+  # The verdict, recorded once every shard has passed.
+  #
+  # It used to be the last two steps of `visual`, which was right while that
+  # was one runner. Split three ways, a shard reaching its last step means only
+  # that *its* third passed, so a marker written there would claim a verdict
+  # two other runners had not reached yet. Here it `needs` the matrix, and a
+  # matrix job's result is `success` only when every leg succeeded, so the
+  # marker means what the key says. No checkout: it writes one file under the
+  # same path the lookup restores, which is part of the cache's identity.
+  #
+  # Not in `verify`'s `needs`: the marker is an optimisation for the next run.
+  # Failing to save it must not turn a green PR red.
+  record:
+    name: verdict
+    runs-on: ubuntu-latest
+    needs: [visual]
+    if: needs.visual.result == 'success' && needs.visual.outputs.hit != 'true'
+    timeout-minutes: 5
+
+    steps:
+      - name: Record Verdict
+        run: |
+          mkdir -p packages/design-system/telemetry/verdict
+          echo "${GITHUB_SHA}" > packages/design-system/telemetry/verdict/sha
+
+      - name: Save Verdict
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: packages/design-system/telemetry/verdict
+          key: ${{ needs.visual.outputs.key }}
 
   # One check that stands or falls with all four jobs above.
   #

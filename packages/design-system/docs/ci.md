@@ -9,7 +9,18 @@ Which job runs what and why, and how to review what a change looks like.
 ## ⚙️ CI Shape
 
 `ci.yml` runs **four jobs in parallel**, then a fifth that reports their
-combined verdict.
+combined verdict. `visual` is itself three runners — a matrix of shards, each
+taking a third of both browser suites — and `record` saves its verdict once all
+three have passed.
+
+**Shards are cut by test count, so a test must not exist where it would only
+skip.** Playwright slices the collected list in declaration order, chromium
+first, and a runtime `test.skip` still counts. With the a11y suite's ~190
+out-of-scope mobile scans skipping at runtime, three shards measured 94s, 62s and
+15s of work. They are tagged instead — `@chromium-only`, `@mobile-only` — and each
+project's `grepInvert` leaves the other's out at collection, which split the same
+work 103 / 102 / 102 a11y and 44 / 44 / 43 visual tests. A new test that belongs
+to one project takes its tag, not only a `test.skip`.
 
 **It runs on every pull request, whatever the base branch.** `pull_request` used
 to carry `branches: [main]`, which filters on the PR's *base* — so a PR aimed at
@@ -24,6 +35,7 @@ trigger is the post-merge signal for the default branch specifically.
 | `unit` | `typecheck`, `test:coverage` | 95s | 10m |
 | `package` | `build`, `check:bundle-size`, `check:dep-cost`, `check:api`, and the report generator | 85s | 10m |
 | `visual` | `build-storybook`, `check:visual-coverage`, `check:docgen-props`, `check:story-conventions`, `test:visual`, `test:a11y` | 430s | 25m |
+| `record` | nothing — saves the verdict key once every `visual` shard passed; not in `verify`'s `needs` | 5s | 5m |
 | `verify` | nothing — fails unless the four above succeeded | 10s | 5m |
 
 **Check names are lowercase, snake_case, and at most two words**, taken from the
@@ -77,7 +89,7 @@ measurements rather than a guess:
   every tracked file that can reach the job's result (`scripts/render-inputs.mjs`,
   default-deny; `--list` prints what it leaves out and why) and, on a pull request,
   looks that hash up as a cache key. A hit skips everything after checkout, which is
-  the whole ~5 minutes; a full pass records one. `main` never looks up and always
+  the whole ~5 minutes, on every shard; a pass of every shard records one. `main` never looks up and always
   records, so it is both the source most PRs hit and the run where a wrong
   exclusion would show. The key is inputs rather than `storybook-static/` because
   the build is not reproducible: `react-docgen-typescript` reorders props between

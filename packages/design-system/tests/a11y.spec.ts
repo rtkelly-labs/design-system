@@ -113,6 +113,20 @@ function scannedIn(project: string, id: string): boolean {
 }
 
 /**
+ * The same decision, taken when the test is declared rather than when it runs.
+ *
+ * A test skipped at runtime still counts when Playwright shards the suite, and
+ * shards are cut by count in declaration order — chromium first, then mobile.
+ * With ~190 mobile tests skipping, three shards measured 94s, 62s and 15s of
+ * work. Tagged `@chromium-only`, the mobile project's `grepInvert` never
+ * collects them, so there is nothing to mis-count. `scannedIn` stays as the
+ * runtime guard for any project that does not filter on the tag.
+ */
+function projectTag(id: string): { tag?: string } {
+  return scannedIn('mobile', id) ? {} : { tag: '@chromium-only' };
+}
+
+/**
  * Stories that pin their own Level, and must not be forced onto the other one.
  *
  * A story named `--dark-mode` or `--sketch-mode` wraps itself in a provider for
@@ -179,7 +193,7 @@ async function markScope(page: Page) {
 test.describe('Accessibility', () => {
   for (const level of LEVELS) {
     for (const id of assertedStoryIds()) {
-      test(`${id} — ${level}`, async ({ page }, testInfo) => {
+      test(`${id} — ${level}`, projectTag(id), async ({ page }, testInfo) => {
         test.skip(
           !scannedIn(testInfo.project.name, id),
           'No narrow-viewport case for this component; see `scannedIn`',
@@ -257,7 +271,7 @@ const DATATABLE_CASES = [
 test.describe('DataTable semantics', () => {
   for (const level of LEVELS) {
     for (const { id, rowcount } of DATATABLE_CASES) {
-      test(`${id} — keyboard sort — ${level}`, async ({ page }, testInfo) => {
+      test(`${id} — keyboard sort — ${level}`, projectTag(id), async ({ page }, testInfo) => {
         test.skip(!scannedIn(testInfo.project.name, id), 'No narrow-viewport case for this component; see `scannedIn`');
         await page.goto(`/iframe.html?id=${id}&viewMode=story&globals=level:${level}`);
         await waitForStoryRendered(page, id);
@@ -323,7 +337,7 @@ test.describe('DataTable semantics', () => {
  * element that is itself `aria-hidden`, and a button under an `aria-hidden`
  * ancestor — and both must still be reported, while no guard is.
  */
-test('the focus-guard exclusion still reports a real aria-hidden-focus', async ({ page }, testInfo) => {
+test('the focus-guard exclusion still reports a real aria-hidden-focus', { tag: '@chromium-only' }, async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium', 'One project is enough to prove the scope');
   const id = 'components-overlays-menu--actions';
   await page.goto(`/iframe.html?id=${id}&viewMode=story`);
@@ -373,7 +387,7 @@ const OPEN_POPUPS = [
 test.describe('Accessibility — open popups', () => {
   for (const level of LEVELS) {
     for (const { id, trigger, popup } of OPEN_POPUPS) {
-      test(`${id} open — ${level}`, async ({ page }, testInfo) => {
+      test(`${id} open — ${level}`, projectTag(id), async ({ page }, testInfo) => {
         test.skip(!scannedIn(testInfo.project.name, id), 'No narrow-viewport case for this component; see `scannedIn`');
         await page.goto(`/iframe.html?id=${id}&viewMode=story&globals=level:${level}`);
         await waitForStoryRendered(page, id);
