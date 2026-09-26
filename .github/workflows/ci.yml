@@ -34,7 +34,7 @@ concurrency:
   group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# Four jobs in parallel, then one that reports their verdict.
+# Five jobs in parallel, then one that reports their verdict.
 #
 # This was a single job of nineteen serial steps. Nothing in it needed to be
 # serial: the gates read the tree, the visual suite needs only a built
@@ -715,6 +715,49 @@ jobs:
           path: packages/design-system/telemetry/verdict
           key: ${{ needs.visual.outputs.key }}
 
+  # The applied site (`apps/site`): a Next.js App Router consumer built only
+  # from this package. It is the one place a Server Component, a client
+  # boundary, SSR and hydration are exercised against the built `dist/` — so a
+  # change that builds and passes every gate above but breaks a real consumer
+  # fails here instead of in the blog.
+  #
+  # Its own job rather than a step in `unit`, which has about twenty seconds
+  # of headroom (docs/ci.md): the package build plus a docgen pass and a Next
+  # build is a minute or more. It needs the package built first because the
+  # site depends on it by `workspace:*` through the exports map, exactly as an
+  # npm consumer resolves it.
+  #
+  # The steps are one `run:` block, like `Report Generator` in `unit`, so
+  # that `check:governance` does not read the site's `lint`/`build` as this
+  # package's gates of the same names.
+  site:
+    name: build
+    runs-on: ubuntu-latest
+    # ~40s for the package build, ~40s for docgen, lint, typecheck and the
+    # static export. No browser.
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build Package
+        run: pnpm --filter @rtkelly13/design-system build
+
+      # Lint (react-hooks, jsx-a11y, typescript-eslint at zero), the package's
+      # own colour-rule scanner at zero, a typecheck, then the static export.
+      - name: Applied Site
+        working-directory: apps/site
+        run: |
+          pnpm generate
+          pnpm lint
+          pnpm check:tokens
+          pnpm exec tsc --noEmit
+          pnpm exec next build
+
   # One check that stands or falls with all four jobs above.
   #
   # `ci` is the string branch protection matches on, and it is deliberately
@@ -733,7 +776,7 @@ jobs:
   verify:
     name: ci
     runs-on: ubuntu-latest
-    needs: [gates, unit, package, visual]
+    needs: [gates, unit, package, visual, site]
     # `always()`, so this reports a verdict when a job fails rather than being
     # skipped — a skipped required check is indistinguishable from one still
     # running, and blocks the PR either way.
@@ -749,10 +792,11 @@ jobs:
           UNIT: ${{ needs.unit.result }}
           PACKAGE: ${{ needs.package.result }}
           VISUAL: ${{ needs.visual.result }}
+          SITE: ${{ needs.site.result }}
         run: |
           set -uo pipefail
           failed=0
-          for job in GATES UNIT PACKAGE VISUAL; do
+          for job in GATES UNIT PACKAGE VISUAL SITE; do
             result="${!job}"
             if [ "${result}" = "success" ]; then
               echo "✅ ${job}: ${result}"

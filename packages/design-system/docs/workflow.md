@@ -75,6 +75,9 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    - `pnpm check:api` (the published type surface matches `api/index.d.ts`)
    - `pnpm build-storybook`
    - `pnpm test:visual` (Linux CI)
+   - the applied site in `apps/site` (the `site` job): this package built, then
+     the site's docgen, lint, colour scan, typecheck and static export against
+     that `dist/` — the one Next.js App Router consumer the repo builds
 
    This list is a copy of what `ci.yml` runs, introduced with the words "all of
    these run on every PR", and four of thirteen entries were missing when

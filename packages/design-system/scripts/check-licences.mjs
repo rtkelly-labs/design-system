@@ -25,6 +25,12 @@
  * `docs/reference-material.md`, which covers the other half, the artwork that is
  * deliberately kept out of the tree.
  *
+ * And this package only, by `--filter`. Run bare from a workspace member,
+ * `pnpm licenses list` reports every importer in the workspace, so the day
+ * `apps/site` arrived its Next.js tree (`next`, `sharp`, `styled-jsx`, …) read as
+ * shipped by this package. A private app's dependencies are not redistributed
+ * by anyone, and they are certainly not this package's.
+ *
  *   node scripts/check-licences.mjs            verify
  *   node scripts/check-licences.mjs --list     print the table
  *   node scripts/check-licences.mjs --update   rewrite the baseline
@@ -37,6 +43,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BASELINE = path.join(ROOT, 'licenses.baseline.json');
+const PACKAGE_NAME = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8')).name;
 
 /** Licences the shipped set may use. Everything here is a deliberate decision. */
 const ALLOWED = {
@@ -54,7 +61,7 @@ const ALLOWED = {
 };
 
 function current() {
-  const raw = execFileSync('pnpm', ['--silent', 'licenses', 'list', '--prod', '--json'], {
+  const raw = execFileSync('pnpm', ['--silent', '--filter', PACKAGE_NAME, 'licenses', 'list', '--prod', '--json'], {
     cwd: ROOT,
     encoding: 'utf8',
     maxBuffer: 32 * 1024 * 1024,

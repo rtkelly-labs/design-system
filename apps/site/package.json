@@ -1,0 +1,42 @@
+{
+  "name": "@rtkelly13/design-system-site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The applied design-system website: a Next.js App Router consumer built entirely from @rtkelly13/design-system, with a live homepage and the component documentation.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "generate": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/generate-docs-data.mts",
+    "dev": "pnpm generate && next dev",
+    "build": "pnpm generate && next build",
+    "start": "npx serve out -l 3100",
+    "typecheck": "pnpm generate && tsc --noEmit",
+    "check:tokens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-tokens.mjs",
+    "lint": "eslint --max-warnings 0 ."
+  },
+  "dependencies": {
+    "@rtkelly13/design-system": "workspace:*",
+    "lucide-react": "^1.28.0",
+    "next": "^16.3.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/typography": "^0.5.20",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "eslint": "^10.8.1",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "react-docgen-typescript": "^2.4.0",
+    "shiki": "^4.4.3",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0"
+  }
+}
