@@ -8,7 +8,7 @@ Which job runs what and why, and how to review what a change looks like.
 
 ## ⚙️ CI Shape
 
-`ci.yml` runs **three jobs in parallel**, then a fourth that reports their
+`ci.yml` runs **four jobs in parallel**, then a fifth that reports their
 combined verdict.
 
 **It runs on every pull request, whatever the base branch.** `pull_request` used
@@ -21,14 +21,15 @@ trigger is the post-merge signal for the default branch specifically.
 | Job | What it runs | Roughly | Ceiling |
 | --- | --- | --- | --- |
 | `gates` | `tokens:check`, `tokens:design:check`, `check:contrast`, `check:docs`, `check:doc-snippets`, `check:skills`, `check:component-docs`, `check:story-docs`, `check:component-contract`, `check:licences`, `check:reference-material`, `check:lint-budget`, `check:css`, `check:tokens`, `ansi:check`, `check:fonts`, `check:deps`, `check:governance` | 55s | 10m |
-| `unit` | `typecheck`, `test:coverage`, `build`, `check:bundle-size`, `check:dep-cost`, `check:api` | 170s | 10m |
+| `unit` | `typecheck`, `test:coverage` | 95s | 10m |
+| `package` | `build`, `check:bundle-size`, `check:dep-cost`, `check:api`, and the report generator | 85s | 10m |
 | `visual` | `build-storybook`, `check:visual-coverage`, `check:docgen-props`, `check:story-conventions`, `test:visual`, `test:a11y` | 430s | 25m |
-| `verify` | nothing — fails unless the three above succeeded | 10s | 5m |
+| `verify` | nothing — fails unless the four above succeeded | 10s | 5m |
 
 **Check names are lowercase, snake_case, and at most two words**, taken from the
 shared lexicon in `shared-utilities` (`ci`, `build`, `test`, `lint`, `visual`,
-`publish`, `format`, ...) — so the four jobs report as `lint`, `test`, `visual`
-and `ci`. Names that describe their contents cannot also be stable contracts:
+`publish`, `format`, ...) — so the five jobs report as `lint`, `test`, `build`,
+`visual` and `ci`. Names that describe their contents cannot also be stable contracts:
 the required check used to be `Build, Typecheck, Storybook & Visual Regression`,
 splitting the job silently made it `Build, Typecheck, Unit Tests, Storybook &
 Visual Regression`, and the governance map went on requiring the old string.
@@ -37,7 +38,7 @@ warns on names that drift from the lexicon.
 
 Only `visual` installs a browser, so only its ceiling has to clear
 `install-playwright`'s retry budget (rule 9). Splitting the job is what let the
-other three drop to a ceiling sized to their own work, instead of every gate
+others drop to a ceiling sized to their own work, instead of every gate
 waiting out a browser-shaped timeout.
 
 **This table is checked.** It is a copy of the roster in `ci.yml`, and it had
@@ -51,8 +52,8 @@ the DTCG export and ran in **no workflow at all**, so a stale `tokens/*.json`
 could reach npm with every check green. A gate in `package.json` now has to be
 wired into a workflow or exempted in the script with a stated reason.
 
-**Add a new gate to `gates` or `unit`, not to `visual`.** The visual job is the
-critical path; the other two have headroom, and putting a check behind a browser
+**Add a new gate to `gates`, `unit` or `package`, not to `visual`.** The visual
+job is the critical path; the others have headroom, and putting a check behind a browser
 install and a screenshot suite is what made this slow in the first place. It was
 one job of nineteen serial steps, and nothing in it needed to be serial — so
 `lint`, the fastest and most frequently-failing check in the repo, reported after
