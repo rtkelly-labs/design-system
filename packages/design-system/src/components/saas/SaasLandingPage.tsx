@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { ArrowRight, Zap, Shield, Cpu } from 'lucide-react';
 import { Button } from '../Button';
 import { Badge } from '../Badge';

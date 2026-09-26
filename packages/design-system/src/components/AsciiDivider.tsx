@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { Divider } from './Divider';
 import type { DividerProps } from './Divider';
 

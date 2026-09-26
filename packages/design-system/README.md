@@ -137,6 +137,13 @@ pnpm add @rtkelly13/design-system
 
 No registry configuration needed — it's a public npm package.
 
+**ESM only, Node 22 or later.** The package is `"type": "module"` with one build. Bundlers
+(Vite, Next, webpack, esbuild) and `import` need nothing. `require('@rtkelly13/design-system')`
+works on Node 22.12+, which loads ES modules from `require()`; a toolchain that needs the package
+to be CommonJS (Jest without ESM support, for one) does not. Server components can import it
+directly — see [`docs/api-surface.md`](./docs/api-surface.md) for which components render on the
+server.
+
 ### Dev Prerelease Testing
 
 Comment `/publish-dev` on a Pull Request and CI publishes that branch as

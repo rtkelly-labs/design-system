@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { THEME_LEVELS } from '../src/theme/levels';
 
@@ -13,7 +14,7 @@ export interface StoryEntry {
   name: string;
 }
 
-export const REPO_ROOT = path.resolve(__dirname, '..');
+export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const STORYBOOK_INDEX = path.join(REPO_ROOT, 'storybook-static', 'index.json');
 
 /**

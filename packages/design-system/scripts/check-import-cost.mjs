@@ -44,6 +44,16 @@
  * Turbopack (+699 KB, against +46 KB named). `scripts/expand-star-exports.mjs`
  * writes the names at build time; this fails if one survives.
  *
+ * And one more: **no side-effect-only import in the output** — `import
+ * "./Card.js"` or `import "react"` with no bindings. `sideEffects` says only
+ * CSS has side effects, so a bare import of a module is never needed; it is
+ * what the build leaves when a module imports a value and uses it only as a
+ * type, or not at all. `verbatimModuleSyntax` stops the compiler eliding
+ * those, so they now reach `dist/` as written, and between two of this
+ * package's modules one is a runtime edge a server component's graph follows
+ * into a `'use client'` module. Twelve appeared when the flag went on: eleven
+ * `import React` used only for `React.FC`-style types, and one unused `Card`.
+ *
  * ## A ratchet
  *
  * Ceilings are the measurement on the day this landed plus about 3%, the
@@ -201,8 +211,8 @@ if (manifest.name !== '@rtkelly13/design-system') {
   console.error(`${PACKAGE_DIR} is ${manifest.name}, not @rtkelly13/design-system.`);
   process.exit(1);
 }
-if (PACKAGE_DIR === ROOT && !existsSync(path.join(ROOT, 'dist', 'index.mjs'))) {
-  console.error('dist/index.mjs is missing — run `pnpm build` first.');
+if (PACKAGE_DIR === ROOT && !existsSync(path.join(ROOT, 'dist', 'index.js'))) {
+  console.error('dist/index.js is missing — run `pnpm build` first.');
   process.exit(1);
 }
 
@@ -253,7 +263,7 @@ const walk = (dir) =>
     return statSync(full).isDirectory() ? walk(full) : [full];
   });
 const starred = walk(path.join(PACKAGE_DIR, 'dist'))
-  .filter((file) => file.endsWith('.mjs') && /^export \* from /m.test(readFileSync(file, 'utf8')))
+  .filter((file) => /\.m?js$/.test(file) && /^export \* from /m.test(readFileSync(file, 'utf8')))
   .map((file) => path.relative(PACKAGE_DIR, file));
 if (starred.length) {
   problems.push(
@@ -266,6 +276,25 @@ if (listing) {
   console.log(`\nESM barrels: ${starred.length ? `${starred.length} still use export *` : 'every re-export named'}`);
 }
 
+const BARE = /^import ["']([^"']+)["'];?$/gm;
+const bare = walk(path.join(PACKAGE_DIR, 'dist'))
+  .filter((file) => /\.m?js$/.test(file))
+  .flatMap((file) =>
+    [...readFileSync(file, 'utf8').matchAll(BARE)]
+      .filter(([, specifier]) => !specifier.endsWith('.css'))
+      .map(([, specifier]) => `${path.relative(PACKAGE_DIR, file)} → "${specifier}"`),
+  );
+if (bare.length) {
+  problems.push(
+    `${bare.length} side-effect-only import(s) in the output: ${bare.join(', ')}. Nothing but CSS has side ` +
+      'effects here, so each is an import used only as a type (write `import type`) or not used at all ' +
+      '(delete it). Between two of this package\'s modules it is a runtime edge.',
+  );
+}
+if (listing) {
+  console.log(`Side-effect-only imports: ${bare.length || 'none'}`);
+}
+
 if (problems.length) {
   console.error(`\nImport cost exceeded — ${problems.length} problem(s):\n`);
   for (const problem of problems) console.error(`  - ${problem}`);
@@ -276,4 +305,4 @@ if (problems.length) {
   process.exit(1);
 }
 
-console.log(`Import cost OK — ${CASES.length} consumer import sets within their ceilings, every ESM re-export named.`);
+console.log(`Import cost OK — ${CASES.length} consumer import sets within their ceilings, every ESM re-export named, no side-effect-only import.`);

@@ -1,5 +1,5 @@
 /**
- * Rewrite every `export * from "./x.mjs"` in the ESM output as the named list
+ * Rewrite every `export * from "./x.js"` in the ESM output as the named list
  * it stands for.
  *
  * ## Why
@@ -56,7 +56,7 @@ async function exportsOf(file) {
 
 /** The names a module exports by name — `export { a, b as c }`, with or without `from`. */
 function ownExports(source) {
-  const sf = ts.createSourceFile('barrel.mjs', source, ts.ScriptTarget.Latest, false, ts.ScriptKind.JS);
+  const sf = ts.createSourceFile('barrel.js', source, ts.ScriptTarget.Latest, false, ts.ScriptKind.JS);
   const names = new Set();
   for (const statement of sf.statements) {
     if (ts.isExportDeclaration(statement) && statement.exportClause && ts.isNamedExports(statement.exportClause)) {
@@ -68,7 +68,7 @@ function ownExports(source) {
 
 export async function expandStarExports(distDir) {
   let rewritten = 0;
-  for (const file of walk(distDir).filter((f) => f.endsWith('.mjs'))) {
+  for (const file of walk(distDir).filter((f) => f.endsWith('.js'))) {
     const source = readFileSync(file, 'utf8');
     const lines = source.split('\n');
     if (!lines.some((line) => STAR.test(line))) continue;

@@ -4,7 +4,7 @@ import { Avatar as BaseAvatar } from '@base-ui/react/avatar';
 import { forwardRef } from 'react';
 import { accentVar } from '../lib/theme';
 import type { AccentToken } from '../lib/theme';
-import React from 'react';
+import type React from 'react';
 
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   src?: string;

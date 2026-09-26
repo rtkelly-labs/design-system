@@ -42,10 +42,9 @@ three lines naming it.
 
 ## 📦 The Output Layout, and What It Promises
 
-`dist/` is **one file per source module** — `dist/components/Button.mjs`,
-`dist/theme/levels.mjs` and so on, ESM and CommonJS side by side — with
-`dist/index.mjs` a barrel over them. The `exports` map is unchanged: the root
-import is still the only entry point, and there are no deep paths.
+`dist/` is **one file per source module** — `dist/components/Button.js`,
+`dist/theme/levels.js` and so on — with `dist/index.js` a barrel over them.
+The root import is the only entry point, and there are no deep paths.
 
 It was one flat file until #301, and that made the package effectively
 un-tree-shakeable. `sideEffects` works per module, the whole library was one
@@ -67,6 +66,49 @@ hand are not worth one kilobyte.
 ships. `tsup.config.ts` keeps each import between two of those modules an
 import between their output files, with the extension Node's own resolver
 needs. `pnpm check:import-cost` holds the result in bytes.
+
+### ESM only
+
+The package is `"type": "module"` and ships one format. `exports["."]` is
+`{ types, default }` → `dist/index.js`; there is no `main`, no `module` and no
+`require` condition. `types` stays at the top level for a consumer on
+`moduleResolution: "node"` (node10), which never reads `exports` and would
+otherwise find no declarations.
+
+There was a CommonJS build beside the ESM one until the per-module layout, and
+it was dropped rather than kept per module:
+
+- **It was the bigger half.** esbuild writes its interop helpers
+  (`__defProp`, `__export`, `__toCommonJS`, `__toESM`) into every CommonJS
+  file, so 117 modules carried 117 copies: 565,563 B against the ESM output's
+  387,723 B.
+- **Nothing used it, and it could not stand alone.** `engines.node` is
+  `>=22`, and Node 22.12 and later `require()` an ES module without a flag.
+  Before 22.12 the CommonJS build failed anyway: it `require()`s
+  `@microcharts/react`, which is ESM only (`ERR_REQUIRE_ESM` on Node 22.11,
+  for 0.12.0 as for the per-module build). The blog, Vite and Next
+  resolve the `import` condition. The one `require('@rtkelly13/design-system')`
+  in the estate is generated: `design-system-report`'s own CommonJS build,
+  which Node 22.12+ serves from this ESM output.
+- **Two copies was a bug waiting.** Where one part of an app imported the
+  package and another required it, both builds loaded, each with its own
+  `createContext` — so a `ThemeProvider` from one copy was invisible to a
+  `useTheme` from the other. One format has one module instance, however it is
+  reached: `require()` and `import()` now return the same `Button`.
+
+`require('@rtkelly13/design-system')` still works on Node 22.12+; it returns
+the ES module's namespace. What no longer works is a CommonJS toolchain that
+wants a `.js` file to be CommonJS — Jest without ESM support, for one.
+
+**`verbatimModuleSyntax` is on**, and matters more here than in a flat bundle.
+An import is emitted exactly as written, so an import between two modules is
+an import between two output files. A value imported only for its type
+(`import React from 'react'` for `React.FC`) survives as a bare `import
+"react"`, and between two of this package's modules the same thing is a real
+edge — enough to put a `'use client'` module in a server component's graph.
+`import type` is the fix; the `design-system/type-imports` lint rule catches
+the mistake in source, and `check:import-cost` fails on any side-effect-only
+import left in `dist/`.
 
 ### `'use client'`, per module
 

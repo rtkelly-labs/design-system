@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { IS_STORY_SURFACE, waitForStoryRendered } from './story-ready';
 
 /**
@@ -35,9 +35,10 @@ import { IS_STORY_SURFACE, waitForStoryRendered } from './story-ready';
  * never merged when it tried to land its rules and their fixes together.
  */
 
-/* `process.cwd()` rather than `import.meta` — Playwright loads specs through a
- * CJS-compatible path here, and `import.meta` is a syntax error in that context. */
-const ROOT = process.cwd();
+/* The package root, from this file rather than `process.cwd()`. The package is
+ * `"type": "module"`, so Playwright loads specs as ES modules and `import.meta`
+ * is available; it was not while the package was CommonJS by default. */
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 /** The asserted-story ids, read from the visual suite so the two cannot drift. */
 function assertedStoryIds(): string[] {

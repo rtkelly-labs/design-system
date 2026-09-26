@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { BlogPost } from './BlogPost';
 import { TLDR } from '../TLDR';
 import { NoteBlock } from '../NoteBlock';
