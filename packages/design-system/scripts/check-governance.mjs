@@ -747,6 +747,24 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
  * has to record one, or the reuse is dead code that reads as a feature.
  */
 {
+  /*
+   * The lines of each step in a job body, split at `      - ` — a linear scan.
+   * These used to be one regex per question with a nested lazy quantifier over
+   * whitespace-and-line, which backtracked catastrophically: a download step
+   * whose `pattern:` did not match spun `check:governance` at 100% CPU for
+   * sixteen minutes. A gate that can hang on malformed input is a gate that
+   * waits out its job ceiling and reports `cancelled`.
+   */
+  const stepsOf = (body) => {
+    const out = [];
+    for (const line of body.split('\n')) {
+      if (/^ {6}- /.test(line)) out.push([]);
+      if (out.length) out.at(-1).push(line.trim());
+    }
+    return out;
+  };
+  const stepUses = (step, action) => step.some((l) => l.replace(/^- /, '').startsWith(`uses: ${action}@`));
+  const stepHas = (step, re) => step.some((l) => re.test(l));
   const ciJobsFull = jobsOf('.github/workflows/ci.yml').map((job) => ({
     id: job.id,
     body: job.body.map(({ text }) => text).join('\n'),
@@ -754,7 +772,11 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   // A job saves the verdict when it has a cache-save step keyed on the
   // verdict key: `visual`'s own step output, or the one it exports.
   const saves = (body) =>
-    /uses:\s*actions\/cache\/save@[^\n]*\n(?:\s+[^\n]*\n)*?\s+key:\s*\$\{\{\s*(?:needs\.visual\.outputs\.key|steps\.inputs\.outputs\.key)\s*\}\}/.test(body);
+    stepsOf(body).some(
+      (step) =>
+        stepUses(step, 'actions/cache/save') &&
+        stepHas(step, /^key:\s*\$\{\{\s*(?:needs\.visual\.outputs\.key|steps\.inputs\.outputs\.key)\s*\}\}$/),
+    );
   const visual = ciJobsFull.find((job) => job.id === 'visual');
   const recorders = ciJobsFull.filter((job) => job.id !== 'visual' && saves(job.body));
   if (visual && saves(visual.body)) {
@@ -776,7 +798,9 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
     // The job's outputs carry one leg's key. During an image rollout the legs
     // can compute different keys, or one can hit while another misses, so the
     // recorder must compare every leg's decision and save only on agreement.
-    const collects = /uses:\s*actions\/download-artifact@[^\n]*\n(?:\s+[^\n]*\n)*?\s+pattern:\s*verdict-key-\*/.test(job.body);
+    const collects = stepsOf(job.body).some(
+      (step) => stepUses(step, 'actions/download-artifact') && stepHas(step, /^pattern:\s*verdict-key-\*$/),
+    );
     const compares = /- name: Agreed Key\n\s+id: agreed\n/.test(job.body);
     const saveGated = /- name: Save Verdict\n\s+if: steps\.agreed\.outputs\.ok == 'true'\n/.test(job.body);
     const published = visual && /name:\s*verdict-key-\$\{\{\s*matrix\.shard\s*\}\}/.test(visual.body);
