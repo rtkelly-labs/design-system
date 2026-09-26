@@ -582,7 +582,6 @@ jobs:
           --playwright visual=telemetry/visual.json
           --playwright a11y=telemetry/a11y.json
           --cache storybook=${{ steps.storybook-cache.outputs.cache-hit }}
-          --cache playwright=${{ steps.playwright.outputs.cache-hit }}
 
       - name: Upload Telemetry
         if: (success() || failure()) && steps.verdict.outputs.cache-hit != 'true'
