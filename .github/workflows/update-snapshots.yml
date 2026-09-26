@@ -38,6 +38,20 @@ jobs:
   update-snapshots:
     name: Update Snapshots on Linux
     runs-on: ubuntu-latest
+    # The render environment, pinned: the official Playwright image at the
+    # lockfile's Playwright version, by digest — rule 14's reasoning applied to
+    # the one input no tracked file recorded. It carries Chromium and every
+    # library it links, so nothing is installed at run time. Every job that
+    # renders names this exact reference, and `check:governance` holds them
+    # equal: a baseline written in one environment and checked in another is
+    # the thing this suite can least afford. See docs/visual-regression.md.
+    #
+    # `--ipc=host` because Docker's default 64MB `/dev/shm` is what Chromium
+    # renders into, and a full-page capture can exhaust it — Playwright's own
+    # Docker guidance. `--init` reaps the browser's child processes.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --ipc=host --init
     defaults:
       run:
         working-directory: packages/design-system
@@ -65,9 +79,6 @@ jobs:
 
       - name: Build Storybook Static
         run: pnpm build-storybook
-
-      - name: Install Playwright Browsers
-        uses: ./.github/actions/install-playwright
 
       # `missing` mode writes the baseline and then reports that test as failed —
       # deliberately, via a Playwright soft error, so that creating a baseline is

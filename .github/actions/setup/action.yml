@@ -7,9 +7,11 @@ description: Node, pnpm, and installed dependencies.
 # between the job that writes a baseline and the job that checks it is the one
 # difference this repo can least afford.
 #
-# Browsers are deliberately not here — that is
-# `.github/actions/install-playwright`, which bounds and retries the install per
-# AGENTS.md rule 9. Only the two jobs that actually drive a browser pay for it.
+# Browsers are deliberately not here, and are not installed anywhere: the jobs
+# that drive one run inside the pinned Playwright image, which carries them
+# (AGENTS.md rule 9). The same steps run in that container and on the bare
+# runner, so the `pnpm install` is identical wherever a baseline is written or
+# checked.
 
 runs:
   using: composite
