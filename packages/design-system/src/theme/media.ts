@@ -231,6 +231,71 @@ export const MEDIA_DEFINITIONS: Readonly<Record<Medium, MediumDefinition>> = {
   },
 };
 
+/**
+ * The looping animations the feedback primitives wear — `Spinner`, `Skeleton`
+ * and indeterminate `Progress` — as `--animate-ds-<name>` tokens (#302).
+ *
+ * Each one splits across the two variance classes this file already knows:
+ *
+ * - its **period** is time, so it is a multiple of the Medium's `considered`
+ *   duration rather than a literal. A spinner is not a 300ms interaction, but
+ *   its period should still move when the Medium's time base does; `900ms`
+ *   would throw that away. The generator writes it as
+ *   `calc(var(--ds-duration-considered) * N)`, so it follows `theme.css`'s one
+ *   Medium without a second number being authored.
+ * - its **keyframe** is a shape, and is the same on every Level and in every
+ *   Medium — invariant, declared once, the way `FIXED_COLOURS` is for colour.
+ *
+ * They were declared in `styles.css` from 0.10.0 on the argument that a
+ * keyframe is "not a value on either axis". The consequence was that a
+ * consumer on the documented contract — `tailwindcss` then `theme.css`, no
+ * `styles.css` — got `animate-ds-spin` in the compiled components and no theme
+ * variable to back it, so Tailwind emitted nothing and all three stood still.
+ * A utility a component writes is part of the token surface, whatever axis its
+ * parts sit on, so it is generated into `theme.css` from here.
+ *
+ * `spin-slow` is the `prefers-reduced-motion` partner of `spin`, not a
+ * decorative alternative: a stopped spinner says "hung", which is the opposite
+ * of the thing being communicated, so the rotation survives the preference and
+ * its speed does not. `pulse` is what `Skeleton` drops to instead — it changes
+ * no geometry, only opacity — and under the preference even that stops. The
+ * preference itself is applied at the call site (`motion-reduce:`), not here.
+ *
+ * `linear` on the rotation is deliberate and is not a missing token: an eased
+ * loop accelerates and decelerates once per revolution, which reads as a
+ * stutter rather than as work in progress. The two with a beginning and an end
+ * take the Medium's easing.
+ */
+export interface Loop {
+  /** Which entry of `LOOP_KEYFRAMES` it runs. Two loops may share one shape. */
+  readonly keyframes: LoopKeyframesName;
+  /** The period, as a multiple of the Medium's `motion.considered`. */
+  readonly periods: number;
+  /** `linear`, or the Medium's own `motion.easing`. */
+  readonly easing: 'linear' | 'medium';
+}
+
+export type LoopKeyframesName = 'spin' | 'pulse' | 'track';
+
+/** A keyframe as selector → declarations. Emitted as `@keyframes ds-<name>`. */
+export type Keyframes = Readonly<Record<string, Readonly<Record<string, string>>>>;
+
+export const LOOP_KEYFRAMES: Readonly<Record<LoopKeyframesName, Keyframes>> = {
+  spin: { to: { transform: 'rotate(360deg)' } },
+  pulse: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0.45' } },
+  // The indeterminate progress sweep. The indicator is a third of the track,
+  // so `-100%` starts it fully off the leading edge and `400%` carries it
+  // fully past the trailing one.
+  track: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(400%)' } },
+};
+
+export const LOOPS: Readonly<Record<'spin' | 'spin-slow' | 'pulse' | 'track', Loop>> = {
+  spin: { keyframes: 'spin', periods: 3, easing: 'linear' },
+  'spin-slow': { keyframes: 'spin', periods: 9, easing: 'linear' },
+  pulse: { keyframes: 'pulse', periods: 4, easing: 'medium' },
+  track: { keyframes: 'track', periods: 5, easing: 'medium' },
+};
+
 /** Type guard for a Medium arriving from an emitter flag or an env var. */
 export function isMedium(value: unknown): value is Medium {
   return typeof value === 'string' && (MEDIA as readonly string[]).includes(value);

@@ -80,64 +80,11 @@
 @import "./theme.css";
 @import "./prose.css";
 
-/* The four looping animations the feedback primitives need, declared as tokens.
- *
- * `theme.css` is generated from `media.ts` and carries the *durations*
- * (`--ds-duration-*`) and the easing (`--ds-ease`). What it cannot carry is a
- * keyframe: a keyframe is not a value on either axis — it is the same shape on
- * every Level and in every Medium — so it belongs here, in the sheet that holds
- * everything with no element to hang a `className` on. `check:css` agrees: a
- * keyframe step selects no class, so it is exempt for the same reason `body` is.
- *
- * Every time here is a multiple of `--ds-duration-considered` rather than a
- * literal. A spinner is not a 300ms interaction and never will be, but its
- * period should still move when the Medium's time base does, which is what the
- * multiple buys and what `animation: … 900ms` would throw away.
- *
- * `ds-spin-slow` is the `prefers-reduced-motion` partner of `ds-spin`, not a
- * decorative alternative. A stopped spinner says "hung", which is the opposite
- * of the thing being communicated, so the rotation survives the preference and
- * its speed does not. `ds-pulse` is what `Skeleton` drops to instead — it
- * changes no geometry, only opacity — and under the preference even that stops.
- *
- * `linear` on the rotation is deliberate and is not a missing token: an eased
- * loop accelerates and decelerates once per revolution, which reads as a stutter
- * rather than as work in progress. The two animations that have a beginning and
- * an end take `--ds-ease`. */
-@theme {
-  --animate-ds-spin: ds-spin calc(var(--ds-duration-considered) * 3) linear infinite;
-  --animate-ds-spin-slow: ds-spin calc(var(--ds-duration-considered) * 9) linear infinite;
-  --animate-ds-pulse: ds-pulse calc(var(--ds-duration-considered) * 4) var(--ds-ease) infinite;
-  --animate-ds-track: ds-track calc(var(--ds-duration-considered) * 5) var(--ds-ease) infinite;
-
-  @keyframes ds-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  @keyframes ds-pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.45;
-    }
-  }
-
-  /* The indeterminate progress sweep. The indicator is a third of the track, so
-   * `-100%` starts it fully off the leading edge and `400%` carries it fully
-   * past the trailing one. */
-  @keyframes ds-track {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(400%);
-    }
-  }
-}
+/* The `--animate-ds-*` loops and their keyframes used to be declared here,
+ * which left a consumer on the documented `theme.css` contract with a Spinner
+ * that did not spin (#302). They are generated into `theme.css` now, from
+ * `LOOPS` in `src/theme/media.ts`, and reach this sheet through the import
+ * above. */
 
 body, html {
   font-family: var(--ds-font-body);

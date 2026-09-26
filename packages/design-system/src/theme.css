@@ -247,6 +247,41 @@
   --ease-brutalist: var(--ds-ease);
 }
 
+/* Looping animations — `animate-ds-spin`, `-spin-slow`, `-pulse`, `-track`.
+ * Declared in `src/theme/media.ts` (`LOOPS`); the period is a multiple of
+ * the Medium's `considered` duration and the keyframes are invariant.
+ * `prefers-reduced-motion` is answered at the call site with `motion-reduce:`. */
+@theme {
+  --animate-ds-spin: ds-spin calc(var(--ds-duration-considered) * 3) linear infinite;
+  --animate-ds-spin-slow: ds-spin calc(var(--ds-duration-considered) * 9) linear infinite;
+  --animate-ds-pulse: ds-pulse calc(var(--ds-duration-considered) * 4) var(--ds-ease) infinite;
+  --animate-ds-track: ds-track calc(var(--ds-duration-considered) * 5) var(--ds-ease) infinite;
+
+  @keyframes ds-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes ds-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  @keyframes ds-track {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(400%);
+    }
+  }
+}
+
 /* ==========================================================================
    Typography roles — level-independent
    ========================================================================== */
