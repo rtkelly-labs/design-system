@@ -54,7 +54,7 @@ navigation* and *General site layout* with #246, *Long-form content* with #250, 
 | Choose many | `Checkbox` | `ready` | |
 | Toggle state | `Switch` | `ready` | |
 | Group fields | `Fieldset` + `Legend` | `ready` | |
-| Submit an action | `Button` — `disabled` while a request is in flight, with its own treatment | `ready` | |
+| Submit an action | `Button` — `pending` while a request is in flight: keeps focus, `aria-disabled`, refuses a second submit; `disabled` has its own treatment | `ready` | |
 | Confirm a destructive action | `AlertDialog` | `ready` | |
 | Display a modal workflow | `Modal` | `ready` | |
 | Show an off-canvas panel | `Drawer` | `ready` | |

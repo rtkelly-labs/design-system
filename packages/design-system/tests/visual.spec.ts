@@ -173,6 +173,9 @@ const CASES: readonly VisualCase[] = [
   // buttons side by side, so the sunken ground and the missing shadow are
   // asserted against the resting button they replace.
   { id: 'components-actions-forms-button--disabled', snapshot: 'button-disabled.png' },
+  // `pending`, between enabled and disabled: the held press, the spinner over
+  // the label's box, and the width it keeps — asserted against both.
+  { id: 'components-actions-forms-button--pending', snapshot: 'button-pending.png' },
   // The account flows (#252), every state a reader meets on the way through:
   // each flow at rest and after a failed submit, the reset flow's middle step,
   // and the settings page in `AppShell`. The a11y suite reads these ids, so

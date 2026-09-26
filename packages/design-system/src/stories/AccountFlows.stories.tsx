@@ -26,7 +26,8 @@ const meta: Meta = {
           '',
           'Each form reports a failed submit through `ErrorSummary`, which takes focus and links',
           'to the fields; the field errors say the same thing where the reader lands. A submit',
-          'is disabled only while its request is in flight, never to hold an invalid form shut.',
+          'is `pending` while its request is in flight — it keeps focus and refuses a second',
+          'submit — and is never disabled to hold an invalid form shut.',
           '`tests/a11y.spec.ts` completes every flow from the keyboard and runs axe at rest and',
           'in the error state, on both Levels and both viewports.',
         ].join('\n'),
@@ -42,7 +43,8 @@ type Story = StoryObj;
  * Sign in, at rest: email, password, a remember-me `Checkbox` and the links
  * to the neighbouring flows. Submit it empty to see the field errors; enter
  * any address with the password `analytical-engine` to complete it. Any other
- * password is rejected after a pause, during which the submit is disabled.
+ * password is rejected after a pause, during which the submit is `pending`:
+ * focus stays on it, and a second Enter does not send the form again.
  */
 export const SignIn: Story = {
   render: (_args, context) => <SignInForm focusOnAppear={!inDocs(context)} />,
@@ -61,7 +63,8 @@ export const SignInRejected: Story = {
 /**
  * Create an account, at rest: three required fields with helper text, an
  * optional checkbox marked as such, and a required one. The submit is never
- * disabled to hold the form shut — only while the request is in flight. An
+ * disabled to hold the form shut, and is `pending` while the request is in
+ * flight. An
  * address of `taken@example.com` passes the client's checks and is refused
  * by the server, through the same summary.
  */

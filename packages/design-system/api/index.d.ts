@@ -385,11 +385,19 @@ type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'default
 
 type ButtonElementProps = ButtonOwnProps & DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & {
     href?: never;
+
+    pending?: boolean;
+
+    pendingLabel?: string;
 };
 
 type ButtonLinkProps = ButtonOwnProps & DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement> & {
 
     href: string;
+
+    pending?: never;
+
+    pendingLabel?: never;
 };
 type ButtonProps = ButtonElementProps | ButtonLinkProps;
 
@@ -554,7 +562,7 @@ interface TagProps {
     prefix?: string;
     children?: ReactNode;
 }
-declare const Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLAnchorElement | HTMLSpanElement>>;
+declare const Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLSpanElement | HTMLAnchorElement>>;
 
 interface PaginationProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 
@@ -1145,7 +1153,7 @@ interface SpinnerProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'className'
 
     size?: 'sm' | 'md' | 'lg';
 
-    accent?: AccentToken;
+    accent?: AccentToken | 'current';
 
     className?: string;
 }
@@ -2531,7 +2539,7 @@ declare const mdxComponents: {
     TLDR: react.FC<TLDRProps>;
     Badge: react.ForwardRefExoticComponent<BadgeProps & react.RefAttributes<HTMLSpanElement>>;
     Card: react.ForwardRefExoticComponent<CardProps & react.RefAttributes<HTMLDivElement>>;
-    Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLAnchorElement | HTMLSpanElement>>;
+    Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLSpanElement | HTMLAnchorElement>>;
     AsciiDivider: react.FC<DividerProps>;
     CodeBlock: typeof CodeBlock;
     CodeTabs: typeof CodeTabs;

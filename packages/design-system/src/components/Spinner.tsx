@@ -59,8 +59,13 @@ export interface SpinnerProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'cla
   /**
    * Semantic colour for the leading edge. Accepts an `Emphasis`
    * (`primary`…`quiet`) or an `Intent` (`info`/`success`/`warning`/`danger`).
+   *
+   * `current` takes the ink of whatever the spinner sits in, for a spinner
+   * inside a control: on a filled `Button` every accent is either the fill
+   * itself or a clash with it, and the button's own text colour is the one
+   * already measured against that fill.
    */
-  accent?: AccentToken;
+  accent?: AccentToken | 'current';
   /**
    * Merged onto the wrapper, which is what positions the spinner. The mark
    * itself is sized by `size`.
@@ -114,7 +119,9 @@ export const Spinner = forwardRef<HTMLSpanElement, SpinnerProps>(function Spinne
         // `border-t-current`. One map, eight roles, no second table to drift.
         // Through the recipe's `class` slot rather than appended, so a caller
         // who reaches the mark through `className` still wins the conflict.
-        className={styles.mark({ class: accentTextClass(accent) })}
+        className={styles.mark({
+          class: accent === 'current' ? undefined : accentTextClass(accent),
+        })}
       />
       <span className="sr-only">{label}</span>
     </span>

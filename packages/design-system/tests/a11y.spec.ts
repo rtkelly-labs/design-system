@@ -471,6 +471,26 @@ test.describe('Account flows — keyboard', () => {
     expect(orphaned).toEqual([]);
   }
 
+  /**
+   * Count the story form's `submit` events from here on. A pending submit
+   * cancels the click that would send one, so this is the direct evidence
+   * that a second Enter did not submit twice — the fixtures no longer guard
+   * against it themselves.
+   */
+  async function countSubmits(page: Page) {
+    await root(page)
+      .locator('form')
+      .first()
+      .evaluate((form) => {
+        const w = window as unknown as { __submits: number };
+        w.__submits = 0;
+        form.addEventListener('submit', () => {
+          w.__submits += 1;
+        });
+      });
+    return () => page.evaluate(() => (window as unknown as { __submits: number }).__submits);
+  }
+
   /** Enter on the summary's first link, which should land on `field`. */
   async function followFirstError(page: Page, field: ReturnType<Page['locator']>) {
     await expect(summary(page)).toBeFocused();
@@ -495,7 +515,15 @@ test.describe('Account flows — keyboard', () => {
     await page.keyboard.press('Tab');
     await expect(password).toBeFocused();
     await page.keyboard.type('difference-engine');
+    const submits = await countSubmits(page);
+    const signIn = root(page).getByRole('button', { name: 'SIGN IN' });
     await page.keyboard.press('Enter');
+
+    // Pending: Enter in a field again is an implicit submit through the same
+    // button, and the button refuses it.
+    await expect(signIn).toHaveAttribute('aria-disabled', 'true');
+    await page.keyboard.press('Enter');
+    expect(await submits()).toBe(1);
 
     // The server's refusal: one entry, no field to blame, the password cleared.
     await expect(summary(page)).toContainText('We could not sign you in');
@@ -510,8 +538,18 @@ test.describe('Account flows — keyboard', () => {
     await tabTo(page, remember);
     await page.keyboard.press('Space');
     await expect(remember).toBeChecked();
-    await tabTo(page, root(page).getByRole('button', { name: 'SIGN IN' }));
+    await tabTo(page, signIn);
     await page.keyboard.press('Enter');
+
+    // Pending on the button itself: focus stays on it — `disabled` would have
+    // dropped it to <body> — and neither Enter nor Space sends the form again.
+    await expect(signIn).toHaveAttribute('aria-disabled', 'true');
+    await expect(signIn).toBeFocused();
+    await expect(root(page).getByRole('status').filter({ hasText: 'Signing in' })).toHaveCount(1);
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Space');
+    await expect(signIn).toBeFocused();
+    expect(await submits()).toBe(2);
 
     await expect(root(page).getByRole('heading', { name: 'Signed in' })).toBeFocused();
     await expect(root(page)).toContainText('stay signed in for 30 days');
@@ -547,8 +585,15 @@ test.describe('Account flows — keyboard', () => {
 
     await followFirstError(page, email);
     await retype(page, 'ada@example.com');
-    await tabTo(page, root(page).getByRole('button', { name: 'CREATE ACCOUNT' }));
+    const create = root(page).getByRole('button', { name: 'CREATE ACCOUNT' });
+    const submits = await countSubmits(page);
+    await tabTo(page, create);
     await page.keyboard.press('Enter');
+
+    await expect(create).toHaveAttribute('aria-disabled', 'true');
+    await expect(create).toBeFocused();
+    await page.keyboard.press('Enter');
+    expect(await submits()).toBe(1);
 
     await expect(root(page).getByRole('heading', { name: 'Account created' })).toBeFocused();
   });
