@@ -80,19 +80,23 @@ links to its upstream source in the file header. See the
 Playwright screenshots of Storybook stories, asserted on every PR. The determinism contract and
 operating instructions are in [`docs/visual-regression.md`](./docs/visual-regression.md).
 
-- **What is asserted**: the `CASES` table in `tests/visual.spec.ts`, against a static Storybook
-  build served on `http://localhost:6006`. `pnpm check:visual-coverage` requires every component to
+- **What is asserted**: three tables in `tests/visual.spec.ts`: `CASES` (desktop), `MOBILE_CASES`
+  (narrow viewport) and `INTERACTIONS` (hover, focus and open states). They run against a static
+  Storybook build served on `http://localhost:6006`. `pnpm check:visual-coverage` requires every component to
   have an asserted story or a stated reason.
 - **Two projects**: `chromium` (desktop) and `mobile`. Baselines live in `tests/__snapshots__/`,
   named by file rather than story id, so retitling a story does not orphan one.
 - **Tolerance**: `maxDiffPixels: 0` at Playwright's default per-pixel `threshold` of `0.2`. A
   flaky case is a defect to fix, not a threshold to loosen.
-- **Linux only**: baselines are rendered on the CI runner. Run locally on macOS or Windows and every
-  case fails on font rasterisation, which says nothing about the change.
+- **Linux only**: baselines are rendered on the CI runner, and font rasterisation differs by OS. On
+  macOS or Windows the suite skips every case (`test.skip(process.platform !== 'linux')`), so an
+  all-skipped run there has asserted nothing.
 
 ```bash
 # Regenerate baselines: comment on the PR (owner/member/collaborator only)
-/update-snapshots
+/update-snapshots            # writes only missing baselines (new cases); never overwrites
+/update-snapshots changed    # also overwrites baselines that now differ: an intended visual change
+/update-snapshots all        # regenerates every baseline
 
 # On a Linux machine matching CI:
 pnpm test:visual            # assert
