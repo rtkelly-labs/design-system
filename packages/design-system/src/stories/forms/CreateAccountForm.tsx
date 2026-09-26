@@ -205,7 +205,7 @@ export function CreateAccountForm({
           onCheckedChange={(terms) => setValues({ ...values, terms })}
           error={errors.terms}
         />
-        <div>
+        <div className="flex">
           <Button
             type="submit"
             variant="primary"

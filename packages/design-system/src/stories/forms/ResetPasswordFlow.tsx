@@ -216,7 +216,7 @@ export function ResetPasswordFlow({
             onChange={(e) => setConfirm(e.target.value)}
             error={errors.confirm}
           />
-          <div>
+          <div className="flex">
             <Button
               type="submit"
               variant="primary"
@@ -259,7 +259,7 @@ export function ResetPasswordFlow({
           onChange={(e) => setEmail(e.target.value)}
           error={errors.email}
         />
-        <div>
+        <div className="flex">
           <Button
             type="submit"
             variant="primary"
