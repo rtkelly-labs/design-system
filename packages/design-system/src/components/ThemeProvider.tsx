@@ -44,8 +44,8 @@ export interface ThemeProviderProps {
    */
   persist?: boolean;
   /**
-   * Fall back to the OS `prefers-color-scheme` when nothing is persisted. The
-   * ladder has four rungs and the media query has two, so the mapping is the
+   * Fall back to the OS `prefers-color-scheme` when nothing is persisted. A
+   * rung is not named after a media-query state, so the mapping is the
    * explicit {@link SYSTEM_LEVEL} constant rather than an inference.
    */
   followSystem?: boolean;

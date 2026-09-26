@@ -182,9 +182,9 @@ const CASES: readonly VisualCase[] = [
   { id: 'docs-layout-portal--full-portal', snapshot: 'portal-full.png', fullPage: true },
 
   // The one case where a single screenshot is worth more than the others put
-  // together: all four rungs side by side. The gated suite otherwise asserts one
+  // together: every rung side by side. The gated suite otherwise asserts one
   // level, so a token change that reads well on `midnight` and is unusable on
-  // `white` passes everything. This is AGENTS.md rule 7's worked example and the
+  // `sketch` passes everything. This is AGENTS.md rule 7's worked example and the
   // gap its own § *Screenshot Walkthrough* calls out.
   { id: 'foundations-theme-ladder--all-levels', snapshot: 'theme-ladder-all-levels.png', fullPage: true },
 

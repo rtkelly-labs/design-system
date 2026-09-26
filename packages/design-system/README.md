@@ -77,20 +77,30 @@ links to its upstream source in the file header. See the
 
 ## 📸 Visual Regression Layer
 
-The design system incorporates a **Playwright Visual Snapshot Testing Layer** matching the architecture of **ryankelly.dev**:
+Playwright screenshots of Storybook stories, asserted on every PR. The determinism contract and
+operating instructions are in [`docs/visual-regression.md`](./docs/visual-regression.md).
 
-- **Framework**: Playwright snapshot engine (`playwright.config.ts` & `tests/visual.spec.ts`).
-- **Isolation**: Runs against static Storybook builds (`http://localhost:6006`).
-- **Precision**: `maxDiffPixelRatio: 0.002` (0.2% max pixel tolerance).
-- **Platform Integrity**: Executed strictly on Linux CI runners to prevent macOS / Windows font rendering variations.
+- **What is asserted**: the `CASES` table in `tests/visual.spec.ts`, against a static Storybook
+  build served on `http://localhost:6006`. `pnpm check:visual-coverage` requires every component to
+  have an asserted story or a stated reason.
+- **Two projects**: `chromium` (desktop) and `mobile`. Baselines live in `tests/__snapshots__/`,
+  named by file rather than story id, so retitling a story does not orphan one.
+- **Tolerance**: `maxDiffPixels: 0` at Playwright's default per-pixel `threshold` of `0.2`. A
+  flaky case is a defect to fix, not a threshold to loosen.
+- **Linux only**: baselines are rendered on the CI runner. Run locally on macOS or Windows and every
+  case fails on font rasterisation, which says nothing about the change.
 
 ```bash
-# Run visual regression suite locally:
-pnpm test:visual
+# Regenerate baselines: comment on the PR (owner/member/collaborator only)
+/update-snapshots
 
-# Update visual snapshots:
-pnpm test:visual:update
+# On a Linux machine matching CI:
+pnpm test:visual            # assert
+pnpm test:visual:missing    # write baselines only for new cases
 ```
+
+The bot's snapshot commit does not trigger CI. Push a fresh commit afterwards so the new baselines
+are asserted.
 
 ### Capturing this package deterministically
 

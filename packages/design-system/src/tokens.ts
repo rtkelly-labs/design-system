@@ -5,7 +5,7 @@
  * `surfaceVar()`, `textVar()`, `borderVar()` from `lib/theme`, or the
  * `--ds-*` custom properties directly. Everything here resolves through the
  * compatibility aliases emitted by `theme.css`, so it still renders correctly on
- * all four levels, but the names describe hues rather than roles and the
+ * every level, but the names describe hues rather than roles and the
  * aliases are removed once the components stop using them.
  */
 

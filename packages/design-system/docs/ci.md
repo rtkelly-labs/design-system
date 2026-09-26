@@ -166,7 +166,7 @@ Its real value is breadth per level: it captures *every* story on every rung,
 where the gated suite captures one representative per component.
 
 The cross-level gap the gated suite used to have is closed —
-`Foundations/Theme Ladder → AllLevels` renders all four rungs in one screenshot
+`Foundations/Theme Ladder → AllLevels` renders every rung in one screenshot
 and is now a `CASES` row, so a token change that reads fine on `midnight` and is
 unusable on `sketch` fails a required check rather than merely showing up in a
 report nobody opened.
@@ -174,8 +174,8 @@ report nobody opened.
 Two structural choices worth keeping:
 
 - **One test per story, not per story-and-level.** The report lists tests, so a
-  row is a component and opening it shows all four levels together — which is
-  the comparison worth making. Splitting by level quadruples the rows and
+  row is a component and opening it shows every level together — which is
+  the comparison worth making. Splitting by level multiplies the rows and
   scatters the images that need comparing.
 - **Each theme's capture is wrapped in a `test.step`.** Ungrouped, the
   navigation plumbing contributes ~21 rows to the step list and pushes the
