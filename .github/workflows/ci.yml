@@ -34,7 +34,7 @@ concurrency:
   group: ci-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-# Three jobs in parallel, then one that reports their verdict.
+# Four jobs in parallel, then one that reports their verdict.
 #
 # This was a single job of nineteen serial steps. Nothing in it needed to be
 # serial: the gates read the tree, the visual suite needs only a built
@@ -46,14 +46,15 @@ concurrency:
 # browser install and the screenshot suite had also run.
 #
 # Split, the critical path is the visual job alone and the gates report in about
-# half a minute. `check:api` took the headroom in `unit` beside `build`; there is
-# roughly twenty seconds left there before that job becomes the critical path
-# again, so the next gate needing a built `dist/` goes there and anything that
-# reads only the tree goes in `gates`.
+# half a minute. `unit` was later split again, into the Vitest half and a
+# `package` half that builds and reads `dist/`, because its serial chain had
+# become the second-longest path. A gate needing a built `dist/` goes in
+# `package`, a test goes in `unit`, and anything that reads only the tree goes
+# in `gates`.
 #
 # Every job carries a `timeout-minutes` per AGENTS.md rule 9. Only `visual`
 # installs a browser, so only its ceiling has to clear that step's retry budget;
-# the other three are sized to their own work, which is the point of splitting
+# the other four are sized to their own work, which is the point of splitting
 # them — a hung gate no longer waits out a browser-shaped timeout.
 # Job names are lowercase, snake_case, and at most two words, drawn from the
 # shared lexicon in `shared-utilities`' governance map (`ci`, `build`, `test`,
@@ -236,7 +237,7 @@ jobs:
         # this once per job keeps each step reading exactly as it did when the
         # package was the repository.
         working-directory: packages/design-system
-    # ~35s: tsc, the Vitest suite, and a tsup build.
+    # ~95s: tsc and the Vitest suite. The build half is `package` below.
     timeout-minutes: 10
 
     steps:
@@ -249,12 +250,64 @@ jobs:
       - name: Type Check
         run: pnpm typecheck
 
-      # Stays before `Build Package`, and the order is load-bearing rather than
-      # incidental: `src/package-shape.test.ts` asserts on what `files` declares
-      # while `dist/` does not yet exist. Running it after a build would change
-      # what it is testing.
+      # No build in this job, and that is load-bearing rather than incidental:
+      # `src/package-shape.test.ts` asserts on what `files` declares while
+      # `dist/` does not exist. It used to hold only because this step ran
+      # before `Build Package`; with the build in `package`, it holds because
+      # nothing here writes `dist/` at all.
       - name: Unit Tests and Coverage
         run: pnpm test:coverage
+
+      # Per-test and per-file timings, one level below the step — see
+      # `scripts/ci-telemetry.mjs`. Not a gate: it exits 0 on a missing report,
+      # and `continue-on-error` covers the rest, because telemetry that can turn
+      # a build red is telemetry that gets deleted. On failure too, since a
+      # slow or flaky test is most worth seeing on the run it broke.
+      - name: Telemetry
+        if: success() || failure()
+        continue-on-error: true
+        run: >-
+          node scripts/ci-telemetry.mjs tests
+          --vitest unit=telemetry/vitest.json
+
+      - name: Upload Telemetry
+        if: success() || failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ci-telemetry-${{ github.job }}
+          path: packages/design-system/telemetry/
+          retention-days: 30
+
+  # The half of the old `test` job that needs `dist/`: the build, the three
+  # gates that read it, and the second package, which builds against it.
+  #
+  # Split out because `test` ran all of it after the unit suite, one step after
+  # another — typecheck 12s, Vitest 72s, then build 10s, dependency cost 8s and
+  # the report generator 56s. Nothing in the second half reads the first half's
+  # output, so it was ~170s of serial work that is ~95s and ~85s side by side.
+  # The repository is public, so the second runner costs a concurrency slot and
+  # nothing else.
+  package:
+    name: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        # Every `pnpm` step below is this package's. The workspace root holds
+        # only the lockfile, the workflows and `vercel.json`; the gates, the
+        # build and the suites all live in `packages/design-system`, and setting
+        # this once per job keeps each step reading exactly as it did when the
+        # package was the repository.
+        working-directory: packages/design-system
+    # ~85s: a tsup build, the gates that read it, and the report generator.
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup
+        uses: ./.github/actions/setup
 
       - name: Build Package
         run: pnpm build
@@ -292,27 +345,6 @@ jobs:
           pnpm test
           pnpm build
           pnpm verify:report-cli
-
-      # Per-test and per-file timings, one level below the step — see
-      # `scripts/ci-telemetry.mjs`. Not a gate: it exits 0 on a missing report,
-      # and `continue-on-error` covers the rest, because telemetry that can turn
-      # a build red is telemetry that gets deleted. On failure too, since a
-      # slow or flaky test is most worth seeing on the run it broke.
-      - name: Telemetry
-        if: success() || failure()
-        continue-on-error: true
-        run: >-
-          node scripts/ci-telemetry.mjs tests
-          --vitest unit=telemetry/vitest.json
-
-      - name: Upload Telemetry
-        if: success() || failure()
-        continue-on-error: true
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: ci-telemetry-${{ github.job }}
-          path: packages/design-system/telemetry/
-          retention-days: 30
 
   visual:
     name: visual
@@ -521,7 +553,7 @@ jobs:
           path: packages/design-system/tests/__snapshots__/
           retention-days: 7
 
-  # One check that stands or falls with all three jobs above.
+  # One check that stands or falls with all four jobs above.
   #
   # `ci` is the string branch protection matches on, and it is deliberately
   # content-free. The previous name listed what CI did — "Build, Typecheck,
@@ -539,12 +571,12 @@ jobs:
   verify:
     name: ci
     runs-on: ubuntu-latest
-    needs: [gates, unit, visual]
+    needs: [gates, unit, package, visual]
     # `always()`, so this reports a verdict when a job fails rather than being
     # skipped — a skipped required check is indistinguishable from one still
     # running, and blocks the PR either way.
     if: always()
-    # Reads three strings and exits. A ceiling anyway, per rule 9: "every job",
+    # Reads four strings and exits. A ceiling anyway, per rule 9: "every job",
     # including the ones that obviously cannot hang.
     timeout-minutes: 5
 
@@ -553,11 +585,12 @@ jobs:
         env:
           GATES: ${{ needs.gates.result }}
           UNIT: ${{ needs.unit.result }}
+          PACKAGE: ${{ needs.package.result }}
           VISUAL: ${{ needs.visual.result }}
         run: |
           set -uo pipefail
           failed=0
-          for job in GATES UNIT VISUAL; do
+          for job in GATES UNIT PACKAGE VISUAL; do
             result="${!job}"
             if [ "${result}" = "success" ]; then
               echo "✅ ${job}: ${result}"
