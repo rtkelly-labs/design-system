@@ -746,12 +746,19 @@ for (const job of ALL_JOBS) {
         `the same version — bump both together.`,
     );
   }
+  if (!texts.some((text) => /^\s*run:\s*git config --global --add safe\.directory "\$GITHUB_WORKSPACE"\s*$/.test(text))) {
+    problems.push(
+      `${at}: job \`${job.id}\` runs in a container without marking the workspace a safe ` +
+        `directory. The container is root over a runner-owned checkout, so git refuses it and ` +
+        `every script that asks git for the repository root fails or falls back.`,
+    );
+  }
   if (!/--ipc=host/.test(options)) {
     problems.push(`${at}: job \`${job.id}\` needs \`options: --ipc=host\` — Chromium renders into /dev/shm, 64MB by default.`);
   }
   images.set(image, [...(images.get(image) ?? []), `${job.file} ${job.id}`]);
   for (const text of texts) {
-    if (/render-inputs\.mjs/.test(text) && /key=/.test(text) && !text.includes(parsed[2])) {
+    if (/key=/.test(text) && /render-inputs\.mjs|\$hash/.test(text) && !text.includes(parsed[2])) {
       problems.push(
         `${at}: job \`${job.id}\` builds a cache key from render-inputs.mjs without the image ` +
           `digest. The hash covers tracked files; the image is the one input none records.`,

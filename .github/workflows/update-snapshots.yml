@@ -66,6 +66,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
+      # The container runs as root over a checkout the runner user owns, and
+      # git refuses to read a repository owned by someone else ("dubious
+      # ownership"). Every script that asks git for the repository root then
+      # fails or falls back to the package — `check-lockfile.mjs` went looking
+      # for `packages/design-system/pnpm-lock.yaml`, and `render-inputs.mjs`
+      # produced no hash at all. `actions/checkout` trusts the path only for
+      # its own git calls, so it is trusted here for everyone else's.
+      - name: Trust the Workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       # The SHA every baseline below is generated against. Compared to the
       # branch tip again before committing, because a run that regenerates
       # against one tree and commits onto another produces a baseline that

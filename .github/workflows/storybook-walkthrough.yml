@@ -52,6 +52,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
+      # The container runs as root over a checkout the runner user owns, and
+      # git refuses to read a repository owned by someone else ("dubious
+      # ownership"). Every script that asks git for the repository root then
+      # fails or falls back to the package — `check-lockfile.mjs` went looking
+      # for `packages/design-system/pnpm-lock.yaml`, and `render-inputs.mjs`
+      # produced no hash at all. `actions/checkout` trusts the path only for
+      # its own git calls, so it is trusted here for everyone else's.
+      - name: Trust the Workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       # The report is a function of its inputs, the same ones the `visual` job's
       # verdict is keyed on (`scripts/render-inputs.mjs` — this workflow and the
       # walkthrough config are tracked files, so they count). When a run with
@@ -66,8 +76,7 @@ jobs:
         # yields a key ending in `-` with no hash: one constant key that every
         # later pull request would match, skipping the job on a verdict nothing
         # earned. So the hash is taken on its own line under `set -e`, checked for
-        # shape, and only then written. The image variables must be non-empty
-        # for the same reason.
+        # shape, and only then written. The key also names the pinned image.
         run: |
           set -euo pipefail
           inputs="$(node scripts/render-inputs.mjs)"
