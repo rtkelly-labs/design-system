@@ -164,6 +164,9 @@ async function scan(page: Page) {
 async function markScope(page: Page) {
   await page.evaluate(`(() => {
     const isStorySurface = ${IS_STORY_SURFACE};
+    for (const el of Array.from(document.querySelectorAll('[data-a11y-scope]'))) {
+      el.removeAttribute('data-a11y-scope');
+    }
     document.getElementById('storybook-root')?.setAttribute('data-a11y-scope', '');
     for (const el of Array.from(document.body.children)) {
       if (el.id !== 'storybook-root' && isStorySurface(el)) {
@@ -173,62 +176,164 @@ async function markScope(page: Page) {
   })()`);
 }
 
+/**
+ * How a story reaches its second Level.
+ *
+ * Page load is about half of every scan here — navigation, Storybook's
+ * preview boot, `waitForStoryRendered`, the fonts — and the second Level
+ * repeated all of it to change one global. `.storybook/preview.ts` already
+ * applies the toolbar global live: its decorator re-renders on
+ * `updateGlobals` and sets `data-theme` on `<html>`. So the second Level is
+ * reached by emitting that on the preview channel and waiting for the
+ * re-render, the attribute and the fonts, instead of by a new page.
+ *
+ * - `in-place` — the pull-request default.
+ * - `reload` — a fresh page per Level, which is what this suite always did.
+ * - `compare` — switch in place, scan, then load the same Level fresh on the
+ *   same page, scan again, and fail unless the two **full** violation sets
+ *   match: every impact, not only the budgeted ones, and every node target.
+ *   `ci.yml` runs this on every push to `main`, so the claim that the two
+ *   pathways see the same page is re-checked after each merge rather than
+ *   trusted — the same arrangement as `A11Y_FULL_MATRIX` above.
+ *
+ * The equivalence was measured before this landed: every asserted story that
+ * takes both Levels, on both viewports, in both directions (midnight → sketch
+ * and back), compared as full violation sets. See the PR that added this.
+ *
+ * ## One test per story, with a step per Level
+ *
+ * Playwright hands every test a fresh page, so a switch can only save a load
+ * inside one test. Keeping a test per Level would mean sharing a page across
+ * tests — `mode: 'serial'`, which skips sketch whenever midnight fails and so
+ * hides half the result, or leaning on worker order, which a retry or a worker
+ * restart silently undoes. So each story is one test, each Level a
+ * `test.step`, and each Level's budget check an `expect.soft`: a midnight
+ * failure still reports sketch. `KNOWN` stays a budget per scan, as before.
+ */
+const LEVEL_SWITCH = (process.env.A11Y_LEVEL_SWITCH ?? 'in-place') as 'in-place' | 'reload' | 'compare';
+if (!['in-place', 'reload', 'compare'].includes(LEVEL_SWITCH)) {
+  throw new Error(`A11Y_LEVEL_SWITCH must be in-place, reload or compare, not ${LEVEL_SWITCH}`);
+}
+
+const NO_MOTION = '*,*::before,*::after{transition:none!important;animation:none!important}';
+
+/** A fresh page at this Level, rendered, with its fonts, and motion off. */
+async function openStory(page: Page, id: string, level: string) {
+  const global = pinsItsOwnLevel(id) ? '' : `&globals=level:${level}`;
+  await page.goto(`/iframe.html?id=${id}&viewMode=story${global}`);
+  await waitForStoryRendered(page, id);
+  /*
+   * Wait for the fonts, then suppress motion.
+   *
+   * `color-contrast` is the rule most likely to fire here and it measures
+   * *rendered* text: a run that lands before the faces register measures
+   * the fallback, at a different size and sometimes a different colour.
+   * `docs/deterministic-rendering.md` names this as the second of the
+   * three switches, and an accessibility gate that is a race is worse than
+   * no gate — it teaches people to re-run it.
+   */
+  await page.evaluate(() => document.fonts.ready);
+  await page.addStyleTag({ content: NO_MOTION });
+}
+
+/**
+ * The same page, re-rendered at another Level through the preview channel.
+ *
+ * Resolves on Storybook's own `storyRendered` for the re-render, then on the
+ * attribute the decorator writes, then on the fonts and two frames — the
+ * decorator's `ThemeProvider` reconciles its level in an effect, so the
+ * attribute can land a commit before the tree beneath it has repainted. The
+ * no-motion sheet is still in the document from `openStory`.
+ */
+async function switchLevel(page: Page, id: string, level: string) {
+  await page.evaluate(async (next) => {
+    const channel = (window as unknown as { __STORYBOOK_ADDONS_CHANNEL__?: {
+      on: (event: string, fn: () => void) => void;
+      off: (event: string, fn: () => void) => void;
+      emit: (event: string, payload: unknown) => void;
+    } }).__STORYBOOK_ADDONS_CHANNEL__;
+    if (!channel) throw new Error('No Storybook preview channel on this page');
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error(`No storyRendered after switching to ${next}`)), 15_000);
+      const done = () => {
+        clearTimeout(timer);
+        channel.off('storyRendered', done);
+        resolve();
+      };
+      channel.on('storyRendered', done);
+      channel.emit('updateGlobals', { globals: { level: next } });
+    });
+  }, level);
+  await expect(page.locator('html')).toHaveAttribute('data-theme', level);
+  // The suite's own render check, not a text check: a sparkline, a skeleton
+  // or a story that portals everything to `body` has a root with no text,
+  // and `toBeEmpty` read all of them as unrendered.
+  await waitForStoryRendered(page, id);
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+}
+
+/** A violation set in a form two scans can be compared by: every impact, every target. */
+function signature(violations: Awaited<ReturnType<typeof scan>>) {
+  return violations
+    .map((v) => ({ rule: v.id, impact: v.impact, targets: v.nodes.map((n) => n.target.join(' ')).sort() }))
+    .sort((a, b) => (a.rule < b.rule ? -1 : a.rule > b.rule ? 1 : 0));
+}
+
+/** The serious-and-critical violations over their `KNOWN` budget. */
+function overBudget(violations: Awaited<ReturnType<typeof scan>>) {
+  return violations
+    .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+    .filter((v) => v.nodes.length > (KNOWN[v.id] ?? 0))
+    .map((v) => `${v.id} (${v.impact}, ${v.nodes.length}): ${v.help}`);
+}
+
 test.describe('Accessibility', () => {
-  for (const level of LEVELS) {
-    for (const id of assertedStoryIds()) {
-      test(`${id} — ${level}`, projectTag(id), async ({ page }, testInfo) => {
-        test.skip(
-          !scannedIn(testInfo.project.name, id),
-          'No narrow-viewport case for this component; see `scannedIn`',
-        );
-        test.skip(
-          pinsItsOwnLevel(id) && level !== LEVELS[0],
-          'Story pins its own Level; forcing the other one mixes two palettes',
-        );
+  for (const id of assertedStoryIds()) {
+    // A story that pins its own Level is scanned on that one only: forcing the
+    // other mixes two palettes (see `pinsItsOwnLevel`).
+    const levels = pinsItsOwnLevel(id) ? [LEVELS[0]] : [...LEVELS];
 
-        const global = pinsItsOwnLevel(id) ? '' : `&globals=level:${level}`;
-        await page.goto(`/iframe.html?id=${id}&viewMode=story${global}`);
-        await waitForStoryRendered(page, id);
+    test(`${id} — ${levels.join(' + ')}`, projectTag(id), async ({ page }, testInfo) => {
+      test.skip(
+        !scannedIn(testInfo.project.name, id),
+        'No narrow-viewport case for this component; see `scannedIn`',
+      );
+      // The ceiling was sized for one Level on one page. This test now does a
+      // scan per Level, and `compare` a second load and scan for each switch,
+      // so the budget scales with the work rather than silently halving.
+      const scans = levels.length + (LEVEL_SWITCH === 'compare' ? levels.length - 1 : 0);
+      test.setTimeout(testInfo.timeout * scans);
 
-        /*
-         * Wait for the fonts, then suppress motion.
-         *
-         * `color-contrast` is the rule most likely to fire here and it measures
-         * *rendered* text: a run that lands before the faces register measures
-         * the fallback, at a different size and sometimes a different colour.
-         * `docs/deterministic-rendering.md` names this as the second of the
-         * three switches, and an accessibility gate that is a race is worse than
-         * no gate — it teaches people to re-run it.
-         */
-        await page.evaluate(() => document.fonts.ready);
-        await page.addStyleTag({
-          content: '*,*::before,*::after{transition:none!important;animation:none!important}',
+      for (const [index, level] of levels.entries()) {
+        await test.step(level, async () => {
+          if (index === 0 || LEVEL_SWITCH === 'reload') await openStory(page, id, level);
+          else await switchLevel(page, id, level);
+
+          // The root, plus anything the story portalled to `body`: `Modal`,
+          // `AlertDialog`, `Drawer` and `Toast` all render outside the root by
+          // design, and a scope of `#storybook-root` alone scanned an empty box
+          // for every one of them (#273). The portal test is `IS_STORY_SURFACE`,
+          // the one `waitForStoryRendered` uses, so the two cannot disagree about
+          // what the story rendered. Page-level rules an isolated story trips —
+          // no `main`, no `h1` — are moderate, below the serious bar this counts.
+          // Re-marked after a switch: a re-render can replace a portal.
+          await markScope(page);
+          const violations = await scan(page);
+
+          expect.soft(overBudget(violations), `${level}: serious or critical over budget`).toEqual([]);
+
+          if (LEVEL_SWITCH === 'compare' && index > 0) {
+            await openStory(page, id, level);
+            await markScope(page);
+            expect(
+              signature(violations),
+              `${level}: the in-place switch and a fresh load disagree — see LEVEL_SWITCH`,
+            ).toEqual(signature(await scan(page)));
+          }
         });
-
-        // The root, plus anything the story portalled to `body`: `Modal`,
-        // `AlertDialog`, `Drawer` and `Toast` all render outside the root by
-        // design, and a scope of `#storybook-root` alone scanned an empty box
-        // for every one of them (#273). The portal test is `IS_STORY_SURFACE`,
-        // the one `waitForStoryRendered` uses, so the two cannot disagree about
-        // what the story rendered. Page-level rules an isolated story trips —
-        // no `main`, no `h1` — are moderate, below the serious bar this counts.
-        await markScope(page);
-
-        const violations = await scan(page);
-
-        const serious = violations.filter(
-          (v) => v.impact === 'serious' || v.impact === 'critical',
-        );
-
-        const overBudget = serious.filter(
-          (v) => v.nodes.length > (KNOWN[v.id] ?? 0),
-        );
-
-        expect(
-          overBudget.map((v) => `${v.id} (${v.impact}, ${v.nodes.length}): ${v.help}`),
-        ).toEqual([]);
-      });
-    }
+      }
+    });
   }
 });
 
