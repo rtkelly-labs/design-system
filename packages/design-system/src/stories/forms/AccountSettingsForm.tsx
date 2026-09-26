@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { FormEvent } from 'react';
 import { Button } from '../../components/Button';
 import { Checkbox } from '../../components/Checkbox';
@@ -29,14 +29,9 @@ interface AccountSettingsValues {
 
 type FieldName = 'displayName' | 'email' | 'bio' | 'visibility' | 'terms';
 
-/** One id per validated field: the control's `id`, and the summary's link target. */
-const FIELD_IDS: Record<FieldName, string> = {
-  displayName: 'account-display-name',
-  email: 'account-email',
-  bio: 'account-bio',
-  visibility: 'account-visibility',
-  terms: 'account-terms',
-};
+const FIELD_ORDER: FieldName[] = ['displayName', 'email', 'bio', 'visibility', 'terms'];
+
+type FieldErrors = Partial<Record<FieldName, string>>;
 
 const BIO_LIMIT = 160;
 
@@ -64,29 +59,20 @@ const FAILING_VALUES: AccountSettingsValues = {
   terms: false,
 };
 
-// In the order the fields appear, which is the order the summary lists them.
-function validate(values: AccountSettingsValues): ErrorSummaryError[] {
-  const errors: ErrorSummaryError[] = [];
-  if (!values.displayName.trim()) {
-    errors.push({ id: FIELD_IDS.displayName, message: 'Enter a display name' });
-  }
+// Keyed by field rather than by id: the ids are per instance (`useId`), so
+// the same form can render twice on one docs page without two controls
+// answering to one label. The summary is built from this in `FIELD_ORDER`.
+function validate(values: AccountSettingsValues): FieldErrors {
+  const errors: FieldErrors = {};
+  if (!values.displayName.trim()) errors.displayName = 'Enter a display name';
   if (!values.email.trim()) {
-    errors.push({ id: FIELD_IDS.email, message: 'Enter an email address' });
+    errors.email = 'Enter an email address';
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-    errors.push({
-      id: FIELD_IDS.email,
-      message: 'Enter an email address in the correct format, like name@example.com',
-    });
+    errors.email = 'Enter an email address in the correct format, like name@example.com';
   }
-  if (values.bio.length > BIO_LIMIT) {
-    errors.push({ id: FIELD_IDS.bio, message: `Bio must be ${BIO_LIMIT} characters or fewer` });
-  }
-  if (!values.visibility) {
-    errors.push({ id: FIELD_IDS.visibility, message: 'Choose who can see your profile' });
-  }
-  if (!values.terms) {
-    errors.push({ id: FIELD_IDS.terms, message: 'Accept the updated terms to save your settings' });
-  }
+  if (values.bio.length > BIO_LIMIT) errors.bio = `Bio must be ${BIO_LIMIT} characters or fewer`;
+  if (!values.visibility) errors.visibility = 'Choose who can see your profile';
+  if (!values.terms) errors.terms = 'Accept the updated terms to save your settings';
   return errors;
 }
 
@@ -109,14 +95,28 @@ export function AccountSettingsForm({
   initiallyFailed = false,
   focusOnAppear = true,
 }: AccountSettingsFormProps) {
+  const uid = useId();
+  /** One id per field: the control's `id`, and the summary's link target. */
+  const ids: Record<FieldName, string> = {
+    displayName: `${uid}display-name`,
+    email: `${uid}email`,
+    bio: `${uid}bio`,
+    visibility: `${uid}visibility`,
+    terms: `${uid}terms`,
+  };
   const [values, setValues] = useState<AccountSettingsValues>(FAILING_VALUES);
-  const [errors, setErrors] = useState<ErrorSummaryError[]>(() =>
-    initiallyFailed ? validate(FAILING_VALUES) : [],
+  const [errors, setErrors] = useState<FieldErrors>(() =>
+    initiallyFailed ? validate(FAILING_VALUES) : {},
   );
   const [attempt, setAttempt] = useState(initiallyFailed ? 1 : 0);
   const [saved, setSaved] = useState(false);
 
-  const errorFor = (field: FieldName) => errors.find((e) => e.id === FIELD_IDS[field])?.message;
+  const errorFor = (field: FieldName) => errors[field];
+  // In the order the fields appear, which is the order the summary lists them.
+  const summary: ErrorSummaryError[] = FIELD_ORDER.flatMap((field) => {
+    const message = errors[field];
+    return message ? [{ id: ids[field], message }] : [];
+  });
 
   function update<K extends keyof AccountSettingsValues>(key: K, value: AccountSettingsValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -125,7 +125,7 @@ export function AccountSettingsForm({
 
   function discard() {
     setValues(FAILING_VALUES);
-    setErrors([]);
+    setErrors({});
     setSaved(false);
   }
 
@@ -136,7 +136,7 @@ export function AccountSettingsForm({
     const next = validate(values);
     setErrors(next);
     setAttempt((n) => n + 1);
-    setSaved(next.length === 0);
+    setSaved(Object.keys(next).length === 0);
   }
 
   return (
@@ -151,13 +151,13 @@ export function AccountSettingsForm({
         </p>
       </div>
 
-      <ErrorSummary key={attempt} errors={errors} focusOnAppear={focusOnAppear} />
+      <ErrorSummary key={attempt} errors={summary} focusOnAppear={focusOnAppear} />
 
       <form noValidate onSubmit={submit} className="flex flex-col gap-8">
         <Fieldset legend="Profile">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <Input
-              id={FIELD_IDS.displayName}
+              id={ids.displayName}
               name="displayName"
               label="Display name"
               autoComplete="nickname"
@@ -167,7 +167,7 @@ export function AccountSettingsForm({
               error={errorFor('displayName')}
             />
             <Input
-              id="account-username"
+              id={`${uid}username`}
               name="username"
               label="Username"
               defaultValue="ada.lovelace"
@@ -176,7 +176,7 @@ export function AccountSettingsForm({
             />
           </div>
           <Input
-            id={FIELD_IDS.email}
+            id={ids.email}
             name="email"
             type="email"
             label="Email address"
@@ -188,7 +188,7 @@ export function AccountSettingsForm({
             error={errorFor('email')}
           />
           <TextArea
-            id={FIELD_IDS.bio}
+            id={ids.bio}
             name="bio"
             label="Bio (optional)"
             rows={4}
@@ -201,7 +201,7 @@ export function AccountSettingsForm({
 
         <Fieldset legend="Preferences">
           <Select
-            id="account-timezone"
+            id={`${uid}timezone`}
             name="timezone"
             label="Time zone"
             options={TIMEZONES}
@@ -210,7 +210,7 @@ export function AccountSettingsForm({
             helperText="Used for the dates in notifications"
           />
           <RadioGroup
-            id={FIELD_IDS.visibility}
+            id={ids.visibility}
             name="visibility"
             legend="Profile visibility"
             required
@@ -223,7 +223,7 @@ export function AccountSettingsForm({
             <Radio value="private" label="Private" />
           </RadioGroup>
           <Switch
-            id="account-sign-in-alerts"
+            id={`${uid}sign-in-alerts`}
             name="signInAlerts"
             label="Email me about new sign-ins"
             checked={values.signInAlerts}
@@ -233,7 +233,7 @@ export function AccountSettingsForm({
         </Fieldset>
 
         <Checkbox
-          id={FIELD_IDS.terms}
+          id={ids.terms}
           name="terms"
           label="I accept the updated terms of service"
           required

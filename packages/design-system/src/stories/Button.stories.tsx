@@ -50,3 +50,26 @@ export const PinkAccent: Story = {
     variant: 'tertiary',
   },
 };
+
+/**
+ * `disabled`, beside the same button enabled. A sunken ground, the subtle
+ * edge, muted ink and no shadow — the treatment the disabled text fields and
+ * `Select` wear — and no lift on hover or sink on press. Reach for it while a
+ * submit is in flight, not to hold a form shut until it is valid: a disabled
+ * button cannot say what is missing, and the error summary can.
+ */
+export const Disabled: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      <Button variant="primary" bracketed>
+        SAVE CHANGES
+      </Button>
+      <Button variant="primary" bracketed disabled>
+        SAVE CHANGES
+      </Button>
+      <Button variant="inverse" disabled>
+        DISCARD
+      </Button>
+    </div>
+  ),
+};

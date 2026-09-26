@@ -90,4 +90,15 @@ describe('Button', () => {
     expect(button.type).toBe('submit');
     expect(button.disabled).toBe(true);
   });
+
+  // #252: a pending submit rendered exactly like a pressable one.
+  it('carries a disabled treatment, and gates the press affordance on being enabled', () => {
+    render(<Button disabled>SAVE</Button>);
+    const cls = screen.getByRole('button').className;
+    expect(cls).toContain('disabled:bg-surface-sunken');
+    expect(cls).toContain('disabled:text-content-muted');
+    expect(cls).toContain('disabled:shadow-none');
+    expect(cls).toContain('not-disabled:hover:shadow-hard-lg');
+    expect(cls).not.toMatch(/(^|\s)hover:shadow-hard-lg/);
+  });
 });

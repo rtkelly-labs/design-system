@@ -92,6 +92,24 @@ describe('Input', () => {
   });
 });
 
+// #252: a disabled field rendered exactly like an editable one.
+describe('disabled text fields', () => {
+  it('give Input and TextArea the sunken, muted treatment Select already wore', () => {
+    render(
+      <>
+        <Input label="Username" disabled defaultValue="ada" />
+        <TextArea label="Bio" disabled />
+      </>,
+    );
+    for (const control of [screen.getByLabelText('Username'), screen.getByLabelText('Bio')]) {
+      expect(control).toHaveProperty('disabled', true);
+      expect(control.className).toContain('disabled:bg-surface-sunken');
+      expect(control.className).toContain('disabled:text-content-muted');
+      expect(control.className).toContain('disabled:border-edge-subtle');
+    }
+  });
+});
+
 describe('TextArea', () => {
   it('associates the label with the control', () => {
     render(<TextArea label="Notes" />);
