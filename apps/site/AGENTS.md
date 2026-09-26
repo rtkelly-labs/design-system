@@ -16,8 +16,10 @@ library, and colour is addressed by role, never by hue.
 
 ## Commands
 
-The package must be built first (`pnpm --filter @rtkelly13/design-system build`,
-or `pnpm site:build` from the root). The site resolves it through its exports
+From the workspace root, `pnpm site` (dev) and `pnpm site:build` build the package
+first. Inside `apps/site` the scripts below assume `packages/design-system/dist`
+already exists (`pnpm --filter @rtkelly13/design-system build`), so that CI, which
+builds the package once in its own step, does not build it twice. The site resolves it through its exports
 map, as an npm consumer would.
 
 | | |
@@ -72,3 +74,13 @@ map, as an npm consumer would.
    examples, the components whose props to show, accessibility notes and keys).
 3. Add it to `COMPONENT_PAGES` in `src/content/registry.ts`. The nav, pager,
    TOC, search and static params follow from that.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

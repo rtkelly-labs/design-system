@@ -26,7 +26,7 @@ pnpm install                 # one install, both packages
 pnpm build                   # build every package, in dependency order
 pnpm -r test                 # every package's unit suite
 pnpm storybook               # the design system's Storybook
-pnpm site                    # the applied site, on http://localhost:3000
+pnpm site                    # build the package, then the applied site on :3000
 ```
 
 Anything narrower is a package concern: `cd packages/design-system` and use the scripts
