@@ -37,7 +37,7 @@
  */
 
 import path from 'node:path';
-import { jobBody } from './render-inputs.mjs';
+import { jobBody, jobCommands } from './render-inputs.mjs';
 
 export const PKG = 'packages/design-system/';
 
@@ -81,6 +81,9 @@ const SPECIFIER = [
   /@import\s+(?:url\()?['"]([^'"]+)['"]/g, // CSS @import
 ];
 
+/** `url(…)` in a stylesheet: fonts and images the sheet loads. */
+const CSS_URL = /url\(\s*['"]?(\.{1,2}\/[^'")\s]+)['"]?\s*\)/g;
+
 const CANDIDATES = ['', '.ts', '.tsx', '.js', '.mjs', '.jsx', '.mdx', '.css', '.json', '/index.ts', '/index.tsx'];
 
 /**
@@ -112,7 +115,8 @@ export function graphFromSource(files, read, { pkg = PKG, name = '@rtkelly13/des
     if (!/\.(m?[jt]sx?|mdx|css)$/.test(file)) continue;
     const out = new Set();
     const text = read(file);
-    for (const re of SPECIFIER) for (const [match, spec] of text.matchAll(re)) {
+    const patterns = file.endsWith('.css') ? [...SPECIFIER, CSS_URL] : SPECIFIER;
+    for (const re of patterns) for (const [match, spec] of text.matchAll(re)) {
       // `import type` and `export type` are erased before anything renders; the
       // bundle graph never has them, and `typecheck` is what judges them.
       if (/^\W?(import|export)\s+type\s/.test(match)) continue;
@@ -122,6 +126,13 @@ export function graphFromSource(files, read, { pkg = PKG, name = '@rtkelly13/des
     graph.set(file, out);
   }
   return graph;
+}
+
+/** Every file either side of an edge — a font is a target and never a key. */
+export function graphNodes(graph) {
+  const out = new Set(graph.keys());
+  for (const tos of graph.values()) for (const to of tos) out.add(to);
+  return out;
 }
 
 export function mergeGraphs(...graphs) {
@@ -260,16 +271,73 @@ export function specChange(base, head, lists) {
 
 const RESOLUTION_FIELDS = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'pnpm', 'overrides', 'exports', 'type'];
 
-export function packageJsonChange(base, head) {
-  const pick = (text) => {
+/**
+ * The package scripts a job reaches: the ones it runs, and every `pnpm <name>`
+ * those invoke in turn. `build-storybook` calling `tokens:build` makes the
+ * second as much a part of the job as the first.
+ */
+export function scriptClosure(scripts, roots) {
+  const seen = new Set();
+  const queue = [...roots];
+  while (queue.length) {
+    const name = queue.pop();
+    if (seen.has(name) || !(name in scripts)) continue;
+    seen.add(name);
+    for (const [, next] of String(scripts[name]).matchAll(/\bpnpm\s+(?:run\s+)?([\w:-]+)/g)) queue.push(next);
+  }
+  return seen;
+}
+
+/**
+ * Whether a `package.json` edit can reach a story: a resolution field, or the
+ * body of a script the `visual` job runs — named by `visualScripts`, which the
+ * caller reads from `ci.yml` on both sides of the change. Any other script is
+ * tooling. Returns the reason, or null.
+ */
+export function packageJsonChange(base, head, visualScripts = []) {
+  const parse = (text) => {
     try {
-      const json = JSON.parse(text ?? '{}');
-      return JSON.stringify(RESOLUTION_FIELDS.map((field) => json[field] ?? null));
+      return JSON.parse(text ?? '{}');
     } catch {
       return null; // unparseable is a change
     }
   };
-  return pick(base) === null || pick(base) !== pick(head);
+  const [a, b] = [parse(base), parse(head)];
+  if (!a || !b) return 'package.json: unparseable on one side';
+  const fields = (json) => JSON.stringify(RESOLUTION_FIELDS.map((field) => json[field] ?? null));
+  if (fields(a) !== fields(b)) return 'package.json: a dependency, exports or resolution field';
+  const reach = new Set([
+    ...scriptClosure(a.scripts ?? {}, visualScripts),
+    ...scriptClosure(b.scripts ?? {}, visualScripts),
+  ]);
+  const moved = [...reach].filter((name) => (a.scripts ?? {})[name] !== (b.scripts ?? {})[name]).sort();
+  return moved.length ? `package.json: a script the visual job runs (${moved.join(', ')})` : null;
+}
+
+/** The `pnpm` scripts `ci.yml`'s `visual` job runs, or null when it has none. */
+export function visualScripts(workflow) {
+  try {
+    return workflow ? jobCommands(jobBody(workflow, 'visual')) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * `ci.yml` with the `jobs:` block cut out and comment-only lines dropped.
+ * Top-level `env`, `defaults`, `permissions` and `concurrency` are inherited
+ * by every job, `visual` included, so a change here reaches it.
+ */
+export function workflowOutsideJobs(text) {
+  const out = [];
+  let inJobs = false;
+  for (const line of (text ?? '').split('\n')) {
+    if (/^jobs:\s*$/.test(line)) { inJobs = true; continue; }
+    if (inJobs && /^\S/.test(line) && !/^#/.test(line)) inJobs = false;
+    if (inJobs || /^\s*(#.*)?$/.test(line)) continue;
+    out.push(line.replace(/\s+#.*$/, '').trimEnd());
+  }
+  return out.join('\n');
 }
 
 /* ------------------------------------------------------------------ *
@@ -290,6 +358,7 @@ const GLOBAL_PATHS = [
 /** Files that reach no gated story, each with the reason. */
 const INERT_PATHS = [
   [new RegExp(`^${PKG}docs/`), 'prose'],
+  [new RegExp(`^${PKG}src/(.*\\.test\\.tsx?|test-setup\\.ts)$`), 'a unit test or its set-up; Vitest runs it, no story imports it'],
   [new RegExp(`^${PKG}[^/]+\\.md$`), 'prose'],
   [new RegExp(`^${PKG}scripts/`), 'tooling; the index gates run in full whatever is selected'],
   [new RegExp(`^${PKG}(api|skills|terminal)/`), 'published artefacts no story imports'],
@@ -314,9 +383,10 @@ export function classifyChange(change, ctx) {
   const none = (reason) => ({ kind: 'none', reason, ids: [] });
 
   if (file === `${PKG}package.json` || file === 'package.json') {
-    return packageJsonChange(ctx.base(file), ctx.head(file))
-      ? global('package.json: a dependency, exports or resolution field')
-      : none('package.json: no field that changes resolution');
+    const wf = '.github/workflows/ci.yml';
+    const scripts = [...new Set([...visualScripts(ctx.base(wf)), ...visualScripts(ctx.head(wf))])];
+    const why = packageJsonChange(ctx.base(file), ctx.head(file), scripts);
+    return why ? global(why) : none('package.json: no resolution field, and no script the visual job runs');
   }
   if (SPEC_LISTS[file]) {
     const result = specChange(ctx.base(file), ctx.head(file), SPEC_LISTS[file]);
@@ -342,6 +412,9 @@ export function classifyChange(change, ctx) {
         return null; // no `visual` job on that side: treat as changed
       }
     };
+    if (workflowOutsideJobs(ctx.base(file)) !== workflowOutsideJobs(ctx.head(file))) {
+      return global('ci.yml: a workflow-level key every job inherits (env, defaults, permissions, concurrency, on)');
+    }
     const [a, b] = [job(ctx.base(file)), job(ctx.head(file))];
     return a !== null && a === b ? none('ci.yml: the `visual` job is unchanged') : global('ci.yml: the `visual` job changed');
   }
@@ -352,13 +425,13 @@ export function classifyChange(change, ctx) {
   if (ids.length) return { kind: 'stories', reason: 'in the import closure of these stories', ids };
 
   for (const [re, why] of INERT_PATHS) if (re.test(file)) return none(why);
-  if (ctx.graph?.has(file)) return none('in the graph, and in no asserted story’s closure');
-  if (file.startsWith(`${PKG}src/`)) {
-    return change.status === 'D'
-      ? none('deleted; whatever imported it changed with it')
-      : none('reaches no asserted story');
-  }
-  // Default-deny: a path no rule names reaches everything.
+  // In a graph and reached by no asserted story: an orphan, or a story the
+  // suites do not assert. Only a file the graph *knows* can be ruled out this
+  // way; one it has never seen — an asset loaded some way neither graph
+  // follows — falls through to default-deny below.
+  if (ctx.nodes?.has(file)) return none('in the graph, and in no asserted story’s closure');
+  // Default-deny, `src/` and `.storybook/` included: a path no rule names and
+  // no graph holds reaches everything.
   return global('no rule names this path — default-deny');
 }
 

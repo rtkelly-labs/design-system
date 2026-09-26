@@ -163,6 +163,12 @@ no rule names reaches every story.
 asserted story, 35 reached all of them, and 31 reached a median of 6 (p90 28) —
 **39% of today's story scans across all PRs**. It uses today's graph for old PRs, so
 it is an estimate; `pnpm stories:graphs` prints where the two graphs disagree.
+Three rules added after review — a `package.json` edit to a script the `visual` job
+runs (read from `ci.yml`, followed through the scripts it calls), a workflow-level key
+`visual` inherits, and default-deny inside `src/` for a file neither graph holds
+(the source graph now follows CSS `url()`, so the self-hosted font is reached
+through `styles.css`) — left these figures unchanged: the three PRs that trip them
+already reached every story for another reason.
 
 **What would let it decide.** The detector is the point of shadow mode: every
 failing visual or a11y test is checked against the selection, and one outside it is

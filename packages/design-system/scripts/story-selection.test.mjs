@@ -7,10 +7,13 @@ import {
   detect,
   globalFiles,
   graphFromSource,
+  graphNodes,
   graphFromStats,
   mergeGraphs,
   packageJsonChange,
   parseCases,
+  scriptClosure,
+  workflowOutsideJobs,
   selectStories,
   snapshotMap,
   specChange,
@@ -46,7 +49,8 @@ describe('graphFromSource', () => {
     [P('src/components/Types.ts')]: '',
     [P('src/components/Lazy.tsx')]: '',
     [P('src/lib/cn.ts')]: '',
-    [P('src/styles.css')]: '@import "./theme.css";',
+    [P('src/styles.css')]: '@import "./theme.css";\n@font-face { src: url("./fonts/Mono.woff2") format("woff2"); }',
+    [P('src/fonts/Mono.woff2')]: '',
     [P('src/theme.css')]: '',
     [P('tokens/palette.midnight.tokens.json')]: '{}',
   };
@@ -67,7 +71,12 @@ describe('graphFromSource', () => {
 
   it('resolves `.js` specifiers to TypeScript and follows CSS @import', () => {
     expect([...graph.get(P('src/components/Card.tsx'))]).toEqual([P('src/lib/cn.ts')]);
-    expect([...graph.get(P('src/styles.css'))]).toEqual([P('src/theme.css')]);
+    expect([...graph.get(P('src/styles.css'))]).toEqual([P('src/theme.css'), P('src/fonts/Mono.woff2')]);
+  });
+
+  it('knows a font as a node though it is never a key', () => {
+    expect(graph.has(P('src/fonts/Mono.woff2'))).toBe(false);
+    expect(graphNodes(graph).has(P('src/fonts/Mono.woff2'))).toBe(true);
   });
 });
 
@@ -128,10 +137,42 @@ describe('parseCases and specChange', () => {
 });
 
 describe('packageJsonChange', () => {
-  it('ignores a version bump and a script, not a dependency', () => {
-    const base = JSON.stringify({ version: '0.1.0', scripts: { a: 'x' }, dependencies: { r: '1' } });
-    expect(packageJsonChange(base, JSON.stringify({ version: '0.2.0', scripts: { a: 'y' }, dependencies: { r: '1' } }))).toBe(false);
-    expect(packageJsonChange(base, JSON.stringify({ version: '0.1.0', scripts: { a: 'x' }, dependencies: { r: '2' } }))).toBe(true);
+  const pkg = (over) =>
+    JSON.stringify({
+      version: '0.1.0',
+      dependencies: { r: '1' },
+      scripts: { 'build-storybook': 'pnpm tokens:build && storybook build', 'tokens:build': 'node a.mjs', 'release:train': 'node r.mjs' },
+      ...over,
+    });
+  const base = pkg({});
+  const visual = ['build-storybook'];
+
+  it('ignores a version bump and a script the visual job does not reach', () => {
+    expect(packageJsonChange(base, pkg({ version: '0.2.0' }), visual)).toBeNull();
+    const scripts = { ...JSON.parse(base).scripts, 'release:train': 'node r.mjs --dry-run' };
+    expect(packageJsonChange(base, pkg({ scripts }), visual)).toBeNull();
+  });
+
+  it('reaches every story for a dependency', () => {
+    expect(packageJsonChange(base, pkg({ dependencies: { r: '2' } }), visual)).toMatch(/dependency/);
+  });
+
+  it('reaches every story for a script the visual job runs, directly or through another', () => {
+    const direct = { ...JSON.parse(base).scripts, 'build-storybook': 'storybook build --quiet' };
+    expect(packageJsonChange(base, pkg({ scripts: direct }), visual)).toMatch(/build-storybook/);
+    const nested = { ...JSON.parse(base).scripts, 'tokens:build': 'node b.mjs' };
+    expect(packageJsonChange(base, pkg({ scripts: nested }), visual)).toMatch(/tokens:build/);
+  });
+
+  it('follows `pnpm x` and `pnpm run x` through the scripts', () => {
+    expect([...scriptClosure({ a: 'pnpm run b', b: 'pnpm c && echo', c: 'x', d: 'y' }, ['a'])].sort()).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('workflowOutsideJobs', () => {
+  it('keeps what every job inherits, and drops the jobs and the comments', () => {
+    const wf = ['name: CI', '# why', 'env:', '  A: 1 # inline', 'jobs:', '  visual:', '    steps: []', 'concurrency: x'].join('\n');
+    expect(workflowOutsideJobs(wf)).toBe(['name: CI', 'env:', '  A: 1', 'concurrency: x'].join('\n'));
   });
 });
 
@@ -152,6 +193,7 @@ describe('classifyChange and selectStories', () => {
   const files = {};
   const ctx = {
     graph,
+    nodes: graphNodes(graph),
     closures: storyClosures(graph, index, asserted),
     global: globalFiles(graph),
     snapshots: new Map([['button-default.png', ['button--default']]]),
@@ -181,6 +223,11 @@ describe('classifyChange and selectStories', () => {
     expect(sel.decisions.every((d) => d.kind === 'none')).toBe(true);
   });
 
+  it('is default-deny inside src too: a file no graph holds reaches everything', () => {
+    expect(pick(P('src/fonts/New.woff2')).decisions[0]).toMatchObject({ kind: 'global', reason: expect.stringMatching(/default-deny/) });
+    expect(pick(P('src/components/Button.test.tsx')).all).toBe(false);
+  });
+
   it('is default-deny for a path no rule names', () => {
     expect(pick(P('some-new-config.yaml')).decisions[0]).toMatchObject({ kind: 'global', reason: expect.stringMatching(/default-deny/) });
   });
@@ -192,6 +239,25 @@ describe('classifyChange and selectStories', () => {
     expect(pick('.github/workflows/ci.yml').all).toBe(false);
     files['head:.github/workflows/ci.yml'] = wf('pnpm lint').replace('test:visual', 'test:visual --retries 3');
     expect(pick('.github/workflows/ci.yml').all).toBe(true);
+  });
+
+  it('reaches every story when a workflow-level key changes, since visual inherits it', () => {
+    const wf = (env) => `name: CI\nenv:\n  NODE_OPTIONS: ${env}\njobs:\n  visual:\n    steps:\n      - run: pnpm test:visual\n`;
+    files['base:.github/workflows/ci.yml'] = wf('--x');
+    files['head:.github/workflows/ci.yml'] = wf('--y');
+    expect(pick('.github/workflows/ci.yml').decisions[0].reason).toMatch(/workflow-level/);
+    files['head:.github/workflows/ci.yml'] = wf('--x').replace('name: CI', '# a comment\nname: CI');
+    expect(pick('.github/workflows/ci.yml').all).toBe(false);
+  });
+
+  it('reads the visual job’s scripts from ci.yml when judging package.json', () => {
+    files['base:.github/workflows/ci.yml'] = files['head:.github/workflows/ci.yml'] =
+      'jobs:\n  visual:\n    steps:\n      - run: pnpm build-storybook\n';
+    files[`base:${P('package.json')}`] = JSON.stringify({ scripts: { 'build-storybook': 'a', other: 'b' } });
+    files[`head:${P('package.json')}`] = JSON.stringify({ scripts: { 'build-storybook': 'a', other: 'c' } });
+    expect(pick(P('package.json')).all).toBe(false);
+    files[`head:${P('package.json')}`] = JSON.stringify({ scripts: { 'build-storybook': 'z', other: 'b' } });
+    expect(pick(P('package.json')).all).toBe(true);
   });
 
   it('judges a rename on both paths, and a changed runner image as everything', () => {
