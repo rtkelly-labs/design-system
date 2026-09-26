@@ -47,8 +47,10 @@ describe('useActiveHeading', () => {
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    // Unstub first: the rAF stub sits on top of fake timers' own fake rAF, and
+    // restoring real timers before it reinstalls that fake for every later file.
     vi.unstubAllGlobals();
+    vi.useRealTimers();
     vi.restoreAllMocks();
     document.body.innerHTML = '';
   });
