@@ -54,7 +54,7 @@ navigation* and *General site layout* with #246, *Long-form content* with #250, 
 | Choose many | `Checkbox` | `ready` | |
 | Toggle state | `Switch` | `ready` | |
 | Group fields | `Fieldset` + `Legend` | `ready` | |
-| Submit an action | `Button` | `ready` | |
+| Submit an action | `Button` — `disabled` while a request is in flight, with its own treatment | `ready` | |
 | Confirm a destructive action | `AlertDialog` | `ready` | |
 | Display a modal workflow | `Modal` | `ready` | |
 | Show an off-canvas panel | `Drawer` | `ready` | |
@@ -77,6 +77,23 @@ Two rows are additions to the table #237 proposed, each because a landed compone
 capability separable: *Group fields* (the half of #239 that is not radio-specific — a set of
 checkboxes or an address block wants the same group label, description and error) and *Show an
 off-canvas panel* (`Drawer`, #241, which *Mobile navigation* composes but does not exhaust).
+
+## The proof: account flows
+
+`SaaS/Account Flows` ([#252](https://github.com/rtkelly13/design-system/issues/252)) composes four
+flows — sign in, create an account, reset a password, account settings inside `AppShell` — from the
+rows above, and `tests/a11y.spec.ts` completes each one from the keyboard. It is the check that the
+form rows are `ready` together and not only one at a time. What it found:
+
+- **Fixed:** a disabled `Button` and a disabled `Input` / `TextArea` rendered exactly like enabled
+  ones. Both now wear the sunken, muted treatment `Select` already had.
+- **Composed from utilities, with no system answer:** a heading for the top of a form panel
+  (`PageTitle` and `PageHeader` are page-scale), and an inline text link outside `Prose`.
+  Not blocking: both are typography over roles, not invented behaviour.
+  [#300](https://github.com/rtkelly13/design-system/issues/300).
+- **Filed:** every field error is `role="alert"`, so a failed submit announces each invalid field
+  on top of `ErrorSummary` taking focus.
+  [#299](https://github.com/rtkelly13/design-system/issues/299).
 
 ## What is deliberately not a row
 

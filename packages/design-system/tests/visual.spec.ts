@@ -169,6 +169,34 @@ const CASES: readonly VisualCase[] = [
     snapshot: 'errorsummary-account-settings.png',
     fullPage: true,
   },
+  // The disabled treatment #252 gave `Button`: an enabled and two disabled
+  // buttons side by side, so the sunken ground and the missing shadow are
+  // asserted against the resting button they replace.
+  { id: 'components-actions-forms-button--disabled', snapshot: 'button-disabled.png' },
+  // The account flows (#252), every state a reader meets on the way through:
+  // each flow at rest and after a failed submit, the reset flow's middle step,
+  // and the settings page in `AppShell`. The a11y suite reads these ids, so
+  // this list is also what puts the error states in front of axe.
+  { id: 'saas-account-flows--sign-in', snapshot: 'account-flows-sign-in.png' },
+  { id: 'saas-account-flows--sign-in-rejected', snapshot: 'account-flows-sign-in-rejected.png' },
+  { id: 'saas-account-flows--create-account', snapshot: 'account-flows-create-account.png', fullPage: true },
+  {
+    id: 'saas-account-flows--create-account-failed',
+    snapshot: 'account-flows-create-account-failed.png',
+    fullPage: true,
+  },
+  { id: 'saas-account-flows--reset-password', snapshot: 'account-flows-reset-password.png' },
+  { id: 'saas-account-flows--reset-password-sent', snapshot: 'account-flows-reset-password-sent.png' },
+  {
+    id: 'saas-account-flows--reset-password-mismatch',
+    snapshot: 'account-flows-reset-password-mismatch.png',
+  },
+  { id: 'saas-account-flows--account-settings', snapshot: 'account-flows-account-settings.png', fullPage: true },
+  {
+    id: 'saas-account-flows--account-settings-failed',
+    snapshot: 'account-flows-account-settings-failed.png',
+    fullPage: true,
+  },
   { id: 'components-data-statcard--system-health', snapshot: 'statcard-system-health.png' },
   { id: 'components-data-datatable--virtualized', snapshot: 'datatable-virtualized.png' },
   // The semantics at rest (#245): a caption, a row-header column in the body
@@ -441,6 +469,24 @@ const MOBILE_CASES: readonly VisualCase[] = [
   {
     id: 'components-actions-forms-errorsummary--account-settings',
     snapshot: 'errorsummary-account-settings-mobile.png',
+    fullPage: true,
+  },
+  // The account flows (#252) at a phone's width: a signed-out panel with its
+  // summary and field errors wrapping, the longest signed-out form, and the
+  // settings page with its sidebar collapsed behind the topbar's toggle.
+  {
+    id: 'saas-account-flows--sign-in-rejected',
+    snapshot: 'account-flows-sign-in-rejected-mobile.png',
+    fullPage: true,
+  },
+  {
+    id: 'saas-account-flows--create-account-failed',
+    snapshot: 'account-flows-create-account-failed-mobile.png',
+    fullPage: true,
+  },
+  {
+    id: 'saas-account-flows--account-settings',
+    snapshot: 'account-flows-account-settings-mobile.png',
     fullPage: true,
   },
   // The marketing sections' breakpoint (issue 248): every grid drops to one

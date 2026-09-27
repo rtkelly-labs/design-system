@@ -126,6 +126,10 @@ const EXCLUDED = {
     propsTable:
       'A reference sheet for the role tokens, not a component. Same as Theme Ladder: nothing to tabulate.',
   },
+  'SaaS/Account Flows': {
+    propsTable:
+      'Four compositions — sign in, registration, password reset, account settings — and no component of their own. The primitives they compose each have a page and a table; the fixtures\' props are story switches, not an API.',
+  },
   'Docs/Layout/Portal': {
     propsTable:
       'A composition of the whole docs kit — layout, header, sidebar, TOC, pager — so no single component owns the page. Each part has its own page with its own table.',

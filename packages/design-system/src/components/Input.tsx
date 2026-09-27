@@ -44,9 +44,15 @@ export const fieldControl = recipe({
      * outline from this slot defeats that rule: the utility carries a class and
      * a pseudo-class, so it outranks the bare `:focus-visible` selector and
      * wins on exactly the keyboard focus the rule exists to cover.
+     *
+     * The `disabled:` half is the treatment `Select`'s listbox trigger already
+     * wore: a sunken ground, the subtle edge and muted ink. Without it a
+     * disabled `Input` rendered exactly like an editable one — the username
+     * in the account-settings proof read as a field you could change (#252).
      */
     control:
-      'w-full border-2 border-edge-strong bg-surface-base font-mono text-sm text-content-primary transition-colors placeholder:text-content-muted focus:border-[var(--field-accent)]',
+      'w-full border-2 border-edge-strong bg-surface-base font-mono text-sm text-content-primary transition-colors placeholder:text-content-muted focus:border-[var(--field-accent)] ' +
+      'disabled:cursor-not-allowed disabled:border-edge-subtle disabled:bg-surface-sunken disabled:text-content-muted',
   },
   variants: {
     /** Padding differs by control: a textarea is a box, the others are lines. */

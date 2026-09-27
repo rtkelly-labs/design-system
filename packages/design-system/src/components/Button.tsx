@@ -93,9 +93,26 @@ export type ButtonProps = ButtonElementProps | ButtonLinkProps;
 /**
  * The press affordance — offset shadow that collapses as the control moves into
  * it. Shared rather than repeated so the four accents cannot drift apart.
+ *
+ * Hover and press are gated on `not-disabled:` so a disabled button does not
+ * lift under the pointer or sink when clicked: it would be promising an action
+ * it will not take. `not-disabled` rather than `enabled`, because `:enabled`
+ * matches form elements only and the anchor form would lose its hover.
  */
 const PRESS =
-  'shadow-hard-md hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none';
+  'shadow-hard-md not-disabled:hover:shadow-hard-lg not-disabled:active:translate-x-1 ' +
+  'not-disabled:active:translate-y-1 not-disabled:active:shadow-none';
+
+/**
+ * The disabled treatment, the one `Select`'s trigger and the text fields wear:
+ * a sunken ground, the subtle edge, muted ink and no shadow. Before #252 a
+ * disabled button rendered exactly like an enabled one — a pending submit
+ * looked pressable and did nothing. `disabled:` matches the `<button>` form
+ * only, which is right: an anchor cannot be disabled.
+ */
+const DISABLED =
+  'disabled:cursor-not-allowed disabled:border-edge-subtle disabled:bg-surface-sunken ' +
+  'disabled:text-content-muted disabled:shadow-none';
 
 /**
  * One constant per rendered form, aliased by every name that resolves to it.
@@ -114,7 +131,7 @@ const TERTIARY = `bg-accent-tertiary text-content-inverse border-edge-strong ${P
 const INVERSE = `bg-content-primary text-content-inverse border-content-primary ${PRESS}`;
 
 const button = recipe({
-  base: 'font-mono font-bold uppercase border-2 transition-all duration-200',
+  base: `font-mono font-bold uppercase border-2 transition-all duration-200 ${DISABLED}`,
   variants: {
     size: {
       sm: 'px-4 py-2 text-sm',

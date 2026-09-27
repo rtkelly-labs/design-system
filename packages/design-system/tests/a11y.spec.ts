@@ -393,3 +393,221 @@ test.describe('Accessibility — open popups', () => {
     }
   }
 });
+
+/**
+ * The account flows (#252), completed from the keyboard.
+ *
+ * The loop above axes each flow's stories at rest and in the error state. What
+ * it cannot see is whether the flow can be *finished* without a pointer: that
+ * a failed submit puts focus on the summary, that the summary's links land on
+ * the fields, that a step change or a success moves focus somewhere rather
+ * than dropping it with an unmounted button. These drive each flow with Tab,
+ * Enter, Space and the arrows only — no clicks, no `.focus()` — through a
+ * failure and out the other side, and axe the states the loop never reaches:
+ * a server rejection mid-flow, the finished step with its toast, and the
+ * delete confirmation open over the settings page.
+ *
+ * One Level: nothing here varies by colour, and the loop already covers both.
+ * Both projects, because the settings page is a different tab order once the
+ * sidebar collapses behind the topbar's toggle.
+ */
+test.describe('Account flows — keyboard', () => {
+  const root = (page: Page) => page.locator('#storybook-root');
+  const summary = (page: Page) => root(page).locator('[data-slot="error-summary"]');
+
+  async function open(page: Page, id: string) {
+    await page.goto(`/iframe.html?id=${id}&viewMode=story`);
+    await waitForStoryRendered(page, id);
+    await page.evaluate(() => document.fonts.ready);
+    await page.addStyleTag({
+      content: '*,*::before,*::after{transition:none!important;animation:none!important}',
+    });
+  }
+
+  /** Tab forward until `target` has focus. Bounded, so a trap fails rather than hangs. */
+  async function tabTo(page: Page, target: ReturnType<Page['locator']>, max = 40) {
+    for (let i = 0; i < max; i++) {
+      if (await target.evaluate((el) => el === document.activeElement)) return;
+      await page.keyboard.press('Tab');
+    }
+    await expect(target).toBeFocused();
+  }
+
+  /** Replace a text field's value from the keyboard. */
+  async function retype(page: Page, value: string) {
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.type(value);
+  }
+
+  async function axe(page: Page) {
+    await markScope(page);
+    const serious = (await scan(page)).filter((v) => v.impact === 'serious' || v.impact === 'critical');
+    return serious.map((v) => `${v.id} (${v.impact}, ${v.nodes.length}): ${v.help}`);
+  }
+
+  /** Enter on the summary's first link, which should land on `field`. */
+  async function followFirstError(page: Page, field: ReturnType<Page['locator']>) {
+    await expect(summary(page)).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(summary(page).getByRole('link').first()).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(field).toBeFocused();
+  }
+
+  test('sign in — empty, rejected, then signed in', async ({ page }) => {
+    await open(page, 'saas-account-flows--sign-in');
+    const email = root(page).getByLabel('Email address');
+    const password = root(page).getByLabel('Password', { exact: true });
+
+    await tabTo(page, email);
+    await page.keyboard.press('Enter');
+    await expect(summary(page).getByRole('link')).toHaveCount(2);
+    await followFirstError(page, email);
+
+    await page.keyboard.type('ada@example.com');
+    await page.keyboard.press('Tab');
+    await expect(password).toBeFocused();
+    await page.keyboard.type('difference-engine');
+    await page.keyboard.press('Enter');
+
+    // The server's refusal: one entry, no field to blame, the password cleared.
+    await expect(summary(page)).toContainText('We could not sign you in');
+    await expect(summary(page).getByRole('link')).toHaveCount(1);
+    await expect(password).toHaveValue('');
+    expect(await axe(page)).toEqual([]);
+
+    await followFirstError(page, email);
+    await tabTo(page, password);
+    await page.keyboard.type('analytical-engine');
+    const remember = root(page).getByRole('checkbox', { name: 'Keep me signed in on this device' });
+    await tabTo(page, remember);
+    await page.keyboard.press('Space');
+    await expect(remember).toBeChecked();
+    await tabTo(page, root(page).getByRole('button', { name: 'SIGN IN' }));
+    await page.keyboard.press('Enter');
+
+    await expect(root(page).getByRole('heading', { name: 'Signed in' })).toBeFocused();
+    await expect(root(page)).toContainText('stay signed in for 30 days');
+  });
+
+  test('create account — four errors, a server refusal, then created', async ({ page }) => {
+    await open(page, 'saas-account-flows--create-account');
+    const name = root(page).getByLabel('Full name');
+    const email = root(page).getByLabel('Email address');
+
+    await tabTo(page, name);
+    await page.keyboard.press('Enter');
+    await expect(summary(page).getByRole('link')).toHaveCount(4);
+    await followFirstError(page, name);
+
+    await page.keyboard.type('Ada Lovelace');
+    await page.keyboard.press('Tab');
+    await expect(email).toBeFocused();
+    await page.keyboard.type('taken@example.com');
+    await page.keyboard.press('Tab');
+    await page.keyboard.type('notes-on-the-engine');
+    const terms = root(page).getByRole('checkbox', { name: 'I agree to the terms of service' });
+    await tabTo(page, terms);
+    await page.keyboard.press('Space');
+    await expect(terms).toBeChecked();
+    await tabTo(page, root(page).getByRole('button', { name: 'CREATE ACCOUNT' }));
+    await page.keyboard.press('Enter');
+
+    await expect(summary(page)).toContainText('An account already exists for this email address');
+    await expect(summary(page).getByRole('link')).toHaveCount(1);
+    expect(await axe(page)).toEqual([]);
+
+    await followFirstError(page, email);
+    await retype(page, 'ada@example.com');
+    await tabTo(page, root(page).getByRole('button', { name: 'CREATE ACCOUNT' }));
+    await page.keyboard.press('Enter');
+
+    await expect(root(page).getByRole('heading', { name: 'Account created' })).toBeFocused();
+  });
+
+  test('reset password — every step, a mismatch, and the toast', async ({ page }) => {
+    await open(page, 'saas-account-flows--reset-password');
+    const email = root(page).getByLabel('Email address');
+
+    await tabTo(page, email);
+    await page.keyboard.press('Enter');
+    await followFirstError(page, email);
+    await page.keyboard.type('ada@example.com');
+    await page.keyboard.press('Enter');
+
+    await expect(root(page).getByRole('heading', { name: 'Check your email' })).toBeFocused();
+    await tabTo(page, root(page).getByRole('button', { name: 'OPEN THE RESET LINK' }));
+    await page.keyboard.press('Enter');
+
+    const password = root(page).getByLabel('New password', { exact: true });
+    const confirm = root(page).getByLabel('Confirm new password');
+    await expect(root(page).getByRole('heading', { name: 'Choose a new password' })).toBeFocused();
+    await tabTo(page, password);
+    await page.keyboard.type('engine');
+    await page.keyboard.press('Tab');
+    await expect(confirm).toBeFocused();
+    await page.keyboard.type('engines');
+    await page.keyboard.press('Enter');
+    await expect(summary(page).getByRole('link')).toHaveCount(2);
+
+    await followFirstError(page, password);
+    await retype(page, 'notes-on-the-engine');
+    await page.keyboard.press('Tab');
+    await retype(page, 'notes-on-the-engine');
+    await page.keyboard.press('Enter');
+
+    await expect(root(page).getByRole('heading', { name: 'Password changed' })).toBeFocused();
+    await expect(page.locator('[data-slot="toast"]')).toContainText('Password changed');
+    expect(await axe(page)).toEqual([]);
+  });
+
+  test('account settings — fix five errors, save, then delete and cancel', async ({ page }) => {
+    await open(page, 'saas-account-flows--account-settings');
+    const save = root(page).getByRole('button', { name: 'SAVE CHANGES' });
+
+    await tabTo(page, save, 80);
+    await page.keyboard.press('Enter');
+    await expect(summary(page).getByRole('link')).toHaveCount(5);
+    await followFirstError(page, root(page).getByLabel('Display name'));
+
+    // Down the form in tab order, fixing each field on the way.
+    await page.keyboard.type('Ada');
+    await tabTo(page, root(page).getByLabel('Email address'));
+    await retype(page, 'ada@example.com');
+    await page.keyboard.press('Tab');
+    await expect(root(page).getByLabel('Bio (optional)')).toBeFocused();
+    await retype(page, 'Analyst of engines.');
+    const firstRadio = root(page).getByRole('radio', { name: 'Public' });
+    await tabTo(page, firstRadio);
+    await page.keyboard.press('Space');
+    await expect(firstRadio).toBeChecked();
+    const terms = root(page).getByRole('checkbox', { name: 'I accept the updated terms of service' });
+    await tabTo(page, terms);
+    await page.keyboard.press('Space');
+    await expect(terms).toBeChecked();
+    await tabTo(page, save);
+    await page.keyboard.press('Enter');
+
+    await expect(summary(page)).toHaveCount(0);
+    await expect(root(page).getByText('> Settings saved')).toBeVisible();
+
+    // The destructive half: into the confirmation, and back out with focus intact.
+    const del = root(page).getByRole('button', { name: 'DELETE ACCOUNT' });
+    await tabTo(page, del);
+    await page.keyboard.press('Enter');
+    const dialog = page.getByRole('alertdialog', { name: /Delete account/ });
+    await expect(dialog).toBeVisible();
+    expect(await axe(page)).toEqual([]);
+
+    const confirmDelete = dialog.getByRole('button', { name: 'DELETE ACCOUNT' });
+    await tabTo(page, confirmDelete, 5);
+    await page.keyboard.press('Enter');
+    await expect(dialog).toBeHidden();
+    const cancel = root(page).getByRole('button', { name: 'CANCEL DELETION' });
+    await expect(cancel).toBeFocused();
+    await expect(page.locator('[data-slot="toast"]')).toContainText('Account scheduled for deletion');
+
+    await page.keyboard.press('Enter');
+    await expect(root(page).getByRole('button', { name: 'DELETE ACCOUNT' })).toBeFocused();
+  });
+});
