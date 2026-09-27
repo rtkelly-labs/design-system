@@ -7,8 +7,9 @@ to express a checkbox. What a consumer actually asks is **can I build this site 
 foundational interaction behaviour?** — so this file has one row per **capability**, not per
 component.
 
-[`surface-readiness.md`](./surface-readiness.md) asks a neighbouring question — how many *kinds* of
-site the package serves. This file is narrower and is the one 1.0 is measured against.
+This is the current source of truth for readiness, and the file 1.0 is measured against.
+[`surface-readiness.md`](./surface-readiness.md) is the earlier, surface-by-surface assessment. It is
+kept as history, apart from its status-tag table, which is still live.
 
 ## The 1.0 criterion
 

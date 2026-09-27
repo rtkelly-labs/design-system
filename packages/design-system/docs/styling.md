@@ -116,7 +116,7 @@ the prose layer is the plugin plus two things:
   `--ds-*` role tokens. Variables only, so it is the sanctioned CSS payload —
   and there is deliberately no `--tw-prose-invert-*` block: the plugin needs one
   because it models theming as a light/dark flip, while `--ds-*` already resolves
-  per level, so one mapping is correct on all four rungs.
+  per level, so one mapping is correct on every rung.
 - The brutalist deltas are `prose-h1:` / `prose-table:` / `prose-code:` element
   modifiers in `Prose.tsx` — the plugin's own mechanism for exactly this.
 

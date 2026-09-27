@@ -1,7 +1,7 @@
 {
   "name": "@rtkelly13/design-system",
   "version": "0.12.0",
-  "description": "Brutalist design system with a four-level theme ladder, slide deck system, and experiments foundation for Ryan Kelly websites",
+  "description": "Brutalist design system for Ryan Kelly websites: a two-level theme ladder, role-addressed tokens, and Base UI-backed components",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

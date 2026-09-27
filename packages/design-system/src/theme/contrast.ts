@@ -2,10 +2,10 @@
  * Contrast arithmetic over the ladder.
  *
  * Every colour in `levels.ts` is a literal, so contrast can be computed as data
- * — no browser, no screenshot, no rendering. `pnpm check:contrast` walks all
- * four levels and fails CI on a violation, which is the thing that makes a
- * four-rung ladder maintainable: 4 levels x ~15 role pairs is 60 combinations,
- * and nobody eyeballs 60 combinations reliably twice.
+ * — no browser, no screenshot, no rendering. `pnpm check:contrast` walks every
+ * level and fails CI on a violation, which is the thing that makes the ladder
+ * maintainable: every level times every role pair is a matrix nobody eyeballs
+ * reliably twice.
  *
  * The maths is WCAG 2.1 relative luminance. APCA is the better predictor of
  * perceived contrast, but it is not yet normative and its thresholds are not

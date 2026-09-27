@@ -23,7 +23,7 @@ conclusion from a green run.
 | **Output** | pass/fail + diff triad | HTML report you browse | count + names |
 
 The walkthrough is the one people misread. It captures far more than the gated
-suite — all four rungs of the ladder, every story — and asserts **none** of it.
+suite — every rung of the ladder, every story — and asserts **none** of it.
 It exists so a human can *look*; it will never fail because something broke. A
 component that appears in the walkthrough and nowhere else is photographed, not
 tested.
@@ -456,7 +456,7 @@ Revisit when one of these becomes true:
 
 - 37 components, 38 asserted rows, budget `0`. One exclusion
   (`Showcase/DesignSandbox`, with a reason).
-- `Foundations/Theme Ladder → AllLevels` is asserted, so all four rungs are
+- `Foundations/Theme Ladder → AllLevels` is asserted, so every rung is
   compared in one screenshot. That closes the gap where a token change could
   read well on `midnight` and be unusable on `sketch` while passing everything.
 - Open, in rough priority order:

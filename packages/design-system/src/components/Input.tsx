@@ -10,8 +10,8 @@ import type { FieldProps } from './fieldFrame';
  * Three things to copy from here:
  *
  *   1. **Every colour addresses a role.** `bg-surface-base`,
- *      `text-content-primary`, `border-edge-strong`, `text-intent-danger`. All
- *      four levels are styled by the same classes and a fifth would be too.
+ *      `text-content-primary`, `border-edge-strong`, `text-intent-danger`. Every
+ *      level is styled by the same classes, and a new one would be too.
  *   2. **Styling is a `recipe`, not a template string.** The recipe has one
  *      slot per element, so a consumer can reach any of them, and conflicts
  *      resolve — a caller's `bg-surface-raised` genuinely replaces the base's

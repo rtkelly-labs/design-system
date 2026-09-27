@@ -2,11 +2,11 @@
 /**
  * Fail the build when any level's role pair falls below its minimum ratio.
  *
- * This is the gate that makes a four-rung ladder maintainable. Every colour in
- * `levels.ts` is a literal, so the whole matrix — 4 levels x every text, accent,
- * intent and border against every surface — is computable as data, with no
- * browser and no screenshot. The alternative is reviewing sixty combinations by
- * eye on every palette change, which nobody does twice.
+ * This is the gate that makes the ladder maintainable. Every colour in
+ * `levels.ts` is a literal, so the whole matrix — every level x every text,
+ * accent, intent and border against every surface — is computable as data, with
+ * no browser and no screenshot. The alternative is reviewing that matrix by eye
+ * on every palette change, which nobody does twice.
  *
  *   node scripts/check-contrast.mjs            fail on violations
  *   node scripts/check-contrast.mjs --report   print the full matrix, always exit 0

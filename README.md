@@ -7,7 +7,7 @@ belongs to the repository rather than to any one package: the workflows, the sin
 
 | Package | |
 |---|---|
-| [`@rtkelly13/design-system`](./packages/design-system) | The design system itself — components, the four-level theme ladder, the tokens, and the gates that hold them. Start at its [`AGENTS.md`](./packages/design-system/AGENTS.md). |
+| [`@rtkelly13/design-system`](./packages/design-system) | The design system itself — components, the two-level theme ladder, the tokens, and the gates that hold them. Start at its [`AGENTS.md`](./packages/design-system/AGENTS.md). |
 
 One package, for now. The layout is what makes a second one a normal addition rather than a
 restructure — which is why it landed before there was a second package to justify it. The

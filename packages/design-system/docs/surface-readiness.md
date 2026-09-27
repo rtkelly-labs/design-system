@@ -1,5 +1,18 @@
 # Surface readiness — is this a multi-purpose design system yet?
 
+> [!IMPORTANT]
+> **Mostly history. The current answer is [`capability-readiness.md`](./capability-readiness.md).**
+>
+> One section here is live: [*These assignments are published as story tags*](#these-assignments-are-published-as-story-tags).
+> It is the source for the sidebar status tags, which `check:story-conventions` enforces, and it is
+> kept current.
+>
+> Everything else is an assessment measured at `95ef0ba`, kept as the record of why the capability
+> work was ordered the way it was. Its percentages and gaps describe that commit, not `main`. Since
+> then the marketing sections (#248, #286), `AppShell` (#247), site chrome (#246), the overlay set
+> (#166) and the form controls (#238, #239, #164) have all landed. Don't cite a figure from those
+> sections as current.
+
 The stated aim is one system serving **marketing**, **blog** and **admin** sites.
 This document measures the package against that aim, surface by surface, and
 names the other surfaces worth claiming.
@@ -53,6 +66,9 @@ Retag it when something depends on it.
 The vocabulary is Storybook's own feature lifecycle — `stable`, `experimental`, `preview`,
 `deprecated` — rather than a second one to maintain. A group cannot be added to the sidebar
 without a status, because `check:story-conventions` closes both lists at once.
+
+The readiness table below is the `95ef0ba` assessment, kept for the record. For the current
+state, see [`capability-readiness.md`](./capability-readiness.md).
 
 | Surface | Readiness | What carries it | What blocks it |
 |---|---|---|---|
