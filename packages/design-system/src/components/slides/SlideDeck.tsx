@@ -252,7 +252,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
+          fontFamily: 'var(--ds-font-mono)',
         }}
       >
         {/* Slide Counter */}
@@ -327,7 +327,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
             padding: '1rem 1.5rem',
             borderTop: '2px solid var(--ds-border-strong)',
             backgroundColor: 'var(--ds-surface-raised)',
-            fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
+            fontFamily: 'var(--ds-font-mono)',
             fontSize: '0.85rem',
             lineHeight: 1.6,
             color: 'var(--ds-text-primary)',

@@ -20,7 +20,7 @@ export const TLDR: React.FC<TLDRProps> = ({ children }) => {
         <Zap size={20} color="var(--ds-accent-secondary)" />
         <span
           style={{
-            fontFamily: 'var(--font-space-grotesk, "Space Grotesk"), sans-serif',
+            fontFamily: 'var(--ds-font-display)',
             fontWeight: 800,
             fontSize: '1rem',
             textTransform: 'uppercase',
@@ -32,7 +32,7 @@ export const TLDR: React.FC<TLDRProps> = ({ children }) => {
       </div>
       <div
         style={{
-          fontFamily: 'var(--font-inter, "Inter"), sans-serif',
+          fontFamily: 'var(--ds-font-body)',
           fontSize: '1rem',
           fontWeight: 500,
           color: 'var(--ds-text-primary)',

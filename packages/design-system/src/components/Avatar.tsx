@@ -101,7 +101,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(function Avatar({
       <BaseAvatar.Fallback
         data-slot="avatar-fallback"
         style={{
-            fontFamily: 'var(--font-space-grotesk, "Space Grotesk"), sans-serif',
+            fontFamily: 'var(--ds-font-display)',
             fontWeight: 800,
             fontSize: size === 'sm' ? '0.75rem' : size === 'lg' ? '1.2rem' : '0.95rem',
             color: accentColor,

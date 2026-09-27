@@ -71,7 +71,7 @@ export interface SaasLandingPageProps {
   deployLog?: string;
 }
 
-const MONO = 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace';
+const MONO = 'var(--ds-font-mono)';
 
 const DIVIDER_STYLE: React.CSSProperties = {
   margin: '3rem 0',
@@ -185,7 +185,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
         margin: '0 auto',
         padding: '3rem 1.5rem',
         color: 'var(--ds-text-primary)',
-        fontFamily: 'var(--font-inter, "Inter"), sans-serif',
+        fontFamily: 'var(--ds-font-body)',
       }}
     >
       <Hero
