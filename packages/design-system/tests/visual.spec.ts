@@ -222,6 +222,17 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-feedback-skeleton--loading-card', snapshot: 'skeleton-loading-card.png' },
   { id: 'components-feedback-progress--accents', snapshot: 'progress-accents.png' },
   { id: 'components-feedback-emptystate--first-run', snapshot: 'emptystate-first-run.png' },
+  // The page-level states (issue 251), all five: the two presets and the
+  // three recipes, each on the frame it is normally served in. The 404 and
+  // the 401 inside the site chrome (`fullPage`, header to footer); the 500,
+  // maintenance and offline standalone, as the whole document. The a11y suite
+  // reads these ids, so each page's single `<h1>` and its landmark are axed
+  // on both Levels.
+  { id: 'components-feedback-notfoundpage--in-site-chrome', snapshot: 'notfoundpage-in-site-chrome.png', fullPage: true },
+  { id: 'components-feedback-servererrorpage--standalone', snapshot: 'servererrorpage-standalone.png' },
+  { id: 'components-feedback-statuspage--maintenance', snapshot: 'statuspage-maintenance.png' },
+  { id: 'components-feedback-statuspage--offline', snapshot: 'statuspage-offline.png' },
+  { id: 'components-feedback-statuspage--unauthorized', snapshot: 'statuspage-unauthorized.png', fullPage: true },
   // mdxcn-derived documentation visuals. Each renderer gets a representative
   // capture on both levels. Compositions prove that related visuals share one frame.
   { id: 'docs-figures-figureframe--editorial-figure', snapshot: 'figureframe-editorial.png' },
@@ -430,6 +441,13 @@ const MOBILE_CASES: readonly VisualCase[] = [
   // the point of the issue is that two different pages survive this width.
   { id: 'saas-landingpage--product-launch', snapshot: 'saas-landing-product-launch-mobile.png', fullPage: true },
   { id: 'saas-landingpage--project-site', snapshot: 'saas-landing-project-site-mobile.png', fullPage: true },
+  // The page-level states (issue 251) at a phone's width: the code steps down
+  // a size, the actions wrap under the prose, and inside the chrome the header
+  // has become the `MENU` trigger. One in the chrome, one standalone, and the
+  // recipe with two actions.
+  { id: 'components-feedback-notfoundpage--in-site-chrome', snapshot: 'notfoundpage-in-site-chrome-mobile.png', fullPage: true },
+  { id: 'components-feedback-servererrorpage--standalone', snapshot: 'servererrorpage-standalone-mobile.png' },
+  { id: 'components-feedback-statuspage--unauthorized', snapshot: 'statuspage-unauthorized-mobile.png', fullPage: true },
 ];
 
 test.describe('Design System Visual Regression - Narrow viewport', () => {

@@ -1186,6 +1186,8 @@ interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' |
 
     title: string;
 
+    headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+
     description?: ReactNode;
 
     action?: ReactNode;
@@ -1196,6 +1198,46 @@ interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' |
 }
 
 declare const EmptyState: react.ForwardRefExoticComponent<EmptyStateProps & react.RefAttributes<HTMLDivElement>>;
+
+interface StatusPageProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children' | 'className'> {
+
+    title: string;
+
+    code?: ReactNode;
+
+    description?: ReactNode;
+
+    action?: ReactNode;
+
+    children?: ReactNode;
+
+    standalone?: boolean;
+
+    className?: string;
+}
+
+declare const StatusPage: react.ForwardRefExoticComponent<StatusPageProps & react.RefAttributes<HTMLElement>>;
+
+interface StatusPagePresetProps extends Omit<StatusPageProps, 'title'> {
+
+    homeHref?: string;
+
+    homeLabel?: string;
+}
+interface NotFoundPageProps extends StatusPagePresetProps {
+
+    title?: string;
+}
+
+declare const NotFoundPage: react.ForwardRefExoticComponent<NotFoundPageProps & react.RefAttributes<HTMLElement>>;
+interface ServerErrorPageProps extends StatusPagePresetProps {
+
+    title?: string;
+
+    standalone?: boolean;
+}
+
+declare const ServerErrorPage: react.ForwardRefExoticComponent<ServerErrorPageProps & react.RefAttributes<HTMLElement>>;
 
 type OverlaySide = 'top' | 'bottom' | 'left' | 'right';
 
@@ -2779,6 +2821,8 @@ export {
   type NerdIconProps,
   Node,
   type NodeProps,
+  NotFoundPage,
+  type NotFoundPageProps,
   NoteBlock,
   type NoteBlockProps,
   type OverlayAlign,
@@ -2839,6 +2883,8 @@ export {
   type SelectProps,
   type SelectionDevice,
   type SelectionDeviceCheck,
+  ServerErrorPage,
+  type ServerErrorPageProps,
   SiteFooter,
   type SiteFooterProps,
   SiteHeader,
@@ -2873,6 +2919,8 @@ export {
   StatCard,
   type StatCardAccent,
   type StatCardProps,
+  StatusPage,
+  type StatusPageProps,
   Step,
   type StepProps,
   type StepState,

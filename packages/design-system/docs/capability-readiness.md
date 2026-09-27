@@ -37,8 +37,8 @@ Assessed against `main` after #271 (`Pagination`); *Notify* moved to `ready` wit
 records* with #245, *Context actions*, *Explain an icon/control* and *Show contextual content*
 with #166, *Application layout* with #247, *Primary site navigation*, *Mobile
 navigation* and *General site layout* with #246, *Long-form content* with #250, *Validation* with
-#50, *Marketing* with #248, and *Choose one* with #164 (`Select`'s list painted by the palette, with
-`native` kept for the platform picker).
+#50, *Marketing* with #248, *Choose one* with #164 (`Select`'s list painted by the palette, with
+`native` kept for the platform picker), and *System & error pages* with #251.
 
 | Capability | System answer | Status | Issue |
 |---|---|---|---|
@@ -62,6 +62,7 @@ navigation* and *General site layout* with #246, *Long-form content* with #250, 
 | Loading | `Spinner` / `Skeleton` | `ready` | |
 | Progress | `Progress` | `ready` | |
 | No content | `EmptyState` | `ready` | |
+| System & error pages | `NotFoundPage` / `ServerErrorPage`; maintenance, offline and unauthorized as `StatusPage` recipes — each inside the site chrome or `standalone` | `ready` | |
 | Validation | field `error` + `ErrorSummary` — links to each invalid field, focus moves to the summary when it appears | `ready` | |
 | Paginate | `Pagination` — numbered pages, callback or `href` mode | `ready` | |
 | Display records | `Table` / `DataTable` — sorting, virtualisation, `caption`, row headers | `ready` | |

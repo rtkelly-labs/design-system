@@ -203,6 +203,11 @@ export interface SitePageProps {
   site: SiteFixture;
   /** Open the mobile drawer on load — for the narrow-viewport baselines. */
   mobileNavOpen?: boolean;
+  /**
+   * The page's content, in place of the fixture's headline and body — for a
+   * story that is about what goes inside the chrome (a `NotFoundPage`, say).
+   */
+  children?: ReactNode;
 }
 
 /**
@@ -211,7 +216,7 @@ export interface SitePageProps {
  * `SiteFooter`. The current page comes from `LinkProvider`'s `isCurrent`,
  * standing in for a router, rather than from any item saying so.
  */
-export function SitePage({ site, mobileNavOpen = false }: SitePageProps) {
+export function SitePage({ site, mobileNavOpen = false, children }: SitePageProps) {
   const items = navItems(site.nav);
   return (
     <LinkProvider isCurrent={(href) => href === site.currentPath}>
@@ -228,10 +233,14 @@ export function SitePage({ site, mobileNavOpen = false }: SitePageProps) {
           actions={site.actions}
         />
         <main id="main-content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-12 md:px-6">
-          <h1 className="font-display text-3xl font-bold uppercase tracking-wider">{site.headline}</h1>
-          <p className="mt-4 max-w-prose font-sans text-base leading-relaxed text-content-secondary">
-            {site.body}
-          </p>
+          {children ?? (
+            <>
+              <h1 className="font-display text-3xl font-bold uppercase tracking-wider">{site.headline}</h1>
+              <p className="mt-4 max-w-prose font-sans text-base leading-relaxed text-content-secondary">
+                {site.body}
+              </p>
+            </>
+          )}
         </main>
         <SiteFooter
           nav={site.footerColumns?.length ? footerNav(site.footerColumns) : undefined}

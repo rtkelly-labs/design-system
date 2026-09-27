@@ -57,11 +57,15 @@ consumer sees it without reading this file.
 | `SaaS/*` | `experimental` | ~20–25%, "screenshots of one specific product" |
 | `Showcase/*` | `experimental` | a sandbox, not a component |
 
-One entry departs from its group. `Components/Reports/ReportDocument` is tagged `preview`, not
-`stable`: it is gated end to end like everything else in the group, but its only intended
-consumer — the report generator — does not exist in this repository yet, so its API has not
-met a caller. `stable` claims a shape has survived use, and this one has survived a story.
-Retag it when something depends on it.
+Four entries depart from their group, all tagged `preview` rather than `stable` for the same
+reason. Each is gated end to end like everything else in the group, but no consumer depends on
+it yet, so its API has not met a caller. `stable` claims a shape has survived use, and these
+have survived a story. Retag each one when something depends on it.
+
+- `Components/Reports/ReportDocument`: its intended consumer, the report generator, is not in
+  this repository yet.
+- `Components/Feedback/StatusPage`, `NotFoundPage` and `ServerErrorPage` (#251): no site serves
+  them as its error pages yet.
 
 The vocabulary is Storybook's own feature lifecycle — `stable`, `experimental`, `preview`,
 `deprecated` — rather than a second one to maintain. A group cannot be added to the sidebar
