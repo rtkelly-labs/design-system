@@ -6,12 +6,15 @@ import { describe, expect, it } from 'vitest';
 import {
   cmapCodepoints,
   cssContentCodepoints,
+  cssStackBypasses,
+  decodeEntities,
   deterministicPrefix,
   fontFaces,
   mdxCodepoints,
   parseUnicodeRange,
   stackFamilies,
   tsCodepoints,
+  tsStackBypasses,
   woff2Cmap,
 } from './font-coverage.mjs';
 
@@ -88,5 +91,38 @@ describe('census extractors', () => {
   it('reads CSS content, literal or escaped, and ignores comments', () => {
     const src = '/* content: "✗" */\n.a::before { content: "\\2713  done"; }\n.b::after { content: "→"; }';
     expect(cssContentCodepoints(src).map(({ cp, line }) => [cp.toString(16), line])).toEqual([['2713', 2], ['2192', 3]]);
+  });
+});
+
+describe('entities', () => {
+  it('decodes named, decimal and hex entities, and reports unknown names', () => {
+    expect(decodeEntities('a &rarr; &#x2713; &#8984; &bogus;')).toEqual({ decoded: 'a → ✓ ⌘ &bogus;', unknown: ['&bogus;'] });
+  });
+
+  it('counts a character written as an entity in JSX text and JSX attributes, not in plain strings', () => {
+    const hits = tsCodepoints(ts, 'x.tsx', "const s = '&rarr;';\nexport const X = () => <p title=\"&times;\">go &check;</p>;");
+    expect(hits.map(({ cp }) => cp.toString(16))).toEqual(['d7', '2713']);
+  });
+
+  it('decodes MDX body text too', () => {
+    expect(mdxCodepoints('Next &rarr;').map(({ cp }) => cp.toString(16))).toEqual(['2192']);
+  });
+});
+
+describe('stack bypasses', () => {
+  it('finds a stack written in a TS string, and a Tailwind arbitrary family', () => {
+    const src = [
+      "const a = { fontFamily: 'var(--font-inter, \"Inter\"), sans-serif' };",
+      "const b = { fontFamily: '\"IBM Plex Mono\", monospace' };",
+      "const ok = { fontFamily: 'var(--ds-font-mono)' };",
+      "const c = 'font-[Foo] p-2';",
+      "const prose = 'a sans-serif font, the monospace kind';",
+    ].join('\n');
+    expect(tsStackBypasses(ts, 'x.tsx', src).map(({ line }) => line)).toEqual([1, 2, 4]);
+  });
+
+  it('finds a CSS font-family that is not a role variable, outside @font-face', () => {
+    const css = '@font-face { font-family: "X"; }\n.a { font-family: var(--ds-font-body); }\n.b { font-family: Arial, sans-serif; }\n.c { font-family: inherit; }';
+    expect(cssStackBypasses(css)).toEqual([{ line: 3, text: 'Arial, sans-serif' }]);
   });
 });

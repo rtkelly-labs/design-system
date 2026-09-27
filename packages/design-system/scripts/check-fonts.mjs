@@ -26,6 +26,7 @@ import ts from 'typescript';
 import {
   cmapCodepoints,
   cssContentCodepoints,
+  cssStackBypasses,
   deterministicPrefix,
   fontFaces,
   hex,
@@ -33,6 +34,7 @@ import {
   parseUnicodeRange,
   stackFamilies,
   tsCodepoints,
+  tsStackBypasses,
   woff2Cmap,
 } from './font-coverage.mjs';
 
@@ -222,6 +224,9 @@ const sourceFiles = [];
 })('src');
 
 const rendered = new Map();
+const bypasses = [];
+// These files *define* the stacks; everything else must use them.
+const STACK_DEFINITIONS = new Set(['src/theme.css', 'src/styles.css']);
 for (const file of sourceFiles) {
   const source = readFileSync(file, 'utf8');
   const hits = file.endsWith('.mdx')
@@ -229,6 +234,16 @@ for (const file of sourceFiles) {
     : file.endsWith('.css')
       ? cssContentCodepoints(source)
       : tsCodepoints(ts, file, source);
+  for (const { entity, line } of hits.unknownEntities ?? []) {
+    problems.push(
+      `${file}:${line}: entity ${entity} is not in font-coverage.mjs's table, so the census cannot ` +
+        `tell which character it renders. Write the character itself, or a numeric entity.`,
+    );
+  }
+  if (!STACK_DEFINITIONS.has(file) && !file.endsWith('.mdx')) {
+    const found = file.endsWith('.css') ? cssStackBypasses(source) : tsStackBypasses(ts, file, source);
+    for (const { line, text } of found) bypasses.push({ at: `${file}:${line}`, text });
+  }
   for (const { cp, line } of hits) {
     const sites = rendered.get(cp) ?? [];
     sites.push(`${file}:${line}`);
@@ -258,6 +273,35 @@ for (const [cp, sites] of [...rendered].sort((a, b) => a[0] - b[0])) {
   );
 }
 
+/*
+ * Font stacks written in place, as a ratchet.
+ *
+ * The census above proves the four role stacks cover every rendered character.
+ * That only matters for text that uses them: a component writing its own
+ * `var(--font-*, "Name"), generic` inherits none of the symbol faces. On the
+ * day this landed, 43 such stacks existed in 12 files, and two of the three
+ * spellings name families nothing declares (\`"Inter"\`, \`"Space Grotesk"\`; the
+ * shipped builds are the Variable ones), so that text is in a system sans.
+ *
+ * Routing them through the role variables changes typography, not glyph
+ * coverage, so it is its own pull request (fix/role-font-stacks), which lowers
+ * this budget to zero and deletes it. Until then the count may only fall.
+ */
+const INLINE_STACK_BUDGET = 43;
+if (listing) {
+  for (const { at, text } of bypasses) console.log(`  [STACK IN PLACE] ${at} — ${text.slice(0, 70)}`);
+}
+if (bypasses.length > INLINE_STACK_BUDGET) {
+  problems.push(
+    `${bypasses.length} font stacks are written in place, over the budget of ${INLINE_STACK_BUDGET}. A stack ` +
+      `written in a component skips the symbol faces the --ds-font-* stacks carry, so its non-Latin ` +
+      `characters reach a system font. Use var(--ds-font-body|display|mono|pixel), fontVar / ` +
+      `semanticTokens.font, or a font-* class. \`pnpm check:fonts:list\` lists them.`,
+  );
+} else if (bypasses.length < INLINE_STACK_BUDGET) {
+  console.log(`  ${bypasses.length} font stacks written in place, of a budget of ${INLINE_STACK_BUDGET} — lower the budget.`);
+}
+
 if (listing) {
   for (const stack of stackCoverage) console.log(`  [STACK] --${stack.name}: ${stack.families.join(' → ')}`);
 }
@@ -272,5 +316,5 @@ if (problems.length) {
 console.log(
   `Fonts OK — ${packages.length} @fontsource packages, every declared family named by a --ds-font-* stack; ` +
     `${rendered.size} non-ASCII characters rendered across ${sourceFiles.length} files, every one drawn by a ` +
-    `shipped face in all ${stackCoverage.length} stacks.`,
+    `shipped face in all ${stackCoverage.length} stacks; ${bypasses.length} stacks written in place (budget ${INLINE_STACK_BUDGET}).`,
 );

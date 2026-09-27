@@ -195,6 +195,36 @@ export function deterministicPrefix(families, selfHosted) {
  * Census: codepoints the package can render
  * ------------------------------------------------------------------ */
 
+/**
+ * HTML entities, decoded the way JSX and MDX render them. TypeScript keeps
+ * `&rarr;` verbatim in `JsxText.text`, so without this a character written as an
+ * entity never enters the census. The named table is the set this codebase
+ * writes plus the common punctuation; an unknown name is reported rather than
+ * guessed, so the table can never silently under-read.
+ */
+const NAMED = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: '\u00a0', times: '\u00d7', divide: '\u00f7',
+  rarr: '\u2192', larr: '\u2190', uarr: '\u2191', darr: '\u2193', harr: '\u2194', mdash: '\u2014',
+  ndash: '\u2013', hellip: '\u2026', lsquo: '\u2018', rsquo: '\u2019', ldquo: '\u201c', rdquo: '\u201d',
+  laquo: '\u00ab', raquo: '\u00bb', middot: '\u00b7', bull: '\u2022', deg: '\u00b0', plusmn: '\u00b1',
+  minus: '\u2212', copy: '\u00a9', reg: '\u00ae', trade: '\u2122', check: '\u2713', cross: '\u2717',
+};
+
+/** Decode `&name;`, `&#123;` and `&#x7b;`. Unknown names are returned in `unknown`. */
+export function decodeEntities(text) {
+  const unknown = [];
+  const decoded = text.replace(/&(#x[0-9a-fA-F]+|#[0-9]+|[a-zA-Z][a-zA-Z0-9]*);/g, (whole, body) => {
+    if (body[0] === '#') {
+      const cp = body[1] === 'x' || body[1] === 'X' ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
+      return String.fromCodePoint(cp);
+    }
+    if (body in NAMED) return NAMED[body];
+    unknown.push(whole);
+    return whole;
+  });
+  return { decoded, unknown };
+}
+
 /** Plain ASCII is covered by every face here and is not the question. */
 export const isInteresting = (cp) => cp > 0x7e;
 
@@ -207,7 +237,15 @@ export function tsCodepoints(ts, fileName, source) {
   const sf = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true,
     fileName.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
   const hits = [];
-  const record = (node, text) => {
+  const unknownEntities = [];
+  const lineOf = (node) => sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1;
+  const record = (node, raw, entities = false) => {
+    let text = raw;
+    if (entities) {
+      const { decoded, unknown } = decodeEntities(raw);
+      text = decoded;
+      for (const entity of unknown) unknownEntities.push({ entity, line: lineOf(node) });
+    }
     for (const ch of text) {
       const cp = ch.codePointAt(0);
       if (isInteresting(cp)) hits.push({ cp, line: sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1 });
@@ -216,12 +254,17 @@ export function tsCodepoints(ts, fileName, source) {
   const visit = (node) => {
     const k = ts.SyntaxKind;
     switch (node.kind) {
+      case k.JsxText:
+        record(node, node.text, true);
+        break;
       case k.StringLiteral:
+        // A JSX attribute string is HTML-ish: `title="&rarr;"` renders an arrow.
+        record(node, node.text, node.parent?.kind === k.JsxAttribute);
+        break;
       case k.NoSubstitutionTemplateLiteral:
       case k.TemplateHead:
       case k.TemplateMiddle:
       case k.TemplateTail:
-      case k.JsxText:
         record(node, node.text);
         break;
       default:
@@ -229,6 +272,7 @@ export function tsCodepoints(ts, fileName, source) {
     ts.forEachChild(node, visit);
   };
   visit(sf);
+  hits.unknownEntities = unknownEntities;
   return hits;
 }
 
@@ -240,14 +284,66 @@ export function tsCodepoints(ts, fileName, source) {
 export function mdxCodepoints(source) {
   const hits = [];
   const text = source.replace(/\{\/\*[\s\S]*?\*\/\}/g, (m) => m.replace(/[^\n]/g, ' '));
+  const unknownEntities = [];
   text.split('\n').forEach((line, i) => {
     if (/^\s*(import|export)\s/.test(line)) return;
-    for (const ch of line) {
+    const { decoded, unknown } = decodeEntities(line);
+    for (const entity of unknown) unknownEntities.push({ entity, line: i + 1 });
+    for (const ch of decoded) {
       const cp = ch.codePointAt(0);
       if (isInteresting(cp)) hits.push({ cp, line: i + 1 });
     }
   });
+  hits.unknownEntities = unknownEntities;
   return hits;
+}
+
+/**
+ * Font stacks written outside the role tokens. The census proves every glyph is
+ * in the four `--ds-font-*` stacks; that proof is only about rendering if text
+ * actually uses them. A component writing `'"IBM Plex Mono", monospace'` itself
+ * inherits none of the symbol faces, and two of the three literal stacks this
+ * gate first found named families nothing declares (`"Inter"`, `"Space
+ * Grotesk"` — the shipped builds are the `Variable` ones), so that text was in
+ * the system sans outright.
+ *
+ * Reported: any TS/TSX string that reads as a stack (`var(--font-*`, or a quoted
+ * family followed by a generic keyword), a CSS `font-family` outside
+ * `@font-face` that is not a role variable or `inherit`, and Tailwind's arbitrary
+ * `font-[…]`.
+ */
+const LOOKS_LIKE_STACK = /var\(--font-[\w-]+|["'][^"']+["']\s*,\s*(?:sans-serif|serif|monospace|system-ui|cursive)\b/;
+const ROLE_ONLY = /^\s*(?:var\(--ds-font-[a-z]+\)|inherit)\s*(?:!important)?\s*$/;
+
+export function tsStackBypasses(ts, fileName, source) {
+  const sf = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true,
+    fileName.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+  const out = [];
+  const visit = (node) => {
+    const k = ts.SyntaxKind;
+    if (node.kind === k.StringLiteral || node.kind === k.NoSubstitutionTemplateLiteral) {
+      const text = node.text;
+      if (LOOKS_LIKE_STACK.test(text) || /(?:^|\s)font-\[/.test(text)) {
+        out.push({ line: sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1, text });
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  return out;
+}
+
+export function cssStackBypasses(source) {
+  const out = [];
+  const text = source
+    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '))
+    .replace(/@font-face\s*\{[^}]*\}/g, (m) => m.replace(/[^\n]/g, ' '));
+  text.split('\n').forEach((line, i) => {
+    for (const [, value] of line.matchAll(/(?<![-\w])font-family:\s*([^;}]+)/g)) {
+      if (!ROLE_ONLY.test(value)) out.push({ line: i + 1, text: value.trim() });
+    }
+  });
+  return out;
 }
 
 /** Codepoints generated by CSS `content:` — literal characters and `\2713` escapes. */

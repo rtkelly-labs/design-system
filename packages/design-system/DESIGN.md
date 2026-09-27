@@ -188,7 +188,9 @@ no box drawing and Nerd Fonts' symbol set has none either, so every ASCII-art ru
 used to be drawn by whatever font the machine had — Courier New on the CI runner, no glyph at all
 for `⌘` there. DS Symbols draws them now, at the same 600/1000 advance as IBM Plex Mono so box
 drawing keeps the mono column width. `pnpm check:fonts` fails when a character rendered in `src/`
-has no shipped glyph in any of the four stacks; `--list` prints the census.
+has no shipped glyph in any of the four stacks, and when the count of font stacks components write
+in place rises. Those skip the symbol faces entirely; there are 43 today, and none is allowed to
+be added. `--list` prints the census.
 
 **Geometry and time are the second axis, and they are declared.** A Level varies colour and is
 picked at runtime; a **Medium** varies geometry and time and is picked at build time by which
