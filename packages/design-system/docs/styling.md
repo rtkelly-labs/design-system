@@ -54,8 +54,9 @@ that is wrong a third of the time.
 
 **Paying it down is per-component work**, not a sweep: converting a style object to utilities
 is a rendering change, so each one wants its own baseline review. The concentration is in the
-demo surfaces — `AdminDashboardLayout` (41) and `SaasLandingPage` (26) are nearly half the
-total, and they are mockups rather than published components.
+demo surfaces — `AdminDashboardLayout` (41) and `SaasLandingPage` (26) were nearly half the
+total, and they were mockups rather than published components. `AdminDashboardLayout` is gone
+(#249); its content is story fixtures on `AppShell`.
 
 
 ## 🧱 Styling Lives in TSX

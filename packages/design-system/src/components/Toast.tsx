@@ -438,9 +438,9 @@ export function useToast(): ToastApi {
 }
 
 /**
- * The same API, or `null` when there is no provider — for a component in this
- * package that notifies when it can and renders regardless, as
- * `AdminDashboardLayout` does. Matches `useOptionalTheme`.
+ * The same API, or `null` when there is no provider — for a component that
+ * notifies when it can and renders regardless, like the finance console's
+ * sync button in `SaaS/AdminDashboard`. Matches `useOptionalTheme`.
  */
 export function useOptionalToast(): ToastApi | null {
   return useContext(ToastContext);

@@ -430,10 +430,10 @@ export const AppSidebarNav = forwardRef<HTMLElement, AppSidebarNavProps>(functio
 const topbarStyles = recipe({
   slots: {
     header:
-      'flex items-center gap-4 border-b-4 border-edge-strong bg-surface-base px-4 py-3 md:px-8',
+      'flex flex-wrap items-center gap-4 border-b-4 border-edge-strong bg-surface-base px-4 py-3 md:px-8',
     toggle: 'shrink-0 px-3 lg:hidden',
-    lead: 'flex min-w-0 flex-1 flex-wrap items-center gap-3',
-    actions: 'flex shrink-0 flex-wrap items-center gap-3',
+    lead: 'flex min-w-0 flex-auto flex-wrap items-center gap-3',
+    actions: 'ml-auto flex shrink-0 flex-wrap items-center gap-3',
   },
 });
 
@@ -463,6 +463,9 @@ export interface AppTopbarProps extends Omit<HTMLAttributes<HTMLElement>, 'class
  * below desktop width only. The toggle is a real button in the tab order,
  * named by `sidebarToggleLabel`, reporting `aria-expanded`; opening it moves
  * focus into the drawer, and closing the drawer returns focus here.
+ *
+ * When the leading slot and the actions do not fit on one line, the actions
+ * wrap onto a second, right-aligned, rather than overlapping the lead.
  */
 export const AppTopbar = forwardRef<HTMLElement, AppTopbarProps>(function AppTopbar(
   {

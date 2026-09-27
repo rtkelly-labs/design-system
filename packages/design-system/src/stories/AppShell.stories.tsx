@@ -34,8 +34,8 @@ export default meta;
 type Story = StoryObj<typeof AppShell>;
 
 // The fixtures are an operations console — deliberately unrelated to the
-// application `AdminDashboardLayout` was cut from, so nothing here can lean on
-// that one's content.
+// finance admin the shell was cut from (`SaaS/AdminDashboard`), so nothing
+// here can lean on that one's content.
 const NAV: AppNavItem[] = [
   { id: 'overview', label: 'Overview', href: '#overview', icon: LayoutDashboard },
   {

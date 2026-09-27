@@ -50,24 +50,7 @@ function assertedStoryIds(): string[] {
  * Violations that exist today, by rule. Lower a number as they are fixed; delete
  * the line at zero. A rule absent here is budgeted at zero and fails on sight.
  */
-const KNOWN: Record<string, number> = {
-  /*
-   * One node, on `saas-admindashboardlayout--sketch-mode` at the narrow
-   * viewport: `#1450d7` on `#0a0a1a`, 2.94:1.
-   *
-   * Those are sketch's `accent.primary` and **midnight's** `surface.base`, which
-   * is a combination the palette never produces. The story wraps the dashboard
-   * in `<ThemeProvider defaultLevel="sketch" scoped className="min-h-screen
-   * bg-surface-base">`, and that wrapper paints a viewport-wide box. At 412px
-   * the dashboard's fixed-width grid overflows it, so a sketch-blue heading ends
-   * up over the iframe body, which is still midnight.
-   *
-   * Real, and not a palette defect: `AdminDashboardLayout` is not responsive. It
-   * is #189, and this line comes out with it rather than the violation being
-   * excluded — a budget of 1 still fails on a second one.
-   */
-  'color-contrast': 1,
-};
+const KNOWN: Record<string, number> = {};
 
 const LEVELS = ['midnight', 'sketch'] as const;
 

@@ -50,7 +50,7 @@ const NO_DOCS_PAGE = {
   'Docs/Layout/Portal': 'A composition of the whole docs chrome; the parts carry the docs.',
   'Foundations/Theme Ladder': 'Renders every Level side by side — a specimen, not an API.',
   'Presentation/SlideDeck': 'A composition. `Slide` carries the props table.',
-  'SaaS/AdminDashboardLayout': 'A product mockup, not a published component API.',
+  'SaaS/AdminDashboard': 'Two applications composed on AppShell; AppShell carries the props table.',
   'SaaS/LandingPage': 'A product mockup, not a published component API.',
   'Showcase/DesignSandbox': 'An interactive sandbox; it takes no props.',
 };

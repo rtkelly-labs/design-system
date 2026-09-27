@@ -267,9 +267,13 @@ An application shell was the thing missing underneath all of these until
 [#247](https://github.com/rtkelly13/design-system/issues/247) extracted `AppShell`,
 `AppSidebar`, `AppSidebarNav`, `AppTopbar` and `AppMain`: a persistent sidebar at desktop
 width that becomes a left `Drawer` below it, a consumer-supplied navigation tree, and the
-account area as a slot rather than a signed-in user. `AdminDashboardLayout` itself is not yet
-rebuilt on it — that is [#249](https://github.com/rtkelly13/design-system/issues/249), which
-moves its baselines deliberately.
+account area as a slot rather than a signed-in user.
+[#249](https://github.com/rtkelly13/design-system/issues/249) then removed `AdminDashboardLayout`
+rather than keep a second shell model beside it. Its navigation, signed-in user, KPI values,
+bank-ingestion table and `TRIGGER SYNC` are story fixtures now (`SaaS/AdminDashboard`, *Finance
+Console*), and an unrelated CMS (*Content Studio*) sits on the same `AppShell` with no change to
+the shell between the two. Everything this section quotes from the old file is gone from the
+package.
 
 `Dropdown` / `Menu` and `Tooltip` were on it until
 [#166](https://github.com/rtkelly13/design-system/issues/166) landed `Tooltip`,

@@ -70,7 +70,7 @@ navigation* and *General site layout* with #246, *Long-form content* with #250, 
 | Long-form content | `Prose` / `BlogPost` — the author card from a `BlogAuthor` (name, initials, `Avatar`, link, description) or the `authorCard` slot | `ready` | |
 | Documentation | the docs system (`DocsLayout`, `CodeTabs`, …) | `ready` | |
 | Marketing | `Hero`, `FeatureGrid` + `Feature`, `PricingGrid` + `PricingTier`, `CTASection` — `SaasLandingPage` is one composition of them | `ready` | |
-| Application layout | `AppShell` + `AppSidebar` / `AppSidebarNav` / `AppTopbar` / `AppMain` — sidebar off-canvas in a `Drawer` below desktop width | `ready` | |
+| Application layout | `AppShell` + `AppSidebar` / `AppSidebarNav` / `AppTopbar` / `AppMain` — sidebar off-canvas in a `Drawer` below desktop width; `SaaS/AdminDashboard` composes two unrelated admins on it | `ready` | |
 | General site layout | `SiteHeader` (skip link, breakpoint swap to `MobileNav`) / `SiteFooter` | `ready` | |
 
 Two rows are additions to the table #237 proposed, each because a landed component made the

@@ -1996,40 +1996,6 @@ interface SaasLandingPageProps {
 
 declare const SaasLandingPage: react__default.FC<SaasLandingPageProps>;
 
-interface AdminNavItem {
-    id: string;
-    label: string;
-
-    icon?: ElementType<{
-        className?: string;
-    }>;
-    badgeCount?: number;
-}
-declare const DEFAULT_ADMIN_NAV: AdminNavItem[];
-interface AdminStatusBadge {
-    id: string;
-    label: string;
-    accent?: AccentToken;
-
-    icon?: ElementType<{
-        className?: string;
-    }>;
-}
-
-declare const DEFAULT_ADMIN_STATUS: AdminStatusBadge[];
-interface AdminDashboardLayoutProps {
-    appTitle?: string;
-    navItems?: AdminNavItem[];
-
-    statusBadges?: AdminStatusBadge[];
-    activeNavId?: string;
-    onNavSelect?: (id: string) => void;
-
-    onTriggerSync?: () => void;
-    children?: react__default.ReactNode;
-}
-declare const AdminDashboardLayout: react__default.FC<AdminDashboardLayoutProps>;
-
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 interface AnchorHeadingProps extends Omit<HTMLAttributes<HTMLHeadingElement>, 'id'> {
     level: HeadingLevel;
@@ -2626,10 +2592,6 @@ export {
   type ActivityDay,
   ActivityGrid,
   type ActivityGridProps,
-  AdminDashboardLayout,
-  type AdminDashboardLayoutProps,
-  type AdminNavItem,
-  type AdminStatusBadge,
   AlertDialog,
   type AlertDialogProps,
   AnchorHeading,
@@ -2703,8 +2665,6 @@ export {
   type ContrastCheck,
   type ContrastFloor,
   type Crumb,
-  DEFAULT_ADMIN_NAV,
-  DEFAULT_ADMIN_STATUS,
   DEFAULT_DEPLOY_LOG,
   DEFAULT_EXPERIMENTS,
   DEFAULT_LEVEL,

@@ -192,8 +192,12 @@ const CASES: readonly VisualCase[] = [
   // than four. `DimMode` is gone: with `dim` collapsed into `midnight` it
   // rendered exactly what `DarkMode` renders, so asserting both was asserting
   // the same pixels twice under two names.
-  { id: 'saas-admindashboardlayout--dark-mode', snapshot: 'admin-dashboard-midnight.png', fullPage: true },
-  { id: 'saas-admindashboardlayout--sketch-mode', snapshot: 'admin-dashboard-sketch.png', fullPage: true },
+  // Two admin applications on one `AppShell` (issue 249), in place of
+  // `AdminDashboardLayout`'s pinned-Level pair: the finance console it
+  // shipped, now a story fixture, and an unrelated CMS. Neither pins a Level,
+  // so the a11y suite axes both on both, at both widths.
+  { id: 'saas-admindashboard--finance-console', snapshot: 'admin-finance-console.png', fullPage: true },
+  { id: 'saas-admindashboard--content-studio', snapshot: 'admin-content-studio.png', fullPage: true },
   { id: 'saas-landingpage--dark-mode', snapshot: 'saas-landing-midnight.png', fullPage: true },
   { id: 'saas-landingpage--sketch-mode', snapshot: 'saas-landing-sketch.png', fullPage: true },
   // Two more landing pages from the same sections as `SaasLandingPage` (issue
@@ -352,15 +356,15 @@ const INTERACTIONS: readonly InteractionCase[] = [
  * The narrow viewport, where behaviour exists that the desktop set cannot reach.
  *
  * Every other case in this file is Desktop Chrome at 1280x720, so the docs
- * sidebar toggle, its scrim, the admin drawer and the responsive type and
+ * sidebar toggle, its scrim, the app-shell drawer and the responsive type and
  * padding steps were asserted nowhere. `walkthrough` captures them, and
  * `AGENTS.md` says plainly that it is not a gate and its report is "nobody's job
  * to look" at.
  *
- * Deliberately eighteen, not forty-one. Each is a committed PNG a human reviews on
+ * Deliberately nineteen, not forty-one. Each is a committed PNG a human reviews on
  * every change, and the point is the layout that *differs* at this width — a
  * second copy of a component that renders identically is cost without evidence.
- * `Drawer` is the sixth and the clearest case for the rule: it is the one
+ * `Drawer` is the seventh and the clearest case for the rule: it is the one
  * component in the package whose reason for existing is this viewport.
  *
  * The `-mobile` filenames are load-bearing: `snapshotPathTemplate` carries no
@@ -369,7 +373,10 @@ const INTERACTIONS: readonly InteractionCase[] = [
  */
 const MOBILE_CASES: readonly VisualCase[] = [
   { id: 'docs-layout-docslayout--mobile-drawer', snapshot: 'docs-layout-mobile.png', fullPage: true },
-  { id: 'saas-admindashboardlayout--dark-mode', snapshot: 'admin-dashboard-mobile.png', fullPage: true },
+  // The two admin applications collapsed (issue 249): no sidebar column, the
+  // toggle at the head of the topbar, the stat row in one column.
+  { id: 'saas-admindashboard--finance-console', snapshot: 'admin-finance-console-mobile.png', fullPage: true },
+  { id: 'saas-admindashboard--content-studio', snapshot: 'admin-content-studio-mobile.png', fullPage: true },
   { id: 'saas-landingpage--dark-mode', snapshot: 'saas-landing-mobile.png', fullPage: true },
   { id: 'components-layout-pageheader--default', snapshot: 'pageheader-mobile.png' },
   { id: 'components-content-card--default', snapshot: 'card-mobile.png' },
