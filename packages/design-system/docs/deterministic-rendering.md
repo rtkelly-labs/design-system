@@ -108,8 +108,8 @@ This belongs to the consumer rather than the package — a stylesheet that suppr
 transitions would be wrong in a browser.
 
 The three `@keyframes` are the reason the reset names `animation` as well as `transition`, and they
-are a harder case than a transition in one specific way: they are **infinite loops**, declared in
-`styles.css` as `--animate-ds-*` tokens and worn by `Spinner`, `Skeleton` and `Progress`. A
+are a harder case than a transition in one specific way: they are **infinite loops**, generated into
+`theme.css` as `--animate-ds-*` tokens (from `LOOPS` in `src/theme/media.ts`) and worn by `Spinner`, `Skeleton` and `Progress`. A
 transition is inert until something changes; a loop is never at rest, so a capture taken at an
 arbitrary moment lands on an arbitrary frame. Nothing about that is a race the harness can wait out
 — the only deterministic frame is the one where the animation is not running.
