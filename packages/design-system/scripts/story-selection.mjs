@@ -37,6 +37,7 @@
  */
 
 import path from 'node:path';
+import ts from 'typescript';
 import { jobBody, jobCommands } from './render-inputs.mjs';
 
 export const PKG = 'packages/design-system/';
@@ -120,6 +121,16 @@ export function graphFromSource(files, read, { pkg = PKG, name = '@rtkelly13/des
       // `import type` and `export type` are erased before anything renders; the
       // bundle graph never has them, and `typecheck` is what judges them.
       if (/^\W?(import|export)\s+type\s/.test(match)) continue;
+      const declaration = ts.createSourceFile('edge.ts', match.trim().replace(/^[^a-z]+/, ''), ts.ScriptTarget.Latest).statements[0];
+      if (declaration && ts.isImportDeclaration(declaration)) {
+        const clause = declaration.importClause;
+        if (clause?.isTypeOnly) continue;
+        if (!clause?.name && clause?.namedBindings && ts.isNamedImports(clause.namedBindings)
+          && clause.namedBindings.elements.length > 0 && clause.namedBindings.elements.every((item) => item.isTypeOnly)) continue;
+      }
+      if (declaration && ts.isExportDeclaration(declaration)
+        && (declaration.isTypeOnly || (declaration.exportClause && ts.isNamedExports(declaration.exportClause)
+          && declaration.exportClause.elements.length > 0 && declaration.exportClause.elements.every((item) => item.isTypeOnly)))) continue;
       const hit = resolve(file, spec);
       if (hit) out.add(hit);
     }

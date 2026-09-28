@@ -42,6 +42,8 @@ describe('graphFromSource', () => {
     [P('src/stories/Specimen.stories.tsx')]: [
       "import { Card } from '../components/Card';",
       "import type { Props } from '../components/Types';",
+      "import { type Props as NamedProps } from '../components/Types';",
+      "export { type Props } from '../components/Types';",
       "import tokens from '@rtkelly13/design-system/tokens/midnight.tokens.json';",
       "const Lazy = () => import('../components/Lazy');",
     ].join('\n'),
