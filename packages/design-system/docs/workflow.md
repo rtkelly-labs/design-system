@@ -22,16 +22,26 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    - Run manual snapshot updates via GitHub Actions `Update Visual Regression Snapshots` workflow (dispatch it on your branch; it commits regenerated baselines back to that branch — this repo blocks Actions from creating PRs).
    - **The update runs in `missing` mode by default**, writing only baselines that do not exist. That matters: a bare `--update-snapshots` presets to `changed`, so a run intended to add one new story would also re-record every baseline whose render had drifted — which is exactly how a regression becomes the expectation. Say **`/update-snapshots all`** (or `changed`) when a change is *meant* to alter rendering; the mode is echoed back in the PR comment so a reviewer can tell "two added" from "everything re-recorded".
    - Note that the snapshot workflow pushes as `github-actions[bot]`, and CI runs on bot-authored commits land in **`action_required`** — they need an "Approve and run" click before the PR shows a green check.
-6. **Required Checks** — all of these run on every PR, spread across three
+6. **Required Checks** — all of these run on every PR, spread across four
    parallel jobs in `ci.yml`; see § *CI Shape* for which job runs what and why.
+   One exception, and only one: the `visual` job's gates may be satisfied by a
+   **verdict those exact inputs already earned** — the same
+   `scripts/render-inputs.mjs` hash on the same runner image — and then are
+   skipped rather than re-run. Only on a pull request; a push to `main` always
+   runs them in full, which is what checks the key. `visual` is sharded, so the
+   verdict is recorded by the `record` job, which needs every shard to have
+   passed and to have computed the same key, as a miss — never by a shard. `pnpm check:governance`
+   holds the exception to that shape: no other job may read the verdict, the
+   lookup is pull-request-only, and the key names both the input hash and the
+   image.
    Branch protection requires the single aggregate check named **`ci`** (the
-   `verify` job), which passes only if all three jobs do. That name is
+   `verify` job), which passes only if all four jobs do. That name is
    deliberately content-free, and **must stay that way**: the string is what
    branch protection and `shared-utilities`' governance map match on. It used to
    list what CI did, and splitting the single job into three silently rewrote it
    — the map went on requiring a job that no longer reported, so every PR failed
    `repo-governance verify-pr-checks` with all seven checks green. Rename the
-   three jobs below freely; never rename `ci`:
+   four jobs below freely; never rename `ci`:
    - `pnpm tokens:check` (theme.css matches `src/theme/levels.ts`)
    - `pnpm tokens:design:check` (the DTCG export in `tokens/` is neither stale nor orphaned)
    - `pnpm check:contrast` (every role pair, every level)
@@ -44,9 +54,8 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    - `pnpm check:component-contract` (refs, displayName, recipe, prop spreading — per clause)
    - `pnpm check:licences` (every shipped package against a default-deny baseline)
    - `pnpm check:reference-material` (unlicensed reference artwork stays untracked, its catalogue stays tracked)
-   - `pnpm check:lint-budget` (the general-purpose ruleset, as a per-rule ratchet)
+   - `pnpm check:lint-budget` (the one ESLint pass: errors fail outright, warnings as a per-rule ratchet)
    - `pnpm test:a11y` (axe over every asserted story, on both Levels)
-   - `pnpm lint` (colour-instead-of-role, reported at the site)
    - `pnpm check:css` (styling-in-CSS ratchet)
    - `pnpm check:tokens` (hue-named call sites, budget 0)
    - `pnpm ansi:check` (terminal slot coverage and the committed fixture diff)
@@ -56,12 +65,13 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    - `pnpm check:visual-coverage` (every story asserted or excluded with a reason)
    - `pnpm check:docgen-props` (every documented component publishes its props)
    - `pnpm check:story-conventions` (title vocabulary, and an autodocs decision per component)
-   - `pnpm check:story-docs` (what a component page tells a reader — a ratchet, ceiling 43)
+   - `pnpm check:story-docs` (what a component page tells a reader — a ratchet, ceiling 41)
    - `pnpm typecheck`
    - `pnpm test:coverage` (unit and V8 coverage — see "Unit Tests" below)
    - `pnpm build`
    - `pnpm check:bundle-size` (built bundle and CSS stay within raw and gzip byte budgets)
    - `pnpm check:dep-cost` (what each runtime dependency costs a consumer, against a recorded baseline)
+   - `pnpm check:import-cost` (what a consumer pays for a subset of imports — `Button` alone, one Base UI control, the blog's twelve names — against recorded ceilings)
    - `pnpm check:api` (the published type surface matches `api/index.d.ts`)
    - `pnpm build-storybook`
    - `pnpm test:visual` (Linux CI)
@@ -120,9 +130,15 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    `main` went red on `dafbc1f`: `playwright install --with-deps` hung on both
    `ci.yml` and `storybook-walkthrough.yml`, burned six hours each, and a
    manual re-run of the identical SHA passed in two minutes. So: every job
-   carries a `timeout-minutes`, and the browser install goes through
-   [`.github/actions/install-playwright`](../.github/actions/install-playwright/action.yml),
-   which bounds each attempt with `timeout` and retries once. Use `pnpm exec`,
+   carries a `timeout-minutes`. The install that hung no longer exists: every
+   job that drives a browser runs in the pinned Playwright image
+   (`mcr.microsoft.com/playwright:v1.62.1-noble@sha256:…`), which carries Chromium and its
+   libraries, so nothing reaches apt or Playwright's CDN at run time. It
+   replaced `install-playwright`, a bounded-and-retried install that also had to
+   strip vendor apt sources after a corrupt Google index failed every run on
+   9 Sep. `pnpm check:governance` fails a job that renders outside the image, a
+   tag without a digest, an image at a version the lockfile does not pin, or any
+   `playwright install`. Use `pnpm exec`,
    never `npx`, for anything Playwright: `npx` falls back to fetching the
    latest published CLI, and a Playwright other than the lockfile's installs a
    different Chromium — which under `maxDiffPixels: 0` moves every baseline

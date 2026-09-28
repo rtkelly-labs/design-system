@@ -12,7 +12,7 @@ import { childrenToText, slugify } from '../lib/slug';
  * `StatCard`, `DataTable`, `NoteBlock`, `Prose` — and the frame only owns the
  * measure, the header and the vertical rhythm.
  *
- * Every colour addresses a role, so the same markup renders on all four rungs of
+ * Every colour addresses a role, so the same markup renders on every rung of
  * the ladder and the generator's `--theme` flag is the only thing that decides.
  */
 

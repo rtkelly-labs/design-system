@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { SlideDeck } from './SlideDeck';
 import { Slide } from './Slide';
@@ -264,5 +264,36 @@ describe('SlideDeck presenter notes', () => {
       </SlideDeck>,
     );
     expect(notesToggle()).toBeNull();
+  });
+});
+
+/**
+ * The deck is `Tooltip`'s first consumer (#166): its icon-only controls had a
+ * `title` attribute, which no keyboard reaches. The hint now opens on focus,
+ * names the shortcut, and leaves the accessible name where it was.
+ */
+describe('SlideDeck control hints', () => {
+  it('replaces `title` with a tooltip that opens on keyboard focus', async () => {
+    deckWithNotes();
+    const toggle = screen.getByRole('button', { name: 'Show speaker notes' });
+    expect(toggle.hasAttribute('title')).toBe(false);
+
+    act(() => toggle.focus());
+    await waitFor(() =>
+      expect(document.querySelector('[data-slot="tooltip"]')?.textContent).toBe('Speaker notes (N)'),
+    );
+
+    fireEvent.keyDown(toggle, { key: 'Escape' });
+    await waitFor(() => expect(document.querySelector('[data-slot="tooltip"]')).toBeNull());
+    expect(document.activeElement).toBe(toggle);
+  });
+
+  it('hints the fullscreen shortcut the same way', async () => {
+    deckWithoutNotes();
+    const fullscreen = screen.getByRole('button', { name: 'Enter fullscreen' });
+    act(() => fullscreen.focus());
+    await waitFor(() =>
+      expect(document.querySelector('[data-slot="tooltip"]')?.textContent).toBe('Fullscreen (F)'),
+    );
   });
 });

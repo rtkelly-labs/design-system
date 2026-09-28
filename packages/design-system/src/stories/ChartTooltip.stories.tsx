@@ -3,7 +3,7 @@ import { ChartTooltip } from '../components/ChartTooltip';
 import { ThemeProvider } from '../components/ThemeProvider';
 
 const meta: Meta<typeof ChartTooltip> = {
-  title: 'Foundations/ChartTooltip',
+  title: 'Components/Data/ChartTooltip',
   component: ChartTooltip,
   tags: ['autodocs', 'stable'],
 };

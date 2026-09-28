@@ -112,6 +112,32 @@ export default tseslint.config(
     },
   },
 
+  {
+    /**
+     * A binding used only as a type is imported with `import type`.
+     *
+     * `tsconfig.json` sets `verbatimModuleSyntax`, so an import is emitted
+     * exactly as written, and `dist/` is one file per module — an import
+     * between two modules is an import between two output files. `tsc` catches
+     * a *type* imported as a value (TS1484). It cannot catch a *value* imported
+     * and then used only as a type: `import React from 'react'` for
+     * `React.FC` compiles, and the build keeps it as `import "react"`. Eleven
+     * shipped modules did exactly that when the flag went on. Between two of
+     * this package's own modules the same thing is a runtime edge that can put a
+     * `'use client'` module in a server component's graph. At zero, so an error.
+     */
+    name: 'design-system/type-imports',
+    files: ['src/**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    plugins: { '@typescript-eslint': tseslint.plugin },
+    rules: {
+      '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'separate-type-imports' }],
+    },
+  },
+
   /**
    * The general-purpose ruleset, as **warnings**.
    *

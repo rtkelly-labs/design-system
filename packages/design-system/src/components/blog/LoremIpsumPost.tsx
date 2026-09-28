@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { BlogPost } from './BlogPost';
 import { TLDR } from '../TLDR';
 import { NoteBlock } from '../NoteBlock';
@@ -20,7 +20,7 @@ export const LoremIpsumPost: React.FC = () => {
         we achieve an unmistakable visual identity that scales across every application.
       </TLDR>
 
-      <h2 style={{ fontFamily: 'var(--font-space-grotesk, "Space Grotesk"), sans-serif', fontSize: '1.75rem', fontWeight: 800, textTransform: 'uppercase', marginTop: '2.5rem', color: 'var(--ds-accent-primary)' }}>
+      <h2 style={{ fontFamily: 'var(--ds-font-display)', fontSize: '1.75rem', fontWeight: 800, textTransform: 'uppercase', marginTop: '2.5rem', color: 'var(--ds-accent-primary)' }}>
         [ 01. The Problem with Generic Web UI ]
       </h2>
       <p style={{ marginTop: '1rem' }}>
@@ -33,7 +33,7 @@ export const LoremIpsumPost: React.FC = () => {
         All colors must resolve through standard CSS tokens (<code style={{ color: 'var(--ds-accent-primary)' }}>--ds-accent-primary</code>, <code style={{ color: 'var(--ds-accent-tertiary)' }}>--ds-accent-tertiary</code>) to preserve paper-and-ink theme remapping.
       </NoteBlock>
 
-      <h2 style={{ fontFamily: 'var(--font-space-grotesk, "Space Grotesk"), sans-serif', fontSize: '1.75rem', fontWeight: 800, textTransform: 'uppercase', marginTop: '2.5rem', color: 'var(--ds-accent-tertiary)' }}>
+      <h2 style={{ fontFamily: 'var(--ds-font-display)', fontSize: '1.75rem', fontWeight: 800, textTransform: 'uppercase', marginTop: '2.5rem', color: 'var(--ds-accent-tertiary)' }}>
         [ 02. Executable Design Tokens ]
       </h2>
       <p style={{ marginTop: '1rem' }}>
@@ -41,11 +41,11 @@ export const LoremIpsumPost: React.FC = () => {
       </p>
 
       <div style={{ margin: '1.5rem 0', border: '2px solid var(--ds-border-strong)', backgroundColor: 'var(--ds-surface-base)' }}>
-        <div style={{ padding: '0.75rem 1.25rem', backgroundColor: 'var(--ds-border-strong)', color: 'var(--ds-surface-base)', fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace', fontWeight: 800, fontSize: '0.875rem' }}>
+        <div style={{ padding: '0.75rem 1.25rem', backgroundColor: 'var(--ds-border-strong)', color: 'var(--ds-surface-base)', fontFamily: 'var(--ds-font-mono)', fontWeight: 800, fontSize: '0.875rem' }}>
           // tailwind-preset.ts
         </div>
         {/* Scrollable at narrow widths — see `CodeBlock` for why this needs a tabIndex. */}
-        <pre tabIndex={0} role="region" aria-label="Code sample" style={{ padding: '1.25rem', fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace', fontSize: '0.875rem', color: 'var(--ds-intent-success)', overflowX: 'auto', margin: 0 }}>
+        <pre tabIndex={0} role="region" aria-label="Code sample" style={{ padding: '1.25rem', fontFamily: 'var(--ds-font-mono)', fontSize: '0.875rem', color: 'var(--ds-intent-success)', overflowX: 'auto', margin: 0 }}>
 {`export const brutalistTailwindPreset = {
   theme: {
     extend: {

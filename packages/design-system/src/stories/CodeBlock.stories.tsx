@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CodeBlock } from '../components/docs/CodeBlock';
 
 const meta: Meta<typeof CodeBlock> = {
-  title: 'Docs/CodeBlock',
+  title: 'Docs/Content/CodeBlock',
   component: CodeBlock,
   tags: ['autodocs', 'stable'],
 };

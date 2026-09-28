@@ -5,7 +5,7 @@ import { Modal } from '../components/Modal';
 import { Button } from '../components/Button';
 
 const meta: Meta<typeof AlertDialog> = {
-  title: 'Foundations/AlertDialog',
+  title: 'Components/Overlays/AlertDialog',
   component: AlertDialog,
   tags: ['autodocs', 'stable'],
   parameters: { layout: 'fullscreen' },

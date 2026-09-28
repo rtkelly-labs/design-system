@@ -24,7 +24,10 @@
  * tree against a deployment that cannot include it yet, and fail every time. A
  * gate that is always red is a gate that gets removed.
  *
- * Run it on a schedule, or by hand when a deploy is in doubt.
+ * Run it on a schedule, or by hand when a deploy is in doubt. The domain serves the
+ * `production` branch, so build that to ask whether the deploy is healthy.
+ * `deployment-drift.yml` does exactly that. Built from `main`, it instead answers
+ * what the next release train would ship.
  *
  *   node scripts/check-deployed.mjs            compare and report
  *   node scripts/check-deployed.mjs --strict   exit 1 on any drift
@@ -109,8 +112,9 @@ if (stale.length) {
 }
 
 console.log(
-  '\nA deploy is triggered by a push to `main`. If those are failing, the cause is\n' +
-    'usually the Vercel account build quota rather than this repo — see docs/hosting.md.',
+  '\nThe domain deploys the `production` branch, which the release train moves. Built from\n' +
+    '`main`, a gap here only means a train is due. Built from `production`, it means the\n' +
+    'deploy failed or is stuck, usually the Vercel account build quota; see docs/hosting.md.',
 );
 
 if (process.argv.includes('--strict')) process.exit(1);

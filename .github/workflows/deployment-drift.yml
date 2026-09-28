@@ -1,4 +1,4 @@
-# Is the deployed Storybook the one `main` builds?
+# Is the production domain serving what the `production` branch builds?
 #
 # Production silently stopped updating. `Docs/CodeTabs` landed on 8 September and
 # was still absent from the site three days and ~30 merged pull requests later,
@@ -10,7 +10,7 @@
 # Two reasons, and both are structural rather than preference.
 #
 # 1. **`vercel.json` deliberately does not build feature branches.** Its
-#    `ignoreCommand` exits 1 (build) only for `main`, `preview`, `slot/N`, or a
+#    `ignoreCommand` exits 1 (build) only for `main`, `production`, `preview`, `slot/N`, or a
 #    commit message tagged `[deploy]`/`[preview]`/`[storybook]`; everything else
 #    exits 0 (skip). A Vercel check made required would therefore never turn
 #    green on an ordinary branch, and every pull request would block forever.
@@ -19,8 +19,22 @@
 #    to compare: the deployed site cannot contain the commit under review. A gate
 #    that can only be red is a gate that gets deleted.
 #
-# So this runs where the answer exists — after a push to `main`, and on a
-# schedule to catch a deploy that fails later or a quota that runs out overnight.
+# ## Why it compares against `production`, not `main`
+#
+# The domain serves the `production` branch, which only the release train moves.
+# Compared against `main`, this was red after nearly every merge until the next
+# train, truthfully but uselessly: "a train is due" is the train's own question,
+# and a check that is red by design hides the red that is a fault. Compared
+# against `production`, red means one thing: the site is not serving what the
+# pointer says. That is a failed or stuck Vercel build, or the account quota.
+#
+# So it runs where the answer exists:
+#
+# - when a release train finishes, since the train may have just moved the
+#   pointer. The train pushes `production` with `GITHUB_TOKEN`, and GitHub
+#   starts no workflow from such a push, so `push: [production]` would never
+#   fire. `workflow_run` does;
+# - daily, to catch a deploy that fails later or a quota that runs out overnight.
 #
 # The quota is the usual cause and it is not a code problem: the failing Vercel
 # checks read `build-rate-limit`, which looks nothing like a broken build. This
@@ -29,8 +43,9 @@
 name: Deployment Drift
 
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: [Release Train]
+    types: [completed]
   schedule:
     # 07:00 UTC daily. A deploy that fails at 02:00 should not wait for someone
     # to merge something before anyone hears about it.
@@ -49,23 +64,27 @@ jobs:
       run:
         working-directory: packages/design-system
     timeout-minutes: 10
+    # A failed train moved nothing, so there is nothing new to check.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout the production pointer
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: production
 
       # The repo's own composite, so the Node version, the pnpm version and the
       # cache strategy cannot drift from `ci.yml`.
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Build the Storybook this commit describes
+      - name: Build the Storybook the pointer describes
         run: pnpm build-storybook
 
-      # Vercel builds on its own schedule after a push. Give it room before
-      # calling the difference drift rather than latency.
+      # Vercel builds on its own schedule after the train moves the pointer. Give
+      # it room before calling the difference drift rather than latency.
       - name: Wait for the deploy to land
-        if: github.event_name == 'push'
+        if: github.event_name == 'workflow_run'
         run: sleep 180
 
       - name: Compare the deployment with this build

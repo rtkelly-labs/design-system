@@ -23,7 +23,7 @@ conclusion from a green run.
 | **Output** | pass/fail + diff triad | HTML report you browse | count + names |
 
 The walkthrough is the one people misread. It captures far more than the gated
-suite — all four rungs of the ladder, every story — and asserts **none** of it.
+suite — every rung of the ladder, every story — and asserts **none** of it.
 It exists so a human can *look*; it will never fail because something broke. A
 component that appears in the walkthrough and nowhere else is photographed, not
 tested.
@@ -51,6 +51,14 @@ way visual testing dies — not by being switched off, but by being disbelieved.
   one Chromium revision. Baselines are only comparable across runs that share
   it, which is why the version is exact in `package.json` and why bumping
   Playwright is a re-baselining event, not a routine dependency bump.
+- **One image.** Every job that renders — `visual`, the snapshot writer, the
+  walkthrough — runs in `mcr.microsoft.com/playwright:v1.62.1-noble`, pinned by digest,
+  at the Playwright version the lockfile pins. The fonts, the shared libraries
+  and Chromium are the image's, so the environment moves only when that
+  reference does, in a commit. It used to be `ubuntu-latest` plus a Chromium
+  installed per run, which moved weekly with the runner image and with nothing
+  in this repository to say so. `pnpm check:governance` holds every rendering
+  job to the same reference, and the image's version to the lockfile's.
 - **Linux only.** `tests/visual.spec.ts` opens with
   `test.skip(process.platform !== 'linux')`. macOS and Windows render text
   differently enough to fail every baseline, so local runs are skipped rather
@@ -94,6 +102,19 @@ and is noted below.
   that `position: fixed` resolves against the viewport rather than the nearest
   transformed ancestor, which leaves its root legitimately empty; `Drawer`,
   `Toast` and `Tooltip` will all do the same.
+- **Nothing on the mobile project is its own compositor layer.** The `mobile`
+  project renders at a device pixel ratio of 2.625, and at any ratio of 1.5 or
+  more Floating UI writes `will-change: transform` onto every positioner. The
+  layer that creates is drawn on Chromium's schedule: on some runs it was drawn
+  resampled at a sub-pixel offset, smearing the whole popup horizontally, and
+  on others it was not. That was
+  [#293](https://github.com/rtkelly13/design-system/issues/293): the mobile
+  tooltip at the viewport edge failed by the same 215 pixels in two CI runs out
+  of 69, then matched on retry, while the desktop rows of the same components,
+  at 1x with no layer, never failed. `floatingSurface.ts` and `Select` force
+  `will-change: auto`, and every mobile case asserts that no element on the page
+  computes anything else, so a regression names the element rather than showing
+  up as a diff that passes on retry.
 - **Clean URLs must stay off.** `serve` rewrites `/iframe.html` to `/iframe` by
   default and **drops the query string**, so Storybook gets no story to select
   and renders its placeholder. Both Playwright configs therefore pass
@@ -151,12 +172,11 @@ and is noted below.
   shared-cache performance argument years ago; and `@import` of a remote
   stylesheet is the slowest delivery available, serialising three round trips of
   render-blocking work before text can paint.
-- **CI and local render in different environments.** CI is `ubuntu-latest` plus
-  the Chromium that `.github/actions/install-playwright` installs (`playwright
-  install --with-deps chromium`, cached on the lockfile). The industry-standard fix is to
-  run both CI and local baselining inside the same official image
-  (`mcr.microsoft.com/playwright:v1.62.1-noble`), which is what makes "just
-  re-record it locally" possible at all. Until then, **CI is the only place a
+- **CI and local render in different environments.** Fixed in CI: every
+  rendering job runs in the official image (`mcr.microsoft.com/playwright:v1.62.1-noble`,
+  by digest). That is also what makes local re-recording possible in
+  principle — the same image under `docker run` should produce the same pixels —
+  but it has **not been verified** here, so **CI is still the only place a
   baseline can legitimately be produced**, which is why `/update-snapshots`
   exists.
 
@@ -333,7 +353,7 @@ and run" click before the PR shows a green check.
 1. **A story did not render.** The error names the story and says which
    Storybook state it reached. Not a visual problem — the Storybook build is
    stale, the id is wrong, or the story throws. Nothing to re-baseline.
-2. **Pixels moved and you meant it.** Download the `playwright-report` artifact
+2. **Pixels moved and you meant it.** Download the `playwright-report-<shard>` artifact of the failing shard
    and look at the expected / actual / diff triad. If it is the change you
    intended, re-baseline with `changed`.
 3. **Pixels moved and you did not.** This is the suite paying for itself. Do not
@@ -342,9 +362,10 @@ and run" click before the PR shows a green check.
 
 ### Baselining locally
 
-You cannot, today, and the suite tells you so by skipping on non-Linux. Even on
-Linux, a local machine is not `ubuntu-latest`. Until the render environment is
-containerised, CI is the only legitimate source of a baseline.
+Not yet. CI renders in a pinned image, so running the suite inside that same
+image is the route — but nobody has checked that a local `docker run` of it
+reproduces CI's pixels byte for byte, and until someone has, CI is the only
+legitimate source of a baseline. A bare Linux machine is not that image.
 
 What you *can* do locally is everything except the pixel comparison:
 `pnpm build-storybook && pnpm check:visual-coverage` catches an unasserted
@@ -443,7 +464,7 @@ Revisit when one of these becomes true:
 
 - 37 components, 38 asserted rows, budget `0`. One exclusion
   (`Showcase/DesignSandbox`, with a reason).
-- `Foundations/Theme Ladder → AllLevels` is asserted, so all four rungs are
+- `Foundations/Theme Ladder → AllLevels` is asserted, so every rung is
   compared in one screenshot. That closes the gap where a token change could
   read well on `midnight` and be unusable on `sketch` while passing everything.
 - Open, in rough priority order:

@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TLDR } from '../components/TLDR';
 
 const meta: Meta<typeof TLDR> = {
-  title: 'Foundations/TLDR',
+  title: 'Components/Content/TLDR',
   component: TLDR,
   tags: ['autodocs', 'stable'],
 };

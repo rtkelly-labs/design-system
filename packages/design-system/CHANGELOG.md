@@ -9,6 +9,142 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## Unreleased
+
+**ESM only.** The package is `"type": "module"` and ships one build: `dist/index.js` and one
+`.js` file per module. The CommonJS build, `main` and `module` are gone, and `exports["."]` is
+`{ types, default }`. No export was added or removed, and the CSS, token and terminal subpaths are
+unchanged.
+
+### You have to do something only if
+
+- **You `require()` the package on Node older than 22.12.** That already failed on 0.12.0: the
+  CommonJS build `require()`d `@microcharts/react`, which is ESM only, and Node before 22.12 throws
+  `ERR_REQUIRE_ESM` on it. 22.12 is the first release that loads an ES module from `require()`.
+  Upgrade Node, or use `import`. On 22.12+ `require('@rtkelly13/design-system')` returns the same
+  module `import` does.
+- **A tool of yours needs the package to be CommonJS** — Jest without ESM support, say. Run it in
+  ESM mode, or move it to Vitest.
+- **You deep-imported a file under `dist/`.** Nothing documented one, but `dist/index.mjs` and
+  every `dist/**/*.mjs` are now `.js`. Import from the package root.
+
+Bundlers (Vite, Next, webpack, esbuild) resolved the `import` condition already and see no change.
+
+A field's `error` is described, not announced (#299). It was `role="alert"`, so a failed submit
+read every invalid field on top of `ErrorSummary` taking focus. No export, prop or rendering
+changed; only the `role` attribute is gone. This affects `Input`, `TextArea`, `Select`, `Checkbox`,
+`Switch`, `RadioGroup` and `Fieldset`.
+
+### You have to do something
+
+- **A form that validates on submit should render `ErrorSummary`.** It takes focus and is the
+  announcement. Each field's error stays in its control's `aria-describedby`, with `aria-invalid`,
+  so it is read when a summary link moves focus to the field.
+- **A form that validates inline or on blur, with no summary, is no longer announced.** Setting
+  `error` on the focused field is silent until the reader returns to it. If the change needs to be
+  heard, give the form one polite live region of its own and write the message into it. Do not
+  put a live region on each field.
+- **Tests that found a field error with `getByRole('alert')` will fail.** Find it by its text, or
+  follow the control's `aria-describedby`.
+
+## 0.12.0
+
+New documentation visuals adapted from mdxcn: `ActivityGrid`, `GanttChart`,
+`UptimeStrip`, `FlowDiagram`, `Timeline`, `TreeDiagram`, `ChangeSummary`, and
+`BeforeAfter`. `Steps` and `Terminal` are available as unframed blocks. Wrap one
+or more of them in `FigureFrame` when the content needs a shared caption and
+border. Each adapted component links to its upstream source in its file header.
+
+No mdxcn package dependency is required. Existing published components and
+their props are unchanged.
+
+## 0.11.0
+
+`Select` themed on Base UI's select: the open list is painted by the Level, not the operating
+system (#164). With it the last row of [`docs/capability-readiness.md`](./docs/capability-readiness.md)
+is `ready`. Breaking only for `Select`: no export was added or removed, and the entry points,
+dependencies and peer dependencies are the same as 0.10.0.
+
+### You have to do something
+
+- **`onChange(event)` is removed. Use `onValueChange(value: string)`.** It is called with the newly
+  chosen option's `value` — a string, not a `ChangeEvent` — so `onChange={(e) => set(e.target.value)}`
+  becomes `onValueChange={set}`. There is no alias and no shim.
+- **`multiple` and `size` are removed.** `Select` chooses exactly one option from a closed list.
+  Choosing several is `Checkbox`; showing a visible set is `RadioGroup`.
+- **`value` and `defaultValue` are strings only.** `number` and `string[]` are no longer accepted.
+  With neither given, the first enabled option is chosen, as on a native `<select>`; pass
+  `placeholder` to start from nothing instead.
+- **Options still come from `options`, never from children.** `children` is no longer part of
+  `SelectProps` at all; `<option>` elements passed as children were never rendered and are now a
+  type error. A row that cannot be chosen is `{ label, value, disabled: true }`.
+- **The control is a button with `role="combobox"`, not a `<select>`.** `SelectProps` extends
+  `HTMLAttributes<HTMLElement>` instead of `SelectHTMLAttributes<HTMLSelectElement>`, and the ref
+  (`Select` now forwards one) is the trigger. The field label is no longer a `<label>`: it names the
+  trigger by `aria-labelledby`, and clicking it focuses the trigger without opening the list.
+  Tests that drove it with `fireEvent.change` on a `<select>` should find it with
+  `getByRole('combobox', { name })`, open it, and choose a row by `getByRole('option', { name })`.
+- **If you need the platform picker, pass `native`.** It renders the `<select>` element, with the
+  same props and the same `onValueChange` — not the removed native API.
+- **A `name` still submits.** Base UI keeps a hidden input under `name`, so `FormData` carries the
+  chosen `value` as before. `form` and `autoComplete` are now explicit props.
+
+### Rendering changed
+
+- **The closed `Select` gains a chevron, and its open list is drawn from roles** — `surface.raised`
+  rows, an accent fill on the highlighted row, an accent `>` on the chosen one. The
+  `errorsummary-account-settings*` baselines move with it, and `select-*` rows are new.
+
+## 0.10.0
+
+The capability release: every row in [`docs/capability-readiness.md`](./docs/capability-readiness.md)
+but *Choose one* is `ready`, so a site can be built without inventing its own interaction
+behaviour. The themed `Select` that finishes that row is a breaking change and follows in 0.11.0.
+
+### You have to do something
+
+- **Nothing, for imports.** No export was removed or renamed; 120 were added. The entry points,
+  `files`, runtime dependencies and peer dependencies are the same as 0.9.0.
+- **If you pass `BlogPost` an `author` string other than the default name**, the card now shows that
+  author — their own initials, no description — instead of the default author's initials and bio.
+  Pass a `BlogAuthor` object (`name`, `initials`, `avatar`, `url`, `description`) to describe them,
+  or `authorCard` to replace the card. Omitting `author` is unchanged.
+- **If you pass `SaasLandingPage` `deployLog=""`**, the terminal preview is now hidden, as the prop
+  always documented.
+
+### Rendering changed
+
+- **`Pagination` renders a numbered page list** rather than previous/next alone.
+- **A `DataTable` with `pageSize` now paginates:** one page of rows, with `Pagination` beneath when
+  there is more than one page. It also renders `caption`, row headers, `scope` and `aria-sort`.
+- **Portalled surfaces follow a scoped `ThemeProvider`.** `Modal`, `AlertDialog`, `Drawer`, `Toast`,
+  `Tooltip`, `Popover` and `Menu` rendered inside `<ThemeProvider scoped>` take that provider's Level,
+  not the document's. Under an unscoped provider nothing changes.
+- **`SaasLandingPage`** is now composed from the marketing sections. Its prices use the display
+  face (they had fallen back to the system sans-serif), and its grids drop to one column below `md`
+  instead of overflowing a phone's width.
+
+### New
+
+- **Forms:** `Checkbox`, `Switch`, `Fieldset` + `Legend`, `RadioGroup` + `Radio`, and
+  `ErrorSummary` — a form-level summary that links to each invalid field and takes focus when it
+  appears.
+- **Feedback:** `Spinner`, `Skeleton`, `Progress`, `EmptyState`, and `ToastProvider` / `useToast`.
+- **Overlays:** `Drawer`, `Tooltip`, `Popover` and `Menu`, all on Base UI.
+- **Navigation:** `Tabs`, `SiteHeader` (skip link, breakpoint swap), `SiteNav` + `SiteNavItem`,
+  `MobileNav` and `SiteFooter`, with `LinkProvider` / `SiteLink` to inject a router's link and its
+  current-route test once. `DocsLinkProvider` keeps its API and now shares that context.
+- **Layout:** `AppShell` with `AppSidebar`, `AppSidebarNav`, `AppTopbar` and `AppMain`.
+- **Marketing:** `Hero`, `FeatureGrid` + `Feature`, `PricingGrid` + `PricingTier`, `CTASection`.
+- **Reports:** `ReportDocument`, `ReportSection`, `ReportDetails`.
+- **`BlogPost`:** `BlogAuthor` and the `authorCard` slot.
+
+### Fixed
+
+- `Input`, `TextArea` and `Select` merge a caller's `style` with the accent instead of losing it.
+- `TextArea` and `Select` put their `id` on the control, so the label's `for` points at it and a
+  click on the label focuses the field.
+- `Card` forwards its ref.
 ## 0.9.0
 
 `Modal` on Base UI's dialog, and the `AlertDialog` that had to ship with it.

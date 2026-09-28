@@ -27,17 +27,9 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { CATEGORIES, GROUPS, storySortOrder } from '../.storybook/sidebar.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-
-/**
- * The sidebar vocabulary, closed on purpose.
- *
- * Order is the reading order `preview.ts` sorts by, and it is an argument: token
- * surfaces first, product mockups last. A new group here is a decision about
- * what this system claims to be, not a filing choice.
- */
-const GROUPS = ['Guides', 'Foundations', 'Docs', 'Blog', 'Presentation', 'SaaS', 'Showcase'];
 
 /**
  * Titles that are a single page rather than a group, so `<Group>/<Name>` does
@@ -55,10 +47,10 @@ const SINGLE_PAGES = { Manifesto: 'The landing page. A group of one is not a gro
  */
 const NO_DOCS_PAGE = {
   'Blog/LoremIpsumPost': 'A fixture post. Its API is the prose it renders.',
-  'Docs/Portal': 'A composition of the whole docs chrome; the parts carry the docs.',
+  'Docs/Layout/Portal': 'A composition of the whole docs chrome; the parts carry the docs.',
   'Foundations/Theme Ladder': 'Renders every Level side by side — a specimen, not an API.',
   'Presentation/SlideDeck': 'A composition. `Slide` carries the props table.',
-  'SaaS/AdminDashboardLayout': 'A product mockup, not a published component API.',
+  'SaaS/AdminDashboard': 'Two applications composed on AppShell; AppShell carries the props table.',
   'SaaS/LandingPage': 'A product mockup, not a published component API.',
   'Showcase/DesignSandbox': 'An interactive sandbox; it takes no props.',
 };
@@ -70,7 +62,7 @@ const NO_DOCS_PAGE = {
  * down in `docs/surface-readiness.md`: `Docs/*` at ~90% with "nothing
  * structural" blocking it, the SaaS mockups at ~20-25% and described there as
  * "screenshots of one specific product". A consumer browsing the sidebar saw one
- * flat list in which `Docs/Prose` and `SaaS/LandingPage` looked equally
+ * flat list in which `Docs/Content/Prose` and `SaaS/LandingPage` looked equally
  * load-bearing.
  *
  * The gap was never that the maturity was unknown. It was that it was known and
@@ -95,11 +87,17 @@ for (const title of titles) {
       `${title} — "${group}" is not a group. The vocabulary is: ${GROUPS.join(', ')}.`,
     );
   }
-  if (rest.length === 0) {
-    problems.push(`${title} — a title must be <Group>/<Name>; this has no name.`);
-  }
-  if (rest.length > 1) {
-    problems.push(`${title} — a title must be <Group>/<Name>; this nests ${rest.length} deep.`);
+  const categories = CATEGORIES[group];
+  const shape = categories ? '<Group>/<Category>/<Name>' : '<Group>/<Name>';
+  const depth = categories ? 2 : 1;
+  if (rest.length < depth) {
+    problems.push(`${title} — a ${group} title must be ${shape}; this has ${rest.length + 1} level${rest.length ? 's' : ''}.`);
+  } else if (rest.length > depth) {
+    problems.push(`${title} — a ${group} title must be ${shape}; this nests ${rest.length} deep.`);
+  } else if (categories && !categories.includes(rest[0])) {
+    problems.push(
+      `${title} — "${rest[0]}" is not a ${group} category. The vocabulary is: ${categories.join(', ')} (.storybook/sidebar.ts).`,
+    );
   }
   const tags = new Set(entries.filter((e) => e.title === title).flatMap((e) => e.tags ?? []));
   const statuses = STATUSES.filter((status) => tags.has(status));
@@ -121,12 +119,33 @@ for (const title of titles) {
   }
 }
 
+/**
+ * `preview.ts` has to spell the sort order as a literal — Storybook reads
+ * `storySort` statically and rejects a call — so it is a second copy of the
+ * vocabulary, and a second copy drifts. Evaluate the literal and compare.
+ */
+{
+  const preview = readFileSync(path.join(ROOT, '.storybook/preview.ts'), 'utf8');
+  const literal = preview.match(/storySort:\s*\{[^]*?order:\s*(\[[^]*?\n\s*\]),/)?.[1];
+  const declared = literal ? JSON.stringify(new Function(`return ${literal}`)()) : null;
+  const expected = JSON.stringify(storySortOrder());
+  if (declared !== expected) {
+    problems.push(
+      `.storybook/preview.ts — storySort.order ${declared ? `is ${declared}` : 'was not found'}; sidebar.ts says ${expected}.`,
+    );
+  }
+}
+
 if (process.argv.includes('--list')) {
   for (const group of GROUPS) {
     const own = titles.filter((t) => t.startsWith(`${group}/`));
     console.log(`${group} (${own.length})`);
-    for (const t of own) {
-      console.log(`  ${withDocs.has(t) ? 'docs' : '    '}  ${t}`);
+    for (const category of CATEGORIES[group] ?? [null]) {
+      const filed = category ? own.filter((t) => t.startsWith(`${group}/${category}/`)) : own;
+      if (category) console.log(`  ${category} (${filed.length})`);
+      for (const t of filed) {
+        console.log(`  ${category ? '  ' : ''}${withDocs.has(t) ? 'docs' : '    '}  ${t}`);
+      }
     }
   }
   console.log('');

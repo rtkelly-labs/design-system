@@ -2,7 +2,9 @@
 
 Foundational brutalist design system for ryankelly.dev and personal web applications (`@rtkelly13/design-system`, published to public npm).
 
-Package manager is **pnpm** (`node >=22`).
+Package manager is **pnpm** (`node >=22`). The package is **ESM only** (`"type": "module"`, one
+build, `dist/*.js`), and `verbatimModuleSyntax` is on: a binding used only as a type is imported
+with `import type`, because anything else is emitted as a real import between two output files.
 
 ## Commands
 
@@ -18,31 +20,35 @@ Everything is a `pnpm` script; these are the ones whose names do not give them a
 | `pnpm check:docs` | figures written in prose against the source they describe — `--list` for the census |
 | `pnpm check:skills` | the agent-facing skills tree (`skills/**/SKILL.md`) parses and its frontmatter is schema-valid |
 | `pnpm check:doc-snippets` | props and level names in documentation code fences against `api/index.d.ts` |
-| `pnpm check:component-docs` | every component carries a JSDoc — a ratchet, budget **18** |
+| `pnpm check:component-docs` | every component carries a JSDoc — a ratchet, budget **12** |
 | `pnpm check:component-contract` | refs, `displayName`, `recipe`, prop spreading — a per-clause ratchet |
 | `pnpm check:licences` | every shipped package against `licenses.baseline.json`, default-deny |
 | `pnpm check:reference-material` | unlicensed reference artwork stays out of the tree, and its catalogue stays in it |
 | `pnpm check:lint-budget` | `react-hooks`, `jsx-a11y` and `no-explicit-any` as a per-rule ratchet |
 | `pnpm check:api` | the built type surface against the committed `api/index.d.ts` |
 | `pnpm check:dep-cost` | what each runtime dependency costs a consumer, against the recorded baseline — `--list` for the table |
+| `pnpm check:import-cost` | what a consumer pays for a *subset* of imports, bundled through the package name — `--list` for the breakdown. Also fails on an `export *` or a side-effect-only import left in `dist/` |
 | `pnpm check:governance` | the repo's own rules: pinned SHAs, job ceilings, every gate wired, `rule N` resolving — `--list` for the census |
 | `pnpm check:visual-coverage` | every component has an asserted story, or a stated reason |
 | `pnpm check:docgen-props` | every documented component publishes its props, and the components manifest carries them |
 | `pnpm check:story-conventions` | story title vocabulary, and an autodocs decision per component |
-| `pnpm check:story-docs` | what a component page actually tells a reader — docs page, description, three samples, story captions, prop docs. A ratchet, ceiling **43** |
+| `pnpm check:story-docs` | what a component page actually tells a reader — docs page, description, three samples, story captions, prop docs. A ratchet, ceiling **41** |
 | `pnpm check:deployed` | the live Storybook against this build — deliberately **not** a PR gate |
+| `pnpm ci:history` | where CI's minutes go: p50/p90 per job and step over recent runs, from GitHub's own timings — not a gate |
+| `pnpm release:train --dry-run` | why the last train did or did not depart — assessment only, moves nothing |
 | `pnpm check:tokens` | hue-named call sites, budget **0** — a colour is addressed by its job |
 | `pnpm ansi:check` | terminal slot coverage **and** the committed fixture diff |
-| `pnpm test:visual` | Playwright snapshots — **Linux only**, see [`docs/visual-regression.md`](./docs/visual-regression.md) |
+| `pnpm test:leaks` | the unit suite shuffled with no per-file isolation, N times — the detector `isolate: false` stands on; not a gate |
+| `pnpm test:visual` | Playwright snapshots — **in the pinned image only**, see [`docs/visual-regression.md`](./docs/visual-regression.md) |
 | `pnpm test:a11y` | axe over every asserted story, on both Levels |
 | `pnpm walkthrough` | screenshot every story on every level, for review rather than assertion |
 
-`pnpm lint` reports colour literals at the site that wrote them. `pnpm check:deps`,
+`pnpm lint` reports colour literals at the site that wrote them; in CI its errors are read out of `check:lint-budget`'s pass rather than a second one. `pnpm check:deps`,
 `pnpm check:css` and `pnpm check:fonts` are ratchets with stated budgets.
 
-## The four rules that are not discoverable
+## The five rules that are not discoverable
 
-Everything else here you can find by reading the code. These four you cannot, and each has
+Everything else here you can find by reading the code. These five you cannot, and each has
 cost real time:
 
 1. **`src/theme.css` is generated.** `src/theme/levels.ts` is the only place a level name or a
@@ -69,6 +75,28 @@ cost real time:
    rationale live in [`docs/adr/0005-chart-rendering-engines.md`](./adr/0005-chart-rendering-engines.md).
    Measured comparison of the interaction layer remains in [`docs/radix-vs-base-ui.md`](./radix-vs-base-ui.md).
 
+5. **Merging to `main` does not deploy. The release train does.** The production domain follows
+   the `production` branch, and only `.github/workflows/release-train.yml` advances it — on a
+   schedule, at **08:00 and 16:00 UTC**, batching the day's merges into two deployments instead
+   of one per merge. That is the whole point of it: the Vercel account is on a build quota, and
+   merging ten times before lunch used to mean ten production builds.
+
+   So `production` being behind `main` is the normal state between trains, not a fault. What
+   *is* a fault is it being days behind — that means no train has departed, and the run log is
+   where to look.
+
+   The train holds rather than deploys when a deployment is already in progress, when CI on
+   `main` failed, or when CI is still running. It departs when the pointer has drifted, when the
+   deployed SHA is behind `main`, or when the last production deployment failed. To send one
+   early, dispatch the workflow; `dry_run` prints the assessment and moves nothing, `force`
+   advances the pointer even when the SHAs already match. `pnpm release:train --dry-run` runs
+   the same assessment locally and is the fastest way to find out why a train did not depart.
+
+   Two checks are deliberately excluded from the CI it consults — `deployment-drift` and
+   `backup-main` — because they observe the deployment rather than judge the code. Leaving
+   `deployment-drift` in could deadlock: it fails when the live site is behind the pointer, and
+   a redeploy is what fixes that.
+
 ## Where things are written down
 
 Load these when the task is in them, not before.
@@ -76,6 +104,7 @@ Load these when the task is in them, not before.
 | Topic | |
 |---|---|
 | **The brand outline — start here** | [`DESIGN.md`](./DESIGN.md) |
+| **Is the system complete? The 1.0 capability matrix** | [`docs/capability-readiness.md`](./docs/capability-readiness.md) |
 | The vocabulary in plain terms, if the glossary reads as jargon | [`docs/orientation.md`](./docs/orientation.md) |
 | Domain vocabulary | [`CONTEXT.md`](./CONTEXT.md) |
 | Architectural decisions | [`docs/adr/`](./docs/adr/) |
@@ -91,7 +120,7 @@ Load these when the task is in them, not before.
 | Unit tests | [`docs/testing.md`](./docs/testing.md) |
 | The published API surface | [`docs/api-surface.md`](./docs/api-surface.md) |
 | Dependencies, and the ones held back | [`docs/dependencies.md`](./docs/dependencies.md) |
-| Hosted Storybook and its domains | [`docs/hosting.md`](./docs/hosting.md) |
+| Hosted Storybook, its domains, and the release train | [`docs/hosting.md`](./docs/hosting.md) |
 | Workflow conventions, with the incidents behind them | [`docs/workflow.md`](./docs/workflow.md) |
 | Outside reading, and what each idea changed here | [`docs/research.md`](./docs/research.md) |
 | **Third-party reference material — licensing** | [`docs/reference-material.md`](./docs/reference-material.md) |
@@ -120,11 +149,11 @@ citation names a rule that does not exist.
 2. **Delete Branch on Merge**: feature branches are deleted immediately on merge.
 3. **Linear History**: rebase onto `main` before merging; no merge commits.
 4. **Publishing**: stable releases publish from `main` via npm Trusted Publishing — no tokens. Bump `package.json` in the PR. Comment `/publish-dev` for a prerelease.
-5. **Visual Regression Testing**: Playwright snapshots, **Linux CI only**, `maxDiffPixels: 0` — and this suite does **not** gate colour; arithmetic does.
+5. **Visual Regression Testing**: Playwright snapshots, rendered **only in the pinned Playwright image** (`mcr.microsoft.com/playwright:v1.62.1-noble@sha256:…`, in CI), `maxDiffPixels: 0` — and this suite does **not** gate colour; arithmetic does.
 6. **Required Checks**: branch protection requires the single aggregate check named **`ci`**. That name is content-free and **must stay that way** — `shared-utilities` governance matches on the string.
 7. **New Components Need Baselines**: a story without a snapshot asserts nothing. `pnpm check:visual-coverage` is the gate, and its budget is **0**.
 8. **Re-baselining Happens In The PR**: comment `/update-snapshots` — say `all` when the change is *meant* to alter rendering, and name the story that forced it.
-9. **Every CI Job Has A Ceiling**: every job carries `timeout-minutes`, browser installs go through `./.github/actions/install-playwright`, and an upload step uses `if: success() || failure()`, never `always()`.
+9. **Every CI Job Has A Ceiling**: every job carries `timeout-minutes`, a job that drives a browser runs in the pinned Playwright image and installs none, and an upload step uses `if: success() || failure()`, never `always()`.
 10. **Direct Push Protection**: direct pushes to `main` are blocked; PRs required.
 11. **Local Temp & Worktree Directory**: temporary files, local databases, scratch files and git worktrees go in the root `/temp/` directory (gitignored).
 12. **Gitignored Local TODO File**: a root `TODO.md` file MUST exist for local task tracking and be gitignored.

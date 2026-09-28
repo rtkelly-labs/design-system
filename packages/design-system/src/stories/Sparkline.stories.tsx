@@ -3,7 +3,7 @@ import { Sparkline } from '../components/Sparkline';
 import { ThemeProvider } from '../components/ThemeProvider';
 
 const meta: Meta<typeof Sparkline> = {
-  title: 'Foundations/Sparkline',
+  title: 'Components/Data/Sparkline',
   component: Sparkline,
   tags: ['autodocs', 'stable'],
 };

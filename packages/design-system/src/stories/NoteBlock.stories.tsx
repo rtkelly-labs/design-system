@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { NoteBlock } from '../components/NoteBlock';
 
 const meta: Meta<typeof NoteBlock> = {
-  title: 'Foundations/NoteBlock',
+  title: 'Components/Content/NoteBlock',
   component: NoteBlock,
   tags: ['autodocs', 'stable'],
 };

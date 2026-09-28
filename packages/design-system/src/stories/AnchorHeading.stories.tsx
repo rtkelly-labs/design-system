@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AnchorHeading } from '../components/docs/AnchorHeading';
 
 const meta: Meta<typeof AnchorHeading> = {
-  title: 'Docs/AnchorHeading',
+  title: 'Docs/Content/AnchorHeading',
   component: AnchorHeading,
   tags: ['autodocs', 'stable'],
 };

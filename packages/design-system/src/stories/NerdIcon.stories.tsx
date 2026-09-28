@@ -5,7 +5,7 @@ import { Glyph } from '../components/Glyph';
 import { NERD_GLYPHS, NerdIcon, type NerdIconName } from '../components/NerdIcon';
 
 const meta: Meta<typeof NerdIcon> = {
-  title: 'Foundations/NerdIcon',
+  title: 'Components/Icons/NerdIcon',
   component: NerdIcon,
   tags: ['autodocs', 'stable'],
 };

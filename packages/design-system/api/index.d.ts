@@ -1,5 +1,5 @@
 import * as react from 'react';
-import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, SVGProps } from 'react';
+import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps } from 'react';
 import { Table as Table$1, ColumnDef } from '@tanstack/react-table';
 import { RegisterableHotkey } from '@tanstack/react-hotkeys';
 export { ParentSize as ResponsiveChartContainer } from '@visx/responsive';
@@ -385,11 +385,19 @@ type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'default
 
 type ButtonElementProps = ButtonOwnProps & DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & {
     href?: never;
+
+    pending?: boolean;
+
+    pendingLabel?: string;
 };
 
 type ButtonLinkProps = ButtonOwnProps & DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement> & {
 
     href: string;
+
+    pending?: never;
+
+    pendingLabel?: never;
 };
 type ButtonProps = ButtonElementProps | ButtonLinkProps;
 
@@ -423,7 +431,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
     variant?: CardVariant;
 }
 
-declare function Card({ title, description, imgSrc, href, asciiArt, filename, children, className, accent, badge, panel, variant, style, ...props }: CardProps): react.JSX.Element;
+declare const Card: react.ForwardRefExoticComponent<CardProps & react.RefAttributes<HTMLDivElement>>;
 
 interface BadgeProps extends react__default.HTMLAttributes<HTMLSpanElement> {
 
@@ -554,16 +562,80 @@ interface TagProps {
     prefix?: string;
     children?: ReactNode;
 }
-declare const Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLAnchorElement | HTMLSpanElement>>;
+declare const Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLSpanElement | HTMLAnchorElement>>;
 
-interface PaginationProps {
+interface PaginationProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+
     totalPages: number;
+
     currentPage: number;
+
     onPageChange?: (page: number) => void;
+
     getPageHref?: (page: number) => string;
+
     className?: string;
 }
-declare function Pagination({ totalPages, currentPage, onPageChange, getPageHref, className, }: PaginationProps): react.JSX.Element;
+
+declare const Pagination: react.ForwardRefExoticComponent<PaginationProps & react.RefAttributes<HTMLDivElement>>;
+
+type TabsOrientation = 'horizontal' | 'vertical';
+
+type TabsVariant = 'merged' | 'underline' | 'segmented';
+interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
+
+    value?: string;
+
+    defaultValue?: string;
+
+    onValueChange?: (value: string) => void;
+
+    orientation?: TabsOrientation;
+
+    variant?: TabsVariant;
+
+    accent?: AccentToken;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const Tabs: react.ForwardRefExoticComponent<TabsProps & react.RefAttributes<HTMLDivElement>>;
+interface TabsListProps extends HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    caption?: ReactNode;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const TabsList: react.ForwardRefExoticComponent<TabsListProps & react.RefAttributes<HTMLDivElement>>;
+interface TabsTabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'value'> {
+
+    value: string;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const TabsTab: react.ForwardRefExoticComponent<TabsTabProps & react.RefAttributes<HTMLButtonElement>>;
+interface TabsPanelProps extends HTMLAttributes<HTMLDivElement> {
+
+    value: string;
+
+    keepMounted?: boolean;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const TabsPanel: react.ForwardRefExoticComponent<TabsPanelProps & react.RefAttributes<HTMLDivElement>>;
 
 interface SectionContainerProps {
     children: ReactNode;
@@ -586,9 +658,6 @@ type AsciiDividerProps = DividerProps;
 
 declare const AsciiDivider: react__default.FC<AsciiDividerProps>;
 
-declare const THEME_STORAGE_KEY = "ds-theme-level";
-
-declare const THEME_ATTRIBUTE = "data-theme";
 interface ThemeContextValue {
     level: ThemeLevel;
 
@@ -613,14 +682,19 @@ interface ThemeProviderProps {
     className?: string;
 }
 
-declare function getThemeInitScript(options?: {
-    defaultLevel?: ThemeLevel;
-    followSystem?: boolean;
-}): string;
 declare const ThemeProvider: react__default.FC<ThemeProviderProps>;
 declare const useTheme: () => ThemeContextValue;
 
 declare const useOptionalTheme: () => ThemeContextValue | undefined;
+
+declare const THEME_STORAGE_KEY = "ds-theme-level";
+
+declare const THEME_ATTRIBUTE = "data-theme";
+
+declare function getThemeInitScript(options?: {
+    defaultLevel?: ThemeLevel;
+    followSystem?: boolean;
+}): string;
 
 interface BracketTextProps extends HTMLAttributes<HTMLSpanElement> {
     children: ReactNode;
@@ -654,21 +728,185 @@ interface FieldProps {
 
     className?: string;
 }
+
+interface BooleanFieldProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'className' | 'defaultChecked' | 'onChange'>, FieldProps {
+
+    checked?: boolean;
+
+    defaultChecked?: boolean;
+
+    onCheckedChange?: (checked: boolean) => void;
+
+    name?: string;
+
+    value?: string;
+
+    disabled?: boolean;
+
+    readOnly?: boolean;
+
+    required?: boolean;
+
+    id?: string;
+}
+
 interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'className'>, FieldProps {
 }
 
-declare function Input({ label, error, helperText, accent, className, id, ...props }: InputProps): react.JSX.Element;
+declare function Input({ label, error, helperText,
+
+accent,
+
+className, id, style, ...props }: InputProps): react.JSX.Element;
 interface TextAreaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'className'>, FieldProps {
 }
-declare function TextArea({ label, error, helperText, accent, className, id, ...props }: TextAreaProps): react.JSX.Element;
+declare function TextArea({ label, error, helperText,
+
+accent,
+
+className, id, style, ...props }: TextAreaProps): react.JSX.Element;
+
 interface SelectOption {
+
     label: string;
+
     value: string;
+
+    disabled?: boolean;
 }
-interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'className'>, FieldProps {
+interface SelectProps extends Omit<HTMLAttributes<HTMLElement>, 'className' | 'defaultValue' | 'onChange' | 'children'>, FieldProps {
+
     options: SelectOption[];
+
+    value?: string;
+
+    defaultValue?: string;
+
+    onValueChange?: (value: string) => void;
+
+    placeholder?: string;
+
+    name?: string;
+
+    form?: string;
+
+    autoComplete?: string;
+
+    disabled?: boolean;
+
+    required?: boolean;
+
+    id?: string;
+
+    native?: boolean;
 }
-declare function Select({ label, error, helperText, options, accent, className, id, ...props }: SelectProps): react.JSX.Element;
+
+declare const Select: react.ForwardRefExoticComponent<SelectProps & react.RefAttributes<HTMLElement>>;
+
+interface CheckboxProps extends BooleanFieldProps {
+
+    indeterminate?: boolean;
+}
+
+declare const Checkbox: react.ForwardRefExoticComponent<CheckboxProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface SwitchProps extends BooleanFieldProps {
+}
+
+declare const Switch: react.ForwardRefExoticComponent<SwitchProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface LegendProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
+
+    className?: string;
+
+    children?: ReactNode;
+}
+
+declare const Legend: react.ForwardRefExoticComponent<LegendProps & react.RefAttributes<HTMLDivElement>>;
+interface FieldsetProps extends Omit<HTMLAttributes<HTMLFieldSetElement>, 'className' | 'children'> {
+
+    legend?: string;
+
+    error?: string;
+
+    helperText?: string;
+
+    disabled?: boolean;
+
+    className?: string;
+
+    children: ReactNode;
+}
+
+declare const Fieldset: react.ForwardRefExoticComponent<FieldsetProps & react.RefAttributes<HTMLFieldSetElement>>;
+
+interface RadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'children' | 'defaultValue' | 'onChange'> {
+
+    legend?: string;
+
+    error?: string;
+
+    helperText?: string;
+
+    accent?: AccentToken;
+
+    value?: string;
+
+    defaultValue?: string;
+
+    onValueChange?: (value: string) => void;
+
+    name?: string;
+
+    disabled?: boolean;
+
+    readOnly?: boolean;
+
+    required?: boolean;
+
+    className?: string;
+
+    children: ReactNode;
+}
+
+declare const RadioGroup: react.ForwardRefExoticComponent<RadioGroupProps & react.RefAttributes<HTMLDivElement>>;
+interface RadioProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'className' | 'onChange'> {
+
+    value: string;
+
+    label?: string;
+
+    helperText?: string;
+
+    disabled?: boolean;
+
+    className?: string;
+}
+
+declare const Radio: react.ForwardRefExoticComponent<RadioProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface ErrorSummaryError {
+
+    id: string;
+
+    message: string;
+}
+interface ErrorSummaryProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'className' | 'children'> {
+
+    errors: readonly ErrorSummaryError[];
+
+    title?: string;
+
+    headingLevel?: 2 | 3 | 4 | 5 | 6;
+
+    focusOnAppear?: boolean;
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const ErrorSummary: react.ForwardRefExoticComponent<ErrorSummaryProps & react.RefAttributes<HTMLElement>>;
 
 interface SwatchProps extends Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
 
@@ -715,7 +953,8 @@ declare function TableHeader({ className, ...props }: HTMLAttributes<HTMLTableSe
 declare function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
 declare function TableFooter({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
 declare function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowElement>): react.JSX.Element;
-declare function TableHead({ className, ...props }: ThHTMLAttributes<HTMLTableCellElement>): react.JSX.Element;
+
+declare function TableHead({ className, scope, ...props }: ThHTMLAttributes<HTMLTableCellElement>): react.JSX.Element;
 declare function TableCell({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>): react.JSX.Element;
 declare function TableCaption({ className, ...props }: HTMLAttributes<HTMLTableCaptionElement>): react.JSX.Element;
 
@@ -725,6 +964,8 @@ interface Column<T> {
     className?: string;
     enableSorting?: boolean;
     sortValue?: (row: T) => any;
+
+    rowHeader?: boolean;
 }
 
 interface DataTableVirtualization {
@@ -738,7 +979,10 @@ interface DataTableVirtualization {
     scrollElementRef?: RefObject<HTMLElement | null>;
 }
 type DataTableSharedProps<T> = {
+
     keyExtractor?: (row: T, index: number) => string | number;
+
+    caption?: ReactNode;
     emptyText?: string;
     className?: string;
     containerClassName?: string;
@@ -755,10 +999,12 @@ type DataTableProps<T> = DataTableSharedProps<T> & ({
 
     columns: Column<T>[] | ColumnDef<T, any>[];
     data: T[];
+
     enableSorting?: boolean;
     pageSize?: number;
 });
-declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, emptyText, className, containerClassName, virtualize, ...rest }: DataTableProps<T>): react.JSX.Element;
+
+declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, emptyText, className, containerClassName, virtualize, ...rest }: DataTableProps<T>): react.JSX.Element;
 
 interface ModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
     isOpen: boolean;
@@ -790,6 +1036,648 @@ interface AlertDialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' 
 }
 
 declare const AlertDialog: react.ForwardRefExoticComponent<AlertDialogProps & react.RefAttributes<HTMLDivElement>>;
+
+type DrawerPlacement = 'left' | 'right';
+interface DrawerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
+
+    isOpen: boolean;
+
+    onClose: () => void;
+
+    title: string;
+
+    children: ReactNode;
+
+    placement?: DrawerPlacement;
+
+    footer?: ReactNode;
+
+    closeOnBackdropClick?: boolean;
+
+    className?: string;
+}
+
+declare const Drawer: react.ForwardRefExoticComponent<DrawerProps & react.RefAttributes<HTMLDivElement>>;
+
+interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
+
+    sidebar?: ReactNode;
+
+    topbar?: ReactNode;
+
+    children: ReactNode;
+
+    sidebarOpen?: boolean;
+
+    defaultSidebarOpen?: boolean;
+
+    onSidebarOpenChange?: (open: boolean) => void;
+
+    className?: string;
+}
+
+declare const AppShell: react.ForwardRefExoticComponent<AppShellProps & react.RefAttributes<HTMLDivElement>>;
+interface AppSidebarProps extends Omit<HTMLAttributes<HTMLElement>, 'className' | 'children'> {
+
+    label: string;
+
+    header?: ReactNode;
+
+    children: ReactNode;
+
+    footer?: ReactNode;
+
+    className?: string;
+}
+
+declare const AppSidebar: react.ForwardRefExoticComponent<AppSidebarProps & react.RefAttributes<HTMLElement>>;
+
+interface AppNavItem {
+
+    id: string;
+
+    label: ReactNode;
+
+    href?: string;
+
+    icon?: ElementType<{
+        className?: string;
+    }>;
+
+    badge?: ReactNode;
+
+    items?: readonly AppNavItem[];
+}
+interface AppSidebarNavProps extends Omit<HTMLAttributes<HTMLElement>, 'className' | 'children'> {
+
+    label: string;
+
+    items: readonly AppNavItem[];
+
+    activeId?: string;
+
+    onNavigate?: (id: string) => void;
+
+    heading?: ReactNode;
+
+    className?: string;
+}
+
+declare const AppSidebarNav: react.ForwardRefExoticComponent<AppSidebarNavProps & react.RefAttributes<HTMLElement>>;
+interface AppTopbarProps extends Omit<HTMLAttributes<HTMLElement>, 'className'> {
+
+    label?: string;
+
+    children?: ReactNode;
+
+    actions?: ReactNode;
+
+    sidebarToggleLabel?: string;
+
+    className?: string;
+}
+
+declare const AppTopbar: react.ForwardRefExoticComponent<AppTopbarProps & react.RefAttributes<HTMLElement>>;
+interface AppMainProps extends Omit<HTMLAttributes<HTMLElement>, 'className'> {
+
+    label?: string;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const AppMain: react.ForwardRefExoticComponent<AppMainProps & react.RefAttributes<HTMLElement>>;
+
+interface SpinnerProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'className'> {
+
+    label?: string;
+
+    size?: 'sm' | 'md' | 'lg';
+
+    accent?: AccentToken | 'current';
+
+    className?: string;
+}
+
+declare const Spinner: react.ForwardRefExoticComponent<SpinnerProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface SkeletonProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
+
+    shape?: 'text' | 'heading' | 'block' | 'avatar';
+
+    className?: string;
+}
+
+declare const Skeleton: react.ForwardRefExoticComponent<SkeletonProps & react.RefAttributes<HTMLDivElement>>;
+
+interface ProgressProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'children'> {
+
+    value?: number | null;
+
+    max?: number;
+
+    label: string;
+
+    hideLabel?: boolean;
+
+    showValue?: boolean;
+
+    accent?: AccentToken;
+
+    className?: string;
+}
+
+declare const Progress: react.ForwardRefExoticComponent<ProgressProps & react.RefAttributes<HTMLDivElement>>;
+
+interface EmptyStateProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'className'> {
+
+    icon?: ReactNode;
+
+    title: string;
+
+    headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+
+    description?: ReactNode;
+
+    action?: ReactNode;
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const EmptyState: react.ForwardRefExoticComponent<EmptyStateProps & react.RefAttributes<HTMLDivElement>>;
+
+interface StatusPageProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children' | 'className'> {
+
+    title: string;
+
+    code?: ReactNode;
+
+    description?: ReactNode;
+
+    action?: ReactNode;
+
+    children?: ReactNode;
+
+    standalone?: boolean;
+
+    className?: string;
+}
+
+declare const StatusPage: react.ForwardRefExoticComponent<StatusPageProps & react.RefAttributes<HTMLElement>>;
+
+interface StatusPagePresetProps extends Omit<StatusPageProps, 'title'> {
+
+    homeHref?: string;
+
+    homeLabel?: string;
+}
+interface NotFoundPageProps extends StatusPagePresetProps {
+
+    title?: string;
+}
+
+declare const NotFoundPage: react.ForwardRefExoticComponent<NotFoundPageProps & react.RefAttributes<HTMLElement>>;
+interface ServerErrorPageProps extends StatusPagePresetProps {
+
+    title?: string;
+
+    standalone?: boolean;
+}
+
+declare const ServerErrorPage: react.ForwardRefExoticComponent<ServerErrorPageProps & react.RefAttributes<HTMLElement>>;
+
+type OverlaySide = 'top' | 'bottom' | 'left' | 'right';
+
+type OverlayAlign = 'start' | 'center' | 'end';
+interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'content' | 'children' | 'className'> {
+
+    content: ReactNode;
+
+    children: ReactElement;
+
+    side?: OverlaySide;
+
+    align?: OverlayAlign;
+
+    delay?: number;
+
+    open?: boolean;
+
+    defaultOpen?: boolean;
+
+    onOpenChange?: (open: boolean) => void;
+
+    disabled?: boolean;
+
+    className?: string;
+}
+
+declare const Tooltip: react.ForwardRefExoticComponent<TooltipProps & react.RefAttributes<HTMLDivElement>>;
+
+interface PopoverProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
+
+    trigger: ReactElement;
+
+    title: string;
+
+    children: ReactNode;
+
+    side?: OverlaySide;
+
+    align?: OverlayAlign;
+
+    open?: boolean;
+
+    defaultOpen?: boolean;
+
+    onOpenChange?: (open: boolean) => void;
+
+    className?: string;
+}
+
+declare const Popover: react.ForwardRefExoticComponent<PopoverProps & react.RefAttributes<HTMLDivElement>>;
+
+interface MenuProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'className'> {
+
+    trigger: ReactElement;
+
+    children: ReactNode;
+
+    side?: OverlaySide;
+
+    align?: OverlayAlign;
+
+    open?: boolean;
+
+    defaultOpen?: boolean;
+
+    onOpenChange?: (open: boolean) => void;
+
+    className?: string;
+}
+
+declare const Menu: react.ForwardRefExoticComponent<MenuProps & react.RefAttributes<HTMLDivElement>>;
+interface MenuItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
+
+    children: ReactNode;
+
+    intent?: 'danger';
+
+    disabled?: boolean;
+
+    closeOnClick?: boolean;
+
+    className?: string;
+}
+
+declare const MenuItem: react.ForwardRefExoticComponent<MenuItemProps & react.RefAttributes<HTMLDivElement>>;
+interface MenuRadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'onChange' | 'className'> {
+
+    label?: string;
+
+    value?: string;
+
+    defaultValue?: string;
+
+    onValueChange?: (value: string) => void;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const MenuRadioGroup: react.ForwardRefExoticComponent<MenuRadioGroupProps & react.RefAttributes<HTMLDivElement>>;
+interface MenuRadioItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
+
+    value: string;
+
+    children: ReactNode;
+
+    closeOnClick?: boolean;
+
+    className?: string;
+}
+
+declare const MenuRadioItem: react.ForwardRefExoticComponent<MenuRadioItemProps & react.RefAttributes<HTMLDivElement>>;
+interface MenuSeparatorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
+
+    className?: string;
+}
+
+declare const MenuSeparator: react.ForwardRefExoticComponent<MenuSeparatorProps & react.RefAttributes<HTMLDivElement>>;
+
+type LinkComponentProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+    href: string;
+};
+interface LinkProviderProps {
+
+    component?: ElementType<LinkComponentProps>;
+
+    isCurrent?: (href: string) => boolean;
+    children: ReactNode;
+}
+
+declare function LinkProvider({ component, isCurrent, children }: LinkProviderProps): react.JSX.Element;
+
+declare function useLinkComponent(): ElementType<LinkComponentProps>;
+
+declare function isExternalHref(href: string): boolean;
+
+declare function useIsCurrentHref(href: string): boolean;
+interface SiteLinkProps extends LinkComponentProps {
+
+    current?: boolean;
+
+    className?: string;
+}
+
+declare const SiteLink: react.ForwardRefExoticComponent<SiteLinkProps & react.RefAttributes<HTMLAnchorElement>>;
+
+type SiteHeaderCollapse = 'sm' | 'md' | 'lg';
+interface SiteHeaderProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'className'> {
+
+    brand: ReactNode;
+
+    brandHref?: string;
+
+    nav?: ReactNode;
+
+    mobileNav?: ReactNode;
+
+    actions?: ReactNode;
+
+    collapseAt?: SiteHeaderCollapse;
+
+    skipTo?: string | false;
+
+    skipLabel?: string;
+
+    sticky?: boolean;
+
+    className?: string;
+}
+
+declare const SiteHeader: react.ForwardRefExoticComponent<SiteHeaderProps & react.RefAttributes<HTMLElement>>;
+
+type SiteNavOrientation = 'horizontal' | 'vertical';
+interface SiteNavProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'className' | 'aria-label'> {
+
+    label: string;
+
+    children: ReactNode;
+
+    orientation?: SiteNavOrientation;
+
+    className?: string;
+}
+
+declare const SiteNav: react.ForwardRefExoticComponent<SiteNavProps & react.RefAttributes<HTMLElement>>;
+
+interface SiteNavLinkItemProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children' | 'className'> {
+
+    href: string;
+
+    children: ReactNode;
+
+    current?: boolean;
+
+    className?: string;
+    label?: never;
+    defaultOpen?: never;
+}
+
+interface SiteNavGroupItemProps {
+
+    label: string;
+
+    children: ReactNode;
+
+    defaultOpen?: boolean;
+
+    className?: string;
+    href?: never;
+    current?: never;
+}
+type SiteNavItemProps = SiteNavLinkItemProps | SiteNavGroupItemProps;
+
+declare const SiteNavItem: react.ForwardRefExoticComponent<SiteNavItemProps & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
+
+interface MobileNavProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'title' | 'className'> {
+
+    label: string;
+
+    children: ReactNode;
+
+    title?: string;
+
+    triggerLabel?: string;
+
+    open?: boolean;
+
+    defaultOpen?: boolean;
+
+    onOpenChange?: (open: boolean) => void;
+
+    footer?: ReactNode;
+
+    className?: string;
+}
+
+declare const MobileNav: react.ForwardRefExoticComponent<MobileNavProps & react.RefAttributes<HTMLDivElement>>;
+
+interface SiteFooterProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'className'> {
+
+    children?: ReactNode;
+
+    nav?: ReactNode;
+
+    meta?: ReactNode;
+
+    className?: string;
+}
+
+declare const SiteFooter: react.ForwardRefExoticComponent<SiteFooterProps & react.RefAttributes<HTMLElement>>;
+
+type SectionColumns = 2 | 3 | 4;
+
+type SectionAlign = 'center' | 'start';
+
+interface HeroProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children' | 'className'> {
+
+    title: ReactNode;
+
+    subtitle?: string;
+
+    eyebrow?: ReactNode;
+
+    actions?: ReactNode;
+
+    children?: ReactNode;
+
+    bracketed?: boolean;
+
+    align?: SectionAlign;
+
+    className?: string;
+}
+
+declare const Hero: react.ForwardRefExoticComponent<HeroProps & react.RefAttributes<HTMLElement>>;
+
+interface FeatureGridProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'className'> {
+
+    title?: ReactNode;
+
+    description?: ReactNode;
+
+    columns?: SectionColumns;
+
+    align?: SectionAlign;
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const FeatureGrid: react.ForwardRefExoticComponent<FeatureGridProps & react.RefAttributes<HTMLElement>>;
+interface FeatureProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    title: string;
+
+    icon?: ReactNode;
+
+    accent?: AccentToken;
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const Feature: react.ForwardRefExoticComponent<FeatureProps & react.RefAttributes<HTMLDivElement>>;
+
+interface PricingGridProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'className'> {
+
+    title?: ReactNode;
+
+    description?: ReactNode;
+
+    columns?: SectionColumns;
+
+    align?: SectionAlign;
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const PricingGrid: react.ForwardRefExoticComponent<PricingGridProps & react.RefAttributes<HTMLElement>>;
+
+type PricingTierAccent = 'primary' | 'secondary' | 'tertiary';
+interface PricingTierProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    name: ReactNode;
+
+    price: ReactNode;
+
+    period?: ReactNode;
+
+    description?: ReactNode;
+
+    features?: readonly ReactNode[];
+
+    accent?: PricingTierAccent;
+
+    badge?: string;
+
+    action?: ReactNode;
+
+    className?: string;
+}
+
+interface PricingTier {
+    name: string;
+    price: string;
+    period?: string;
+    description: string;
+    features: string[];
+
+    accent: PricingTierAccent;
+    highlighted?: boolean;
+    ctaText?: string;
+}
+
+declare const PricingTier: react.ForwardRefExoticComponent<PricingTierProps & react.RefAttributes<HTMLDivElement>>;
+
+type CTASectionAccent = 'primary' | 'secondary' | 'tertiary';
+interface CTASectionProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children' | 'className'> {
+
+    title: ReactNode;
+
+    children?: ReactNode;
+
+    actions?: ReactNode;
+
+    accent?: CTASectionAccent;
+
+    align?: SectionAlign;
+
+    className?: string;
+}
+
+declare const CTASection: react.ForwardRefExoticComponent<CTASectionProps & react.RefAttributes<HTMLElement>>;
+
+type ToastIntent = 'info' | 'success' | 'warning' | 'danger';
+
+interface ToastActionOptions {
+
+    label: string;
+
+    onClick: () => void;
+}
+
+interface ToastOptions {
+
+    title: string;
+
+    description?: ReactNode;
+
+    intent?: ToastIntent;
+
+    action?: ToastActionOptions;
+
+    timeout?: number;
+
+    id?: string;
+
+    onClose?: () => void;
+}
+
+interface ToastApi {
+
+    show: (options: ToastOptions) => string;
+
+    dismiss: (id?: string) => void;
+}
+interface ToastProviderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'className'> {
+
+    children?: ReactNode;
+
+    timeout?: number;
+
+    limit?: number;
+
+    label?: string;
+
+    className?: string;
+}
+
+declare const ToastProvider: react.ForwardRefExoticComponent<ToastProviderProps & react.RefAttributes<HTMLDivElement>>;
+
+declare function useToast(): ToastApi;
+
+declare function useOptionalToast(): ToastApi | null;
 
 declare const NERD_GLYPHS: {
     readonly sort: "";
@@ -1039,15 +1927,35 @@ interface SlideDeckProps {
 
 declare const SlideDeck: react__default.FC<SlideDeckProps>;
 
+interface BlogAuthor {
+
+    name: string;
+
+    initials?: string;
+
+    avatar?: ReactNode;
+
+    url?: string;
+
+    description?: string;
+}
+
 interface BlogPostProps {
+
     title: string;
+
     subtitle?: string;
-    author?: string;
+
+    author?: string | BlogAuthor;
+
+    authorCard?: react__default.ReactNode;
+
     date: string;
 
     readingTime?: string;
 
     tags?: string[];
+
     children: react__default.ReactNode;
 }
 
@@ -1082,61 +1990,21 @@ declare const ExperimentsView: react__default.FC<ExperimentsViewProps>;
 
 declare const DesignSandbox: react__default.FC;
 
-interface PricingTier {
-    name: string;
-    price: string;
-    period?: string;
-    description: string;
-    features: string[];
-
-    accent: 'primary' | 'secondary' | 'tertiary';
-    highlighted?: boolean;
-    ctaText?: string;
-}
-
 declare const DEFAULT_PRICING_TIERS: PricingTier[];
 
 declare const DEFAULT_DEPLOY_LOG = "$ platform deploy --environment production\n[\u2713] Connecting to local datastore... OK\n[\u2713] Verifying 1,420 records against checksum... OK\n[\u2713] Running automation rules... APPLIED\n[\u2713] Versioned backup written to ./backups/2026-01-01/\n[*] Surface ready! Server active on http://localhost:8000";
 interface SaasLandingPageProps {
+
     title?: string;
+
     subtitle?: string;
+
     pricingTiers?: PricingTier[];
 
     deployLog?: string;
 }
+
 declare const SaasLandingPage: react__default.FC<SaasLandingPageProps>;
-
-interface AdminNavItem {
-    id: string;
-    label: string;
-
-    icon?: ElementType<{
-        className?: string;
-    }>;
-    badgeCount?: number;
-}
-declare const DEFAULT_ADMIN_NAV: AdminNavItem[];
-interface AdminStatusBadge {
-    id: string;
-    label: string;
-    accent?: AccentToken;
-
-    icon?: ElementType<{
-        className?: string;
-    }>;
-}
-
-declare const DEFAULT_ADMIN_STATUS: AdminStatusBadge[];
-interface AdminDashboardLayoutProps {
-    appTitle?: string;
-    navItems?: AdminNavItem[];
-
-    statusBadges?: AdminStatusBadge[];
-    activeNavId?: string;
-    onNavSelect?: (id: string) => void;
-    children?: react__default.ReactNode;
-}
-declare const AdminDashboardLayout: react__default.FC<AdminDashboardLayoutProps>;
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 interface AnchorHeadingProps extends Omit<HTMLAttributes<HTMLHeadingElement>, 'id'> {
@@ -1187,7 +2055,7 @@ declare const CodeBlockAttachment: react.Context<boolean>;
 
 declare function CodeBlock({ children, title, language, copyable, attached, className, ...rest }: CodeBlockProps): react.JSX.Element;
 
-type CodeTabsVariant = 'merged' | 'underline' | 'segmented';
+type CodeTabsVariant = TabsVariant;
 interface CodeTabProps {
 
     label: string;
@@ -1271,20 +2139,17 @@ interface DocsLayoutProps {
 
 declare function DocsLayout({ header, sidebar, toc, children, sidebarOpen, onCloseSidebar, className, }: DocsLayoutProps): react.JSX.Element;
 
-type DocsLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
-    href: string;
-};
+type DocsLinkProps = LinkComponentProps;
 interface DocsLinkProviderProps {
 
     component: ElementType<DocsLinkProps>;
     children: ReactNode;
 }
+
 declare function DocsLinkProvider({ component, children }: DocsLinkProviderProps): react.JSX.Element;
 declare function useDocsLinkComponent(): ElementType<DocsLinkProps>;
 
-declare function isExternalHref(href: string): boolean;
-
-declare function DocsLink({ href, children, ...rest }: DocsLinkProps): react.JSX.Element;
+declare function DocsLink(props: DocsLinkProps): react.JSX.Element;
 
 interface DocsNavNode {
     label: string;
@@ -1340,6 +2205,307 @@ declare function TableOfContents({ toc, fromDepth, toDepth, label, spy, classNam
 
 declare function collectHeadings(container: ParentNode | null | undefined, selector?: string): TocEntry[];
 
+type FigurePalette$1 = 'mono' | 'duo' | 'multi';
+declare const GLYPH_SETS: {
+    readonly shade: readonly ["·", "░", "▒", "▓", "█"];
+    readonly ascii: readonly [".", "-", "=", "#", "@"];
+    readonly hash: readonly [".", ":", "+", "#", "█"];
+    readonly bar: readonly ["▁", "▂", "▃", "▅", "█"];
+};
+type GlyphSetName = keyof typeof GLYPH_SETS;
+type Glyphs$1 = GlyphSetName | readonly string[];
+interface FigureFrameProps extends Omit<react.ComponentProps<'figure'>, 'title'> {
+
+    title?: string;
+
+    corner?: string;
+}
+
+declare const FigureFrame: react.ForwardRefExoticComponent<Omit<FigureFrameProps, "ref"> & react.RefAttributes<HTMLElement>>;
+
+type FlowTone = 'default' | 'accent' | 'muted';
+interface FlowNode {
+
+    label: string;
+
+    tone?: FlowTone;
+
+    stretch?: boolean;
+}
+interface FlowRow {
+
+    nodes: FlowNode[];
+}
+interface FlowPathProps {
+
+    children?: ReactNode;
+}
+interface FlowDiagramProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    rows?: FlowRow[];
+
+    children?: ReactNode;
+
+    palette?: FigurePalette$1;
+
+    className?: string;
+}
+
+declare const Path: ((props: FlowPathProps & {
+    children?: ReactNode;
+}) => null) & {
+    graphItem: string;
+    displayName?: string;
+};
+
+declare const FlowDiagram: react.ForwardRefExoticComponent<FlowDiagramProps & react.RefAttributes<HTMLDivElement>>;
+
+type TimelineState = 'done' | 'now' | 'next';
+interface TimelineEvent {
+
+    date: string;
+
+    label?: string;
+    state?: TimelineState;
+}
+interface TimelineProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    events?: TimelineEvent[];
+
+    children?: ReactNode;
+
+    palette?: FigurePalette$1;
+
+    className?: string;
+}
+
+declare const Event: ((props: TimelineEvent & {
+    children?: ReactNode;
+}) => null) & {
+    graphItem: string;
+    displayName?: string;
+};
+
+declare const Timeline: react.ForwardRefExoticComponent<TimelineProps & react.RefAttributes<HTMLDivElement>>;
+
+type DiffSign = 'add' | 'remove' | 'keep';
+interface DiffRow {
+
+    label?: string;
+    value: string;
+    sign?: DiffSign;
+}
+interface DiffLineProps extends DiffRow {
+
+    total?: boolean;
+}
+interface ChangeSummaryProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    rows?: DiffRow[];
+
+    footer?: DiffRow;
+
+    children?: ReactNode;
+
+    palette?: FigurePalette$1;
+
+    className?: string;
+}
+
+declare const Line: ((props: DiffLineProps & {
+    children?: ReactNode;
+}) => null) & {
+    graphItem: string;
+    displayName?: string;
+};
+
+declare const ChangeSummary: react.ForwardRefExoticComponent<ChangeSummaryProps & react.RefAttributes<HTMLDivElement>>;
+
+interface SlopeItem {
+
+    label?: string;
+    from: number | string;
+    to: number | string;
+}
+interface BeforeAfterProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    fromLabel: string;
+
+    toLabel: string;
+
+    items?: SlopeItem[];
+
+    children?: ReactNode;
+
+    palette?: FigurePalette$1;
+
+    className?: string;
+}
+
+declare const Slope: ((props: SlopeItem & {
+    children?: ReactNode;
+}) => null) & {
+    graphItem: string;
+    displayName?: string;
+};
+
+declare const BeforeAfter: react.ForwardRefExoticComponent<BeforeAfterProps & react.RefAttributes<HTMLDivElement>>;
+
+type UptimeStatus = 'ok' | 'degraded' | 'down' | 'empty';
+interface UptimeStripProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    days: UptimeStatus[] | string;
+
+    from?: string;
+
+    to?: string;
+
+    columns?: number;
+
+    glyphs?: Glyphs$1;
+
+    palette?: FigurePalette$1;
+
+    className?: string;
+}
+
+declare const UptimeStrip: react.ForwardRefExoticComponent<UptimeStripProps & react.RefAttributes<HTMLDivElement>>;
+
+interface TreeNode {
+    label: string;
+    meta?: string;
+    accent?: boolean;
+    children?: TreeNode[];
+}
+interface NodeProps {
+
+    label?: string;
+    meta?: string;
+    accent?: boolean;
+    children?: ReactNode;
+}
+interface TreeDiagramProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    nodes?: TreeNode[];
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const Node: ((props: NodeProps & {
+    children?: ReactNode;
+}) => null) & {
+    graphItem: string;
+    displayName?: string;
+};
+
+declare const TreeDiagram: react.ForwardRefExoticComponent<TreeDiagramProps & react.RefAttributes<HTMLDivElement>>;
+
+type Glyphs = 'shade' | 'ascii' | 'hash' | 'bar' | readonly string[];
+type FigurePalette = 'mono' | 'duo' | 'multi';
+interface ActivityDay {
+
+    date: string;
+
+    count: number;
+}
+interface ActivityGridProps extends react.HTMLAttributes<HTMLElement> {
+
+    data: ActivityDay[];
+
+    weekStartsOn?: 0 | 1;
+
+    max?: number;
+
+    legend?: boolean;
+
+    glyphs?: Glyphs;
+
+    palette?: FigurePalette;
+
+    className?: string;
+}
+
+declare const ActivityGrid: react.ForwardRefExoticComponent<ActivityGridProps & react.RefAttributes<HTMLElement>>;
+
+interface GanttItem {
+    label: string;
+
+    start: string;
+
+    end: string;
+
+    complete?: number;
+}
+interface GanttChartProps extends react.HTMLAttributes<HTMLElement> {
+
+    items: GanttItem[];
+
+    range?: {
+        start: string;
+        end: string;
+    };
+
+    columns?: number;
+
+    className?: string;
+}
+
+declare const GanttChart: react.ForwardRefExoticComponent<GanttChartProps & react.RefAttributes<HTMLElement>>;
+
+interface TerminalProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    prompt?: string;
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const Terminal: react.ForwardRefExoticComponent<TerminalProps & react.RefAttributes<HTMLDivElement>>;
+
+type StepState = 'done' | 'now' | 'next';
+interface StepProps {
+
+    title?: string;
+
+    state?: StepState;
+
+    children?: ReactNode;
+}
+interface StepsProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const Step: ((props: StepProps & {
+    children?: ReactNode;
+}) => null) & {
+    graphItem: string;
+    displayName?: string;
+};
+
+declare const Steps: react.ForwardRefExoticComponent<StepsProps & react.RefAttributes<HTMLDivElement>>;
+
 declare function MdxPre({ children, ...rest }: HTMLAttributes<HTMLPreElement>): react.JSX.Element;
 declare function MdxAnchor({ href, children, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement>): react.JSX.Element;
 
@@ -1374,22 +2540,68 @@ declare const mdxComponents: {
     NoteBlock: react.FC<NoteBlockProps>;
     TLDR: react.FC<TLDRProps>;
     Badge: react.ForwardRefExoticComponent<BadgeProps & react.RefAttributes<HTMLSpanElement>>;
-    Card: typeof Card;
-    Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLAnchorElement | HTMLSpanElement>>;
+    Card: react.ForwardRefExoticComponent<CardProps & react.RefAttributes<HTMLDivElement>>;
+    Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLSpanElement | HTMLAnchorElement>>;
     AsciiDivider: react.FC<DividerProps>;
     CodeBlock: typeof CodeBlock;
     CodeTabs: typeof CodeTabs;
     CodeTab: typeof CodeTab;
+    FigureFrame: react.ForwardRefExoticComponent<Omit<FigureFrameProps, "ref"> & react.RefAttributes<HTMLElement>>;
+    ActivityGrid: react.ForwardRefExoticComponent<ActivityGridProps & react.RefAttributes<HTMLElement>>;
+    BeforeAfter: react.ForwardRefExoticComponent<BeforeAfterProps & react.RefAttributes<HTMLDivElement>>;
+    ChangeSummary: react.ForwardRefExoticComponent<ChangeSummaryProps & react.RefAttributes<HTMLDivElement>>;
+    FlowDiagram: react.ForwardRefExoticComponent<FlowDiagramProps & react.RefAttributes<HTMLDivElement>>;
+    GanttChart: react.ForwardRefExoticComponent<GanttChartProps & react.RefAttributes<HTMLElement>>;
+    Timeline: react.ForwardRefExoticComponent<TimelineProps & react.RefAttributes<HTMLDivElement>>;
+    TreeDiagram: react.ForwardRefExoticComponent<TreeDiagramProps & react.RefAttributes<HTMLDivElement>>;
+    UptimeStrip: react.ForwardRefExoticComponent<UptimeStripProps & react.RefAttributes<HTMLDivElement>>;
+    Terminal: react.ForwardRefExoticComponent<TerminalProps & react.RefAttributes<HTMLDivElement>>;
+    Steps: react.ForwardRefExoticComponent<StepsProps & react.RefAttributes<HTMLDivElement>>;
+    Path: ((props: FlowPathProps & {
+        children?: ReactNode;
+    }) => null) & {
+        graphItem: string;
+        displayName?: string;
+    };
+    Event: ((props: TimelineEvent & {
+        children?: ReactNode;
+    }) => null) & {
+        graphItem: string;
+        displayName?: string;
+    };
+    Line: ((props: DiffLineProps & {
+        children?: ReactNode;
+    }) => null) & {
+        graphItem: string;
+        displayName?: string;
+    };
+    Slope: ((props: SlopeItem & {
+        children?: ReactNode;
+    }) => null) & {
+        graphItem: string;
+        displayName?: string;
+    };
+    Node: ((props: NodeProps & {
+        children?: ReactNode;
+    }) => null) & {
+        graphItem: string;
+        displayName?: string;
+    };
+    Step: ((props: StepProps & {
+        children?: ReactNode;
+    }) => null) & {
+        graphItem: string;
+        displayName?: string;
+    };
 };
 type MdxComponents = typeof mdxComponents;
 
 export {
   ANSI_SLOTS,
   type AccentToken,
-  AdminDashboardLayout,
-  type AdminDashboardLayoutProps,
-  type AdminNavItem,
-  type AdminStatusBadge,
+  type ActivityDay,
+  ActivityGrid,
+  type ActivityGridProps,
   AlertDialog,
   type AlertDialogProps,
   AnchorHeading,
@@ -1398,6 +2610,17 @@ export {
   type AnsiHue,
   type AnsiScheme,
   type AnsiSlot,
+  AppMain,
+  type AppMainProps,
+  type AppNavItem,
+  AppShell,
+  type AppShellProps,
+  AppSidebar,
+  AppSidebarNav,
+  type AppSidebarNavProps,
+  type AppSidebarProps,
+  AppTopbar,
+  type AppTopbarProps,
   AsciiDivider,
   type AsciiDividerProps,
   Avatar,
@@ -1407,6 +2630,9 @@ export {
   BarChart,
   type BarChartDatum,
   type BarChartProps,
+  BeforeAfter,
+  type BeforeAfterProps,
+  type BlogAuthor,
   BlogPost,
   type BlogPostProps,
   BlueskyIcon,
@@ -1424,11 +2650,18 @@ export {
   type ButtonProps,
   type ButtonVariant,
   CSS_MEDIUM,
+  CTASection,
+  type CTASectionAccent,
+  type CTASectionProps,
   Card,
   type CardProps,
   type CardVariant,
+  ChangeSummary,
+  type ChangeSummaryProps,
   ChartTooltip,
   type ChartTooltipProps,
+  Checkbox,
+  type CheckboxProps,
   type ClassInput,
   CodeBlock,
   CodeBlockAttachment,
@@ -1442,8 +2675,6 @@ export {
   type ContrastCheck,
   type ContrastFloor,
   type Crumb,
-  DEFAULT_ADMIN_NAV,
-  DEFAULT_ADMIN_STATUS,
   DEFAULT_DEPLOY_LOG,
   DEFAULT_EXPERIMENTS,
   DEFAULT_LEVEL,
@@ -1453,6 +2684,9 @@ export {
   type DataTableProps,
   type DataTableVirtualization,
   DesignSandbox,
+  type DiffLineProps,
+  type DiffRow,
+  type DiffSign,
   Divider,
   type DividerProps,
   type DividerVariant,
@@ -1471,18 +2705,46 @@ export {
   type DocsNavNode,
   DocsSidebar,
   type DocsSidebarProps,
+  Drawer,
+  type DrawerPlacement,
+  type DrawerProps,
   type Emphasis,
+  EmptyState,
+  type EmptyStateProps,
+  ErrorSummary,
+  type ErrorSummaryError,
+  type ErrorSummaryProps,
+  Event,
   type ExperimentItem,
   ExperimentsView,
   type ExperimentsViewProps,
   FIXED_COLOURS,
+  Feature,
+  FeatureGrid,
+  type FeatureGridProps,
+  type FeatureProps,
+  Fieldset,
+  type FieldsetProps,
+  FigureFrame,
+  type FigureFrameProps,
   type Finding,
   type FixedColour,
+  FlowDiagram,
+  type FlowDiagramProps,
+  type FlowNode,
+  type FlowPathProps,
+  type FlowRow,
+  type FlowTone,
+  GanttChart,
+  type GanttChartProps,
+  type GanttItem,
   GitHubIcon,
   Glyph,
   type GlyphProps,
   HEADING_EMPHASIS,
   type HeadingLevel,
+  Hero,
+  type HeroProps,
   type Hue,
   type HueAgreementCheck,
   type HueRef,
@@ -1490,7 +2752,13 @@ export {
   type InputProps,
   type Intent,
   LEVELS,
+  Legend,
+  type LegendProps,
   type LevelDefinition,
+  Line,
+  type LinkComponentProps,
+  LinkProvider,
+  type LinkProviderProps,
   LinkedInIcon,
   LoremIpsumPost,
   MAXIMUM_NEUTRAL_CHROMA,
@@ -1501,6 +2769,18 @@ export {
   type MdxComponents,
   type Medium,
   type MediumDefinition,
+  Menu,
+  MenuItem,
+  type MenuItemProps,
+  type MenuProps,
+  MenuRadioGroup,
+  type MenuRadioGroupProps,
+  MenuRadioItem,
+  type MenuRadioItemProps,
+  MenuSeparator,
+  type MenuSeparatorProps,
+  MobileNav,
+  type MobileNavProps,
   Modal,
   type ModalProps,
   type Motion,
@@ -1509,8 +2789,14 @@ export {
   type NerdIconAccent,
   type NerdIconName,
   type NerdIconProps,
+  Node,
+  type NodeProps,
+  NotFoundPage,
+  type NotFoundPageProps,
   NoteBlock,
   type NoteBlockProps,
+  type OverlayAlign,
+  type OverlaySide,
   PALETTE_HUES,
   PageHeader,
   type PageHeaderProps,
@@ -1518,8 +2804,17 @@ export {
   type PageTitleProps,
   Pagination,
   type PaginationProps,
+  Path,
   type Polarity,
-  type PricingTier,
+  Popover,
+  type PopoverProps,
+  PricingGrid,
+  type PricingGridProps,
+  PricingTier,
+  type PricingTierAccent,
+  type PricingTierProps,
+  Progress,
+  type ProgressProps,
   Prose,
   type ProseProps,
   RECOMMENDED_COLOURS,
@@ -1528,6 +2823,10 @@ export {
   RECOMMENDED_COLOUR_PROPERTIES,
   RECOMMENDED_COLOUR_ROLES,
   RECOMMENDED_COLOUR_VARS,
+  Radio,
+  RadioGroup,
+  type RadioGroupProps,
+  type RadioProps,
   type RecommendedColourClass,
   type RecommendedColourNamespace,
   type RecommendedColourProperty,
@@ -1545,6 +2844,8 @@ export {
   SYSTEM_LEVEL,
   SaasLandingPage,
   type SaasLandingPageProps,
+  type SectionAlign,
+  type SectionColumns,
   SectionContainer,
   type SectionContainerProps,
   Select,
@@ -1552,25 +2853,56 @@ export {
   type SelectProps,
   type SelectionDevice,
   type SelectionDeviceCheck,
+  ServerErrorPage,
+  type ServerErrorPageProps,
+  SiteFooter,
+  type SiteFooterProps,
+  SiteHeader,
+  type SiteHeaderCollapse,
+  type SiteHeaderProps,
+  SiteLink,
+  type SiteLinkProps,
+  SiteNav,
+  type SiteNavGroupItemProps,
+  SiteNavItem,
+  type SiteNavItemProps,
+  type SiteNavLinkItemProps,
+  type SiteNavOrientation,
+  type SiteNavProps,
+  Skeleton,
+  type SkeletonProps,
   Slide,
   SlideDeck,
   type SlideDeckHotkey,
   type SlideDeckProps,
   type SlideProps,
+  Slope,
+  type SlopeItem,
   Slugger,
   SocialIcon,
   type SocialIconName,
   type SocialIconProps,
   Sparkline,
   type SparklineProps,
+  Spinner,
+  type SpinnerProps,
   StatCard,
   type StatCardAccent,
   type StatCardProps,
+  StatusPage,
+  type StatusPageProps,
+  Step,
+  type StepProps,
+  type StepState,
+  Steps,
+  type StepsProps,
   type Surface,
   Swatch,
   SwatchGroup,
   type SwatchGroupProps,
   type SwatchProps,
+  Switch,
+  type SwitchProps,
   THEME_ATTRIBUTE,
   THEME_LEVELS,
   THEME_STORAGE_KEY,
@@ -1587,8 +2919,20 @@ export {
   TableOfContents,
   type TableOfContentsProps,
   TableRow,
+  Tabs,
+  TabsList,
+  type TabsListProps,
+  type TabsOrientation,
+  TabsPanel,
+  type TabsPanelProps,
+  type TabsProps,
+  TabsTab,
+  type TabsTabProps,
+  type TabsVariant,
   Tag,
   type TagProps,
+  Terminal,
+  type TerminalProps,
   TextArea,
   type TextAreaProps,
   type TextTone,
@@ -1596,10 +2940,28 @@ export {
   type ThemeLevel,
   ThemeProvider,
   type ThemeProviderProps,
+  Timeline,
+  type TimelineEvent,
+  type TimelineProps,
+  type TimelineState,
+  type ToastActionOptions,
+  type ToastApi,
+  type ToastIntent,
+  type ToastOptions,
+  ToastProvider,
+  type ToastProviderProps,
   type TocEntry,
   type TokenRule,
+  Tooltip,
+  type TooltipProps,
+  TreeDiagram,
+  type TreeDiagramProps,
+  type TreeNode,
   type TypeStep,
   type TypeStepName,
+  type UptimeStatus,
+  UptimeStrip,
+  type UptimeStripProps,
   type UseActiveHeadingOptions,
   type UseCopyToClipboardResult,
   WEB_FLOOR,
@@ -1637,6 +2999,10 @@ export {
   useActiveHeading,
   useCopyToClipboard,
   useDocsLinkComponent,
+  useIsCurrentHref,
+  useLinkComponent,
   useOptionalTheme,
+  useOptionalToast,
   useTheme,
+  useToast,
 };

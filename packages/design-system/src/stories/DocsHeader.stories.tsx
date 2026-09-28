@@ -10,7 +10,7 @@ const nav = [
 ];
 
 const meta: Meta<typeof DocsHeader> = {
-  title: 'Docs/DocsHeader',
+  title: 'Docs/Layout/DocsHeader',
   component: DocsHeader,
   tags: ['autodocs', 'stable'],
   parameters: { layout: 'fullscreen' },

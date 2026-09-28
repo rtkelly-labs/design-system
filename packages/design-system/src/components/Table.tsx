@@ -12,6 +12,7 @@ const tableStyles = recipe({
     table: 'w-full caption-bottom text-left font-mono text-sm border-collapse',
     header: 'bg-surface-raised border-b-2 border-edge-strong',
     head: 'h-11 px-4 py-3 text-left align-middle font-display text-xs font-bold uppercase tracking-wider text-accent-primary border-r-2 border-edge-strong last:border-r-0',
+    rowHead: 'px-4 py-3 text-left align-middle text-sm font-bold text-content-primary border-r-2 border-edge-strong last:border-r-0',
     body: 'divide-y-2 divide-edge-strong [&_tr:last-child]:border-0',
     row: 'border-b-2 border-edge-strong transition-colors hover:bg-surface-raised data-[state=selected]:bg-surface-raised',
     cell: 'px-4 py-3 align-middle text-sm text-content-primary border-r-2 border-edge-strong last:border-r-0',
@@ -99,12 +100,19 @@ export function TableRow({
   return <tr data-slot="table-row" className={styles.row({ class: className })} {...props} />;
 }
 
+/**
+ * A header cell. `scope` defaults to `col`, which is what a cell in
+ * `TableHeader` is; pass `scope="row"` for a row header in `TableBody`, which
+ * also gives it the body cell's geometry rather than the column header's.
+ */
 export function TableHead({
   className,
+  scope = 'col',
   ...props
 }: ThHTMLAttributes<HTMLTableCellElement>) {
   const styles = tableStyles();
-  return <th data-slot="table-head" className={styles.head({ class: className })} {...props} />;
+  const slot = scope === 'row' || scope === 'rowgroup' ? styles.rowHead : styles.head;
+  return <th data-slot="table-head" scope={scope} className={slot({ class: className })} {...props} />;
 }
 
 export function TableCell({
@@ -120,5 +128,5 @@ export function TableCaption({
   ...props
 }: HTMLAttributes<HTMLTableCaptionElement>) {
   const styles = tableStyles();
-  return <caption className={styles.caption({ class: className })} {...props} />;
+  return <caption data-slot="table-caption" className={styles.caption({ class: className })} {...props} />;
 }

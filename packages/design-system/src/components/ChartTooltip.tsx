@@ -1,3 +1,5 @@
+'use client';
+
 import { TooltipWithBounds, useTooltip } from '@visx/tooltip';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../lib/recipe';

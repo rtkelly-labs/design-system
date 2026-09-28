@@ -1,3 +1,5 @@
+'use client';
+
 import { AreaClosed, LinePath } from '@visx/shape';
 import { scaleLinear } from '@visx/scale';
 import { forwardRef, type SVGProps } from 'react';

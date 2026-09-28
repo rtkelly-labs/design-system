@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import type { Preview } from '@storybook/react';
 import { DocsContainer, type DocsContainerProps } from '@storybook/addon-docs/blocks';
 import { create } from 'storybook/theming';
-import { ThemeProvider, THEME_ATTRIBUTE } from '../src/components/ThemeProvider';
+import { ThemeProvider } from '../src/components/ThemeProvider';
+import { THEME_ATTRIBUTE } from '../src/components/themeInitScript';
 import { DEFAULT_LEVEL, LEVELS, THEME_LEVELS, isThemeLevel, type ThemeLevel } from '../src/theme/levels';
 import '../src/styles.css';
 import './docs.css';
@@ -193,12 +194,28 @@ const preview: Preview = {
      * lorem-ipsum blog post, and two mockups at ~20-25% readiness sat at the
      * same visual weight as `Docs/*` at ~90% (`docs/surface-readiness.md`).
      *
-     * `check:story-conventions` holds the same vocabulary closed, so a group
-     * cannot arrive here without a decision about what this system claims to be.
+     * The vocabulary lives in `sidebar.ts`, which `check:story-conventions`
+     * also reads, so a group or category cannot arrive here without a decision
+     * about what this system claims to be.
      */
     options: {
       storySort: {
-        order: ['Manifesto', 'Guides', 'Foundations', 'Docs', 'Blog', 'Presentation', 'SaaS', 'Showcase', '*'],
+        // A literal because Storybook reads `storySort` statically; it must equal
+        // `storySortOrder()` in `sidebar.ts`, and `check:story-conventions` fails if not.
+        order: [
+          'Manifesto',
+          'Guides',
+          'Foundations',
+          'Components',
+          ['Actions & Forms', 'Content', 'Feedback', 'Overlays', 'Navigation', 'Layout', 'Icons', 'Data', 'Marketing', 'Reports', '*'],
+          'Docs',
+          ['Layout', 'Content', 'Figures', '*'],
+          'Blog',
+          'Presentation',
+          'SaaS',
+          'Showcase',
+          '*',
+        ],
       },
     },
 

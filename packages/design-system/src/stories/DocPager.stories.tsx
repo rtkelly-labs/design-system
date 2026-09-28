@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { DocPager } from '../components/docs/DocPager';
 
 const meta: Meta<typeof DocPager> = {
-  title: 'Docs/DocPager',
+  title: 'Docs/Layout/DocPager',
   component: DocPager,
   tags: ['autodocs', 'stable'],
 };

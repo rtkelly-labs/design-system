@@ -11,7 +11,7 @@ const SAMPLE_DATA: BarChartDatum[] = [
 ];
 
 const meta: Meta<typeof BarChart> = {
-  title: 'Foundations/BarChart',
+  title: 'Components/Data/BarChart',
   component: BarChart,
   tags: ['autodocs', 'stable'],
 };

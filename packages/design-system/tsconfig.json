@@ -18,6 +18,19 @@
      * `media.ts`. Both are still fine, but the next one should not have to be
      * invented. */
     "allowImportingTsExtensions": true,
+    /* A type is imported with `import type`, and nothing else is elided.
+     *
+     * `dist/` is one file per source module (#301), so an import between two
+     * modules is an import between two output files. An import of only types,
+     * written as a value import, is dropped today only because esbuild happens
+     * to see that nothing uses it at runtime; with this flag the source says so,
+     * and what is left is emitted exactly as written. That matters for the
+     * server/client split: an edge that survives into `dist/` can put a
+     * `'use client'` module in a server module's graph
+     * (`scripts/client-boundary.mjs`).
+     *
+     * It implies `isolatedModules`, which is why that is not set here. */
+    "verbatimModuleSyntax": true,
     "jsx": "react-jsx",
     "declaration": true,
     "declarationMap": true,

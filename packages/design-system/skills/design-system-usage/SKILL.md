@@ -39,7 +39,17 @@ import { Button, DataTable, ThemeProvider } from '@rtkelly13/design-system';
 
 `columns` + `data` (legacy `Column<T>[]` or TanStack `ColumnDef<T>[]`), or pass
 a fully controlled `table` from `useReactTable` — never both. `pageSize`
-attaches pagination; without it, every row is mounted.
+attaches pagination; `virtualize` windows the body instead; without either,
+every row is mounted.
+
+The semantics are the component's, not TanStack's: every header has
+`scope="col"`, the sorted column's header has `aria-sort`, each sortable
+header is a native `<button>`, a `rowHeader` column (`meta.rowHeader` on a
+`ColumnDef`) renders `<th scope="row">`, and a windowed body reports the full
+dataset through `aria-rowcount` / `aria-rowindex`. Pass `caption` to say what
+the table is a table of — it becomes the table's accessible name. Row
+selection and a sticky header are deliberately not built: no consumer needs
+them yet (#245).
 
 ## SlideDeck keyboard
 
@@ -53,7 +63,7 @@ bindings entirely — a page owning its keyboard should pass it.
   config overrides. **Correct:** compose classes with the exported `cn`
   (tailwind-variants based); variants go through `recipe`.
 - **Wrong:** rendering `DataTable` with thousands of rows and no `pageSize`.
-  **Correct:** paginate — the default mounts every row.
+  **Correct:** paginate or `virtualize` — the default mounts every row.
 - **Wrong:** assuming the package themes itself. **Correct:** wrap the app in
   `ThemeProvider` (or set `data-theme` on a root element) — unstyled
   tokens resolve to nothing.

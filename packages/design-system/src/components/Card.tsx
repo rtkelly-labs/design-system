@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import type { ReactNode, HTMLAttributes, CSSProperties } from 'react';
 import { cn } from '../lib/recipe';
 import { accentVar, semanticTokens } from '../lib/theme';
@@ -114,7 +115,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
  * <Card variant="card" title="Where a theme stops applying" href="/posts/theme" />
  * ```
  */
-export function Card({
+export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
   title,
   description,
   imgSrc,
@@ -129,7 +130,7 @@ export function Card({
   variant,
   style,
   ...props
-}: CardProps) {
+}, ref) {
   const accentColor = accent ? accentVar(accent) : undefined;
 
   /**
@@ -155,6 +156,7 @@ export function Card({
   if (form === 'panel') {
     return (
       <div
+        ref={ref}
         className={cn(className)}
         style={{ ...baseCardStyle, padding: '1.5rem' }}
         {...props}
@@ -205,7 +207,7 @@ export function Card({
   const computedFilename = filename || (title ? `${title.toLowerCase().replace(/\s+/g, '_')}.md` : 'card.md');
 
   return (
-    <div className={cn('p-4 md:w-1/2', className)} style={{ maxWidth: '544px' }} {...props}>
+    <div ref={ref} className={cn('p-4 md:w-1/2', className)} style={{ maxWidth: '544px' }} {...props}>
       <div
         style={{
           height: '100%',
@@ -310,4 +312,4 @@ export function Card({
       </div>
     </div>
   );
-}
+});

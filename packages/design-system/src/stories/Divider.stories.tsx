@@ -9,7 +9,7 @@ import { Divider } from '../components/Divider';
  * there is deliberately no story for it: a story is a recommendation.
  */
 const meta: Meta<typeof Divider> = {
-  title: 'Foundations/Divider',
+  title: 'Components/Layout/Divider',
   component: Divider,
   tags: ['autodocs', 'stable'],
 };

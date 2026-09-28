@@ -9,6 +9,8 @@ test-results/
 # Temporary files, local databases, scratch files, and git worktrees
 /temp/
 temp/
+# Agent tooling creates worktrees here regardless of rule 11 in AGENTS.md.
+.claude/worktrees/
 
 # Local TODO file
 todo.md
@@ -24,6 +26,9 @@ walkthrough-results/
 
 # Vitest coverage output
 coverage/
+
+# CI telemetry reports (scripts/ci-telemetry.mjs)
+telemetry/
 .vercel
 
 # Book of Shapes reference SVGs - third-party artwork, no published license.

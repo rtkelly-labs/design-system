@@ -64,7 +64,7 @@ Two files, with different jobs:
   stat row, a table, a note.
 - **`src/templates/sample.tsx` is what you read.** The worked example, exercising
   every path the generator supports, and it is *also* the regression: the render
-  test asserts it and `foundations-reportdocument--sample` screenshots it.
+  test asserts it and `components-reports-reportdocument--sample` screenshots it.
   Adding a component to the report vocabulary means adding it there.
 
 Both ship to `dist/report/` so they are readable from an install.

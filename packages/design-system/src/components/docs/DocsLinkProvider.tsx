@@ -1,21 +1,22 @@
-import { createContext, useContext } from 'react';
-import type { AnchorHTMLAttributes, ElementType, ReactNode } from 'react';
+'use client';
 
-export type DocsLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
-  href: string;
-};
+import type { ElementType, ReactNode } from 'react';
+import {
+  LinkProvider,
+  renderProvidedLink,
+  useLinkComponent,
+} from '../LinkProvider';
+import type { LinkComponentProps } from '../LinkProvider';
 
-/**
- * The component every docs chrome element uses to render an internal link.
- *
- * Defaults to a plain `<a>`, which is correct for Storybook, MDX previews, and
- * statically-rendered output. Apps with a client-side router inject their own
- * (`react-router`'s `Link`, `next/link`, …) via {@link DocsLinkProvider} so
- * sidebar, breadcrumb, pager, and TOC navigation stops triggering full page
- * loads. Without this the docs chrome would hard-navigate on every click and
- * lose scroll position, focus, and any client state on each hop.
- */
-const DocsLinkContext = createContext<ElementType<DocsLinkProps>>('a');
+export type DocsLinkProps = LinkComponentProps;
+
+// The docs chrome's name for the package's one link adapter.
+//
+// This file used to own the context. Since issue 246 it lives in
+// `components/LinkProvider.tsx`, shared with the site chrome, and these are
+// the docs-family names for it: a `DocsLinkProvider` and a `LinkProvider`
+// write to the same context, so either one reaches `DocsHeader`, `SiteHeader`
+// and everything else that renders a link.
 
 export interface DocsLinkProviderProps {
   /** Any component accepting `href` and the usual anchor props. */
@@ -23,22 +24,25 @@ export interface DocsLinkProviderProps {
   children: ReactNode;
 }
 
+/**
+ * Injects the component every docs chrome element uses to render an internal
+ * link.
+ *
+ * Defaults to a plain `<a>`, which is correct for Storybook, MDX previews, and
+ * statically-rendered output. Apps with a client-side router inject their own
+ * (`react-router`'s `Link`, `next/link`, …) so sidebar, breadcrumb, pager, and
+ * TOC navigation stops triggering full page loads. Without this the docs chrome
+ * would hard-navigate on every click and lose scroll position, focus, and any
+ * client state on each hop.
+ *
+ * The same context as {@link LinkProvider}, which also takes `isCurrent`.
+ */
 export function DocsLinkProvider({ component, children }: DocsLinkProviderProps) {
-  return (
-    <DocsLinkContext.Provider value={component}>{children}</DocsLinkContext.Provider>
-  );
+  return <LinkProvider component={component}>{children}</LinkProvider>;
 }
 
 export function useDocsLinkComponent(): ElementType<DocsLinkProps> {
-  return useContext(DocsLinkContext);
-}
-
-const EXTERNAL = /^([a-z][a-z0-9+.-]*:)?\/\//i;
-const NON_ROUTED = /^(mailto:|tel:|#)/i;
-
-/** True for links that must stay plain anchors regardless of the injected router. */
-export function isExternalHref(href: string): boolean {
-  return EXTERNAL.test(href) || NON_ROUTED.test(href);
+  return useLinkComponent();
 }
 
 /**
@@ -47,25 +51,7 @@ export function isExternalHref(href: string): boolean {
  * stay plain too — routers tend to treat `#section` as a route change and
  * scroll to the top instead of to the anchor.
  */
-export function DocsLink({ href, children, ...rest }: DocsLinkProps) {
-  const Component = useDocsLinkComponent();
-
-  if (isExternalHref(href)) {
-    const external = EXTERNAL.test(href);
-    return (
-      <a
-        href={href}
-        {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-        {...rest}
-      >
-        {children}
-      </a>
-    );
-  }
-
-  return (
-    <Component href={href} {...rest}>
-      {children}
-    </Component>
-  );
+export function DocsLink(props: DocsLinkProps) {
+  const Component = useLinkComponent();
+  return renderProvidedLink(Component, props);
 }

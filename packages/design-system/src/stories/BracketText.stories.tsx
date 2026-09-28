@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BracketText } from '../components/BracketText';
 
 const meta: Meta<typeof BracketText> = {
-  title: 'Foundations/BracketText',
+  title: 'Components/Content/BracketText',
   component: BracketText,
   tags: ['autodocs', 'stable'],
 };

@@ -20,7 +20,7 @@ export const DefaultDeck: Story = {
     <SlideDeck>
       <Slide title="WELCOME TO THE SLIDE DECK" subtitle="Brutalist presentation system for talks and decks">
         <div style={{ textAlign: 'center' }}>
-          <p style={{ fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace', fontSize: '1.25rem', color: 'var(--ds-accent-secondary)' }}>
+          <p style={{ fontFamily: 'var(--ds-font-mono)', fontSize: '1.25rem', color: 'var(--ds-accent-secondary)' }}>
             Use [LEFT] / [RIGHT] Arrow Keys or Spacebar to Navigate
           </p>
           <div style={{ marginTop: '2rem' }}>
@@ -36,7 +36,7 @@ export const DefaultDeck: Story = {
       </Slide>
 
       <Slide title="SYSTEM COMPLETE" subtitle="Ready for ryankelly.dev talks">
-        <div style={{ textAlign: 'center', fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace' }}>
+        <div style={{ textAlign: 'center', fontFamily: 'var(--ds-font-mono)' }}>
           <p>End of Presentation</p>
         </div>
       </Slide>
@@ -57,7 +57,7 @@ export const ControlledChromeless: Story = {
       </Slide>
       <Slide title="DRIVEN FROM OUTSIDE" subtitle="slide={1} chrome={false}">
         <div style={{ textAlign: 'center' }}>
-          <p style={{ fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace', fontSize: '1.1rem', color: 'var(--ds-accent-secondary)' }}>
+          <p style={{ fontFamily: 'var(--ds-font-mono)', fontSize: '1.1rem', color: 'var(--ds-accent-secondary)' }}>
             No control bar, no arrow keys, no fullscreen.
           </p>
           <div style={{ marginTop: '2rem' }}>

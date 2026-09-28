@@ -278,7 +278,8 @@ const UNGATED = {
   'check:deployed':
     'Compares the live Storybook with this build, so on a pull request it can only ' +
     'be red: the deployment cannot contain the commit under review. It runs in ' +
-    'deployment-drift.yml on pushes to `main` and on a daily schedule, which is ' +
+    'deployment-drift.yml against the `production` branch after each release train and on a ' +
+    'daily schedule, which is ' +
     'where the answer exists. Making it a PR gate would make it a gate that is ' +
     'always red, and a gate that is always red gets deleted.',
 };
@@ -543,12 +544,41 @@ for (const [name, why] of Object.entries(PLANNED)) {
  * is reachable, whatever it does.
  * ------------------------------------------------------------------ */
 
-const SCRIPT_FILES = readdirSync(at('scripts')).filter((f) => /\.mjs$/.test(f));
+const ALL_MJS = readdirSync(at('scripts')).filter((f) => /\.mjs$/.test(f));
+
+/*
+ * `*.test.mjs` is a test, not a script.
+ *
+ * The two rules below ask of every script "is it kebab-case" and "does
+ * anything reach it", and a test file answers neither the way a script does:
+ * its name carries a `.test.` segment by convention, and nothing imports it
+ * because the runner collects it by glob.
+ *
+ * Exempting it outright would create the hole this section exists to close —
+ * a file nobody runs, sitting in a directory full of gates — so the exemption
+ * is paid for below by asserting the runner really does collect it.
+ */
+const SCRIPT_TEST_FILES = ALL_MJS.filter((f) => /\.test\.mjs$/.test(f));
+const SCRIPT_FILES = ALL_MJS.filter((f) => !/\.test\.mjs$/.test(f));
 const scriptBodies = SCRIPT_FILES.map((f) => read(path.join('scripts', f)));
 const configFiles = ['eslint.config.mjs', 'tsup.config.ts', 'vitest.config.mts', 'playwright.config.ts', 'knip.json']
   .filter((f) => { try { statSync(at(f)); return true; } catch { return false; } })
   .map((f) => read(f));
 const proseBodies = PROSE.map((f) => read(f));
+
+if (SCRIPT_TEST_FILES.length > 0) {
+  const vitestConfig = read('vitest.config.mts');
+  if (!vitestConfig.includes("scripts/**/*.test.mjs")) {
+    problems.push(
+      `scripts/ contains ${SCRIPT_TEST_FILES.join(', ')}, but vitest.config.mts ` +
+        `does not include 'scripts/**/*.test.mjs'. A test the runner never ` +
+        `collects is the unreachable file this section exists to catch, and it ` +
+        `is worse than no test because it reads as coverage.`,
+    );
+  } else {
+    note('scripts', true, `${SCRIPT_TEST_FILES.length} script test(s) — collected by vitest`);
+  }
+}
 
 for (const file of SCRIPT_FILES) {
   if (!/^[a-z0-9]+(-[a-z0-9]+)*\.mjs$/.test(file)) {
@@ -662,10 +692,225 @@ for (const file of PROSE) {
   });
 }
 
+/* ------------------------------------------------------------------ *
+ * Rules 5 and 9 — the render environment is one pinned image.
+ *
+ * A baseline is a claim about pixels in one environment, so every job that
+ * renders — the gated suites, the snapshot writer, the walkthrough — runs in
+ * the same official Playwright image, named by digest, at the version the
+ * lockfile pins. Nothing installs a browser at run time: the image carries it.
+ * Each of those is checked, because each has been wrong somewhere before — a
+ * `playwright install` outside the image is a second Chromium, a tag without
+ * a digest is a render environment someone else can move, and an image a
+ * version behind the lockfile fails every test with a missing executable.
+ *
+ * A cache key built from `render-inputs.mjs` must name the digest too: that
+ * hash covers every tracked file, and the image is the one input none records.
+ * ------------------------------------------------------------------ */
+
+const RENDER_IMAGE = /^mcr\.microsoft\.com\/playwright:v(\d+\.\d+\.\d+)-noble@sha256:([0-9a-f]{64})$/;
+const RENDERS = /^\s*(?:-\s+)?run:.*(?:pnpm\s+(?:test:visual|test:a11y|walkthrough)\b|playwright\s+test)/;
+const lockedPlaywright = /^ {2}'@playwright\/test@(\d+\.\d+\.\d+)':/m.exec(
+  readFileSync(path.join(GITHUB_ROOT, 'pnpm-lock.yaml'), 'utf8'),
+)?.[1];
+const images = new Map();
+
+for (const job of ALL_JOBS) {
+  const at = `${job.file}:${job.line}`;
+  const texts = job.body.map(({ text }) => text);
+  if (texts.some((text) => /^\s*(?:-\s+)?(?:uses:.*install-playwright|run:.*playwright\s+install)/.test(text))) {
+    problems.push(
+      `${at}: job \`${job.id}\` installs a browser. Rule 9: jobs that render run in the ` +
+        `pinned Playwright image, which carries Chromium; a second install is a second Chromium.`,
+    );
+  }
+  if (!texts.some((text) => RENDERS.test(text))) continue;
+
+  const c = texts.findIndex((text) => /^ {4}container:\s*$/.test(text));
+  const image = c < 0 ? null : /^ {6}image:\s*(\S+)\s*$/.exec(texts[c + 1] ?? '')?.[1];
+  const options = c < 0 ? '' : /^ {6}options:\s*(.+)$/.exec(texts[c + 2] ?? '')?.[1] ?? '';
+  const parsed = image && RENDER_IMAGE.exec(image);
+  if (!parsed) {
+    problems.push(
+      `${at}: job \`${job.id}\` renders but does not run in the pinned image. Declare ` +
+        `\`container: image: mcr.microsoft.com/playwright:v<version>-noble@sha256:<digest>\` — ` +
+        `rule 5: a baseline is only comparable with one written in the same environment.`,
+    );
+    note('render', false, `${at} — ${job.id}: ${image ?? 'no container'}`);
+    continue;
+  }
+  if (parsed[1] !== lockedPlaywright) {
+    problems.push(
+      `${at}: job \`${job.id}\` runs Playwright image v${parsed[1]}, and the lockfile pins ` +
+        `@playwright/test ${lockedPlaywright}. The image's Chromium is the lockfile's only at ` +
+        `the same version — bump both together.`,
+    );
+  }
+  if (!texts.some((text) => /^\s*run:\s*git config --global --add safe\.directory "\$GITHUB_WORKSPACE"\s*$/.test(text))) {
+    problems.push(
+      `${at}: job \`${job.id}\` runs in a container without marking the workspace a safe ` +
+        `directory. The container is root over a runner-owned checkout, so git refuses it and ` +
+        `every script that asks git for the repository root fails or falls back.`,
+    );
+  }
+  if (!/--ipc=host/.test(options)) {
+    problems.push(`${at}: job \`${job.id}\` needs \`options: --ipc=host\` — Chromium renders into /dev/shm, 64MB by default.`);
+  }
+  if (!texts.some((text) => /^ {8}shell:\s*bash\s*$/.test(text))) {
+    problems.push(`${at}: job \`${job.id}\` needs \`defaults.run.shell: bash\` — container jobs default to sh, but the render scripts use Bash.`);
+  }
+  images.set(image, [...(images.get(image) ?? []), `${job.file} ${job.id}`]);
+  for (const text of texts) {
+    if (/key=(?:visual-verdict|walkthrough-report)-/.test(text) && !text.includes(parsed[2])) {
+      problems.push(
+        `${at}: job \`${job.id}\` builds a cache key from render-inputs.mjs without the image ` +
+          `digest. The hash covers tracked files; the image is the one input none records.`,
+      );
+    }
+  }
+  note('render', true, `${at} — ${job.id}: v${parsed[1]} @ ${parsed[2].slice(0, 12)}`);
+}
+if (images.size > 1) {
+  problems.push(
+    `Jobs render in ${images.size} different images: ` +
+      [...images].map(([image, jobs]) => `${image} (${jobs.join(', ')})`).join('; ') +
+      `. One image, or baselines written by one job are checked in another environment.`,
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * Rule 6's one exception — a reused `visual` verdict — held to its shape.
+ *
+ * A gate that can be skipped is a gate that can be skipped by accident, and
+ * the roster above only checks that a command is *written* in a job. So the
+ * exception is pinned here instead: only `visual` reads the verdict, only a
+ * pull request looks it up (so `main` always runs in full), and the key is the
+ * input hash plus the runner image — the one input no tracked file records.
+ * ------------------------------------------------------------------ */
+
+for (const job of jobsOf('.github/workflows/ci.yml')) {
+  const body = job.body.map(({ text }) => text).join('\n');
+  const readsVerdict = /steps\.verdict\./.test(body);
+  if (readsVerdict && job.id !== 'visual') {
+    problems.push(
+      `ci.yml job \`${job.id}\` reads \`steps.verdict\`. Rule 6 allows a reused ` +
+        `verdict for the \`visual\` job only; every other gate runs on every PR.`,
+    );
+  }
+  if (job.id !== 'visual') continue;
+  const lookup = /- name: Previous Verdict\n\s+id: verdict\n\s+if: github\.event_name == 'pull_request'\n/.test(body);
+  // The hash is taken on its own line and shape-checked before the key is
+  // written: inlined as `$(...)` inside `echo`, a failing script yields a key
+  // with no hash, which every later pull request would match.
+  const key =
+    /inputs="\$\(node scripts\/render-inputs\.mjs\)"/.test(body) &&
+    /\[\[ "\$\{inputs\}" =~ \^\[0-9a-f\]\{64\}\$ \]\]/.test(body) &&
+    /key=visual-verdict-[0-9a-f]{64}-\$\{inputs\}/.test(body) &&
+    /set -euo pipefail/.test(body);
+  if (readsVerdict && !lookup) {
+    problems.push(
+      'ci.yml `visual`: the `Previous Verdict` lookup must be `if: github.event_name == ' +
+        "'pull_request'`. A push to `main` has to run in full — it is what checks the key.",
+    );
+  }
+  if (readsVerdict && !key) {
+    problems.push(
+      'ci.yml `visual`: the verdict key must be `visual-verdict-<image digest>-${inputs}`, ' +
+        'with `inputs` taken from `node scripts/render-inputs.mjs` on its own line under `set -euo pipefail` ' +
+        'and checked to be a 64-hex hash. Without the image a new runner reuses an old verdict; without ' +
+        'the check a failing script keys every PR to the same verdict.',
+    );
+  }
+  note('verdict', !readsVerdict || (lookup && key), `ci.yml visual — ${readsVerdict ? 'reuses a verdict; PR-only lookup, keyed on inputs and image' : 'no verdict reuse'}`);
+}
+
+/*
+ * Who may *record* the verdict. `visual` is sharded, so a leg reaching its
+ * last step means only that its own slice passed — a marker saved there would
+ * claim a verdict the other legs had not reached. So `visual` must not save
+ * it; the job that does must `need` it and run only on its success, which for
+ * a matrix is every leg succeeding. And if `visual` reuses a verdict, some job
+ * has to record one, or the reuse is dead code that reads as a feature.
+ */
+{
+  /*
+   * The lines of each step in a job body, split at `      - ` — a linear scan.
+   * These used to be one regex per question with a nested lazy quantifier over
+   * whitespace-and-line, which backtracked catastrophically: a download step
+   * whose `pattern:` did not match spun `check:governance` at 100% CPU for
+   * sixteen minutes. A gate that can hang on malformed input is a gate that
+   * waits out its job ceiling and reports `cancelled`.
+   */
+  const stepsOf = (body) => {
+    const out = [];
+    for (const line of body.split('\n')) {
+      if (/^ {6}- /.test(line)) out.push([]);
+      if (out.length) out.at(-1).push(line.trim());
+    }
+    return out;
+  };
+  const stepUses = (step, action) => step.some((l) => l.replace(/^- /, '').startsWith(`uses: ${action}@`));
+  const stepHas = (step, re) => step.some((l) => re.test(l));
+  const ciJobsFull = jobsOf('.github/workflows/ci.yml').map((job) => ({
+    id: job.id,
+    body: job.body.map(({ text }) => text).join('\n'),
+  }));
+  // A job saves the verdict when it has a cache-save step keyed on the
+  // verdict key: `visual`'s own step output, or the one it exports.
+  const saves = (body) =>
+    stepsOf(body).some(
+      (step) =>
+        stepUses(step, 'actions/cache/save') &&
+        stepHas(step, /^key:\s*\$\{\{\s*(?:needs\.visual\.outputs\.key|steps\.inputs\.outputs\.key)\s*\}\}$/),
+    );
+  const visual = ciJobsFull.find((job) => job.id === 'visual');
+  const recorders = ciJobsFull.filter((job) => job.id !== 'visual' && saves(job.body));
+  if (visual && saves(visual.body)) {
+    problems.push(
+      'ci.yml `visual` saves the verdict itself. It is sharded, so one leg finishing says ' +
+        'nothing about the others — record it in a job that `needs: [visual]`.',
+    );
+  }
+  for (const job of recorders) {
+    const needs = /^\s{4}needs:\s*\[?[^\n]*\bvisual\b/m.test(job.body);
+    const gated = /^\s{4}if:[^\n]*needs\.visual\.result == 'success'/m.test(job.body);
+    if (!needs || !gated) {
+      problems.push(
+        `ci.yml \`${job.id}\` saves the visual verdict but ${!needs ? 'does not `need` visual' : ''}` +
+          `${!needs && !gated ? ' and ' : ''}${!gated ? "is not gated on `needs.visual.result == 'success'`" : ''}. ` +
+          'A verdict recorded before every shard passed is a verdict nobody earned.',
+      );
+    }
+    // The job's outputs carry one leg's key. During an image rollout the legs
+    // can compute different keys, or one can hit while another misses, so the
+    // recorder must compare every leg's decision and save only on agreement.
+    const collects = stepsOf(job.body).some(
+      (step) => stepUses(step, 'actions/download-artifact') && stepHas(step, /^pattern:\s*verdict-key-\*$/),
+    );
+    const compares = /- name: Agreed Key\n\s+id: agreed\n/.test(job.body);
+    const saveGated = /- name: Save Verdict\n\s+if: steps\.agreed\.outputs\.ok == 'true'\n/.test(job.body);
+    const published = visual && /name:\s*verdict-key-\$\{\{\s*matrix\.shard\s*\}\}/.test(visual.body);
+    if (!collects || !compares || !saveGated || !published) {
+      problems.push(
+        `ci.yml \`${job.id}\` saves the visual verdict without confirming every shard agreed on it ` +
+          `(${[!published && 'visual uploads no `verdict-key-${{ matrix.shard }}`', !collects && 'no download of `verdict-key-*`',
+            !compares && 'no `Agreed Key` step (id: agreed)', !saveGated && "`Save Verdict` not gated on `steps.agreed.outputs.ok == 'true'`"]
+            .filter(Boolean).join('; ')}). A job output holds one leg's key; legs on different runner images disagree.`,
+      );
+    }
+    note('verdict', needs && gated && collects && compares && saveGated && published, `ci.yml ${job.id} — records the verdict after every visual shard, only when all legs agree`);
+  }
+  if (visual && /steps\.verdict\./.test(visual.body) && !recorders.length) {
+    problems.push(
+      'ci.yml `visual` looks a verdict up, but no job records one — the reuse can never hit.',
+    );
+  }
+}
+
 /* ------------------------------------------------------------------ */
 
 if (listing) {
-  const sections = ['pins', 'ceilings', 'uploads', 'roster', 'names', 'scripts', 'rules', 'citations'];
+  const sections = ['pins', 'ceilings', 'uploads', 'roster', 'names', 'scripts', 'rules', 'citations', 'render', 'verdict'];
   for (const section of sections) {
     const rows = census.filter((row) => row.section === section);
     if (!rows.length) continue;

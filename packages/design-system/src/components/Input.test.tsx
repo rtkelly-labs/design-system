@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Input, Select, TextArea } from './Input';
+import { Input, TextArea } from './Input';
+import { Select } from './Select';
 
 describe('Input', () => {
   it('associates the label with the control', () => {
@@ -91,6 +92,24 @@ describe('Input', () => {
   });
 });
 
+// #252: a disabled field rendered exactly like an editable one.
+describe('disabled text fields', () => {
+  it('give Input and TextArea the sunken, muted treatment Select already wore', () => {
+    render(
+      <>
+        <Input label="Username" disabled defaultValue="ada" />
+        <TextArea label="Bio" disabled />
+      </>,
+    );
+    for (const control of [screen.getByLabelText('Username'), screen.getByLabelText('Bio')]) {
+      expect(control).toHaveProperty('disabled', true);
+      expect(control.className).toContain('disabled:bg-surface-sunken');
+      expect(control.className).toContain('disabled:text-content-muted');
+      expect(control.className).toContain('disabled:border-edge-subtle');
+    }
+  });
+});
+
 describe('TextArea', () => {
   it('associates the label with the control', () => {
     render(<TextArea label="Notes" />);
@@ -114,50 +133,26 @@ describe('TextArea', () => {
     expect(screen.getByText('> Required')).toBeDefined();
   });
 
+  // Regression: the element `render` returned set its own `id` after Base
+  // UI's, so the label's `for` named an id no element had. The accessible
+  // name survived through `aria-labelledby`, which is why the test above
+  // passed; a click on the label focused nothing.
+  it('points the label at the control, with or without an explicit id', () => {
+    const { container, rerender } = render(<TextArea label="Notes" />);
+    const label = () => container.querySelector('label') as HTMLLabelElement;
+
+    expect(label().htmlFor).toBe(container.querySelector('textarea')?.id);
+    expect(label().htmlFor).not.toBe('');
+
+    rerender(<TextArea label="Notes" id="notes" />);
+    expect(container.querySelector('textarea')?.id).toBe('notes');
+    expect(label().htmlFor).toBe('notes');
+  });
+
   it('forwards textarea attributes', () => {
     render(<TextArea label="Notes" rows={7} />);
 
     expect((screen.getByLabelText('Notes') as HTMLTextAreaElement).rows).toBe(7);
-  });
-});
-
-describe('Select', () => {
-  const options = [
-    { label: 'Alpha', value: 'a' },
-    { label: 'Beta', value: 'b' },
-  ];
-
-  it('renders every option', () => {
-    render(<Select label="Mode" options={options} />);
-
-    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(['Alpha', 'Beta']);
-  });
-
-  it('associates the label with the control', () => {
-    render(<Select label="Mode" options={options} />);
-
-    expect(screen.getByLabelText('Mode').tagName).toBe('SELECT');
-  });
-
-  // Same regression as TextArea.
-  it('honours the accent prop', () => {
-    const { container } = render(<Select label="Mode" options={options} accent="success" />);
-
-    expect(container.querySelector('select')?.style.getPropertyValue('--field-accent')).toBe(
-      'var(--ds-intent-success)',
-    );
-  });
-
-  it('renders an empty option list without crashing', () => {
-    render(<Select label="Mode" options={[]} />);
-
-    expect(screen.queryAllByRole('option')).toHaveLength(0);
-  });
-
-  it('forwards select attributes', () => {
-    render(<Select label="Mode" options={options} defaultValue="b" />);
-
-    expect((screen.getByLabelText('Mode') as HTMLSelectElement).value).toBe('b');
   });
 });
 
@@ -177,8 +172,26 @@ describe('form controls address roles, not colours', () => {
   ])('%s emits no palette-pinned class', (_name, element) => {
     const { container } = render(element);
 
-    for (const node of container.querySelectorAll<HTMLElement>('*')) {
-      expect(node.className, `${node.tagName} pins a palette entry`).not.toMatch(FORBIDDEN);
+    // `getAttribute`, not `className`: `Select`'s chevron is an SVG, whose
+    // `className` is an `SVGAnimatedString` rather than the class list.
+    for (const node of container.querySelectorAll<Element>('*')) {
+      expect(node.getAttribute('class') ?? '', `${node.tagName} pins a palette entry`).not.toMatch(FORBIDDEN);
     }
+  });
+
+  it.each([
+    ['Input', () => <Input label="Name" style={{ width: '320px' }} />],
+    ['TextArea', () => <TextArea label="Notes" style={{ width: '320px' }} />],
+    [
+      'Select',
+      () => <Select label="Plan" options={[{ value: 'a', label: 'A' }]} style={{ width: '320px' }} />,
+    ],
+  ])('%s merges a caller style with the accent rather than either replacing the other', (_, ui) => {
+    const { container } = render(ui());
+    const styled = Array.from(container.querySelectorAll<HTMLElement>('[style]')).find(
+      (el) => el.style.width === '320px',
+    );
+    expect(styled).toBeDefined();
+    expect(styled?.style.getPropertyValue('--field-accent')).not.toBe('');
   });
 });

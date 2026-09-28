@@ -1,10 +1,13 @@
+'use client';
+
 import { useEffect, useRef } from 'react';
 import type { ElementType, ReactNode } from 'react';
-import { Menu, Palette, Search, X } from 'lucide-react';
+import { Menu as MenuIcon, Palette, Search, X } from 'lucide-react';
 import { DocsLink } from './DocsLinkProvider';
 import { useOptionalTheme } from '../ThemeProvider';
-import { LEVELS } from '../../theme/levels';
+import { LEVELS, isThemeLevel } from '../../theme/levels';
 import { cn } from '../../lib/recipe';
+import { Menu, MenuRadioGroup, MenuRadioItem } from '../Menu';
 
 export interface DocsNavItem {
   label: string;
@@ -67,7 +70,7 @@ export function DocsHeader({
    * the whole page down rather than degrading.
    *
    * This component *adapts* to the level rather than requiring it: with no
-   * provider there is nothing to cycle, so the control is omitted and the rest
+   * provider there is no level to choose, so the control is omitted and the rest
    * of the header renders.
    */
   const theme = useOptionalTheme();
@@ -108,7 +111,7 @@ export function DocsHeader({
             aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'}
             aria-expanded={sidebarOpen}
           >
-            {sidebarOpen ? <X size={18} /> : <Menu size={18} />}
+            {sidebarOpen ? <X size={18} /> : <MenuIcon size={18} />}
           </button>
         )}
 
@@ -151,16 +154,40 @@ export function DocsHeader({
           </button>
         )}
 
+        {/*
+          * A menu of the levels, not a button that cycles through them (#166).
+          * Cycling made the choice a guess: nothing said what the next press
+          * would pick, and reaching the last of N levels took N-1 presses.
+          * The menu names every level, marks the current one, and closes on
+          * a choice — the choice is the whole point of opening it.
+          */}
         {theme && (
-          <button
-            type="button"
-            onClick={theme.cycleLevel}
-            className="docs-header-icon-btn"
-            aria-label={`Switch theme level (current: ${LEVELS[theme.level].label})`}
-            title={`Level: ${LEVELS[theme.level].label}`}
+          <Menu
+            align="end"
+            trigger={
+              <button
+                type="button"
+                className="docs-header-icon-btn"
+                aria-label={`Theme level (current: ${LEVELS[theme.level].label})`}
+              >
+                <Palette size={18} aria-hidden="true" />
+              </button>
+            }
           >
-            <Palette size={18} />
-          </button>
+            <MenuRadioGroup
+              label="Level"
+              value={theme.level}
+              onValueChange={(next) => {
+                if (isThemeLevel(next)) theme.setLevel(next);
+              }}
+            >
+              {theme.levels.map((level) => (
+                <MenuRadioItem key={level} value={level} closeOnClick>
+                  {LEVELS[level].label}
+                </MenuRadioItem>
+              ))}
+            </MenuRadioGroup>
+          </Menu>
         )}
       </div>
     </header>

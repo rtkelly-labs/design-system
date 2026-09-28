@@ -1,6 +1,28 @@
 import { expect, type Page } from '@playwright/test';
 
 /**
+ * Whether a direct child of `<body>` is something the *story* rendered — a
+ * portal — rather than Storybook's own furniture.
+ *
+ * Kept as source text so it runs inside the page, and shared so the render wait
+ * below and the axe scope in `a11y.spec.ts` cannot disagree about what a story
+ * put on the page. The first version of the portal test accepted any child of
+ * `body` with children, which Storybook's `.sb-wrapper` panels always have: the
+ * check could not fail, so a portalled story that rendered nothing passed it
+ * (#273).
+ */
+export const IS_STORY_SURFACE = `(el) => {
+  const ignored = ['SCRIPT', 'STYLE', 'LINK', 'TEMPLATE', 'NOSCRIPT'];
+  return (
+    !ignored.includes(el.tagName) &&
+    el.id !== 'storybook-docs' &&
+    el.id !== 'storybook-highlights-root' &&
+    !el.classList.contains('sb-wrapper') &&
+    el.childElementCount > 0
+  );
+}`;
+
+/**
  * Wait until a Storybook story has genuinely rendered, and fail loudly if it
  * has not.
  *
@@ -58,21 +80,16 @@ export async function waitForStoryRendered(page: Page, storyId: string): Promise
   // mounted to the body.
   const mounted = await page
     .waitForFunction(
-      () => {
+      `(() => {
         const root = document.getElementById('storybook-root');
         if (root && (root.childElementCount > 0 || (root.textContent ?? '').trim() !== '')) {
           return true;
         }
-        // Storybook's own scaffolding and the tags it injects are not a render.
-        const ignored = new Set(['SCRIPT', 'STYLE', 'LINK', 'TEMPLATE', 'NOSCRIPT']);
+        const isStorySurface = ${IS_STORY_SURFACE};
         return Array.from(document.body.children).some(
-          (el) =>
-            el.id !== 'storybook-root' &&
-            el.id !== 'storybook-docs' &&
-            !ignored.has(el.tagName) &&
-            el.childElementCount > 0,
+          (el) => el.id !== 'storybook-root' && isStorySurface(el),
         );
-      },
+      })()`,
       undefined,
       { timeout: 15_000 },
     )

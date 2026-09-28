@@ -14,6 +14,13 @@ import { recipe } from '../lib/recipe';
  * drift would show up as a confirmation dialog that does not look like the
  * dialog it was opened from.
  *
+ * `Drawer` is the third caller and the reason `placement` exists. A drawer is
+ * a dialog anchored to an edge — the same chrome, a different position and a
+ * different transition — so it takes a variant here rather than a recipe of
+ * its own. The header, title, close, body and footer slots are shared
+ * verbatim, which is the point: a drawer that does not look like the modal it
+ * sits beside is the drift a second recipe would have produced.
+ *
  * `overlay` and `popup` both sit on `z-top`: the viewport follows the backdrop
  * in DOM order, so it paints above it without a second stacking value. The
  * layer comes from the `--ds-layer-*` scale either way — the `z-50` this
@@ -65,5 +72,53 @@ export const dialogSurface = recipe({
     body: 'p-6 font-sans text-sm leading-relaxed text-content-primary',
     footer:
       'flex justify-end gap-3 border-t-2 border-edge-strong bg-surface-base px-6 py-4',
+  },
+  /*
+   * Placement, and nothing else.
+   *
+   * There is deliberately no `centred` value and no `defaultVariants`. `Modal`
+   * and `AlertDialog` call `dialogSurface()` with no argument and get exactly
+   * the class strings above, unchanged — a default variant would have appended
+   * classes to both and made two components' rendering depend on an edit made
+   * for a third.
+   *
+   * `top` and `bottom` are absent for the reason #241 states: no consumer asks
+   * for them, and an edge nobody anchors to is surface that still has to be
+   * themed, screenshotted and kept working.
+   */
+  variants: {
+    placement: {
+      left: {
+        // `items-stretch` and `justify-start` beat the base's centring, and
+        // `p-0` its gutter: a drawer meets three edges of the viewport, so the
+        // padding that keeps a modal off the edges is exactly wrong here.
+        viewport: 'items-stretch justify-start p-0',
+        popup:
+          'flex h-full max-h-full max-w-sm flex-col overflow-y-hidden '
+          + 'border-y-0 border-l-0 border-r-4 '
+          // `transition`, not the base's `transition-opacity`: the drawer moves
+          // as well as fades, and a translate with no transition on it would
+          // land instantly and leave only the fade visible.
+          + 'transition data-[starting-style]:-translate-x-full data-[ending-style]:-translate-x-full',
+        // The panel is as tall as the viewport, so the body takes the slack
+        // and scrolls inside it. Scrolling the whole popup instead would take
+        // the title and the close control off-screen with the content.
+        body: 'flex-1 overflow-y-auto',
+      },
+      right: {
+        viewport: 'items-stretch justify-end p-0',
+        popup:
+          'flex h-full max-h-full max-w-sm flex-col overflow-y-hidden '
+          + 'border-y-0 border-r-0 border-l-4 '
+          // The hard shadow falls down and to the right, so on a drawer flush
+          // with the right edge it paints off-screen and draws nothing. The
+          // 4px inner border is the separation instead. `shadow-none` clears it
+          // only because `lib/recipe.ts` declares the hard-shadow scale to the
+          // merger — the case its `mergeConfig` comment calls out.
+          + 'shadow-none '
+          + 'transition data-[starting-style]:translate-x-full data-[ending-style]:translate-x-full',
+        body: 'flex-1 overflow-y-auto',
+      },
+    },
   },
 });

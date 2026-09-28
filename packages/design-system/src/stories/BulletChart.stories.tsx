@@ -3,7 +3,7 @@ import { BulletChart } from '../components/BulletChart';
 import { ThemeProvider } from '../components/ThemeProvider';
 
 const meta: Meta<typeof BulletChart> = {
-  title: 'Foundations/BulletChart',
+  title: 'Components/Data/BulletChart',
   component: BulletChart,
   tags: ['autodocs', 'stable'],
 };

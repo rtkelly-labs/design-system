@@ -1,8 +1,11 @@
-import { Children, Fragment, isValidElement, useId, useRef } from 'react';
-import type { CSSProperties, KeyboardEvent, ReactNode } from 'react';
-import { recipe } from '../../lib/recipe';
-import { accentVar } from '../../lib/theme';
+'use client';
+
+import { Children, Fragment, isValidElement } from 'react';
+import type { ReactNode } from 'react';
+import { cn } from '../../lib/recipe';
 import type { AccentToken } from '../../lib/theme';
+import { Tabs, TabsList, TabsPanel, TabsTab } from '../Tabs';
+import type { TabsVariant } from '../Tabs';
 import { CodeBlock, CodeBlockAttachment } from './CodeBlock';
 import { useTabGroup } from './codeTabsStore';
 
@@ -15,6 +18,15 @@ import { useTabGroup } from './codeTabsStore';
  * roving focus and arrow-key traversal, whose panels hold the same snippet in
  * another language or tool. That is why it is not a sidebar rotated: the
  * contract is different.
+ *
+ * ## It is a `Tabs` now
+ *
+ * The tablist this component used to hand-roll is {@link Tabs}, the public
+ * primitive, and it was extracted from here rather than rewritten — same
+ * markup, same classes, same keyboard model, same tests. What stays here is
+ * the part that is documentation-specific and does not belong in a primitive:
+ * the group store, the `CodeBlock` attachment, and reading tabs out of
+ * children.
  *
  * ## `group` is what earns it
  *
@@ -62,7 +74,11 @@ import { useTabGroup } from './codeTabsStore';
  * callers with no MDX pipeline.
  */
 
-export type CodeTabsVariant = 'merged' | 'underline' | 'segmented';
+/**
+ * The strip's shape. The same three the primitive declares — this alias is
+ * kept because it is what existing call sites import.
+ */
+export type CodeTabsVariant = TabsVariant;
 
 /**
  * `Children.toArray` stops at a `<>…</>`, so a set of tabs an author keeps in
@@ -76,84 +92,6 @@ function flattenFragments(children: ReactNode): ReactNode[] {
       : [child],
   );
 }
-
-const styles = recipe({
-  slots: {
-    root: 'my-6',
-    strip: 'relative z-10 flex border-2 border-edge-strong',
-    caption:
-      'truncate font-mono text-xs font-bold uppercase tracking-widest text-content-secondary',
-    list: 'flex items-end',
-    tab: 'shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-widest transition-colors focus-visible:ring-2 focus-visible:ring-[var(--tabs-accent)] focus-visible:ring-inset',
-  },
-  variants: {
-    variant: {
-      // The loudest: a solid accent tab standing on the block, its bottom rule
-      // dropped so the fill runs into the code.
-      merged: {
-        strip: 'items-end overflow-x-auto bg-surface-raised px-1.5 pt-1.5',
-        list: 'gap-1',
-        tab: '-mb-0.5 border-2 px-4 py-2',
-      },
-      // The quietest: no tab shapes, a 4px accent rule on the seam.
-      underline: {
-        strip: 'items-end overflow-x-auto bg-surface-base px-3 pt-2',
-        list: 'gap-1',
-        tab: '-mb-0.5 border-b-4 px-4 py-2.5',
-      },
-      // A title bar with a filename slot; the tabs are a segmented control.
-      segmented: {
-        strip: 'items-center justify-between gap-4 bg-surface-raised px-3 py-2.5',
-        list: 'gap-0 border-2 border-edge-strong',
-        tab: 'border-r-2 border-edge-strong px-4 py-2 last:border-r-0',
-      },
-    },
-    selected: {
-      true: {},
-      false: {},
-    },
-  },
-  compoundVariants: [
-    {
-      variant: 'merged',
-      selected: true,
-      class: {
-        tab: 'relative z-10 border-edge-strong border-b-0 bg-[var(--tabs-accent)] text-content-inverse',
-      },
-    },
-    {
-      variant: 'merged',
-      selected: false,
-      class: {
-        tab: 'border-transparent text-content-muted hover:border-edge-strong hover:text-content-primary',
-      },
-    },
-    {
-      variant: 'underline',
-      selected: true,
-      class: { tab: 'border-b-[var(--tabs-accent)] text-content-primary' },
-    },
-    {
-      variant: 'underline',
-      selected: false,
-      class: { tab: 'border-b-transparent text-content-muted hover:text-content-primary' },
-    },
-    {
-      variant: 'segmented',
-      selected: true,
-      class: { tab: 'bg-[var(--tabs-accent)] text-content-inverse' },
-    },
-    {
-      variant: 'segmented',
-      selected: false,
-      class: { tab: 'bg-surface-base text-content-muted hover:text-content-primary' },
-    },
-  ],
-  defaultVariants: {
-    variant: 'merged',
-    selected: false,
-  },
-});
 
 export interface CodeTabProps {
   /** Tab text: the language, tool or filename. Read by {@link CodeTabs}. */
@@ -203,9 +141,6 @@ export function CodeTabs({
   label,
   className = '',
 }: CodeTabsProps) {
-  const id = useId();
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
   const tabs = flattenFragments(children)
     .filter(isValidElement<CodeTabProps>)
     .map((child, index) => ({
@@ -223,94 +158,44 @@ export function CodeTabs({
     ? selected
     : (tabs[0]?.label ?? '');
 
-  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const last = tabs.length - 1;
-    const next =
-      event.key === 'ArrowRight'
-        ? index === last
-          ? 0
-          : index + 1
-        : event.key === 'ArrowLeft'
-          ? index === 0
-            ? last
-            : index - 1
-          : event.key === 'Home'
-            ? 0
-            : event.key === 'End'
-              ? last
-              : null;
-
-    if (next === null) return;
-    event.preventDefault();
-    const target = tabs[next];
-    if (!target) return;
-    select(target.label);
-    tabRefs.current[next]?.focus();
-  };
-
-  // The accent is a runtime value, so it travels as a custom property that the
-  // fill and edge utilities read — a utility cannot be assembled at build time
-  // from a prop.
-  const accentStyle = { '--tabs-accent': accentVar(accent) } as CSSProperties;
-
-  const slots = styles({ variant });
+  const name = label ?? group;
 
   return (
-    <div className={slots.root({ class: className })} style={accentStyle}>
-      <div className={slots.strip()}>
-        {variant === 'segmented' && (
-          <span className={slots.caption()}>{label ?? group ?? 'source'}</span>
-        )}
-        <div
-          role="tablist"
-          aria-label={label ?? group ?? 'Code variants'}
-          className={slots.list()}
-        >
-          {tabs.map((tab, index) => {
-            const active = tab.label === activeLabel;
-            return (
-              <button
-                key={tab.label}
-                ref={(node) => {
-                  tabRefs.current[index] = node;
-                }}
-                type="button"
-                role="tab"
-                id={`${id}-tab-${index}`}
-                aria-selected={active}
-                aria-controls={`${id}-panel-${index}`}
-                tabIndex={active ? 0 : -1}
-                onClick={() => select(tab.label)}
-                onKeyDown={(event) => onKeyDown(event, index)}
-                className={styles({ variant, selected: active }).tab()}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    // Controlled, because the selection lives in the group store rather than
+    // in the strip: two blocks sharing a group have one selection between them.
+    <Tabs
+      value={activeLabel}
+      onValueChange={select}
+      variant={variant}
+      accent={accent}
+      className={cn('my-6', className)}
+    >
+      <TabsList
+        label={name ?? 'Code variants'}
+        caption={variant === 'segmented' ? (name ?? 'source') : undefined}
+      >
+        {tabs.map((tab) => (
+          <TabsTab key={tab.label} value={tab.label}>
+            {tab.label}
+          </TabsTab>
+        ))}
+      </TabsList>
 
       <CodeBlockAttachment value={true}>
-        {tabs.map((tab, index) => (
-          <div
-            key={tab.label}
-            role="tabpanel"
-            id={`${id}-panel-${index}`}
-            aria-labelledby={`${id}-tab-${index}`}
-            // Hidden panels stay in the document rather than unmounting, so
-            // every variant of a snippet is in the HTML for a crawler and a
-            // switch costs no re-render of the code.
-            hidden={tab.label !== activeLabel}
-          >
+        {tabs.map((tab) => (
+          // Hidden panels stay in the document rather than unmounting, so
+          // every variant of a snippet is in the HTML for a crawler and a
+          // switch costs no re-render of the code. That is what `keepMounted`
+          // is for, and it is why this did not become a Base UI tablist.
+          <TabsPanel key={tab.label} value={tab.label} keepMounted>
             {typeof tab.body === 'string' ? (
               <CodeBlock language={tab.language}>{tab.body}</CodeBlock>
             ) : (
               tab.body
             )}
-          </div>
+          </TabsPanel>
         ))}
       </CodeBlockAttachment>
-    </div>
+    </Tabs>
   );
 }

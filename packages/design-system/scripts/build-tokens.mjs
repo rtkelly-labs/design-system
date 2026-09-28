@@ -20,7 +20,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { LEVELS, THEME_LEVELS, FIXED_COLOURS } from '../src/theme/levels.ts';
-import { CSS_MEDIUM, MEDIA_DEFINITIONS } from '../src/theme/media.ts';
+import { CSS_MEDIUM, LOOPS, LOOP_KEYFRAMES, MEDIA_DEFINITIONS } from '../src/theme/media.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Generated straight into the file consumers already import, rather than into a
@@ -311,6 +311,39 @@ function mediumTheme(medium) {
   return lines.join('\n');
 }
 
+/**
+ * The looping animations, as `--animate-ds-*` tokens plus their keyframes.
+ *
+ * Emitted here rather than in `styles.css` because `theme.css` is the
+ * consumer contract: a Tailwind build that imports only this file must be able
+ * to generate every utility the compiled components write, and
+ * `animate-ds-spin` with no `--animate-ds-spin` behind it generates nothing
+ * (#302). The period reads `--ds-duration-considered` rather than a literal,
+ * so it follows the one Medium this file carries; the keyframes are invariant.
+ * Tailwind only emits a keyframe whose `--animate-*` is used, so a consumer
+ * who renders none of these components pays nothing for them.
+ */
+function loopTheme() {
+  const lines = [];
+  for (const [name, loop] of Object.entries(LOOPS)) {
+    const easing = loop.easing === 'linear' ? 'linear' : 'var(--ds-ease)';
+    lines.push(
+      `  --animate-ds-${name}: ds-${loop.keyframes} calc(var(--ds-duration-considered) * ${loop.periods}) ${easing} infinite;`,
+    );
+  }
+  for (const [name, frames] of Object.entries(LOOP_KEYFRAMES)) {
+    lines.push('');
+    lines.push(`  @keyframes ds-${name} {`);
+    for (const [selector, declarations] of Object.entries(frames)) {
+      lines.push(`    ${selector} {`);
+      for (const [property, value] of Object.entries(declarations)) lines.push(`      ${property}: ${value};`);
+      lines.push('    }');
+    }
+    lines.push('  }');
+  }
+  return lines.join('\n');
+}
+
 function render() {
   const [firstLevel] = THEME_LEVELS;
   const byPolarity = (polarity) => THEME_LEVELS.filter((l) => LEVELS[l].polarity === polarity);
@@ -422,6 +455,14 @@ ${mediumVariables(CSS_MEDIUM)}
 
 @theme {
 ${mediumTheme(CSS_MEDIUM)}
+}
+
+/* Looping animations — \`animate-ds-spin\`, \`-spin-slow\`, \`-pulse\`, \`-track\`.
+ * Declared in \`src/theme/media.ts\` (\`LOOPS\`); the period is a multiple of
+ * the Medium's \`considered\` duration and the keyframes are invariant.
+ * \`prefers-reduced-motion\` is answered at the call site with \`motion-reduce:\`. */
+@theme {
+${loopTheme()}
 }`);
 
   sections.push(`
@@ -434,11 +475,16 @@ ${mediumTheme(CSS_MEDIUM)}
    * not loaded — a blocked CDN, a slow connection, the first paint — the next
    * entry decides the metrics, and a different fallback reflows the page. These
    * chains are the ones the global rules in styles.css have always used, so the
-   * tokens and the globals now agree instead of quietly disagreeing. */
-  --ds-font-display: var(--font-space-grotesk, "Space Grotesk Variable", "Space Grotesk"), var(--font-inter, "Inter Variable", "Inter"), sans-serif;
-  --ds-font-body: var(--font-inter, "Inter Variable", "Inter"), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --ds-font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono"), "Symbols Nerd Font Mono", "Courier New", monospace;
-  --ds-font-pixel: var(--font-vt323, "VT323"), monospace;
+   * tokens and the globals now agree instead of quietly disagreeing.
+   *
+   * Every stack ends its shipped part with the two symbol faces, before any
+   * system font: both are unicode-range bounded, so they draw only what the text
+   * face lacks, and a symbol never falls to whatever the machine has installed.
+   * check:fonts holds every rendered character to that. */
+  --ds-font-display: var(--font-space-grotesk, "Space Grotesk Variable", "Space Grotesk"), var(--font-inter, "Inter Variable", "Inter"), "Symbols Nerd Font Mono", "DS Symbols", sans-serif;
+  --ds-font-body: var(--font-inter, "Inter Variable", "Inter"), "Symbols Nerd Font Mono", "DS Symbols", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --ds-font-mono: var(--font-ibm-plex-mono, "IBM Plex Mono"), "Symbols Nerd Font Mono", "DS Symbols", "Courier New", monospace;
+  --ds-font-pixel: var(--font-vt323, "VT323"), "Symbols Nerd Font Mono", "DS Symbols", monospace;
 }`);
 
   sections.push(`

@@ -41,7 +41,7 @@ used only *inside* a component is not — adopters should not be overriding thos
 | `accent.primary` as used inside `Button` | us | yes — `check:contrast` covers it |
 | `--ds-text-secondary` emitted as a custom property | the adopter's ground | **no — breaking** |
 
-`pnpm check:contrast` reports *222 pairs across 2 levels*, every pair drawn from `levels.ts`. It
+`pnpm check:contrast` reports *260 pairs across 2 levels*, every pair drawn from `levels.ts`. It
 measures our surfaces against our inks. It cannot see the blog's background, and the emitted
 `--ds-text-*` / `--ds-surface-*` / `--ds-type-*` properties are exactly the surface his criteria
 name. His typography criteria bite the same way: a `font-weight` or `letter-spacing` change wraps

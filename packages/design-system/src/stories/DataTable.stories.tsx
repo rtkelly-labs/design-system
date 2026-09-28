@@ -35,7 +35,7 @@ const rows: Deployment[] = [
 const STATE_ACCENT = { ready: 'success', building: 'info', error: 'danger' } as const;
 
 const meta: Meta<typeof DataTable<Deployment>> = {
-  title: 'Foundations/DataTable',
+  title: 'Components/Data/DataTable',
   component: DataTable,
   tags: ['autodocs', 'stable'],
 };
@@ -113,6 +113,25 @@ export const Virtualized: Story = {
   },
 };
 
+/**
+ * `pageSize` shows that many rows and puts the system's `Pagination` under the
+ * table, so every page is reachable. The table still states the full row count
+ * and each row's real position to assistive tech.
+ */
+export const Paginated: Story = {
+  args: {
+    data: bigRows.slice(0, 60),
+    keyExtractor: (row) => row.id,
+    columns: [
+      { header: 'BRANCH', accessor: 'branch' },
+      { header: 'STATE', accessor: 'state' },
+      { header: 'DURATION', accessor: 'duration' },
+      { header: 'COMMITS', accessor: 'commits' },
+    ],
+    pageSize: 8,
+  },
+};
+
 /** Controlled TanStack Table with multi-column sorting. */
 export const HeadlessTanStackTable: Story = {
   render: () => {
@@ -154,6 +173,36 @@ export const HeadlessTanStackTable: Story = {
     }
 
     return <ControlledExample />;
+  },
+};
+
+/**
+ * The semantics at rest, sorted. A `caption` states what the table is of and
+ * names it; the branch column is a row header (`meta.rowHeader`), so moving
+ * across a row announces whose row it is; and the commits column is sorted, so
+ * its header carries `aria-sort="descending"` — the only header that does.
+ * Every sortable header is a real button: Tab to it, Enter or Space to sort.
+ */
+export const SortedWithCaption: Story = {
+  render: () => {
+    function SortedExample() {
+      const table = useReactTable({
+        data: rows,
+        columns: [
+          { accessorKey: 'branch', header: 'BRANCH', meta: { rowHeader: true } },
+          { accessorKey: 'state', header: 'STATE' },
+          { accessorKey: 'commits', header: 'COMMITS' },
+          { accessorKey: 'duration', header: 'DURATION', enableSorting: false },
+        ],
+        initialState: { sorting: [{ id: 'commits', desc: true }] },
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+      });
+
+      return <DataTable table={table} caption="Deployments by commit count" />;
+    }
+
+    return <SortedExample />;
   },
 };
 

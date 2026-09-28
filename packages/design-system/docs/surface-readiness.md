@@ -1,5 +1,18 @@
 # Surface readiness — is this a multi-purpose design system yet?
 
+> [!IMPORTANT]
+> **Mostly history. The current answer is [`capability-readiness.md`](./capability-readiness.md).**
+>
+> One section here is live: [*These assignments are published as story tags*](#these-assignments-are-published-as-story-tags).
+> It is the source for the sidebar status tags, which `check:story-conventions` enforces, and it is
+> kept current.
+>
+> Everything else is an assessment measured at `95ef0ba`, kept as the record of why the capability
+> work was ordered the way it was. Its percentages and gaps describe that commit, not `main`. Since
+> then the marketing sections (#248, #286), `AppShell` (#247), site chrome (#246), the overlay set
+> (#166) and the form controls (#238, #239, #164) have all landed. Don't cite a figure from those
+> sections as current.
+
 The stated aim is one system serving **marketing**, **blog** and **admin** sites.
 This document measures the package against that aim, surface by surface, and
 names the other surfaces worth claiming.
@@ -36,22 +49,30 @@ consumer sees it without reading this file.
 | Sidebar group | Tag | From the table below |
 |---|---|---|
 | `Guides/*` | `stable` | prose about decisions already made and shipped |
-| `Foundations/*` | `stable` | the published primitives, gated end to end |
-| `Docs/*` | `stable` | ~90%, "nothing structural" blocking |
+| `Foundations/*` | `stable` | the token specimens — roles, the ladder, swatches |
+| `Components/*/*` | `stable` | the published primitives, gated end to end, filed by category |
+| `Docs/*/*` | `stable` | ~90%, "nothing structural" blocking |
 | `Blog/*` | `stable` | ~70%, real primitives really adopted by the blog |
 | `Presentation/*` | `experimental` | `SlideDeck` is, per #70, "the one component no other consumer can use" |
 | `SaaS/*` | `experimental` | ~20–25%, "screenshots of one specific product" |
 | `Showcase/*` | `experimental` | a sandbox, not a component |
 
-One entry departs from its group. `Foundations/ReportDocument` is tagged `preview`, not
-`stable`: it is gated end to end like everything else in the group, but its only intended
-consumer — the report generator — does not exist in this repository yet, so its API has not
-met a caller. `stable` claims a shape has survived use, and this one has survived a story.
-Retag it when something depends on it.
+Four entries depart from their group, all tagged `preview` rather than `stable` for the same
+reason. Each is gated end to end like everything else in the group, but no consumer depends on
+it yet, so its API has not met a caller. `stable` claims a shape has survived use, and these
+have survived a story. Retag each one when something depends on it.
+
+- `Components/Reports/ReportDocument`: its intended consumer, the report generator, is not in
+  this repository yet.
+- `Components/Feedback/StatusPage`, `NotFoundPage` and `ServerErrorPage` (#251): no site serves
+  them as its error pages yet.
 
 The vocabulary is Storybook's own feature lifecycle — `stable`, `experimental`, `preview`,
 `deprecated` — rather than a second one to maintain. A group cannot be added to the sidebar
 without a status, because `check:story-conventions` closes both lists at once.
+
+The readiness table below is the `95ef0ba` assessment, kept for the record. For the current
+state, see [`capability-readiness.md`](./capability-readiness.md).
 
 | Surface | Readiness | What carries it | What blocks it |
 |---|---|---|---|
@@ -229,9 +250,36 @@ by [#38](https://github.com/rtkelly13/design-system/pull/38).
 
 ### Missing for any real admin
 
-`Tabs`, `Toast`, `Dropdown` / `Menu`, `Checkbox`, `Radio`, `Switch`, `Drawer`,
-`Tooltip`, `Skeleton` / `Spinner`, `EmptyState`, `Progress`, sortable and
-paginated `DataTable`, form-field layout, auth screens, charts.
+`Tabs`, `Checkbox`, `Radio`, `Switch`, `Skeleton` / `Spinner`, `EmptyState`,
+`Progress`, sortable and paginated `DataTable`, form-field layout, auth screens,
+charts.
+
+`Drawer` was on this list until [#241](https://github.com/rtkelly13/design-system/issues/241)
+landed it as `Modal`'s edge-anchored sibling — the off-canvas primitive the
+responsive admin sidebar, filter panels and mobile navigation all sit on.
+
+`Toast` was on it until [#243](https://github.com/rtkelly13/design-system/issues/243)
+landed `ToastProvider` and `useToast` on `@base-ui/react/toast` — a queue, a
+live region present from mount and a lifetime that pauses for the reader —
+with `AdminDashboardLayout`'s `TRIGGER SYNC` as its first call site.
+
+An application shell was the thing missing underneath all of these until
+[#247](https://github.com/rtkelly13/design-system/issues/247) extracted `AppShell`,
+`AppSidebar`, `AppSidebarNav`, `AppTopbar` and `AppMain`: a persistent sidebar at desktop
+width that becomes a left `Drawer` below it, a consumer-supplied navigation tree, and the
+account area as a slot rather than a signed-in user.
+[#249](https://github.com/rtkelly13/design-system/issues/249) then removed `AdminDashboardLayout`
+rather than keep a second shell model beside it. Its navigation, signed-in user, KPI values,
+bank-ingestion table and `TRIGGER SYNC` are story fixtures now (`SaaS/AdminDashboard`, *Finance
+Console*), and an unrelated CMS (*Content Studio*) sits on the same `AppShell` with no change to
+the shell between the two. Everything this section quotes from the old file is gone from the
+package.
+
+`Dropdown` / `Menu` and `Tooltip` were on it until
+[#166](https://github.com/rtkelly13/design-system/issues/166) landed `Tooltip`,
+`Popover` and `Menu` on `@base-ui/react` — one floating surface, one layer, and
+the dialogs' dismissal stack — with `DocsHeader`'s level chooser and
+`SlideDeck`'s control hints as the first call sites.
 
 `gap-analysis.md` §5 ranks these by *demonstrated demand in shipped code* —
 `Checkbox`, `Switch`, `Spinner` and an `Alert` (which `NoteBlock` probably

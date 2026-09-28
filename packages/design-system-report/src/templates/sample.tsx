@@ -7,7 +7,7 @@
  * report someone is writing six months from now.
  *
  * `src/report/render.test.ts` renders it and asserts on the output;
- * `foundations-reportdocument--sample` screenshots it. Adding a component to the
+ * `components-reports-reportdocument--sample` screenshots it. Adding a component to the
  * report vocabulary means adding it here.
  *
  * ============================================================================

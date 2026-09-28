@@ -81,6 +81,27 @@ truncation: dropping members must not create a collision among the ones that rem
 the Group; unlike every other Group it is a sequence and not a record.
 _Avoid_: chart palette, series colours, qualitative palette
 
+**Documentation figure**:
+A static data or relationship visual intended to sit beside prose. A figure owns its semantic
+data shape and its readable summary; it does not own application interaction or a chart engine.
+
+**Figure frame**:
+The optional `FigureFrame` wrapper. It provides one border, caption, and figure landmark for one or
+more documentation visuals. Renderers do not create the frame.
+
+**ASCII rendering**:
+A visual representation built from character cells. A documentation figure can use ASCII rendering
+without requiring `Ascii` in its name; the data meaning determines the public name.
+
+**Documentation block**:
+A semantic prose or command block such as `Steps` or `Terminal`. It can appear inside a
+`FigureFrame`, but its public name describes the content.
+
+**Interactive chart**:
+An application-facing chart with responsive geometry, chart-engine integration, or interaction
+contracts. `BarChart`, `Sparkline`, and `BulletChart` are Interactive charts, not Documentation
+figures, even when both display numeric data.
+
 **Slot**:
 A fixed, named position in a Target's format that must be filled for the output to be
 valid — one of a terminal's sixteen ANSI positions, one of VS Code's workbench keys.

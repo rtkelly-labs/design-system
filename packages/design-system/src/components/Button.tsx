@@ -1,12 +1,16 @@
+'use client';
+
 import { forwardRef } from 'react';
 import type { Ref } from 'react';
 import type {
   AnchorHTMLAttributes,
   ButtonHTMLAttributes,
   DetailedHTMLProps,
+  MouseEvent,
   ReactNode,
 } from 'react';
 import { recipe } from '../lib/recipe';
+import { Spinner } from './Spinner';
 
 interface ButtonOwnProps {
   /**
@@ -74,6 +78,38 @@ export type ButtonVariant =
 export type ButtonElementProps = ButtonOwnProps &
   DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & {
     href?: never;
+    /**
+     * The request this button started is in flight. Reach for it instead of
+     * `disabled` while a submit is being sent.
+     *
+     * `disabled` removes a focused button from the tab order and drops focus
+     * to `<body>`, so a keyboard user is thrown back to the top of the page
+     * at the moment they need to hear what happened. A pending button keeps
+     * focus and its tab stop, reports `aria-disabled="true"` instead of the
+     * `disabled` attribute, and ignores activation: a click, Enter, Space,
+     * or Enter in one of its form's fields does not run `onClick` and does
+     * not submit the form again.
+     *
+     * It shows a spinner in place of the label, over the label's own box, so
+     * the button keeps its width; the label stays in the accessibility tree,
+     * so the accessible name does not change while it has focus. The fill is
+     * kept and the button sits sunk into its press — the same offset and no
+     * shadow as `:active` — which is distinct from the sunken, muted
+     * `disabled` treatment.
+     *
+     * Pass it from the first render — `pending={saving}`, not
+     * `pending={saving || undefined}` — so the live region that announces
+     * `pendingLabel` is in the page before it has anything to say. `disabled`
+     * wins over `pending` when both are set.
+     */
+    pending?: boolean;
+    /**
+     * What is being waited for, as a screen reader hears it when `pending`
+     * turns on — "Signing in", not "Loading". It is written into a visually
+     * hidden `role="status"` region beside the button, which exists whenever
+     * `pending` is passed at all and is empty until it is `true`.
+     */
+    pendingLabel?: string;
   };
 
 /** The `<a>` form. Passing `href` selects it; there is no `as` prop to remember. */
@@ -86,6 +122,15 @@ export type ButtonLinkProps = ButtonOwnProps &
      * it for anything that acts on the current page.
      */
     href: string;
+    /**
+     * Not offered on the anchor form. A link's work is the browser's
+     * navigation, which the page cannot hold open, and `aria-disabled` on a
+     * link is a link that still navigates. A control that starts a request
+     * is a `<button>`.
+     */
+    pending?: never;
+    /** Not offered on the anchor form; see `pending`. */
+    pendingLabel?: never;
   };
 
 export type ButtonProps = ButtonElementProps | ButtonLinkProps;
@@ -93,9 +138,34 @@ export type ButtonProps = ButtonElementProps | ButtonLinkProps;
 /**
  * The press affordance — offset shadow that collapses as the control moves into
  * it. Shared rather than repeated so the four accents cannot drift apart.
+ *
+ * Hover and press are gated on `not-disabled:` so a disabled button does not
+ * lift under the pointer or sink when clicked: it would be promising an action
+ * it will not take. `not-disabled` rather than `enabled`, because `:enabled`
+ * matches form elements only and the anchor form would lose its hover.
+ *
+ * `not-aria-disabled:` is the same gate for a pending button, which is
+ * `aria-disabled` rather than `:disabled` so that it keeps focus. Spelled out
+ * in full rather than built from a constant: Tailwind reads the source text,
+ * and a template literal emits no CSS.
  */
 const PRESS =
-  'shadow-hard-md hover:shadow-hard-lg active:translate-x-1 active:translate-y-1 active:shadow-none';
+  'shadow-hard-md not-disabled:not-aria-disabled:hover:shadow-hard-lg ' +
+  'not-disabled:not-aria-disabled:active:translate-x-1 ' +
+  'not-disabled:not-aria-disabled:active:translate-y-1 ' +
+  'not-disabled:not-aria-disabled:active:shadow-none';
+
+/**
+ * The disabled treatment, the one `Select`'s trigger and the text fields wear:
+ * a sunken ground, the subtle edge, muted ink and no shadow. Before #252 a
+ * disabled button rendered exactly like an enabled one — it looked pressable
+ * and did nothing. A request in flight is `pending`, not this. `disabled:`
+ * matches the `<button>` form only, which is right: an anchor cannot be
+ * disabled.
+ */
+const DISABLED =
+  'disabled:cursor-not-allowed disabled:border-edge-subtle disabled:bg-surface-sunken ' +
+  'disabled:text-content-muted disabled:shadow-none';
 
 /**
  * One constant per rendered form, aliased by every name that resolves to it.
@@ -114,7 +184,7 @@ const TERTIARY = `bg-accent-tertiary text-content-inverse border-edge-strong ${P
 const INVERSE = `bg-content-primary text-content-inverse border-content-primary ${PRESS}`;
 
 const button = recipe({
-  base: 'font-mono font-bold uppercase border-2 transition-all duration-200',
+  base: `font-mono font-bold uppercase border-2 transition-all duration-200 ${DISABLED}`,
   variants: {
     size: {
       sm: 'px-4 py-2 text-sm',
@@ -136,6 +206,15 @@ const button = recipe({
      */
     asLink: {
       true: 'inline-flex items-center justify-center no-underline',
+    },
+    /**
+     * Held in its press: the `:active` offset with the shadow gone, over the
+     * variant's own fill. Enabled is raised, disabled is sunken and muted, and
+     * pending is the one in between — this button was pressed and has not let
+     * go. `relative` is the box the spinner is centred in.
+     */
+    pending: {
+      true: 'relative cursor-progress translate-x-1 translate-y-1 shadow-none',
     },
   },
   defaultVariants: {
@@ -189,7 +268,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
     ...rest
   } = props;
 
-  const content = bracketed ? (
+  const label = bracketed ? (
     <span className="inline-flex items-center justify-center gap-2">
       <span className="select-none" aria-hidden="true">
         [
@@ -204,7 +283,12 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
   );
 
   if (typeof props.href === 'string') {
-    const anchorProps = rest as Omit<ButtonLinkProps, keyof ButtonOwnProps>;
+    // `pending` is `never` here; taken out so a stray `undefined` is not spread.
+    const {
+      pending: _pending,
+      pendingLabel: _pendingLabel,
+      ...anchorProps
+    } = rest as Omit<ButtonLinkProps, keyof ButtonOwnProps>;
     return (
       <a
         ref={ref as Ref<HTMLAnchorElement>}
@@ -219,19 +303,75 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
         }
         className={button({ variant, size, asLink: true, class: className })}
       >
-        {content}
+        {label}
       </a>
     );
   }
 
-  const buttonProps = rest as Omit<ButtonElementProps, keyof ButtonOwnProps>;
-  return (
+  const {
+    pending,
+    pendingLabel = 'Working',
+    ...buttonProps
+  } = rest as Omit<ButtonElementProps, keyof ButtonOwnProps>;
+  const isPending = pending === true && !buttonProps.disabled;
+
+  const element = (
     <button
       ref={ref as Ref<HTMLButtonElement>}
       {...buttonProps}
-      className={button({ variant, size, class: className })}
+      // The `disabled` attribute is what drops focus, so a pending button says
+      // it is unavailable through ARIA and refuses activation here instead.
+      // Enter and Space on a focused button, and Enter in a text field of its
+      // form (implicit submission), all reach a button as a `click`; cancelling
+      // it cancels the submit it would have sent. Base UI's Button does the
+      // same under `focusableWhenDisabled`.
+      aria-disabled={isPending ? true : buttonProps['aria-disabled']}
+      onClick={isPending ? preventActivation : buttonProps.onClick}
+      data-pending={isPending ? '' : undefined}
+      className={button({ variant, size, pending: isPending, class: className })}
     >
-      {content}
+      {isPending ? (
+        <>
+          {/* Transparent, not removed: it holds the width and the name. */}
+          <span className="inline-flex opacity-0">{label}</span>
+          <Spinner
+            // Sized to the label's line box: `sm` in a small button, `md` —
+            // about a capital's height and a half — in the others.
+            size={size === 'sm' ? 'sm' : 'md'}
+            accent="current"
+            // The status region beside the button announces the wait. This is
+            // the drawing only; a second live region inside a button, whose
+            // children are presentational, would be read unreliably or twice.
+            role={undefined}
+            aria-hidden="true"
+            className="absolute inset-0"
+          />
+        </>
+      ) : (
+        label
+      )}
     </button>
   );
+
+  if (pending === undefined) return element;
+
+  return (
+    <>
+      {element}
+      {/*
+       * Outside the button because a button's children are presentational: a
+       * live region inside one is flattened into its name. Present from the
+       * first render and filled only while pending, which is what makes the
+       * insertion an announcement rather than a region appearing already full.
+       */}
+      <span role="status" className="sr-only" data-slot="button-status">
+        {isPending ? pendingLabel : ''}
+      </span>
+    </>
+  );
 });
+
+/** A pending button's click: cancelled, so neither `onClick` nor a submit runs. */
+function preventActivation(event: MouseEvent<HTMLButtonElement>) {
+  event.preventDefault();
+}

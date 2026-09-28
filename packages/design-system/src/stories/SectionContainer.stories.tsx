@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SectionContainer } from '../components/SectionContainer';
 
 const meta: Meta<typeof SectionContainer> = {
-  title: 'Foundations/SectionContainer',
+  title: 'Components/Layout/SectionContainer',
   component: SectionContainer,
   tags: ['autodocs', 'stable'],
   parameters: { layout: 'fullscreen' },

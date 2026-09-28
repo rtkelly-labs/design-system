@@ -3,7 +3,7 @@ import { SocialIcon, type SocialIconName } from '../components/SocialIcon';
 import { ThemeProvider } from '../components/ThemeProvider';
 
 const meta: Meta<typeof SocialIcon> = {
-  title: 'Foundations/SocialIcon',
+  title: 'Components/Icons/SocialIcon',
   component: SocialIcon,
   tags: ['autodocs', 'stable'],
 };

@@ -49,8 +49,15 @@ const EXCLUDED = {
   'docs/DocsLinkProvider.tsx': 'A context provider; its contract is the docs it is documented in.',
 };
 
-/** The count of undocumented components on the day this gate landed. */
-const BUDGET = 17;
+/**
+ * The count of undocumented components. Lowered from 17 with #238: `Checkbox`,
+ * `Switch` and the extracted `fieldFrame` all arrived documented, so the gap
+ * shrank rather than merely not growing. Lowered to 14 with #244: `Pagination`
+ * gained its JSDoc when it gained a page list. Lowered to 12 with #245:
+ * `DataTable` and `Table` (on `TableHead`) were documented with their
+ * semantics.
+ */
+const BUDGET = 12;
 
 function componentFiles(dir = COMPONENTS) {
   return readdirSync(dir).flatMap((entry) => {

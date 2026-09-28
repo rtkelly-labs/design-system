@@ -24,7 +24,7 @@ import {
 } from './portal/integration';
 
 const meta: Meta = {
-  title: 'Docs/Portal',
+  title: 'Docs/Layout/Portal',
   tags: ['stable'],
   parameters: { layout: 'fullscreen' },
 };

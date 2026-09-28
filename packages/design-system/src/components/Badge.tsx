@@ -1,12 +1,12 @@
 import { forwardRef } from 'react';
-import React from 'react';
+import type React from 'react';
 import { accentVar } from '../lib/theme';
 import type { AccentToken } from '../lib/theme';
 import { cn } from '../lib/recipe';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   /**
-   * The label — a state, a count, a category. Short by construction: the badge
+   * The label: a state, a count, a category. Short by construction: the badge
    * does not wrap, so anything long enough to need two lines is a `Tag` or
    * prose, not a badge.
    */

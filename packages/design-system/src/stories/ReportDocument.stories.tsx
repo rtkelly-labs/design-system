@@ -18,7 +18,7 @@ import { StatCard } from '../components/StatCard';
  * it owns, and neither can pull the other into its graph.
  */
 const meta: Meta<typeof ReportDocument> = {
-  title: 'Foundations/ReportDocument',
+  title: 'Components/Reports/ReportDocument',
   component: ReportDocument,
   tags: ['autodocs', 'preview'],
   parameters: { layout: 'fullscreen' },

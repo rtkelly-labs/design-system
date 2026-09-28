@@ -48,47 +48,125 @@ now either — the estate audit (`repo-governance vercel-gating`, in `shared-uti
 counts what Vercel *did*: deployments created off the allowed refs, and whether the
 latest Ready production build matches `origin/main`.
 
-`pnpm check:deployed` compares the live `index.json` with this build, and
-`.github/workflows/deployment-drift.yml` runs it on pushes to `main` and daily. That
-turns silence into a red mark someone owns, and catches drift within one merge instead
-of thirty.
+`pnpm check:deployed` compares the live `index.json` with a Storybook build, and
+`.github/workflows/deployment-drift.yml` runs it against the `production` branch after every
+release train and daily. That turns silence into a red mark someone owns, and catches a stuck
+deploy within one train instead of thirty merges.
 
-### The production domain has never tracked `main`
+### The production domain tracks `production`, and the release train moves it
 
-The table above said `main` until 21 September. It was wrong, and it was wrong in the
-direction that costs the most: the site had been serving 12 September for nine days, and
-every check you would reach for said success.
+The table above said `main` until 21 September. It was wrong, and the correction has two
+halves — the second of which was missed on the first pass and is the one that matters.
 
 `shared-utilities` declares this project with **`productionBranch: 'production'`**
 ([`infra/vercel/sites.ts`](https://github.com/rtkelly13/shared-utilities/blob/main/infra/vercel/sites.ts)),
-and `design-system.ryankelly.dev` is that project's production domain. So a merge to
-`main` produces a *preview* deployment of this project — which is why the GitHub
-deployment list shows `Preview – design-system-storybook` for commits on `main`, and why
-every one of them reports success while the domain does not move. Nothing is broken in
-the sense of failing. The branch the domain serves simply stops being advanced.
+and `design-system.ryankelly.dev` is that project's production domain. A merge to `main`
+therefore produces a *preview* deployment — which is why the GitHub deployment list shows
+`Preview – design-system-storybook` for commits on `main`, all green, while the domain does not
+move.
 
-It stopped on 12 September, at `583e08a` — which is, with some irony, the commit that
-documented the *previous* stale-production incident. Eighteen commits later the site was
-still serving the 174 stories that incident ended on, without `AlertDialog`, the four
-chart primitives or `SocialIcon`.
+**That is deliberate.** `.github/workflows/release-train.yml` advances `production` on a
+schedule, at 08:00 and 16:00 UTC, so a day of merges becomes two production builds rather than
+one per merge. The Vercel account is on a build quota; this is what protects it. `production`
+sitting behind `main` between trains is the design working.
 
-**To promote, advance `production`:** it is the same promote-by-merge model the `preview`
-branch uses, and the section below says so for that one.
+### Why it was nine days behind anyway
 
-```sh
-git push origin origin/main:production   # fast-forward; a deploy follows
+The train had never run. The workflow and its script were written on 12 September and left
+**uncommitted** on a working copy — so GitHub had no such workflow, no schedule fired, and the
+pointer stayed where it was. `production` was last advanced to `583e08a`, which is, with some
+irony, the commit documenting the *previous* stale-production incident.
+
+A second fault was waiting behind the first. The train consults CI on `main` and refuses to
+depart when a check has failed — and `deployment-drift` fails precisely *because* production is
+behind `main`. Left in the blocking set it is a deadlock: the first train to find the site stale
+refuses to move, so the site stays stale, so every later train refuses for the same reason. The
+assessment said so in as many words:
+
+```
+CI Status:  failed (deployment-drift, deployment-drift)
+Decision:   ⏸️ SKIP
+Reason:     CI checks failed for 4bb0717. Release blocked.
 ```
 
-Two things follow from this, and both are worth stating rather than rediscovering:
+`deployment-drift` now sits with `backup-main` in the set the train ignores: both observe the
+deployment rather than judge the code.
 
-1. **`check:deployed` and `deployment-drift` compare the live site against `main`,** not
-   against `production`. Under promote-by-merge that makes them red for as long as
-   anything is unpromoted — which is true, and is not the same claim as "the deployment
-   is broken". Read a red drift run as *there is unpromoted work*, and promote.
-2. **If the intent is that `main` deploys straight to the domain,** the fix is one line
-   of `productionBranch` in `shared-utilities`, not anything in this repo — and then the
-   `production` branch should go, because a branch nothing advances is a trap the next
-   reader falls into exactly as this one did.
+### And a third fault behind the second
+
+The fix above was correct and still did not move the pointer. The train held on every run, with
+every other check green:
+
+```
+CI Status:  in progress (Assess & Release)
+Decision:   ⏸️ SKIP
+Reason:     CI checks still running for 5d46be8. Holding release train.
+```
+
+The name in that list is the train's own job. The ignore set matched on a check run's `name`,
+which is the **job** name — this workflow is `Release Train` but its check reports as
+`Assess & Release`, so the `release-train` entry matched nothing and the train counted itself as
+a check it was waiting for. Not a timing problem: it was permanent, on every schedule, and the
+run still exited 0 and reported success, which is why two green runs left production nine days
+stale.
+
+The train now excludes its own run by `GITHUB_RUN_ID` rather than by name, so a job rename
+cannot silently restore the deadlock. The selection is a pure function in
+`scripts/release-train-checks.mjs` with tests covering both deadlocks — the train's failure mode
+is a green run that did nothing, which no other gate could see.
+
+### And a fourth: `production` was never allowed to deploy
+
+With all three fixed, the train departed on 23 September — `production` moved from `f7cefd3` to
+`157cf3d` — and the domain still served the 21 September build. No deployment was created at all:
+the GitHub deployment list went on showing only `Preview – design-system-storybook` builds of
+`main`.
+
+`vercel.json` gated creation to `main`, `preview` and `slot/*`, with `"**": false` for everything
+else, and `ignoreCommand` repeated the same list. Both were written (#212) while the domain still
+followed `main`; when `shared-utilities` moved it to `productionBranch: 'production'`, nothing here
+added that branch. So the train could advance the pointer forever and Vercel would refuse every
+push to it — the pointer moving was never evidence of a deployment.
+
+`production` is now in both lists. Vercel reads `vercel.json` from the commit it is deploying, so
+the fix reaches the domain only once a train has carried it onto `production`.
+
+The first attempt at that (#288) broke every deployment instead. Spelling `production` out as one
+more `==` took `ignoreCommand` to 279 characters; Vercel caps it at 256 and rejects the whole config
+past that, so both projects failed on every commit — previews of `main` included — with nothing but
+"Deployment failed". The branch list is now one anchored regex, and
+`scripts/vercel-config.test.mjs` pins the length and which refs build.
+
+The train's own health check did not notice either. It read the latest deployment of every
+environment whose name contained `production` among the last 15, and the storybook project's had
+long fallen out of that window behind previews — so it saw `Production – design-system`, a
+different project that deploys `main`, report success, and read that as this site being healthy.
+
+It now reads one environment, `Production – design-system-storybook`, matched exactly and asked
+for with the deployments API's `?environment=` filter, so no number of previews can push it out of
+view. Finding no deployment for that environment is a reason to deploy, not a quiet `SKIP`. The
+selection is a pure function in `scripts/release-train-deployment.mjs`, tested beside
+`scripts/release-train-checks.mjs`: another project's deployment is ignored, a missing one departs,
+a failed one redeploys.
+
+### Reading a train
+
+`pnpm release:train --dry-run` prints the same assessment the workflow does and moves nothing —
+source SHA, pointer SHA, the production deployments and their states, the CI verdict, and the
+decision with its reason. It is the fastest answer to "why is the site not updating". Dispatch
+the workflow with `force` to advance the pointer when the SHAs already match, which is how to
+redeploy without a new commit.
+
+**`deployment-drift` compares the live site against `production`, not `main`.** Until
+26 September it compared against `main`, which made it red after nearly every merge until the
+next train. That was truthful but useless: *a train is due* is the train's own question, and a
+check that is red by design hides the red that is a fault. A red run now means the domain is not
+serving what the pointer says: a failed or stuck Vercel build, or the account quota. It runs when
+the Release Train workflow completes (`workflow_run`, because the train pushes with
+`GITHUB_TOKEN` and GitHub starts no workflow from such a push) and daily.
+
+Run locally, `pnpm check:deployed` compares against whatever you built. On `main` that answers
+"what would the next train ship", and it is red between trains for the old reason.
 
 ### Why the Vercel check is not, and cannot be, a required check
 
@@ -97,7 +175,7 @@ the repository, for two independent reasons:
 
 1. **Feature branches do not deploy at all, and that is two gates, not one.**
    `git.deploymentEnabled` in `vercel.json` refuses to *create* a deployment for any
-   branch outside `main`, `preview` and `slot/N`; `ignoreCommand` is the same list
+   branch outside `main`, `production`, `preview` and `slot/N`; `ignoreCommand` is the same list
    again, as a skip for anything that reaches the build step anyway. Only the first
    one saves the quota: a skipped deployment is still created, still shows as
    canceled, and still spends one of the 100 deployments per day. Before the creation

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   DEFAULT_LEVEL,
@@ -8,12 +10,8 @@ import {
   THEME_LEVELS,
 } from '../theme/levels';
 import type { Polarity, ThemeLevel } from '../theme/levels';
-
-/** Where the chosen level is persisted. Shared with {@link getThemeInitScript}. */
-export const THEME_STORAGE_KEY = 'ds-theme-level';
-
-/** The attribute the CSS keys off. Shared with {@link getThemeInitScript}. */
-export const THEME_ATTRIBUTE = 'data-theme';
+import { THEME_ATTRIBUTE, THEME_STORAGE_KEY } from './themeInitScript';
+import { ScopedLevelContext } from './themeScope';
 
 export interface ThemeContextValue {
   level: ThemeLevel;
@@ -43,8 +41,8 @@ export interface ThemeProviderProps {
    */
   persist?: boolean;
   /**
-   * Fall back to the OS `prefers-color-scheme` when nothing is persisted. The
-   * ladder has four rungs and the media query has two, so the mapping is the
+   * Fall back to the OS `prefers-color-scheme` when nothing is persisted. A
+   * rung is not named after a media-query state, so the mapping is the
    * explicit {@link SYSTEM_LEVEL} constant rather than an inference.
    */
   followSystem?: boolean;
@@ -79,34 +77,13 @@ function readSystemLevel(): ThemeLevel | undefined {
 }
 
 /**
- * The script to run before first paint, so the page never flashes the default
- * level and then corrects itself.
+ * Holds the active Level and applies it — to `documentElement`, or to a
+ * wrapper element when `scoped`. Read it with {@link useTheme}.
  *
- * Drop the returned string into an inline `<script>` in the document head,
- * ahead of the stylesheet. React cannot do this job: anything it renders runs
- * after hydration, which is already too late — and reading `localStorage` in a
- * `useState` initialiser (what this component used to do) makes the server and
- * client render different markup, which is a hydration mismatch.
- *
- * ```tsx
- * <script dangerouslySetInnerHTML={{ __html: getThemeInitScript() }} />
- * ```
+ * Pair it with {@link getThemeInitScript} in the document head, so the first
+ * paint is already on the right Level; this component only takes over after
+ * hydration.
  */
-export function getThemeInitScript(
-  options: { defaultLevel?: ThemeLevel; followSystem?: boolean } = {},
-): string {
-  const { defaultLevel = DEFAULT_LEVEL, followSystem = true } = options;
-  // Serialised rather than interpolated loosely, so the level list and the
-  // system mapping in this script cannot drift from levels.ts.
-  const levels = JSON.stringify(THEME_LEVELS);
-  const system = JSON.stringify(SYSTEM_LEVEL);
-  return `(function(){try{var l=${levels},s=${system},k=${JSON.stringify(THEME_STORAGE_KEY)};var v=null;try{v=localStorage.getItem(k)}catch(e){}if(l.indexOf(v)===-1){v=${
-    followSystem
-      ? `(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?s.dark:s.light`
-      : JSON.stringify(defaultLevel)
-  }}document.documentElement.setAttribute(${JSON.stringify(THEME_ATTRIBUTE)},v)}catch(e){}})();`;
-}
-
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   defaultLevel = DEFAULT_LEVEL,
@@ -172,7 +149,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     children
   );
 
-  return <ThemeContext.Provider value={value}>{content}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>
+      <ScopedLevelContext.Provider value={scoped ? level : undefined}>
+        {content}
+      </ScopedLevelContext.Provider>
+    </ThemeContext.Provider>
+  );
 };
 
 export const useTheme = (): ThemeContextValue => {

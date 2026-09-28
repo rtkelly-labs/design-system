@@ -3,7 +3,7 @@ import { StatCard } from '../components/StatCard';
 import { Activity, Cpu, ShieldCheck, DollarSign } from 'lucide-react';
 
 const meta: Meta<typeof StatCard> = {
-  title: 'Foundations/StatCard',
+  title: 'Components/Data/StatCard',
   component: StatCard,
   tags: ['autodocs', 'stable'],
 };

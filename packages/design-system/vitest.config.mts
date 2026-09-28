@@ -11,10 +11,34 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'jsdom',
-    include: ['src/**/*.test.{ts,tsx}'],
+    /*
+     * `scripts/**` is included for the release train, which had no test at
+     * all and two deadlocks. Both reported success and exited 0 while doing
+     * nothing — a CI script whose failure mode is silence is exactly the thing
+     * worth asserting, and its logic is plain `.mjs`, so it costs no build
+     * step to cover.
+     */
+    include: ['src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
     // Testing Library only registers its own `afterEach(cleanup)` under
     // `globals: true`, which this project does not use. See src/test-setup.ts.
     setupFiles: ['src/test-setup.ts'],
+    /*
+     * One jsdom per worker, not one per file.
+     *
+     * Building a fresh jsdom and module graph for each of ~90 files was most of
+     * the suite's time: `environment` summed 78–133s against 42–72s of tests.
+     * Sharing them is only honest if no file can see what another left behind,
+     * so this was switched off after `src/test-setup.ts` learnt to restore the
+     * shared globals and `pnpm test:leaks` — shuffled file order, no isolation,
+     * the seed printed so a failure replays — ran clean. It had failed seven
+     * orderings in eight before. If a unit test fails here and passes alone,
+     * that is a leak: run `pnpm test:leaks` and fix the hook, not the test.
+     */
+    isolate: false,
+    // A JSON report on CI for `scripts/ci-telemetry.mjs` — which files are
+    // slow to run. The default reporter stays, so the log reads as before.
+    reporters: process.env.CI ? ['default', 'json'] : ['default'],
+    outputFile: { json: 'telemetry/vitest.json' },
     coverage: {
       provider: 'v8',
       /*

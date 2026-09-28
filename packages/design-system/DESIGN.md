@@ -122,7 +122,7 @@ alias is still the wrong shape.
 ## 4. Contrast is arithmetic, and it is a gate
 
 Colour is the one axis with a machine-checkable definition of correct, so it is checked.
-`pnpm check:contrast` audits **222 pairs — 111 per theme** on every build and fails CI, plus 24 selection devices and 16 Role→Hue agreement checks. The per-theme figure is the one to reason from: it is what a third theme would add.
+`pnpm check:contrast` audits **260 pairs — 130 per theme** on every build and fails CI, plus 24 selection devices and 16 Role→Hue agreement checks. The per-theme figure is the one to reason from: it is what a third theme would add.
 
 | | Floor | Why |
 |---|---|---|
@@ -170,16 +170,27 @@ the opposite of `midnight`. No gate can currently see this; it is tracked in #81
 
 | Role | Stack |
 |---|---|
-| Display | Space Grotesk → Inter → sans-serif |
-| Body | Inter → system sans |
-| Mono | IBM Plex Mono → Symbols Nerd Font Mono → Courier New |
-| Pixel | VT323 → monospace |
+| Display | Space Grotesk → Inter → symbols → sans-serif |
+| Body | Inter → symbols → system sans |
+| Mono | IBM Plex Mono → symbols → Courier New |
+| Pixel | VT323 → symbols → monospace |
+
+"Symbols" is the same pair of shipped faces in every stack: Symbols Nerd Font Mono (icons, the
+private-use area) then DS Symbols (arrows, box drawing, blocks, geometric shapes, dingbats, `⌘`,
+Greek; a subset of JetBrains Mono, OFL-1.1). Both are `unicode-range` bounded, so they draw only
+what the text face lacks.
 
 Fallback chains are load-bearing: when the web font has not loaded, the next entry decides the
 metrics, and a different fallback reflows the page.
 
-**The mono face is latin-only.** Box-drawing and block characters fall through to Symbols Nerd
-Font Mono — which is why ASCII art needs testing rather than assuming.
+**The text faces are latin-only, and no symbol reaches the operating system.** IBM Plex Mono has
+no box drawing and Nerd Fonts' symbol set has none either, so every ASCII-art rule, `✓` and `⌘`
+used to be drawn by whatever font the machine had — Courier New on the CI runner, no glyph at all
+for `⌘` there. DS Symbols draws them now, at the same 600/1000 advance as IBM Plex Mono so box
+drawing keeps the mono column width. `pnpm check:fonts` fails when a character rendered in `src/`
+has no shipped glyph in any of the four stacks, and when a component writes a font stack of its
+own instead of using one of the four, since that skips the symbol faces entirely. `--list` prints
+the census.
 
 **Geometry and time are the second axis, and they are declared.** A Level varies colour and is
 picked at runtime; a **Medium** varies geometry and time and is picked at build time by which
@@ -199,9 +210,9 @@ whole frames because a fractional frame lands a render mid-transition. See
 **The contrast floor is Medium-keyed too**, which is the part most easily got wrong: colour
 values do not vary by Medium, but the floors they must clear do. `pnpm check:contrast` defaults
 to the web floors; `--medium=video` and `--medium=graphic` enforce the stricter 7:1 frame floors
-and report **46 of 222 pairs below minimum**. That is deliberate, not a regression — no video or
+and report **50 of 260 pairs below minimum**. That is deliberate, not a regression — no video or
 graphic artifact is emitted yet, and only the `web` run gates CI. If palette values ever move,
-those 46 are the number that moves first.
+those 50 are the number that moves first.
 
 ## 8. Voice
 

@@ -2,10 +2,10 @@
  * Contrast arithmetic over the ladder.
  *
  * Every colour in `levels.ts` is a literal, so contrast can be computed as data
- * — no browser, no screenshot, no rendering. `pnpm check:contrast` walks all
- * four levels and fails CI on a violation, which is the thing that makes a
- * four-rung ladder maintainable: 4 levels x ~15 role pairs is 60 combinations,
- * and nobody eyeballs 60 combinations reliably twice.
+ * — no browser, no screenshot, no rendering. `pnpm check:contrast` walks every
+ * level and fails CI on a violation, which is the thing that makes the ladder
+ * maintainable: every level times every role pair is a matrix nobody eyeballs
+ * reliably twice.
  *
  * The maths is WCAG 2.1 relative luminance. APCA is the better predictor of
  * perceived contrast, but it is not yet normative and its thresholds are not
@@ -395,6 +395,30 @@ export function auditContrast(
         floor.role,
       );
     }
+    // `Select`'s open list (#164), named for the component because it used to
+    // be the one surface the palette did not reach: the operating system
+    // painted it. The rows are `text.primary` on `surface.raised`; a disabled
+    // row is `text.muted`; the highlighted row is `text.inverse` on the field's
+    // accent fill, and the chosen row's mark is that accent on the list. The
+    // accent is whichever the caller passes, so every Emphasis and Intent is
+    // measured rather than only the default. The values repeat pairs above —
+    // the point is that removing one of those cannot silently un-gate the list.
+    check('select.option: text.primary on surface.raised', def.text.primary, def.surface.raised, floor.role);
+    check('select.option disabled: text.muted on surface.raised', def.text.muted, def.surface.raised, floor.role);
+    check('select.placeholder: text.muted on surface.base', def.text.muted, def.surface.base, floor.role);
+    const listAccents = [
+      ...(['primary', 'secondary', 'tertiary', 'quiet'] as const satisfies readonly Emphasis[]).map(
+        (tone) => [`accent.${tone}`, def.accent[tone]] as const,
+      ),
+      ...(['info', 'success', 'warning', 'danger'] as const satisfies readonly Intent[]).map(
+        (tone) => [`intent.${tone}`, def.intent[tone]] as const,
+      ),
+    ];
+    for (const [name, fill] of listAccents) {
+      check(`select.option highlighted: text.inverse on ${name}`, def.text.inverse, fill, floor.role);
+      check(`select.option selected mark: ${name} on surface.raised`, fill, def.surface.raised, floor.role);
+    }
+
     // A scrim's job is to separate the dialog from the page behind it. Nothing
     // renders text on the scrim, so the assertion is about separation — and it
     // can be satisfied by either edge of the dialog, because this system draws

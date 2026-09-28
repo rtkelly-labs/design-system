@@ -48,9 +48,34 @@ describe('Table', () => {
     expect(screen.getByRole('table', { name: 'Quarterly figures' })).toBeDefined();
   });
 
+  it('scopes a header cell to its column unless told it heads a row', () => {
+    render(
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Node</TableHead>
+            <TableHead>Load</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableHead scope="row">edge-1</TableHead>
+            <TableCell>0.4</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+    expect(screen.getAllByRole('columnheader').map((th) => th.getAttribute('scope'))).toEqual(['col', 'col']);
+    const rowHeader = screen.getByRole('rowheader', { name: 'edge-1' });
+    expect(rowHeader.getAttribute('scope')).toBe('row');
+    // A row header takes the body cell's geometry, not the column header's
+    // display face — it reads as the first cell of its row.
+    expect(rowHeader.className).not.toContain('uppercase');
+  });
+
   it('exposes every part with a data-slot', () => {
     const { container } = render(<Example />);
-    for (const slot of ['table-container', 'table', 'table-header', 'table-body', 'table-footer', 'table-row', 'table-head', 'table-cell']) {
+    for (const slot of ['table-container', 'table', 'table-caption', 'table-header', 'table-body', 'table-footer', 'table-row', 'table-head', 'table-cell']) {
       expect(container.querySelector(`[data-slot="${slot}"]`)).not.toBeNull();
     }
   });

@@ -4,7 +4,7 @@
  *
  * `check-visual-coverage.mjs` asks whether a component is *screenshotted*. This
  * asks the other question — whether a reader (or an agent) arriving at
- * `Foundations/Badge` is told what the thing is for, what its props mean, and
+ * `Components/Content/Badge` is told what the thing is for, what its props mean, and
  * what the samples are demonstrating. Storybook will happily publish a docs
  * page consisting of a title, an untitled control table with an empty
  * Description column, and one story called "Default", and nothing about that
@@ -107,7 +107,7 @@ const MIN_STORIES = 3;
  * never rise. Lower it in the same commit that documents a component. This gate
  * is finished when the number is 0 and this constant is deleted.
  */
-const CEILING = 43;
+const CEILING = 41;
 
 const EXCLUDED = {
   'Showcase/DesignSandbox': {
@@ -126,7 +126,11 @@ const EXCLUDED = {
     propsTable:
       'A reference sheet for the role tokens, not a component. Same as Theme Ladder: nothing to tabulate.',
   },
-  'Docs/Portal': {
+  'SaaS/Account Flows': {
+    propsTable:
+      'Four compositions — sign in, registration, password reset, account settings — and no component of their own. The primitives they compose each have a page and a table; the fixtures\' props are story switches, not an API.',
+  },
+  'Docs/Layout/Portal': {
     propsTable:
       'A composition of the whole docs kit — layout, header, sidebar, TOC, pager — so no single component owns the page. Each part has its own page with its own table.',
   },
@@ -144,29 +148,42 @@ const EXCLUDED = {
  */
 const UNSTORIED = {
   AsciiDivider:
-    'Deprecated alias of `Divider`, kept for existing call sites. A story is a recommendation, and this is not one — `Foundations/Divider` documents the alias in its description.',
+    'Deprecated alias of `Divider`, kept for existing call sites. A story is a recommendation, and this is not one — `Components/Layout/Divider` documents the alias in its description.',
   TextArea:
-    'Documented on `Foundations/Input` beside `Input` and `Select`: the three share one label/error/helper contract and one recipe, so three pages would be one component described three times.',
-  Select:
-    'Same as `TextArea` — a shape of the field contract documented on `Foundations/Input`, not a component of its own.',
+    'Documented on `Components/Actions & Forms/Input` beside `Input`: the two share one label/error/helper contract and one recipe, so two pages would be one component described twice. `Select` shares them too, but has its own page since #164 — its open list is a surface the other two do not have.',
   ReportSection:
-    'A part of the report frame, documented and asserted on `Foundations/ReportDocument`. It is meaningless outside one — a section with no document around it has no measure, no rhythm and nothing to be a section of — so a page of its own would show it in a context no consumer will ever build.',
+    'A part of the report frame, documented and asserted on `Components/Reports/ReportDocument`. It is meaningless outside one — a section with no document around it has no measure, no rhythm and nothing to be a section of — so a page of its own would show it in a context no consumer will ever build.',
   ReportDetails:
-    'Same as `ReportSection`: the disclosure block belongs to the report frame and is shown in place on `Foundations/ReportDocument`, where its collapsed and expanded states are both visible against the surrounding document.',
+    'Same as `ReportSection`: the disclosure block belongs to the report frame and is shown in place on `Components/Reports/ReportDocument`, where its collapsed and expanded states are both visible against the surrounding document.',
   ThemeProvider:
     'Renders no markup of its own; what a screenshot of it would show is whatever children it is given. `Foundations/Theme Ladder` documents the behaviour, including `scoped`, which is the part with a visible consequence.',
   DocsLink:
     'The indirection point for a host router, injected through `DocsLinkProvider`. Its whole behaviour is which element it delegates to, which renders identically either way.',
   DocsLinkProvider:
     'Context only, no markup. Every `Docs/*` story renders inside the default (plain `<a>`) behaviour, which is the case worth showing.',
+  LinkProvider:
+    'Context only, no markup — the package-wide form of `DocsLinkProvider`, and the same context. The `Components/Navigation/SiteHeader` pages render inside one, with `isCurrent` standing in for a router, which is the case worth showing.',
+  SiteLink:
+    'The site chrome’s indirection point for a host router, as `DocsLink` is the docs chrome’s. Its behaviour is which element it delegates to and whether it carries `aria-current`, both shown on every `Foundations/Site*` page.',
+  SiteNavItem:
+    'One entry of `SiteNav`, documented on `Components/Navigation/SiteNav` as a subcomponent. An item outside a nav has no list to be in and no landmark to belong to, so a page of its own would show it in a context no consumer builds.',
   TableHeader:
-    'One of eight parts of a single primitive, all documented together on `Foundations/Table` — a table part shown on its own is a `<thead>` with a border, and eight such pages would be one component described eight times.',
-  TableBody: 'Part of the `Foundations/Table` compound. See `TableHeader`.',
-  TableFooter: 'Part of the `Foundations/Table` compound. See `TableHeader`.',
-  TableRow: 'Part of the `Foundations/Table` compound. See `TableHeader`.',
-  TableHead: 'Part of the `Foundations/Table` compound. See `TableHeader`.',
-  TableCell: 'Part of the `Foundations/Table` compound. See `TableHeader`.',
-  TableCaption: 'Part of the `Foundations/Table` compound. See `TableHeader`.',
+    'One of eight parts of a single primitive, all documented together on `Components/Data/Table` — a table part shown on its own is a `<thead>` with a border, and eight such pages would be one component described eight times.',
+  TableBody: 'Part of the `Components/Data/Table` compound. See `TableHeader`.',
+  TableFooter: 'Part of the `Components/Data/Table` compound. See `TableHeader`.',
+  TableRow: 'Part of the `Components/Data/Table` compound. See `TableHeader`.',
+  TableHead: 'Part of the `Components/Data/Table` compound. See `TableHeader`.',
+  TableCell: 'Part of the `Components/Data/Table` compound. See `TableHeader`.',
+  TableCaption: 'Part of the `Components/Data/Table` compound. See `TableHeader`.',
+  AppSidebar:
+    'One of the five `Components/Layout/AppShell` pieces, documented and asserted there as a subcomponent. A sidebar outside a shell has no drawer and no toggle, so a page of its own would show the half of it that does not collapse.',
+  AppSidebarNav: 'Part of the `Components/Layout/AppShell` composition. See `AppSidebar`.',
+  AppTopbar: 'Part of the `Components/Layout/AppShell` composition. See `AppSidebar`.',
+  AppMain: 'Part of the `Components/Layout/AppShell` composition. See `AppSidebar`.',
+  Feature:
+    'The cell of `Components/Marketing/FeatureGrid`, documented and asserted there as a subcomponent. A feature outside its grid is a `Card` panel with an icon, which `Components/Content/Card` already shows; the grid is where its accent and spacing mean anything.',
+  PricingTier:
+    'The cell of `Components/Marketing/PricingGrid`, documented and asserted there as a subcomponent. A tier on its own page loses the thing it is built for — its action lining up with its neighbours’ however long each feature list is.',
 };
 
 /** Read the JSDoc text attached to a node, if any. */

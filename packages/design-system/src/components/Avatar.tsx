@@ -1,8 +1,10 @@
+'use client';
+
 import { Avatar as BaseAvatar } from '@base-ui/react/avatar';
 import { forwardRef } from 'react';
 import { accentVar } from '../lib/theme';
 import type { AccentToken } from '../lib/theme';
-import React from 'react';
+import type React from 'react';
 
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   src?: string;
@@ -101,7 +103,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(function Avatar({
       <BaseAvatar.Fallback
         data-slot="avatar-fallback"
         style={{
-            fontFamily: 'var(--font-space-grotesk, "Space Grotesk"), sans-serif',
+            fontFamily: 'var(--ds-font-display)',
             fontWeight: 800,
             fontSize: size === 'sm' ? '0.75rem' : size === 'lg' ? '1.2rem' : '0.95rem',
             color: accentColor,

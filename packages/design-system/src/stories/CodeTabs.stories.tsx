@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CodeTab, CodeTabs } from '../components/docs/CodeTabs';
 
 const meta: Meta<typeof CodeTabs> = {
-  title: 'Docs/CodeTabs',
+  title: 'Docs/Content/CodeTabs',
   component: CodeTabs,
   tags: ['autodocs', 'stable'],
   argTypes: {

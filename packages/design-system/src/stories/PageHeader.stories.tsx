@@ -5,7 +5,7 @@ import { PageHeader } from '../components/PageHeader';
 import { Badge } from '../components/Badge';
 
 const meta: Meta<typeof PageHeader> = {
-  title: 'Foundations/PageHeader',
+  title: 'Components/Layout/PageHeader',
   component: PageHeader,
   tags: ['autodocs', 'stable'],
 };

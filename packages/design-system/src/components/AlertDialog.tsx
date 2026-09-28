@@ -1,7 +1,10 @@
+'use client';
+
 import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog';
 import { cn } from '../lib/recipe';
+import { usePortalThemeAttribute } from './portalTheme';
 import { dialogSurface } from './dialogSurface';
 import { Button } from './Button';
 
@@ -75,6 +78,7 @@ export const AlertDialog = forwardRef<HTMLDivElement, AlertDialogProps>(function
 ) {
   const slots = dialogSurface();
 
+  const portalTheme = usePortalThemeAttribute();
   return (
     <BaseAlertDialog.Root
       open={isOpen}
@@ -82,7 +86,7 @@ export const AlertDialog = forwardRef<HTMLDivElement, AlertDialogProps>(function
         if (!open) onClose();
       }}
     >
-      <BaseAlertDialog.Portal>
+      <BaseAlertDialog.Portal {...portalTheme}>
         <BaseAlertDialog.Backdrop
           data-slot="alert-dialog-backdrop"
           className={slots.backdrop()}

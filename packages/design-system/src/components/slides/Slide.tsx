@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 
 export interface SlideProps {
   title?: string;
@@ -41,7 +41,7 @@ export const Slide: React.FC<SlideProps> = ({
         <div style={{ marginBottom: '2rem', borderBottom: '2px solid var(--ds-border-strong)', paddingBottom: '1rem' }}>
           <h2
             style={{
-              fontFamily: 'var(--font-space-grotesk, "Space Grotesk"), sans-serif',
+              fontFamily: 'var(--ds-font-display)',
               fontSize: '2.5rem',
               fontWeight: 800,
               textTransform: 'uppercase',
@@ -55,7 +55,7 @@ export const Slide: React.FC<SlideProps> = ({
           {subtitle && (
             <p
               style={{
-                fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
+                fontFamily: 'var(--ds-font-mono)',
                 fontSize: '1rem',
                 color: 'var(--ds-accent-primary)',
                 marginTop: '0.5rem',
@@ -81,7 +81,7 @@ export const Slide: React.FC<SlideProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
+          fontFamily: 'var(--ds-font-mono)',
           fontSize: '0.75rem',
           color: 'var(--ds-accent-primary)',
         }}

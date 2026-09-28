@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { THEME_LEVELS } from '../src/theme/levels';
 
@@ -7,13 +8,13 @@ import { THEME_LEVELS } from '../src/theme/levels';
 
 export interface StoryEntry {
   id: string;
-  /** Storybook group, e.g. `Foundations/Card`. */
+  /** Storybook group, e.g. `Components/Content/Card`. */
   title: string;
   /** Story name within the group, e.g. `Default`. */
   name: string;
 }
 
-export const REPO_ROOT = path.resolve(__dirname, '..');
+export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const STORYBOOK_INDEX = path.join(REPO_ROOT, 'storybook-static', 'index.json');
 
 /**

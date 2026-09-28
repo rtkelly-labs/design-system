@@ -1,7 +1,10 @@
+'use client';
+
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, FileText, Maximize2, Minimize2, Play, Pause } from 'lucide-react';
 import { useHotkeys, type RegisterableHotkey } from '@tanstack/react-hotkeys';
 import { Button } from '../Button';
+import { Tooltip } from '../Tooltip';
 import type { SlideProps } from './Slide';
 
 /**
@@ -251,7 +254,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
+          fontFamily: 'var(--ds-font-mono)',
         }}
       >
         {/* Slide Counter */}
@@ -266,40 +269,51 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
           </Button>
 
           {autoPlayInterval > 0 && (
-            <Button
-              onClick={() => setIsPlaying(!isPlaying)}
-              aria-pressed={isPlaying}
-              aria-label={isPlaying ? 'Pause autoplay' : 'Start autoplay'}
-              style={{ padding: '0.4rem 0.8rem' }}
-            >
-              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-            </Button>
+            <Tooltip content={isPlaying ? 'Pause autoplay' : 'Start autoplay'}>
+              <Button
+                onClick={() => setIsPlaying(!isPlaying)}
+                aria-pressed={isPlaying}
+                aria-label={isPlaying ? 'Pause autoplay' : 'Start autoplay'}
+                style={{ padding: '0.4rem 0.8rem' }}
+              >
+                {isPlaying ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+              </Button>
+            </Tooltip>
           )}
 
           <Button onClick={nextSlide} style={{ padding: '0.4rem 0.8rem' }}>
             NEXT <ChevronRight size={16} />
           </Button>
 
+          {/*
+            * The icon-only controls carry a `Tooltip` rather than `title=""`
+            * (#166): the hint now reaches a keyboard user on focus, and says
+            * the shortcut. The `aria-label` stays the accessible name — a
+            * tooltip is visual, and restates it for sighted users.
+            */}
           {deckHasNotes && (
-            <Button
-              onClick={() => setShowNotes((visible) => !visible)}
-              aria-pressed={showNotes}
-              aria-label={showNotes ? 'Hide speaker notes' : 'Show speaker notes'}
-              title="Speaker notes (N)"
-              style={{ padding: '0.4rem 0.8rem' }}
-            >
-              <FileText size={16} />
-            </Button>
+            <Tooltip content={showNotes ? 'Hide notes (N)' : 'Speaker notes (N)'}>
+              <Button
+                onClick={() => setShowNotes((visible) => !visible)}
+                aria-pressed={showNotes}
+                aria-label={showNotes ? 'Hide speaker notes' : 'Show speaker notes'}
+                style={{ padding: '0.4rem 0.8rem' }}
+              >
+                <FileText size={16} aria-hidden="true" />
+              </Button>
+            </Tooltip>
           )}
 
-          <Button
-            onClick={toggleFullscreen}
-            aria-pressed={isFullscreen}
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-            style={{ padding: '0.4rem 0.8rem' }}
-          >
-            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-          </Button>
+          <Tooltip content={isFullscreen ? 'Exit fullscreen (F)' : 'Fullscreen (F)'}>
+            <Button
+              onClick={toggleFullscreen}
+              aria-pressed={isFullscreen}
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              style={{ padding: '0.4rem 0.8rem' }}
+            >
+              {isFullscreen ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
+            </Button>
+          </Tooltip>
         </div>
       </div>
       )}
@@ -315,7 +329,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
             padding: '1rem 1.5rem',
             borderTop: '2px solid var(--ds-border-strong)',
             backgroundColor: 'var(--ds-surface-raised)',
-            fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
+            fontFamily: 'var(--ds-font-mono)',
             fontSize: '0.85rem',
             lineHeight: 1.6,
             color: 'var(--ds-text-primary)',

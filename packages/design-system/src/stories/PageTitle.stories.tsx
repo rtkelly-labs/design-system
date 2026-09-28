@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PageTitle } from '../components/PageTitle';
 
 const meta: Meta<typeof PageTitle> = {
-  title: 'Foundations/PageTitle',
+  title: 'Components/Layout/PageTitle',
   component: PageTitle,
   tags: ['autodocs', 'stable'],
 };

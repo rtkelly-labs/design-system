@@ -1,0 +1,66 @@
+name: Release Train
+
+# Periodic and on-demand release train for production deployments.
+# Evaluates main vs production pointer and Vercel deployment health.
+# Only advances the production pointer if changes exist, CI passed,
+# or if a previous production deployment failed.
+#
+# The path is package-qualified because the tree moved under `packages/` in
+# #257. This workflow runs from the repository root — the release train is a
+# repository concern, not one package's — so it cannot rely on the
+# `working-directory` default the CI jobs set.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (assess without moving pointer)'
+        type: boolean
+        default: false
+      force:
+        description: 'Force release (advance pointer even if SHA matches)'
+        type: boolean
+        default: false
+  schedule:
+    # 08:00 and 16:00 UTC every day. Batches daily merges into predictable
+    # release trains to protect Vercel Hobby tier build quotas.
+    - cron: '0 8,16 * * *'
+
+concurrency:
+  group: release-train
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  deployments: read
+  checks: read
+
+jobs:
+  release:
+    name: Assess & Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Run Release Train
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [ "${{ github.event.inputs.force }}" = "true" ]; then
+            ARGS="$ARGS --force"
+          fi
+          node packages/design-system/scripts/release-train.mjs $ARGS

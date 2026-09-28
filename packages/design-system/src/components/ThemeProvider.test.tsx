@@ -1,12 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  getThemeInitScript,
-  THEME_ATTRIBUTE,
-  THEME_STORAGE_KEY,
-  ThemeProvider,
-  useTheme,
-} from './ThemeProvider';
+import { ThemeProvider, useTheme } from './ThemeProvider';
+import { getThemeInitScript, THEME_ATTRIBUTE, THEME_STORAGE_KEY } from './themeInitScript';
 import { SYSTEM_LEVEL, THEME_LEVELS } from '../theme/levels';
 
 function Probe() {

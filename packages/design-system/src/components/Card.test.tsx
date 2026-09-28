@@ -1,3 +1,4 @@
+import { createRef } from 'react';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Card } from './Card';
@@ -58,5 +59,20 @@ describe('Card form selection', () => {
       const { container } = render(<Card panel title="Scoped themes" />);
       expect(hasFilenameBar(container)).toBe(false);
     });
+  });
+});
+
+describe('Card ref', () => {
+  it('forwards its ref to the root of either form', () => {
+    const panel = createRef<HTMLDivElement>();
+    const card = createRef<HTMLDivElement>();
+    render(
+      <>
+        <Card ref={panel} variant="panel" data-testid="panel" />
+        <Card ref={card} variant="card" title="A post" data-testid="card" />
+      </>,
+    );
+    expect(panel.current?.dataset.testid).toBe('panel');
+    expect(card.current?.dataset.testid).toBe('card');
   });
 });
