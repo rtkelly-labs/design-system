@@ -76,7 +76,9 @@ for (const page of pages) {
   for (const [, asset] of html.matchAll(/(?:src|href)="(\/site\/_next\/[^"?#]+)/g)) assets.add(asset);
 }
 for (const asset of assets) {
-  if (!existsSync(path.join(OUT, asset))) problems.push(`${asset} is referenced and was not exported`);
+  // Next encodes route segments such as [slug] in HTML URLs while writing
+  // their literal names to disk. Resolve the URL as the static server does.
+  if (!existsSync(path.join(OUT, decodeURIComponent(asset)))) problems.push(`${asset} is referenced and was not exported`);
 }
 if (!pages.length) problems.push(`no HTML under ${BASE}/`);
 if (problems.length) fail(`the assembled site would not load:\n  ${problems.join('\n  ')}`);
