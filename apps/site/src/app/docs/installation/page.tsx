@@ -126,8 +126,8 @@ export default function Page() {
 }`}
       />
       <p>
-        The default Turbopack build needs no extra setting. For webpack, add
-        <code>experimental.optimizePackageImports: ['@rtkelly13/design-system']</code> to
+        The default Turbopack build needs no extra setting. For webpack, add{' '}
+        <code>experimental.optimizePackageImports: ['@rtkelly13/design-system']</code> to{' '}
         <code>next.config.ts</code> to keep unused client modules out of the browser bundle.
         Call <code>getThemeInitScript</code> directly in the server layout's head.
       </p>
