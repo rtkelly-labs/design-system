@@ -5,12 +5,14 @@ import { Checkbox } from '../../components/Checkbox';
 import { ErrorSummary } from '../../components/ErrorSummary';
 import type { ErrorSummaryError } from '../../components/ErrorSummary';
 import { Input } from '../../components/Input';
-import { Spinner } from '../../components/Spinner';
 import { AuthFrame, TEXT_LINK, looksLikeEmail, respondAfter } from './AuthFrame';
 
 // Sign in (#252): two text fields, a remember-me `Checkbox`, a submit that is
-// disabled while the request is in flight, and a form-level error for the
+// `pending` while the request is in flight, and a form-level error for the
 // failure no single field owns — the credentials were wrong.
+//
+// `pending` rather than `disabled`: the submit keeps focus while it waits, and
+// it is the button, not this handler, that refuses a second submit.
 //
 // There is no authentication here. `DEMO_PASSWORD` is the only password the
 // pretend server accepts, so the story can be completed; everything else is
@@ -98,7 +100,6 @@ export function SignInForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
     const errors = validate();
     setFieldErrors(errors);
     setRejected(false);
@@ -186,11 +187,10 @@ export function SignInForm({
           checked={values.remember}
           onCheckedChange={(remember) => setValues({ ...values, remember })}
         />
-        <div className="flex flex-wrap items-center gap-4">
-          <Button type="submit" variant="primary" bracketed disabled={pending}>
-            {pending ? 'SIGNING IN' : 'SIGN IN'}
+        <div className="flex">
+          <Button type="submit" variant="primary" bracketed pending={pending} pendingLabel="Signing in">
+            SIGN IN
           </Button>
-          {pending && <Spinner size="sm" label="Signing in" />}
         </div>
       </form>
     </AuthFrame>

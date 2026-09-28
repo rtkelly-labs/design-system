@@ -242,16 +242,25 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  * `Button`, already paid for, and no dependency moves. The gzip ceiling
  * keeps ~0.6% over the local figure, above the 149-byte macOS-to-runner
  * spread noted above.
+ *
+ * Raised for `Button`'s `pending` state: +1,842 B raw, +533 B gzip on the
+ * ESM bundle over #303's branch (363,764 B / 84,379 B → 365,606 B /
+ * 84,912 B; CommonJS 398,737 B / 87,147 B → 400,706 B / 87,658 B, +1,969 B /
+ * +511 B), measured locally. That is the pending recipe variant, the press
+ * classes re-gated on `not-aria-disabled`, the cancelled-click handler, the
+ * spinner overlay and the status region beside the button. No dependency
+ * moves: the activation guard is hand-rolled rather than `@base-ui/react/button`,
+ * and the spinner is this package's own `Spinner`.
  */
 const BUDGETS = {
   'dist/index.mjs': {
-    maxRaw: 368_000,
-    maxGzip: 85_500,
+    maxRaw: 370_000,
+    maxGzip: 86_200,
     desc: 'ESM bundle',
   },
   'dist/index.js': {
-    maxRaw: 404_000,
-    maxGzip: 88_400,
+    maxRaw: 406_000,
+    maxGzip: 89_200,
     desc: 'CommonJS bundle',
   },
   'src/theme.css': {

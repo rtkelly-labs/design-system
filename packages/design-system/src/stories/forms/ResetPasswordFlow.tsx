@@ -4,7 +4,6 @@ import { Button } from '../../components/Button';
 import { ErrorSummary } from '../../components/ErrorSummary';
 import type { ErrorSummaryError } from '../../components/ErrorSummary';
 import { Input } from '../../components/Input';
-import { Spinner } from '../../components/Spinner';
 import { useOptionalToast } from '../../components/Toast';
 import { AuthFrame, TEXT_LINK, looksLikeEmail, respondAfter } from './AuthFrame';
 
@@ -105,7 +104,6 @@ export function ResetPasswordFlow({
 
   async function requestLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
     const found: Partial<Record<Field, string>> = {};
     if (!email.trim()) found.email = 'Enter your email address';
     else if (!looksLikeEmail(email)) {
@@ -120,7 +118,6 @@ export function ResetPasswordFlow({
 
   async function choosePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
     const found: Partial<Record<Field, string>> = {};
     if (!password) found.password = 'Enter a new password';
     else if (password.length < MIN_PASSWORD) {
@@ -219,11 +216,16 @@ export function ResetPasswordFlow({
             onChange={(e) => setConfirm(e.target.value)}
             error={errors.confirm}
           />
-          <div className="flex flex-wrap items-center gap-4">
-            <Button type="submit" variant="primary" bracketed disabled={pending}>
-              {pending ? 'SAVING PASSWORD' : 'SAVE PASSWORD'}
+          <div className="flex">
+            <Button
+              type="submit"
+              variant="primary"
+              bracketed
+              pending={pending}
+              pendingLabel="Saving your new password"
+            >
+              SAVE PASSWORD
             </Button>
-            {pending && <Spinner size="sm" label="Saving your new password" />}
           </div>
         </form>
       </AuthFrame>
@@ -257,11 +259,16 @@ export function ResetPasswordFlow({
           onChange={(e) => setEmail(e.target.value)}
           error={errors.email}
         />
-        <div className="flex flex-wrap items-center gap-4">
-          <Button type="submit" variant="primary" bracketed disabled={pending}>
-            {pending ? 'SENDING LINK' : 'SEND RESET LINK'}
+        <div className="flex">
+          <Button
+            type="submit"
+            variant="primary"
+            bracketed
+            pending={pending}
+            pendingLabel="Sending the reset link"
+          >
+            SEND RESET LINK
           </Button>
-          {pending && <Spinner size="sm" label="Sending the reset link" />}
         </div>
       </form>
     </AuthFrame>

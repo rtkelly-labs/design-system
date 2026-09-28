@@ -58,6 +58,15 @@ describe('Spinner', () => {
     expect(container.querySelector('[data-slot="spinner-mark"]')?.className).toContain(expected);
   });
 
+  // Inside a filled Button, the button's ink is the one measured against its fill.
+  it('inherits the surrounding ink when the accent is current', () => {
+    const { container } = render(<Spinner accent="current" />);
+    const mark = container.querySelector('[data-slot="spinner-mark"]');
+
+    expect(mark?.className).not.toMatch(/(^|\s)text-/);
+    expect(mark?.className).toContain('border-t-current');
+  });
+
   it.each([
     ['sm', 'size-3'],
     ['md', 'size-5'],

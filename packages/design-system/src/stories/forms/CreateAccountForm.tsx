@@ -5,17 +5,17 @@ import { Checkbox } from '../../components/Checkbox';
 import { ErrorSummary } from '../../components/ErrorSummary';
 import type { ErrorSummaryError } from '../../components/ErrorSummary';
 import { Input } from '../../components/Input';
-import { Spinner } from '../../components/Spinner';
 import { AuthFrame, TEXT_LINK, looksLikeEmail, respondAfter } from './AuthFrame';
 
 // Create account (#252): validation across four fields, required fields and
-// helper text, an optional one marked as such, and a submit that is disabled
+// helper text, an optional one marked as such, and a submit that is `pending`
 // only while the request is in flight.
 //
-// Not disabled until the form is valid. A disabled button cannot say what is
-// missing, cannot be focused to find out, and leaves a keyboard user pressing
-// a control that does nothing; a submit that fails into the summary tells
-// them. The disabled state here is the one honest use: "already sending".
+// Never disabled, and not held shut until the form is valid. A disabled button
+// cannot say what is missing, cannot be focused to find out, and leaves a
+// keyboard user pressing a control that does nothing; a submit that fails into
+// the summary tells them. "Already sending" is `pending`, which keeps focus on
+// the button and refuses the second submit itself.
 //
 // The length rule is a fixture, not a password policy — the system has none.
 
@@ -110,7 +110,6 @@ export function CreateAccountForm({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (pending) return;
     const found = validate(values);
     setErrors(found);
     if (Object.keys(found).length > 0) {
@@ -206,11 +205,16 @@ export function CreateAccountForm({
           onCheckedChange={(terms) => setValues({ ...values, terms })}
           error={errors.terms}
         />
-        <div className="flex flex-wrap items-center gap-4">
-          <Button type="submit" variant="primary" bracketed disabled={pending}>
-            {pending ? 'CREATING ACCOUNT' : 'CREATE ACCOUNT'}
+        <div className="flex">
+          <Button
+            type="submit"
+            variant="primary"
+            bracketed
+            pending={pending}
+            pendingLabel="Creating your account"
+          >
+            CREATE ACCOUNT
           </Button>
-          {pending && <Spinner size="sm" label="Creating your account" />}
         </div>
       </form>
     </AuthFrame>

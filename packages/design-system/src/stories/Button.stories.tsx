@@ -54,9 +54,10 @@ export const PinkAccent: Story = {
 /**
  * `disabled`, beside the same button enabled. A sunken ground, the subtle
  * edge, muted ink and no shadow — the treatment the disabled text fields and
- * `Select` wear — and no lift on hover or sink on press. Reach for it while a
- * submit is in flight, not to hold a form shut until it is valid: a disabled
- * button cannot say what is missing, and the error summary can.
+ * `Select` wear — and no lift on hover or sink on press. Reach for it when the
+ * action is not available at all. Not while a submit is in flight — that is
+ * `pending`, which keeps focus — and not to hold a form shut until it is valid:
+ * a disabled button cannot say what is missing, and the error summary can.
  */
 export const Disabled: Story = {
   render: () => (
@@ -68,6 +69,34 @@ export const Disabled: Story = {
         SAVE CHANGES
       </Button>
       <Button variant="inverse" disabled>
+        DISCARD
+      </Button>
+    </div>
+  ),
+};
+
+/**
+ * `pending`, between an enabled button and a disabled one. The fill stays and
+ * the button sits in its press — offset, no shadow — with a spinner over the
+ * label's box, so the width does not move. It is `aria-disabled` rather than
+ * `disabled`: it keeps focus and its tab stop, and ignores clicks, Enter,
+ * Space and a second submit of its form. `pendingLabel` is announced through
+ * a status region beside it. Reach for it while a request is in flight;
+ * `disabled` is for an action that is not available at all.
+ */
+export const Pending: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      <Button variant="primary" bracketed>
+        SAVE CHANGES
+      </Button>
+      <Button variant="primary" bracketed pending pendingLabel="Saving your changes">
+        SAVE CHANGES
+      </Button>
+      <Button variant="primary" bracketed disabled>
+        SAVE CHANGES
+      </Button>
+      <Button variant="inverse" pending pendingLabel="Discarding">
         DISCARD
       </Button>
     </div>
