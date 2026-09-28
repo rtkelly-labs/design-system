@@ -59,8 +59,9 @@ export interface FieldsetProps
   /**
    * The group's validation message — an error about the set, not any one
    * control in it ("choose at least one region"). It describes the fieldset
-   * and every control inside it, and is announced. Per-control errors belong
-   * on the controls.
+   * and every control inside it, so it is read when focus enters the group.
+   * It is not a live region; `ErrorSummary` announces a failed submit.
+   * Per-control errors belong on the controls.
    */
   error?: string;
   /**

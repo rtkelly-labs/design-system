@@ -151,12 +151,12 @@ describe('RadioGroup', () => {
   it('associates a group error with the group, not with one option', () => {
     render(<Deployment error="Choose where this runs" helperText="Standing guidance" />);
 
-    expect(screen.getByRole('alert').textContent).toBe('> Choose where this runs');
+    expect(screen.getByText('> Choose where this runs')).toBeDefined();
     expect(screen.queryByText('> Standing guidance')).toBeNull();
     expect(referencedText(group(), 'aria-describedby')).toBe('> Choose where this runs');
     expect(group().getAttribute('aria-invalid')).toBe('true');
 
-    const errorId = screen.getByRole('alert').id;
+    const errorId = screen.getByText('> Choose where this runs').id;
     const describedOptions = screen
       .getAllByRole('radio')
       .filter((r) => (r.getAttribute('aria-describedby') ?? '').split(' ').includes(errorId));

@@ -117,7 +117,9 @@ function SubmitDemo() {
 /**
  * Nothing until a submit fails. Press send with the field empty: the summary
  * appears and takes focus, which is how it is announced — there is no
- * `role="alert"` as well, which would read it twice. Press send again and it
+ * `role="alert"` as well, which would read it twice. The field's own error is
+ * not live either; it is read when the summary's link moves focus to the
+ * field. Press send again and it
  * takes focus again, because the form gives it a new `key` per attempt.
  */
 export const OnSubmit: Story = {

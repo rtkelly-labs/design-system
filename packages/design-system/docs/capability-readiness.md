@@ -63,7 +63,7 @@ navigation* and *General site layout* with #246, *Long-form content* with #250, 
 | Progress | `Progress` | `ready` | |
 | No content | `EmptyState` | `ready` | |
 | System & error pages | `NotFoundPage` / `ServerErrorPage`; maintenance, offline and unauthorized as `StatusPage` recipes — each inside the site chrome or `standalone` | `ready` | |
-| Validation | field `error` + `ErrorSummary` — links to each invalid field, focus moves to the summary when it appears | `ready` | |
+| Validation | field `error` + `ErrorSummary` — links to each invalid field, focus moves to the summary when it appears; a field error is described, not announced | `ready` | |
 | Paginate | `Pagination` — numbered pages, callback or `href` mode | `ready` | |
 | Display records | `Table` / `DataTable` — sorting, virtualisation, `caption`, row headers | `ready` | |
 | Display metrics | `StatCard` and the chart family | `ready` | |
@@ -91,8 +91,10 @@ form rows are `ready` together and not only one at a time. What it found:
   (`PageTitle` and `PageHeader` are page-scale), and an inline text link outside `Prose`.
   Not blocking: both are typography over roles, not invented behaviour.
   [#300](https://github.com/rtkelly13/design-system/issues/300).
-- **Filed:** every field error is `role="alert"`, so a failed submit announces each invalid field
-  on top of `ErrorSummary` taking focus.
+- **Fixed:** every field error was `role="alert"`, so a failed submit announced each invalid field
+  on top of `ErrorSummary` taking focus. Field errors are no longer live regions. The summary is
+  announced, and each field's error is read as its control's description when a summary link lands
+  there. `tests/a11y.spec.ts` asserts that after each failed submit.
   [#299](https://github.com/rtkelly13/design-system/issues/299).
 
 ## What is deliberately not a row

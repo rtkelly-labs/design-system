@@ -445,6 +445,32 @@ test.describe('Account flows — keyboard', () => {
     return serious.map((v) => `${v.id} (${v.impact}, ${v.nodes.length}): ${v.help}`);
   }
 
+  /**
+   * After a failed submit, the summary is the one thing announced (#299).
+   *
+   * It announces by taking focus. No live region on the page may be carrying
+   * text at the same moment. Field errors used to be `role="alert"`, so every
+   * invalid field was read out on top of the summary. Each field error must
+   * still describe its control, so it is read when a summary link lands there.
+   */
+  async function expectSummaryAloneAnnounced(page: Page) {
+    await expect(summary(page)).toBeFocused();
+    const speaking = await page.evaluate(() =>
+      [...document.querySelectorAll('[role="alert"], [role="status"], [role="log"], [aria-live]')]
+        .filter((el) => el.getAttribute('aria-live') !== 'off')
+        .filter((el) => (el.textContent ?? '').trim() !== '')
+        .map((el) => el.outerHTML.slice(0, 120)),
+    );
+    expect(speaking).toEqual([]);
+
+    const orphaned = await root(page).evaluate((scope) =>
+      [...scope.querySelectorAll('[data-slot="field-error"], [data-slot="fieldset-error"]')]
+        .filter((error) => !scope.querySelector(`[aria-describedby~="${error.id}"]`))
+        .map((error) => error.textContent),
+    );
+    expect(orphaned).toEqual([]);
+  }
+
   /** Enter on the summary's first link, which should land on `field`. */
   async function followFirstError(page: Page, field: ReturnType<Page['locator']>) {
     await expect(summary(page)).toBeFocused();
@@ -462,6 +488,7 @@ test.describe('Account flows — keyboard', () => {
     await tabTo(page, email);
     await page.keyboard.press('Enter');
     await expect(summary(page).getByRole('link')).toHaveCount(2);
+    await expectSummaryAloneAnnounced(page);
     await followFirstError(page, email);
 
     await page.keyboard.type('ada@example.com');
@@ -498,6 +525,7 @@ test.describe('Account flows — keyboard', () => {
     await tabTo(page, name);
     await page.keyboard.press('Enter');
     await expect(summary(page).getByRole('link')).toHaveCount(4);
+    await expectSummaryAloneAnnounced(page);
     await followFirstError(page, name);
 
     await page.keyboard.type('Ada Lovelace');
@@ -549,6 +577,7 @@ test.describe('Account flows — keyboard', () => {
     await page.keyboard.type('engines');
     await page.keyboard.press('Enter');
     await expect(summary(page).getByRole('link')).toHaveCount(2);
+    await expectSummaryAloneAnnounced(page);
 
     await followFirstError(page, password);
     await retype(page, 'notes-on-the-engine');
@@ -568,6 +597,7 @@ test.describe('Account flows — keyboard', () => {
     await tabTo(page, save, 80);
     await page.keyboard.press('Enter');
     await expect(summary(page).getByRole('link')).toHaveCount(5);
+    await expectSummaryAloneAnnounced(page);
     await followFirstError(page, root(page).getByLabel('Display name'));
 
     // Down the form in tab order, fixing each field on the way.

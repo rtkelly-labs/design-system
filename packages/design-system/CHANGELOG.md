@@ -9,6 +9,25 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## Unreleased
+
+A field's `error` is described, not announced (#299). It was `role="alert"`, so a failed submit
+read every invalid field on top of `ErrorSummary` taking focus. No export, prop or rendering
+changed; only the `role` attribute is gone. This affects `Input`, `TextArea`, `Select`, `Checkbox`,
+`Switch`, `RadioGroup` and `Fieldset`.
+
+### You have to do something
+
+- **A form that validates on submit should render `ErrorSummary`.** It takes focus and is the
+  announcement. Each field's error stays in its control's `aria-describedby`, with `aria-invalid`,
+  so it is read when a summary link moves focus to the field.
+- **A form that validates inline or on blur, with no summary, is no longer announced.** Setting
+  `error` on the focused field is silent until the reader returns to it. If the change needs to be
+  heard, give the form one polite live region of its own and write the message into it. Do not
+  put a live region on each field.
+- **Tests that found a field error with `getByRole('alert')` will fail.** Find it by its text, or
+  follow the control's `aria-describedby`.
+
 ## 0.12.0
 
 New documentation visuals adapted from mdxcn: `ActivityGrid`, `GanttChart`,

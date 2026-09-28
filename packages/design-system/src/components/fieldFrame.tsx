@@ -88,8 +88,10 @@ export interface FieldProps {
   label?: string;
   /**
    * The validation message. Its presence is also the invalid state: it sets
-   * `aria-invalid`, switches the border to `intent.danger`, and is announced.
-   * Pass the message, never a boolean — "invalid" without a reason leaves the
+   * `aria-invalid`, switches the border to `intent.danger`, and joins the
+   * control's `aria-describedby`, so it is read when the field takes focus.
+   * It is not a live region: on submit, `ErrorSummary` is what announces the
+   * errors. Pass the message, never a boolean — "invalid" without a reason leaves the
    * reader to guess what to change.
    */
   error?: string;
@@ -296,6 +298,24 @@ export interface FieldMessageProps {
  * `id` with the enclosing `Field.Root`, which is what puts them in the
  * control's `aria-describedby` — for a group, in the `radiogroup`'s, and in
  * every option's through `Field.Item`'s inherited message ids.
+ *
+ * ## An error is described, not announced (#299)
+ *
+ * The error is not a live region: no `role="alert"`, no `role="status"`, no
+ * `aria-live`. Base UI's `Field.Error` adds none of its own either. The error
+ * reaches a screen reader through the control's `aria-describedby`, together
+ * with `aria-invalid`, so it is read when the reader arrives at the field.
+ *
+ * It was `role="alert"`, and that collided with `ErrorSummary`. On a failed
+ * submit every invalid field fired an assertive alert at the moment the
+ * summary took focus, so a four-error form read four alerts and then the same
+ * four messages again in the summary. This is GOV.UK's pattern: the summary
+ * takes focus and says what is wrong, each link moves focus to its field, and
+ * the field's own error is read as its description on arrival.
+ *
+ * Inline or on-blur validation, with no summary, is the one case where a live
+ * error would help. No consumer does it yet. A form that needs it should own
+ * one live region for the whole form, rather than every field carrying its own.
  */
 export function FieldMessage({ error, helperText, id, slot = 'field' }: FieldMessageProps) {
   const styles = frame({ invalid: Boolean(error) });
@@ -307,7 +327,7 @@ export function FieldMessage({ error, helperText, id, slot = 'field' }: FieldMes
         id={id}
         data-slot={`${slot}-error`}
         className={styles.message()}
-        render={<span role="alert" />}
+        render={<span />}
       >
         &gt; {error}
       </BaseField.Error>
@@ -380,8 +400,8 @@ export interface GroupFrameProps
  *   `Fieldset` greys and refuses input without being told.
  *
  * The message sits *after* the grouping element, inside the wrapper, because a
- * `radiogroup` owns radios and an `alert` among them is a child the role does
- * not allow.
+ * `radiogroup` owns radios, and a message span among them is a child the role
+ * does not allow.
  */
 export const GroupFrame = forwardRef<HTMLElement, GroupFrameProps>(function GroupFrame(
   { legend, error, helperText, disabled, className, render, children, ...props },

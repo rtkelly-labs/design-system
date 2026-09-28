@@ -19,7 +19,8 @@ export interface RadioGroupProps
   /**
    * The group's validation message. Its presence is also the invalid state:
    * `aria-invalid` on the `radiogroup`, the danger border on every option, and
-   * an announced message that describes the group rather than any one option.
+   * a message that describes the group rather than any one option, read when
+   * focus reaches an option. It is not a live region.
    */
   error?: string;
   /**
