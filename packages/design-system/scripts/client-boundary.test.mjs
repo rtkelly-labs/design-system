@@ -74,4 +74,9 @@ describe('client boundary', () => {
     expect(hasDirective(parse(`/** header */\n'use client';\nexport const a = 1;`))).toBe(true);
     expect(hasDirective(parse(`export const a = 1;\n'use client';`))).toBe(false);
   });
+
+  it('detects local handlers selected conditionally, including a pending submit', () => {
+    expect(clientReasons(parse('function preventActivation() {} export function A(props) { return <button onClick={props.pending ? preventActivation : props.onClick} />; }'))).toEqual(['passes preventActivation to onClick']);
+    expect(clientReasons(parse('export function A(props) { return <button onClick={props.pending ? props.onClick : undefined} />; }'))).toEqual([]);
+  });
 });

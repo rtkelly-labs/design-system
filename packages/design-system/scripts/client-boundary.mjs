@@ -136,10 +136,19 @@ export function clientReasons(sf) {
     if (ts.isJsxAttribute(node) && node.initializer && ts.isJsxExpression(node.initializer)) {
       const value = node.initializer.expression;
       const prop = node.name.getText(sf);
-      if (isFunctionNode(value)) reasons.add(`passes a function to ${prop}`);
-      if (value && ts.isIdentifier(value) && /^on[A-Z]/.test(prop) && localFunctions.has(value.text)) {
-        reasons.add(`passes ${value.text} to ${prop}`);
-      }
+      const inspect = (expression) => {
+        if (!expression) return;
+        if (isFunctionNode(expression)) reasons.add(`passes a function to ${prop}`);
+        if (ts.isIdentifier(expression) && /^on[A-Z]/.test(prop) && localFunctions.has(expression.text)) {
+          reasons.add(`passes ${expression.text} to ${prop}`);
+        }
+        if (ts.isConditionalExpression(expression)) {
+          inspect(expression.whenTrue);
+          inspect(expression.whenFalse);
+        }
+        if (ts.isParenthesizedExpression(expression)) inspect(expression.expression);
+      };
+      inspect(value);
     }
     if (ts.isClassDeclaration(node) && node.heritageClauses?.length) reasons.add('declares a class component');
     ts.forEachChild(node, visit);
