@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Bell, CreditCard, KeyRound, UserRound } from 'lucide-react';
 import { AlertDialog } from '../../components/AlertDialog';
 import { AppMain, AppShell, AppSidebar, AppSidebarNav, AppTopbar } from '../../components/AppShell';
@@ -42,6 +42,7 @@ export function AccountSettingsPage({
   initiallyFailed = false,
   focusOnAppear = true,
 }: AccountSettingsPageProps) {
+  const headingId = useId();
   const [confirming, setConfirming] = useState(false);
   const [scheduled, setScheduled] = useState(false);
   const toast = useOptionalToast();
@@ -83,9 +84,9 @@ export function AccountSettingsPage({
       <AppMain label="Account settings">
         <AccountSettingsForm initiallyFailed={initiallyFailed} focusOnAppear={focusOnAppear} />
 
-        <section aria-labelledby="delete-account-heading" className="flex max-w-2xl flex-col gap-3">
+        <section aria-labelledby={headingId} className="flex max-w-2xl flex-col gap-3">
           <h2
-            id="delete-account-heading"
+            id={headingId}
             className="font-display text-lg font-bold uppercase text-content-primary"
           >
             Delete account
