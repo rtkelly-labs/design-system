@@ -22,7 +22,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 /** Local modules `file` imports, resolved to absolute paths. */
@@ -65,11 +65,27 @@ export function fingerprint(files, root) {
  * the one recorded beside it, empty it otherwise. Returns whether it was kept.
  */
 export function prepareCache(dir, print) {
+  dir = path.resolve(dir);
+  if (path.basename(dir) !== 'eslint-ci') {
+    throw new Error('ESLINT_CACHE_DIR must name a dedicated eslint-ci directory.');
+  }
+  if (existsSync(dir) && lstatSync(dir).isSymbolicLink()) {
+    throw new Error('ESLINT_CACHE_DIR must not be a symlink.');
+  }
   mkdirSync(dir, { recursive: true });
+  const entries = readdirSync(dir);
+  for (const name of entries) {
+    if (name !== 'inputs.sha256' && name !== '.eslintcache' && !/^\.cache_[a-z0-9]+$/i.test(name)) {
+      throw new Error(`Unexpected file in ESLint cache: ${name}`);
+    }
+    if (!lstatSync(path.join(dir, name)).isFile()) {
+      throw new Error(`ESLint cache entry must be a regular file: ${name}`);
+    }
+  }
   const stamp = path.join(dir, 'inputs.sha256');
   const kept = existsSync(stamp) && readFileSync(stamp, 'utf8') === print;
   if (!kept) {
-    for (const name of readdirSync(dir)) rmSync(path.join(dir, name), { recursive: true, force: true });
+    for (const name of entries) rmSync(path.join(dir, name));
     writeFileSync(stamp, print);
   }
   return kept;
