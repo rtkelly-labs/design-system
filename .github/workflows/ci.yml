@@ -411,6 +411,7 @@ jobs:
       legs: ${{ strategy.job-total }}
     defaults:
       run:
+        shell: bash
         # Every `pnpm` step below is this package's. The workspace root holds
         # only the lockfile, the workflows and `vercel.json`; the gates, the
         # build and the suites all live in `packages/design-system`, and setting

@@ -43,6 +43,7 @@ jobs:
       options: --ipc=host --init
     defaults:
       run:
+        shell: bash
         working-directory: packages/design-system
     # See ci.yml — same reason. This workflow is not a gate, so a run of it
     # sitting on a hung install for six hours is pure waste.

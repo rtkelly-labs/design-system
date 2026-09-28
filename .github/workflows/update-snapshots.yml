@@ -54,6 +54,7 @@ jobs:
       options: --ipc=host --init
     defaults:
       run:
+        shell: bash
         working-directory: packages/design-system
     # See ci.yml. Worth more here than anywhere else: this job holds
     # `contents: write`, so a hung run is six hours of a job that can push.

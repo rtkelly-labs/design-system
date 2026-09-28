@@ -756,9 +756,12 @@ for (const job of ALL_JOBS) {
   if (!/--ipc=host/.test(options)) {
     problems.push(`${at}: job \`${job.id}\` needs \`options: --ipc=host\` — Chromium renders into /dev/shm, 64MB by default.`);
   }
+  if (!texts.some((text) => /^ {8}shell:\s*bash\s*$/.test(text))) {
+    problems.push(`${at}: job \`${job.id}\` needs \`defaults.run.shell: bash\` — container jobs default to sh, but the render scripts use Bash.`);
+  }
   images.set(image, [...(images.get(image) ?? []), `${job.file} ${job.id}`]);
   for (const text of texts) {
-    if (/key=/.test(text) && /render-inputs\.mjs|\$hash/.test(text) && !text.includes(parsed[2])) {
+    if (/key=(?:visual-verdict|walkthrough-report)-/.test(text) && !text.includes(parsed[2])) {
       problems.push(
         `${at}: job \`${job.id}\` builds a cache key from render-inputs.mjs without the image ` +
           `digest. The hash covers tracked files; the image is the one input none records.`,
