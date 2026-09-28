@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { LEVELS, DEFAULT_LEVEL } from '../theme/levels';
 import type { Polarity } from '../theme/levels';

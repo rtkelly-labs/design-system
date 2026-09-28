@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, forwardRef, useContext, useMemo } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { Toast as BaseToast } from '@base-ui/react/toast';

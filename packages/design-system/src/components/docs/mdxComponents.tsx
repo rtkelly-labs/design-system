@@ -1,3 +1,5 @@
+'use client';
+
 import { isValidElement } from 'react';
 import type { AnchorHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 import { AnchorHeading, createAnchorHeading } from './AnchorHeading';

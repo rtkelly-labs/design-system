@@ -1,3 +1,5 @@
+'use client';
+
 import { createContext, useCallback, useContext, useRef } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 import { Check, Copy } from 'lucide-react';

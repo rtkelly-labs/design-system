@@ -1,13 +1,78 @@
+import { cpSync } from 'node:fs';
+import path from 'node:path';
+
+import type { Plugin } from 'esbuild';
 import { defineConfig } from 'tsup';
 
+import { expandStarExports } from './scripts/expand-star-exports.mjs';
+import { reachableModules, ROOT, SOURCE, SRC } from './scripts/module-graph.mjs';
+
+/**
+ * Keep every import between source modules an import between output files.
+ *
+ * Each module is its own entry point and is bundled alone: a specifier that
+ * resolves to another module under `src/` is rewritten to that module's output
+ * file — with the extension this format writes, so Node's own ESM resolver can
+ * load `dist/` without a bundler (the report CLI and a Vitest consumer both do)
+ * — and marked external. Packages are already external. What is left inside
+ * each output file is exactly its own source module.
+ */
+function preserveModules(): Plugin {
+  return {
+    name: 'preserve-modules',
+    setup(build) {
+      const extension = build.initialOptions.outExtension?.['.js'] ?? '.js';
+      build.onResolve({ filter: /^(?:\.{1,2}\/|@\/)/ }, async (args) => {
+        if (args.kind === 'entry-point' || args.pluginData?.preserveModules) return undefined;
+        const resolved = await build.resolve(args.path, {
+          importer: args.importer,
+          kind: args.kind,
+          resolveDir: args.resolveDir,
+          pluginData: { preserveModules: true },
+        });
+        if (resolved.errors.length > 0) return { errors: resolved.errors };
+        if (!resolved.path.startsWith(SRC + path.sep) || !SOURCE.test(resolved.path)) return undefined;
+        let specifier = path
+          .relative(path.dirname(args.importer), resolved.path)
+          .replace(SOURCE, extension)
+          .split(path.sep)
+          .join('/');
+        if (!specifier.startsWith('.')) specifier = `./${specifier}`;
+        return { path: specifier, external: true };
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  entry: ['src/index.ts'],
+  /*
+   * One output file per source module (#301). A single flat `dist/index.mjs`
+   * made `sideEffects` useless — it works at module granularity, and the whole
+   * library was one module — so a consumer importing `Button` kept every
+   * module-level `forwardRef`, `recipe` and `createContext` call in the
+   * package, and with them Base UI, visx and d3: 515 KB minified for any
+   * subset at all. Per module, a bundler drops every file the consumer's
+   * imports do not reach without having to prove a single statement pure.
+   * `check:import-cost` holds the result.
+   */
+  entry: reachableModules(),
   format: ['cjs', 'esm'],
-  dts: true,
+  // One declaration file for the public entry point, exactly as before, so the
+  // type surface `check:api` reviews is unchanged by the output layout.
+  dts: { entry: 'src/index.ts' },
+  bundle: true,
   splitting: false,
   sourcemap: true,
   clean: true,
   injectStyle: false,
   external: ['react', 'react-dom'],
-  onSuccess: 'cp src/styles.css src/theme.css src/prose.css dist/ && cp -r src/fonts dist/',
+  esbuildPlugins: [preserveModules()],
+  async onSuccess() {
+    const dist = path.join(ROOT, 'dist');
+    for (const file of ['styles.css', 'theme.css', 'prose.css']) cpSync(path.join(SRC, file), path.join(dist, file));
+    cpSync(path.join(SRC, 'fonts'), path.join(dist, 'fonts'), { recursive: true });
+    // Named, not `export *`, so a server component's import of the barrel
+    // reaches only the client modules it uses. See the script's header.
+    await expandStarExports(dist);
+  },
 });

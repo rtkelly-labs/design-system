@@ -658,9 +658,6 @@ type AsciiDividerProps = DividerProps;
 
 declare const AsciiDivider: react__default.FC<AsciiDividerProps>;
 
-declare const THEME_STORAGE_KEY = "ds-theme-level";
-
-declare const THEME_ATTRIBUTE = "data-theme";
 interface ThemeContextValue {
     level: ThemeLevel;
 
@@ -685,14 +682,19 @@ interface ThemeProviderProps {
     className?: string;
 }
 
-declare function getThemeInitScript(options?: {
-    defaultLevel?: ThemeLevel;
-    followSystem?: boolean;
-}): string;
 declare const ThemeProvider: react__default.FC<ThemeProviderProps>;
 declare const useTheme: () => ThemeContextValue;
 
 declare const useOptionalTheme: () => ThemeContextValue | undefined;
+
+declare const THEME_STORAGE_KEY = "ds-theme-level";
+
+declare const THEME_ATTRIBUTE = "data-theme";
+
+declare function getThemeInitScript(options?: {
+    defaultLevel?: ThemeLevel;
+    followSystem?: boolean;
+}): string;
 
 interface BracketTextProps extends HTMLAttributes<HTMLSpanElement> {
     children: ReactNode;

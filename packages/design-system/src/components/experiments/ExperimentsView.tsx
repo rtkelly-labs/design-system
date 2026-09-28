@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Beaker, Boxes, Palette, Type, Sparkles, Projector, Terminal } from 'lucide-react';
 import { PageTitle } from '../PageTitle';

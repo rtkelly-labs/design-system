@@ -40,7 +40,7 @@ import { afterEach, vi } from 'vitest';
  * one — rather than trusting every test to undo itself, which is the pattern
  * that already failed. `pnpm test:leaks` is the detector that proves it holds.
  */
-const WATCHED: Array<[object, string]> = [
+const WATCHED: Array<[object, string]> = typeof window === 'undefined' ? [] : [
   [window, 'window'],
   [document, 'document'],
   [navigator, 'navigator'],
@@ -90,8 +90,8 @@ const baseline: Baseline = (store[KEY] ??= {
   descriptors: new Map(
     WATCHED.map(([target]) => [target, Object.getOwnPropertyDescriptors(target)] as const),
   ),
-  html: attributes(document.documentElement),
-  body: attributes(document.body),
+  html: typeof document === 'undefined' ? [] : attributes(document.documentElement),
+  body: typeof document === 'undefined' ? [] : attributes(document.body),
 });
 
 function restoreAttributes(el: Element, original: ReadonlyArray<readonly [string, string]>) {
@@ -134,7 +134,7 @@ afterEach(async () => {
   // animation, a node a test appended by hand. A fresh jsdom per file used to
   // clear these between files; without isolation, `Input` found a second
   // textbox from an earlier file's popup.
-  document.body.replaceChildren();
+  if (typeof document !== 'undefined') document.body.replaceChildren();
   vi.restoreAllMocks();
   for (const [key, { present, value }] of baseline.globals) {
     if (!present) {
@@ -144,12 +144,14 @@ afterEach(async () => {
     }
   }
   for (const [target] of WATCHED) restoreProperties(target, baseline.descriptors.get(target)!);
-  restoreAttributes(document.documentElement, baseline.html);
-  restoreAttributes(document.body, baseline.body);
-  (document.activeElement as HTMLElement | null)?.blur?.();
+  if (typeof document !== 'undefined') {
+    restoreAttributes(document.documentElement, baseline.html);
+    restoreAttributes(document.body, baseline.body);
+    (document.activeElement as HTMLElement | null)?.blur?.();
+  }
   // Node 25's own experimental `localStorage` can shadow jsdom's and lacks
   // `clear()` without `--localstorage-file`; clear whichever storage is real.
-  for (const storage of [window.localStorage, window.sessionStorage]) {
+  for (const storage of typeof window === 'undefined' ? [] : [window.localStorage, window.sessionStorage]) {
     if (typeof storage?.clear === 'function') storage.clear();
   }
 });

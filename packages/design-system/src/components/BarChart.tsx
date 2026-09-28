@@ -1,3 +1,5 @@
+'use client';
+
 import { AxisBottom, AxisLeft } from '@visx/axis';
 import { GridColumns, GridRows } from '@visx/grid';
 import { Group } from '@visx/group';

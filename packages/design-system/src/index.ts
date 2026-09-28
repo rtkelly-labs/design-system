@@ -66,6 +66,9 @@ export * from './components/SectionContainer';
 export * from './components/Divider';
 export * from './components/AsciiDivider';
 export * from './components/ThemeProvider';
+// Server-safe: a root layout calls `getThemeInitScript`, and that layout is a
+// server component under the Next App Router. See the module's header.
+export * from './components/themeInitScript';
 export * from './components/BracketText';
 export * from './components/NoteBlock';
 export * from './components/TLDR';

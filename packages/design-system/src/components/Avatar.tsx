@@ -1,3 +1,5 @@
+'use client';
+
 import { Avatar as BaseAvatar } from '@base-ui/react/avatar';
 import { forwardRef } from 'react';
 import { accentVar } from '../lib/theme';

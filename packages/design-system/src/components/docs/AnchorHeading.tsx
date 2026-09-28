@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useMemo } from 'react';
 import type { HTMLAttributes, MouseEvent, ReactNode } from 'react';
 import { Check, Link2 } from 'lucide-react';

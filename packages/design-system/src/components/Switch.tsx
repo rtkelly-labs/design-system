@@ -1,3 +1,5 @@
+'use client';
+
 import { forwardRef } from 'react';
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
 import { cn } from '../lib/recipe';
