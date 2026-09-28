@@ -6,7 +6,7 @@ import { cn } from '../lib/recipe';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   /**
-   * The label — a state, a count, a category. Short by construction: the badge
+   * The label: a state, a count, a category. Short by construction: the badge
    * does not wrap, so anything long enough to need two lines is a `Tag` or
    * prose, not a badge.
    */
