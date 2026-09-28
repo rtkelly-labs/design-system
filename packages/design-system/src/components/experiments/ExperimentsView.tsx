@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
+import type React from 'react';
 import { Beaker, Boxes, Palette, Type, Sparkles, Projector, Terminal } from 'lucide-react';
 import { PageTitle } from '../PageTitle';
-import { Card } from '../Card';
 import { Badge } from '../Badge';
 import type { AccentToken } from '../../lib/theme';
 

@@ -1,5 +1,5 @@
-import { LEVELS, PALETTE_HUES } from './levels.ts';
-import type { LevelDefinition, ThemeLevel } from './levels.ts';
+import { LEVELS } from './levels.ts';
+import type { LevelDefinition, PALETTE_HUES, ThemeLevel } from './levels.ts';
 
 /**
  * The sixteen ANSI slots, and the fan-out that fills them from ten Hues.

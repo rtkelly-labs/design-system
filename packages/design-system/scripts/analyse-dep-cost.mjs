@@ -6,7 +6,7 @@
  *
  * `check:bundle-size` weighs `dist/`. That is the whole of what this package
  * authors and none of what it charges. `tsup` externalises everything in
- * `dependencies`, so `dist/index.mjs` carries `import { Dialog } from
+ * `dependencies`, so `dist/index.js` carries `import { Dialog } from
  * "@base-ui/react/dialog"` and stops there — the bytes arrive in the
  * consumer's bundle, at their build, under their bundler, and no gate in this
  * repo could previously see them. On the day this landed that invisible half
@@ -20,7 +20,7 @@
  *
  * ## How the number is arrived at
  *
- * Every import specifier in `dist/index.mjs` is read with the exact bindings
+ * Every import specifier in `dist/index.js` is read with the exact bindings
  * this package pulls from it — `@visx/shape` is charged for the three shapes
  * imported, not for the package. Those become a synthetic entry point that
  * esbuild bundles, tree-shakes, minifies and gzips the way a consumer's
@@ -66,7 +66,7 @@ import ts from 'typescript';
 import { MANIFEST } from './dependency-manifest.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const BUNDLE = path.join(ROOT, 'dist', 'index.mjs');
+const BUNDLE = path.join(ROOT, 'dist', 'index.js');
 const BASELINE = path.join(ROOT, 'docs', 'data', 'dependency-cost.json');
 const REPORT = path.join(ROOT, 'docs', 'dependency-cost.md');
 const SRC = path.join(ROOT, 'src');
@@ -103,7 +103,7 @@ const scopeOf = (name) => (name.startsWith('@') ? `${name.split('/')[0]}/*` : na
 
 /**
  * Every ESM file the build emitted. Since #301 that is one per source module,
- * with `dist/index.mjs` a barrel over the rest.
+ * with `dist/index.js` a barrel over the rest.
  */
 function bundleFiles() {
   const walk = (dir) =>
@@ -112,7 +112,7 @@ function bundleFiles() {
       return statSync(full).isDirectory() ? walk(full) : [full];
     });
   return walk(path.dirname(BUNDLE))
-    .filter((file) => file.endsWith('.mjs'))
+    .filter((file) => file.endsWith('.js'))
     .sort();
 }
 
@@ -127,7 +127,7 @@ function bundleFiles() {
  */
 function readBundleImports() {
   if (!existsSync(BUNDLE)) {
-    console.error('dist/index.mjs is missing — run `pnpm build` first.');
+    console.error('dist/index.js is missing — run `pnpm build` first.');
     process.exit(1);
   }
   const bySpecifier = new Map();
@@ -302,7 +302,7 @@ const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;
 
 function printTable(result) {
   console.log(
-    `\nAuthored code (dist/**/*.mjs):  ${kb(result.own.gzip)} gzip` +
+    `\nAuthored code (dist/**/*.js):  ${kb(result.own.gzip)} gzip` +
       `\nDependencies, all together:     ${kb(result.total.gzip)} gzip` +
       `\nA consumer importing everything pays ${kb(result.own.gzip + result.total.gzip)} gzip.\n`,
   );
@@ -357,7 +357,7 @@ function renderReport(result) {
   lines.push('');
   lines.push('| | gzip |');
   lines.push('|---|---|');
-  lines.push(`| Authored code — every \`.mjs\` in \`dist/\` | ${kb(result.own.gzip)} |`);
+  lines.push(`| Authored code — every \`.js\` in \`dist/\` | ${kb(result.own.gzip)} |`);
   lines.push(`| Dependencies, all together | ${kb(result.total.gzip)} |`);
   lines.push(`| A consumer importing everything | ${kb(result.own.gzip + result.total.gzip)} |`);
   lines.push('');
@@ -498,7 +498,7 @@ for (const row of result.packages) {
 for (const name of Object.keys(baseline.packages)) {
   if (!result.packages.some((row) => row.name === name)) {
     problems.push(
-      `${name}: recorded in the baseline but no longer imported by dist/index.mjs. ` +
+      `${name}: recorded in the baseline but no longer imported by dist/index.js. ` +
         'Run `pnpm deps:cost:update` to drop the row.',
     );
   }

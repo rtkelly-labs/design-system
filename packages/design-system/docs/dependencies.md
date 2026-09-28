@@ -102,6 +102,14 @@ runtime dependency, so the built bundle is authored code only. Measured on the d
 authored code is 48.6 KB gzip and the dependencies behind it are 100.6 KB — **two thirds of what a
 consumer pays was invisible to CI.** Nothing had gone wrong; it simply was not being counted.
 
+**A runtime dependency has to load from an ES module.** `dist/` is ESM only, and without a bundler
+— the report CLI, a Vitest consumer, plain `node` — Node's own loader runs it, including the named
+imports it takes from each dependency. Every current dependency loads that way; the consumer probe
+on the ESM-only PR imported the whole root in plain Node 22, 24 and 25. A CommonJS-only package
+works only if Node can find its named exports statically, so before adding one, check
+`node --input-type=module -e "import { name } from 'pkg'"` rather than trusting a bundler that
+would paper over it.
+
 **Marginal, not standalone.** Packages that share internals cannot have their standalone weights
 added up. `@visx/grid` is 9.6 KB alone and 0.3 KB once `@visx/axis` is already present. The gate
 records both and argues from the marginal figure, because that is the one that answers "what would

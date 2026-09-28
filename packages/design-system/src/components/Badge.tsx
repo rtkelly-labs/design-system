@@ -1,5 +1,5 @@
 import { forwardRef } from 'react';
-import React from 'react';
+import type React from 'react';
 import { accentVar } from '../lib/theme';
 import type { AccentToken } from '../lib/theme';
 import { cn } from '../lib/recipe';

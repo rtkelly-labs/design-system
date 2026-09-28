@@ -9,13 +9,13 @@
  * without notice.
  *
  * This checks the uncompressed (raw) and gzipped sizes of:
- *   - every `.mjs` file under dist/  (ESM output, one file per module)
- *   - every `.js` file under dist/   (CommonJS output, one file per module)
+ *   - every `.js` file under dist/   (the ESM output, one file per module)
  *   - src/theme.css   (Generated design token & theme ladder CSS)
  *
- * Since #301 `dist/` is one file per source module, so each format is weighed
+ * Since #301 `dist/` is one file per source module, so the output is weighed
  * as all of its files concatenated in path order — the same bytes the single
- * `dist/index.mjs` used to hold, plus the per-file import lines. This gate
+ * `dist/index.mjs` used to hold, plus the per-file import lines. There is no
+ * CommonJS output to weigh any more; see the last entry in `BUDGETS`' notes. This gate
  * weighs what the package *ships*; what a consumer pays for the parts it
  * imports is `check:import-cost`.
  *
@@ -249,17 +249,22 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  * `__export`, `__toCommonJS`, `__toESM`) into every file rather than once —
  * about 1.5 KB a file, boilerplate rather than behaviour, and most of it
  * absorbed by gzip. The ceilings carry about 2% for the Linux gzip spread.
+ *
+ * The CommonJS budget is gone, because the CommonJS build is (ESM only, with
+ * `"type": "module"`). Everything above that quotes a CommonJS figure is the
+ * history of a format this package no longer ships. The ESM output moved from
+ * `.mjs` to `.js`, and so did this key. Measured locally on macOS against
+ * #301's per-module build: 387,723 B raw / 89,050 B gzip before, 387,260 B /
+ * 89,033 B after — 463 B smaller, and every byte of it an `m`: 346 import
+ * specifiers and 117 `sourceMappingURL` comments that said `.mjs` and now
+ * say `.js`. Same 117 modules. The ceilings are unchanged,
+ * which leaves the same ~2% over the new measurement.
  */
 const BUDGETS = {
-  'dist/**/*.mjs': {
+  'dist/**/*.js': {
     maxRaw: 395_000,
     maxGzip: 91_000,
     desc: 'ESM output, every module',
-  },
-  'dist/**/*.js': {
-    maxRaw: 577_000,
-    maxGzip: 100_500,
-    desc: 'CommonJS output, every module',
   },
   'src/theme.css': {
     // #339 adds shipped symbol faces to all four role stacks and explains
@@ -288,7 +293,7 @@ function outputFiles(ext) {
 
 /** The bytes a budget key weighs: one file, or a format's whole output. */
 function contentOf(rel) {
-  const glob = rel.match(/^dist\/\*\*\/\*(\.m?js)$/);
+  const glob = rel.match(/^dist\/\*\*\/\*(\.js)$/);
   if (!glob) {
     const full = path.join(ROOT, rel);
     return existsSync(full) ? readFileSync(full) : null;

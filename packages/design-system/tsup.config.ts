@@ -12,7 +12,7 @@ import { reachableModules, ROOT, SOURCE, SRC } from './scripts/module-graph.mjs'
  *
  * Each module is its own entry point and is bundled alone: a specifier that
  * resolves to another module under `src/` is rewritten to that module's output
- * file — with the extension this format writes, so Node's own ESM resolver can
+ * file — with its `.js` extension written out, so Node's own ESM resolver can
  * load `dist/` without a bundler (the report CLI and a Vitest consumer both do)
  * — and marked external. Packages are already external. What is left inside
  * each output file is exactly its own source module.
@@ -21,7 +21,6 @@ function preserveModules(): Plugin {
   return {
     name: 'preserve-modules',
     setup(build) {
-      const extension = build.initialOptions.outExtension?.['.js'] ?? '.js';
       build.onResolve({ filter: /^(?:\.{1,2}\/|@\/)/ }, async (args) => {
         if (args.kind === 'entry-point' || args.pluginData?.preserveModules) return undefined;
         const resolved = await build.resolve(args.path, {
@@ -34,7 +33,7 @@ function preserveModules(): Plugin {
         if (!resolved.path.startsWith(SRC + path.sep) || !SOURCE.test(resolved.path)) return undefined;
         let specifier = path
           .relative(path.dirname(args.importer), resolved.path)
-          .replace(SOURCE, extension)
+          .replace(SOURCE, '.js')
           .split(path.sep)
           .join('/');
         if (!specifier.startsWith('.')) specifier = `./${specifier}`;
@@ -46,7 +45,7 @@ function preserveModules(): Plugin {
 
 export default defineConfig({
   /*
-   * One output file per source module (#301). A single flat `dist/index.mjs`
+   * One output file per source module (#301). A single flat `dist/index.js`
    * made `sideEffects` useless — it works at module granularity, and the whole
    * library was one module — so a consumer importing `Button` kept every
    * module-level `forwardRef`, `recipe` and `createContext` call in the
@@ -56,7 +55,15 @@ export default defineConfig({
    * `check:import-cost` holds the result.
    */
   entry: reachableModules(),
-  format: ['cjs', 'esm'],
+  /*
+   * ESM only. `"type": "module"` makes `.js` an ES module, so that is the
+   * extension written. There is no CommonJS build: it was every module a
+   * second time, larger than the ESM half because esbuild writes its interop
+   * helpers into each file, and a consumer that loaded both copies got two
+   * React contexts per provider. Node >= 22.12 can `require()` this output.
+   */
+  format: ['esm'],
+  outExtension: () => ({ js: '.js' }),
   // One declaration file for the public entry point, exactly as before, so the
   // type surface `check:api` reviews is unchanged by the output layout.
   dts: { entry: 'src/index.ts' },

@@ -1,4 +1,4 @@
-import React from 'react';
+import type React from 'react';
 import { AlertCircle, CheckCircle2, Info, AlertTriangle } from 'lucide-react';
 import { semanticTokens } from '../lib/theme';
 
