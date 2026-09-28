@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SiteHeader } from '../components/SiteHeader';
+import { Tabs, TabsList, TabsPanel, TabsTab } from '../components/Tabs';
 import { SitePage, blog, marketing, portfolio, projectSite } from './siteChrome/fixtures';
 
 const meta: Meta<typeof SiteHeader> = {
@@ -59,4 +60,25 @@ export const Marketing: Story = {
  */
 export const ProjectSite: Story = {
   render: () => <SitePage site={projectSite} />,
+};
+
+/** A sticky banner remains above tab strips as content scrolls underneath it. */
+export const StickyTabs: Story = {
+  render: () => (
+    <>
+      <SiteHeader sticky brand="Sticky site" />
+      <main id="main-content" className="min-h-[300vh] bg-surface-base text-content-primary">
+        <h1 className="px-4 py-8 font-display text-2xl">Scroll beneath the banner</h1>
+        <div className="h-screen" />
+        <Tabs defaultValue="day">
+          <TabsList label="Window">
+            <TabsTab value="day">24H</TabsTab>
+            <TabsTab value="week">7D</TabsTab>
+          </TabsList>
+          <TabsPanel value="day" className="p-4">Daily activity</TabsPanel>
+          <TabsPanel value="week" className="p-4">Weekly activity</TabsPanel>
+        </Tabs>
+      </main>
+    </>
+  ),
 };

@@ -66,7 +66,7 @@ map, as an npm consumer would.
 7. **When the package can't express something, record it before working
    around it.** Open an issue on `rtkelly13/design-system` with a repro, then
    put the smallest site-local workaround in place with a comment naming the
-   issue. The current ones are 306, 308, 309, 310, 311 and 312.
+   issue. The current ones are 306, 309, 310, 311 and 312.
 
 8. **Everything is under the `/site` basePath, and Storybook is not.** `next/link`,
    `router.push` and the package's links (through `RouterLink`) add the prefix, so
