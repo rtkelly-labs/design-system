@@ -582,6 +582,23 @@ jobs:
           A11Y_LEVEL_SWITCH: ${{ github.event_name == 'pull_request' && 'in-place' || 'compare' }}
         run: pnpm test:a11y
 
+      # Per-story selection, in shadow mode (`scripts/select-stories.mjs`): which
+      # asserted stories this change can reach, and whether any failure above
+      # fell outside that set — a "selection miss". It skips nothing and gates
+      # nothing: both suites above ran every story either way. On `main` it
+      # judges the squash commit against its parent, which is where a miss that
+      # merged green would show. The criteria for letting it decide are in
+      # `docs/ci.md`, counted from what this writes to the telemetry artifact.
+      - name: Story Selection (shadow)
+        if: (success() || failure()) && steps.verdict.outputs.cache-hit != 'true'
+        continue-on-error: true
+        env:
+          RENDER_IMAGE: ${{ job.container.image }}
+        run: >-
+          node scripts/select-stories.mjs shadow
+          --playwright telemetry/visual.json
+          --playwright telemetry/a11y.json
+
       # Per-test and per-file timings, one level below the step — see
       # `scripts/ci-telemetry.mjs`. Not a gate: it exits 0 on a missing report,
       # and `continue-on-error` covers the rest, because telemetry that can turn
