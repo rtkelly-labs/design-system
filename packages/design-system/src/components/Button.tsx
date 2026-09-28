@@ -23,7 +23,7 @@ interface ButtonOwnProps {
    * `primary`, `secondary` and `tertiary` use the corresponding accent role,
    * which changes with the theme level. `inverse` uses the primary content
    * role as its background for maximum contrast. `default` is identical to
-   * `primary`. Omitted, the variant is `default`.
+   * `primary`. Omitted, the variant is `tertiary`.
    */
   variant?: ButtonVariant;
   /**
