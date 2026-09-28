@@ -287,7 +287,7 @@ for (const [cp, sites] of [...rendered].sort((a, b) => a[0] - b[0])) {
  * coverage, so it is its own pull request (fix/role-font-stacks), which lowers
  * this budget to zero and deletes it. Until then the count may only fall.
  */
-const INLINE_STACK_BUDGET = 43;
+const INLINE_STACK_BUDGET = 28;
 if (listing) {
   for (const { at, text } of bypasses) console.log(`  [STACK IN PLACE] ${at} — ${text.slice(0, 70)}`);
 }

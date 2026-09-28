@@ -283,11 +283,40 @@ export function tsCodepoints(ts, fileName, source) {
  */
 export function mdxCodepoints(source) {
   const hits = [];
-  const text = source.replace(/\{\/\*[\s\S]*?\*\/\}/g, (m) => m.replace(/[^\n]/g, ' '));
   const unknownEntities = [];
-  text.split('\n').forEach((line, i) => {
-    if (/^\s*(import|export)\s/.test(line)) return;
-    const { decoded, unknown } = decodeEntities(line);
+  let fence = null;
+  let comment = false;
+  source.split('\n').forEach((raw, i) => {
+    const marker = raw.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    if (marker && !comment) {
+      if (!fence) {
+        fence = marker[1];
+        return;
+      }
+      if (marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim()) {
+        fence = null;
+        return;
+      }
+    }
+    let line = raw;
+    if (!fence) {
+      // Strip MDX comments only in prose. A comment shown in a code fence is text.
+      line = '';
+      let offset = 0;
+      while (offset < raw.length) {
+        const end = raw.indexOf(comment ? '*/}' : '{/*', offset);
+        if (end < 0) {
+          if (!comment) line += raw.slice(offset);
+          break;
+        }
+        if (!comment) line += raw.slice(offset, end);
+        comment = !comment;
+        offset = end + 3;
+      }
+      if (/^\s*(import|export)\s/.test(line)) return;
+    }
+    // Fenced code renders entity spellings literally, unlike the MDX body.
+    const { decoded, unknown } = fence ? { decoded: line, unknown: [] } : decodeEntities(line);
     for (const entity of unknown) unknownEntities.push({ entity, line: i + 1 });
     for (const ch of decoded) {
       const cp = ch.codePointAt(0);
@@ -350,15 +379,19 @@ export function cssStackBypasses(source) {
 export function cssContentCodepoints(source) {
   const hits = [];
   const text = source.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));
-  text.split('\n').forEach((line, i) => {
-    for (const [, , value] of line.matchAll(/content:\s*(["'])((?:\\.|(?!\1).)*)\1/g)) {
+  const declarations = /(?<![-\w])content\s*:\s*((?:"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|[^;}"'])*)/g;
+  for (const declaration of text.matchAll(declarations)) {
+    const valueOffset = declaration.index + declaration[0].indexOf(declaration[1]);
+    for (const literal of declaration[1].matchAll(/(["'])((?:\\[\s\S]|(?!\1)[^\\])*)\1/g)) {
+      const value = literal[2];
+      const line = text.slice(0, valueOffset + literal.index).split('\n').length;
       const decoded = value.replace(/\\([0-9a-fA-F]{1,6})\s?/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)));
       for (const ch of decoded) {
         const cp = ch.codePointAt(0);
-        if (isInteresting(cp)) hits.push({ cp, line: i + 1 });
+        if (isInteresting(cp)) hits.push({ cp, line });
       }
     }
-  });
+  }
   return hits;
 }
 

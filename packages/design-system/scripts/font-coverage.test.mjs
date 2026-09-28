@@ -92,6 +92,23 @@ describe('census extractors', () => {
     const src = '/* content: "✗" */\n.a::before { content: "\\2713  done"; }\n.b::after { content: "→"; }';
     expect(cssContentCodepoints(src).map(({ cp, line }) => [cp.toString(16), line])).toEqual([['2713', 2], ['2192', 3]]);
   });
+
+  it('keeps import, export and comment text inside MDX fences literal', () => {
+    const src = 'import X from "./x"; // ☃\n```ts\nexport const snow = "☃";\n{/* → */}\nconst entity = "&bogus;";\n```';
+    const hits = mdxCodepoints(src);
+    expect(hits.map(({ cp, line }) => [cp.toString(16), line])).toEqual([['2603', 3], ['2192', 4]]);
+    expect(hits.unknownEntities).toEqual([]);
+  });
+
+  it('handles tilde fences and longer fences containing backticks', () => {
+    const src = '~~~~ts\nexport const x = "☃";\n```\nimport y from "→";\n~~~~';
+    expect(mdxCodepoints(src).map(({ cp }) => cp.toString(16))).toEqual(['2603', '2192']);
+  });
+
+  it('reads all CSS content strings, including multiline declarations', () => {
+    const src = '.x::after { content: "prefix;"\n "☃" "\\2192"; }';
+    expect(cssContentCodepoints(src).map(({ cp, line }) => [cp.toString(16), line])).toEqual([['2603', 2], ['2192', 2]]);
+  });
 });
 
 describe('entities', () => {
