@@ -39,7 +39,6 @@ describe('client boundary', () => {
       'src/lib/recipe.ts',
       'src/components/themeInitScript.ts',
       'src/components/Card.tsx',
-      'src/components/Button.tsx',
       'src/components/Tag.tsx',
     ]) {
       expect(server, rel).toContain(rel);

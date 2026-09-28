@@ -118,7 +118,9 @@ const CASES = [
   {
     name: 'button',
     imports: ['Button'],
-    maxBytes: 43_400,
+    // #320 adds pending activation guards and Spinner. Measured at 44,394 B
+    // minified with the per-module build; retain about 2% headroom.
+    maxBytes: 45_300,
     forbid: [...HEAVY, 'lucide-react'],
   },
   {
