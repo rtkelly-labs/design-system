@@ -51,6 +51,14 @@ way visual testing dies — not by being switched off, but by being disbelieved.
   one Chromium revision. Baselines are only comparable across runs that share
   it, which is why the version is exact in `package.json` and why bumping
   Playwright is a re-baselining event, not a routine dependency bump.
+- **One image.** Every job that renders — `visual`, the snapshot writer, the
+  walkthrough — runs in `mcr.microsoft.com/playwright:v1.62.1-noble`, pinned by digest,
+  at the Playwright version the lockfile pins. The fonts, the shared libraries
+  and Chromium are the image's, so the environment moves only when that
+  reference does, in a commit. It used to be `ubuntu-latest` plus a Chromium
+  installed per run, which moved weekly with the runner image and with nothing
+  in this repository to say so. `pnpm check:governance` holds every rendering
+  job to the same reference, and the image's version to the lockfile's.
 - **Linux only.** `tests/visual.spec.ts` opens with
   `test.skip(process.platform !== 'linux')`. macOS and Windows render text
   differently enough to fail every baseline, so local runs are skipped rather
@@ -164,12 +172,11 @@ and is noted below.
   shared-cache performance argument years ago; and `@import` of a remote
   stylesheet is the slowest delivery available, serialising three round trips of
   render-blocking work before text can paint.
-- **CI and local render in different environments.** CI is `ubuntu-latest` plus
-  the Chromium that `.github/actions/install-playwright` installs (`playwright
-  install --with-deps chromium`, cached on the lockfile). The industry-standard fix is to
-  run both CI and local baselining inside the same official image
-  (`mcr.microsoft.com/playwright:v1.62.1-noble`), which is what makes "just
-  re-record it locally" possible at all. Until then, **CI is the only place a
+- **CI and local render in different environments.** Fixed in CI: every
+  rendering job runs in the official image (`mcr.microsoft.com/playwright:v1.62.1-noble`,
+  by digest). That is also what makes local re-recording possible in
+  principle — the same image under `docker run` should produce the same pixels —
+  but it has **not been verified** here, so **CI is still the only place a
   baseline can legitimately be produced**, which is why `/update-snapshots`
   exists.
 
@@ -355,9 +362,10 @@ and run" click before the PR shows a green check.
 
 ### Baselining locally
 
-You cannot, today, and the suite tells you so by skipping on non-Linux. Even on
-Linux, a local machine is not `ubuntu-latest`. Until the render environment is
-containerised, CI is the only legitimate source of a baseline.
+Not yet. CI renders in a pinned image, so running the suite inside that same
+image is the route — but nobody has checked that a local `docker run` of it
+reproduces CI's pixels byte for byte, and until someone has, CI is the only
+legitimate source of a baseline. A bare Linux machine is not that image.
 
 What you *can* do locally is everything except the pixel comparison:
 `pnpm build-storybook && pnpm check:visual-coverage` catches an unasserted

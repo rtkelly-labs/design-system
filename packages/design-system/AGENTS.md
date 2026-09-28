@@ -36,7 +36,7 @@ Everything is a `pnpm` script; these are the ones whose names do not give them a
 | `pnpm check:tokens` | hue-named call sites, budget **0** — a colour is addressed by its job |
 | `pnpm ansi:check` | terminal slot coverage **and** the committed fixture diff |
 | `pnpm test:leaks` | the unit suite shuffled with no per-file isolation, N times — the detector `isolate: false` stands on; not a gate |
-| `pnpm test:visual` | Playwright snapshots — **Linux only**, see [`docs/visual-regression.md`](./docs/visual-regression.md) |
+| `pnpm test:visual` | Playwright snapshots — **in the pinned image only**, see [`docs/visual-regression.md`](./docs/visual-regression.md) |
 | `pnpm test:a11y` | axe over every asserted story, on both Levels |
 | `pnpm walkthrough` | screenshot every story on every level, for review rather than assertion |
 
@@ -146,11 +146,11 @@ citation names a rule that does not exist.
 2. **Delete Branch on Merge**: feature branches are deleted immediately on merge.
 3. **Linear History**: rebase onto `main` before merging; no merge commits.
 4. **Publishing**: stable releases publish from `main` via npm Trusted Publishing — no tokens. Bump `package.json` in the PR. Comment `/publish-dev` for a prerelease.
-5. **Visual Regression Testing**: Playwright snapshots, **Linux CI only**, `maxDiffPixels: 0` — and this suite does **not** gate colour; arithmetic does.
+5. **Visual Regression Testing**: Playwright snapshots, rendered **only in the pinned Playwright image** (`mcr.microsoft.com/playwright:v1.62.1-noble@sha256:…`, in CI), `maxDiffPixels: 0` — and this suite does **not** gate colour; arithmetic does.
 6. **Required Checks**: branch protection requires the single aggregate check named **`ci`**. That name is content-free and **must stay that way** — `shared-utilities` governance matches on the string.
 7. **New Components Need Baselines**: a story without a snapshot asserts nothing. `pnpm check:visual-coverage` is the gate, and its budget is **0**.
 8. **Re-baselining Happens In The PR**: comment `/update-snapshots` — say `all` when the change is *meant* to alter rendering, and name the story that forced it.
-9. **Every CI Job Has A Ceiling**: every job carries `timeout-minutes`, browser installs go through `./.github/actions/install-playwright`, and an upload step uses `if: success() || failure()`, never `always()`.
+9. **Every CI Job Has A Ceiling**: every job carries `timeout-minutes`, a job that drives a browser runs in the pinned Playwright image and installs none, and an upload step uses `if: success() || failure()`, never `always()`.
 10. **Direct Push Protection**: direct pushes to `main` are blocked; PRs required.
 11. **Local Temp & Worktree Directory**: temporary files, local databases, scratch files and git worktrees go in the root `/temp/` directory (gitignored).
 12. **Gitignored Local TODO File**: a root `TODO.md` file MUST exist for local task tracking and be gitignored.

@@ -27,8 +27,23 @@ jobs:
   walkthrough:
     name: Capture Screenshot Walkthrough
     runs-on: ubuntu-latest
+    # The render environment, pinned: the official Playwright image at the
+    # lockfile's Playwright version, by digest — rule 14's reasoning applied to
+    # the one input no tracked file recorded. It carries Chromium and every
+    # library it links, so nothing is installed at run time. Every job that
+    # renders names this exact reference, and `check:governance` holds them
+    # equal: a baseline written in one environment and checked in another is
+    # the thing this suite can least afford. See docs/visual-regression.md.
+    #
+    # `--ipc=host` because Docker's default 64MB `/dev/shm` is what Chromium
+    # renders into, and a full-page capture can exhaust it — Playwright's own
+    # Docker guidance. `--init` reaps the browser's child processes.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --ipc=host --init
     defaults:
       run:
+        shell: bash
         working-directory: packages/design-system
     # See ci.yml — same reason. This workflow is not a gate, so a run of it
     # sitting on a hung install for six hours is pure waste.
@@ -37,6 +52,16 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # The container runs as root over a checkout the runner user owns, and
+      # git refuses to read a repository owned by someone else ("dubious
+      # ownership"). Every script that asks git for the repository root then
+      # fails or falls back to the package — `check-lockfile.mjs` went looking
+      # for `packages/design-system/pnpm-lock.yaml`, and `render-inputs.mjs`
+      # produced no hash at all. `actions/checkout` trusts the path only for
+      # its own git calls, so it is trusted here for everyone else's.
+      - name: Trust the Workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       # The report is a function of its inputs, the same ones the `visual` job's
       # verdict is keyed on (`scripts/render-inputs.mjs` — this workflow and the
@@ -52,17 +77,15 @@ jobs:
         # yields a key ending in `-` with no hash: one constant key that every
         # later pull request would match, skipping the job on a verdict nothing
         # earned. So the hash is taken on its own line under `set -e`, checked for
-        # shape, and only then written. The image variables must be non-empty
-        # for the same reason.
+        # shape, and only then written. The key also names the pinned image.
         run: |
           set -euo pipefail
-          : "${ImageOS:?}" "${ImageVersion:?}"
           inputs="$(node scripts/render-inputs.mjs)"
           if ! [[ "${inputs}" =~ ^[0-9a-f]{64}$ ]]; then
             echo "::error::render-inputs.mjs printed '${inputs}', not a hash. Refusing to key a verdict on it."
             exit 1
           fi
-          echo "key=walkthrough-report-${ImageOS}-${ImageVersion}-${inputs}" >> "$GITHUB_OUTPUT"
+          echo "key=walkthrough-report-dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e-${inputs}" >> "$GITHUB_OUTPUT"
 
       - name: Previous Report
         id: report
@@ -79,10 +102,6 @@ jobs:
       - name: Build Storybook
         if: steps.report.outputs.cache-hit != 'true'
         run: pnpm build-storybook
-
-      - name: Install Playwright Browsers
-        if: steps.report.outputs.cache-hit != 'true'
-        uses: ./.github/actions/install-playwright
 
       # The long pole of the whole PR, and the one that grows with the system:
       # every story adds four captures. `playwright.walkthrough.config.ts` runs

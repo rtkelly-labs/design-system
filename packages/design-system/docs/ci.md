@@ -51,9 +51,10 @@ Visual Regression`, and the governance map went on requiring the old string.
 `repo-governance check-names` now fails on a required check no job declares, and
 warns on names that drift from the lexicon.
 
-Only `visual` installs a browser, so only its ceiling has to clear
-`install-playwright`'s retry budget (rule 9). Splitting the job is what let the
-others drop to a ceiling sized to their own work, instead of every gate
+Only `visual` drives a browser, so only its ceiling has to allow for one — it
+used to clear `install-playwright`'s two-attempt retry budget, and now runs in
+the pinned image with nothing to install (rule 9). Splitting the job is what let
+the other jobs drop to a ceiling sized to their own work, instead of every gate
 waiting out a browser-shaped timeout.
 
 **This table is checked.** It is a copy of the roster in `ci.yml`, and it had
@@ -126,18 +127,16 @@ measurements rather than a guess:
 - **`.github/actions/setup`** is Node + pnpm + install, and nothing else. Use it
   rather than repeating the steps: a `pnpm install` that differs between the job
   that writes a baseline and the job that checks it is the one difference this
-  repo can least afford. Browsers are **not** here — that is
-  `install-playwright`, so only the two jobs that drive a browser pay for it.
-- **`.github/actions/install-playwright` now caches the download** as well as
-  bounding and retrying it (rule 9). 13 of that step's 25 healthy seconds were
-  spent fetching ~300MB that never changes until the lockfile does, which is
-  also why the cache keys on `pnpm-lock.yaml`: the browser revision is pinned by
-  the Playwright version in there, so a lockfile change is exactly when a cached
-  browser stops being the right one. Only the download half is cacheable — the
-  `--with-deps` apt half installs outside the cached directory, so a cache hit
-  still runs `install-deps`, through the same retry loop, since that reaches the
-  network too. Assuming the runner image carries those libraries would trade a
-  red required check for ten seconds.
+  repo can least afford. Browsers are **not** here: the jobs that drive one run
+  in the pinned image, which carries them.
+- **Browser jobs run in the pinned Playwright image** and install nothing.
+  `install-playwright` used to fetch Chromium and `apt-get` its libraries on
+  every run (~20s with a cached download), bounded and retried because both
+  halves had hung or failed upstream. The image carries all of it; the cost
+  moved to pulling ~900MB compressed at job start, so this is a determinism
+  change first and a speed change only if the pull is quicker than the install
+  was. The verdict and walkthrough keys name the image digest instead of the
+  runner's `ImageOS`/`ImageVersion`, which moved weekly.
 - **`ci.yml` supersedes in-flight PR runs** (`concurrency`), as the walkthrough
   already did. The group includes the event name so rule 8's manual
   `workflow_dispatch` re-run is never cancelled by a push or queued behind one.
@@ -217,5 +216,4 @@ npx serve storybook-static -p 6006 --config ../serve.json
 
 The path is relative to the **served directory**, not the repo root. Do not drop
 the `--config` flag.
-
 

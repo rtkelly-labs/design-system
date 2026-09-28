@@ -693,6 +693,92 @@ for (const file of PROSE) {
 }
 
 /* ------------------------------------------------------------------ *
+ * Rules 5 and 9 — the render environment is one pinned image.
+ *
+ * A baseline is a claim about pixels in one environment, so every job that
+ * renders — the gated suites, the snapshot writer, the walkthrough — runs in
+ * the same official Playwright image, named by digest, at the version the
+ * lockfile pins. Nothing installs a browser at run time: the image carries it.
+ * Each of those is checked, because each has been wrong somewhere before — a
+ * `playwright install` outside the image is a second Chromium, a tag without
+ * a digest is a render environment someone else can move, and an image a
+ * version behind the lockfile fails every test with a missing executable.
+ *
+ * A cache key built from `render-inputs.mjs` must name the digest too: that
+ * hash covers every tracked file, and the image is the one input none records.
+ * ------------------------------------------------------------------ */
+
+const RENDER_IMAGE = /^mcr\.microsoft\.com\/playwright:v(\d+\.\d+\.\d+)-noble@sha256:([0-9a-f]{64})$/;
+const RENDERS = /^\s*(?:-\s+)?run:.*(?:pnpm\s+(?:test:visual|test:a11y|walkthrough)\b|playwright\s+test)/;
+const lockedPlaywright = /^ {2}'@playwright\/test@(\d+\.\d+\.\d+)':/m.exec(
+  readFileSync(path.join(GITHUB_ROOT, 'pnpm-lock.yaml'), 'utf8'),
+)?.[1];
+const images = new Map();
+
+for (const job of ALL_JOBS) {
+  const at = `${job.file}:${job.line}`;
+  const texts = job.body.map(({ text }) => text);
+  if (texts.some((text) => /^\s*(?:-\s+)?(?:uses:.*install-playwright|run:.*playwright\s+install)/.test(text))) {
+    problems.push(
+      `${at}: job \`${job.id}\` installs a browser. Rule 9: jobs that render run in the ` +
+        `pinned Playwright image, which carries Chromium; a second install is a second Chromium.`,
+    );
+  }
+  if (!texts.some((text) => RENDERS.test(text))) continue;
+
+  const c = texts.findIndex((text) => /^ {4}container:\s*$/.test(text));
+  const image = c < 0 ? null : /^ {6}image:\s*(\S+)\s*$/.exec(texts[c + 1] ?? '')?.[1];
+  const options = c < 0 ? '' : /^ {6}options:\s*(.+)$/.exec(texts[c + 2] ?? '')?.[1] ?? '';
+  const parsed = image && RENDER_IMAGE.exec(image);
+  if (!parsed) {
+    problems.push(
+      `${at}: job \`${job.id}\` renders but does not run in the pinned image. Declare ` +
+        `\`container: image: mcr.microsoft.com/playwright:v<version>-noble@sha256:<digest>\` — ` +
+        `rule 5: a baseline is only comparable with one written in the same environment.`,
+    );
+    note('render', false, `${at} — ${job.id}: ${image ?? 'no container'}`);
+    continue;
+  }
+  if (parsed[1] !== lockedPlaywright) {
+    problems.push(
+      `${at}: job \`${job.id}\` runs Playwright image v${parsed[1]}, and the lockfile pins ` +
+        `@playwright/test ${lockedPlaywright}. The image's Chromium is the lockfile's only at ` +
+        `the same version — bump both together.`,
+    );
+  }
+  if (!texts.some((text) => /^\s*run:\s*git config --global --add safe\.directory "\$GITHUB_WORKSPACE"\s*$/.test(text))) {
+    problems.push(
+      `${at}: job \`${job.id}\` runs in a container without marking the workspace a safe ` +
+        `directory. The container is root over a runner-owned checkout, so git refuses it and ` +
+        `every script that asks git for the repository root fails or falls back.`,
+    );
+  }
+  if (!/--ipc=host/.test(options)) {
+    problems.push(`${at}: job \`${job.id}\` needs \`options: --ipc=host\` — Chromium renders into /dev/shm, 64MB by default.`);
+  }
+  if (!texts.some((text) => /^ {8}shell:\s*bash\s*$/.test(text))) {
+    problems.push(`${at}: job \`${job.id}\` needs \`defaults.run.shell: bash\` — container jobs default to sh, but the render scripts use Bash.`);
+  }
+  images.set(image, [...(images.get(image) ?? []), `${job.file} ${job.id}`]);
+  for (const text of texts) {
+    if (/key=(?:visual-verdict|walkthrough-report)-/.test(text) && !text.includes(parsed[2])) {
+      problems.push(
+        `${at}: job \`${job.id}\` builds a cache key from render-inputs.mjs without the image ` +
+          `digest. The hash covers tracked files; the image is the one input none records.`,
+      );
+    }
+  }
+  note('render', true, `${at} — ${job.id}: v${parsed[1]} @ ${parsed[2].slice(0, 12)}`);
+}
+if (images.size > 1) {
+  problems.push(
+    `Jobs render in ${images.size} different images: ` +
+      [...images].map(([image, jobs]) => `${image} (${jobs.join(', ')})`).join('; ') +
+      `. One image, or baselines written by one job are checked in another environment.`,
+  );
+}
+
+/* ------------------------------------------------------------------ *
  * Rule 6's one exception — a reused `visual` verdict — held to its shape.
  *
  * A gate that can be skipped is a gate that can be skipped by accident, and
@@ -719,7 +805,7 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   const key =
     /inputs="\$\(node scripts\/render-inputs\.mjs\)"/.test(body) &&
     /\[\[ "\$\{inputs\}" =~ \^\[0-9a-f\]\{64\}\$ \]\]/.test(body) &&
-    /key=visual-verdict-\$\{ImageOS\}-\$\{ImageVersion\}-\$\{inputs\}/.test(body) &&
+    /key=visual-verdict-[0-9a-f]{64}-\$\{inputs\}/.test(body) &&
     /set -euo pipefail/.test(body);
   if (readsVerdict && !lookup) {
     problems.push(
@@ -729,7 +815,7 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   }
   if (readsVerdict && !key) {
     problems.push(
-      'ci.yml `visual`: the verdict key must be `visual-verdict-${ImageOS}-${ImageVersion}-${inputs}`, ' +
+      'ci.yml `visual`: the verdict key must be `visual-verdict-<image digest>-${inputs}`, ' +
         'with `inputs` taken from `node scripts/render-inputs.mjs` on its own line under `set -euo pipefail` ' +
         'and checked to be a 64-hex hash. Without the image a new runner reuses an old verdict; without ' +
         'the check a failing script keys every PR to the same verdict.',
@@ -824,7 +910,7 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
 /* ------------------------------------------------------------------ */
 
 if (listing) {
-  const sections = ['pins', 'ceilings', 'uploads', 'roster', 'names', 'scripts', 'rules', 'citations', 'verdict'];
+  const sections = ['pins', 'ceilings', 'uploads', 'roster', 'names', 'scripts', 'rules', 'citations', 'render', 'verdict'];
   for (const section of sections) {
     const rows = census.filter((row) => row.section === section);
     if (!rows.length) continue;

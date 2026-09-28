@@ -129,9 +129,15 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    `main` went red on `dafbc1f`: `playwright install --with-deps` hung on both
    `ci.yml` and `storybook-walkthrough.yml`, burned six hours each, and a
    manual re-run of the identical SHA passed in two minutes. So: every job
-   carries a `timeout-minutes`, and the browser install goes through
-   [`.github/actions/install-playwright`](../.github/actions/install-playwright/action.yml),
-   which bounds each attempt with `timeout` and retries once. Use `pnpm exec`,
+   carries a `timeout-minutes`. The install that hung no longer exists: every
+   job that drives a browser runs in the pinned Playwright image
+   (`mcr.microsoft.com/playwright:v1.62.1-noble@sha256:…`), which carries Chromium and its
+   libraries, so nothing reaches apt or Playwright's CDN at run time. It
+   replaced `install-playwright`, a bounded-and-retried install that also had to
+   strip vendor apt sources after a corrupt Google index failed every run on
+   9 Sep. `pnpm check:governance` fails a job that renders outside the image, a
+   tag without a digest, an image at a version the lockfile does not pin, or any
+   `playwright install`. Use `pnpm exec`,
    never `npx`, for anything Playwright: `npx` falls back to fetching the
    latest published CLI, and a Playwright other than the lockfile's installs a
    different Chromium — which under `maxDiffPixels: 0` moves every baseline

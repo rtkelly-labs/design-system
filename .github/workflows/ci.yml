@@ -366,6 +366,20 @@ jobs:
   visual:
     name: visual
     runs-on: ubuntu-latest
+    # The render environment, pinned: the official Playwright image at the
+    # lockfile's Playwright version, by digest — rule 14's reasoning applied to
+    # the one input no tracked file recorded. It carries Chromium and every
+    # library it links, so nothing is installed at run time. Every job that
+    # renders names this exact reference, and `check:governance` holds them
+    # equal: a baseline written in one environment and checked in another is
+    # the thing this suite can least afford. See docs/visual-regression.md.
+    #
+    # `--ipc=host` because Docker's default 64MB `/dev/shm` is what Chromium
+    # renders into, and a full-page capture can exhaust it — Playwright's own
+    # Docker guidance. `--init` reaps the browser's child processes.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --ipc=host --init
     # Three runners, each taking a third of both browser suites. The work is
     # ~620s of test time on a pull request and ~1,040s on `main` (the full a11y
     # matrix), at four workers a runner and ~95% utilisation, so one runner was
@@ -397,22 +411,33 @@ jobs:
       legs: ${{ strategy.job-total }}
     defaults:
       run:
+        shell: bash
         # Every `pnpm` step below is this package's. The workspace root holds
         # only the lockfile, the workflows and `vercel.json`; the gates, the
         # build and the suites all live in `packages/design-system`, and setting
         # this once per job keeps each step reading exactly as it did when the
         # package was the repository.
         working-directory: packages/design-system
-    # The only job here that installs a browser, so the only one that has to
-    # clear `install-playwright`'s retry budget: two 8-minute attempts plus
-    # ~1.5 minutes of everything else is 18. Sized above that for the same
-    # reason ci.yml's single job was — a job cap firing mid-retry reports
+    # The only job here that drives a browser. It used to clear
+    # `install-playwright`'s two 8-minute attempts; in the pinned image nothing
+    # is installed, and the pull is the one network step left. 25 is kept for
+    # that pull on a cold runner: a job cap firing mid-pull reports
     # `cancelled` and names no step, which is the failure rule 9 exists for.
     timeout-minutes: 25
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # The container runs as root over a checkout the runner user owns, and
+      # git refuses to read a repository owned by someone else ("dubious
+      # ownership"). Every script that asks git for the repository root then
+      # fails or falls back to the package — `check-lockfile.mjs` went looking
+      # for `packages/design-system/pnpm-lock.yaml`, and `render-inputs.mjs`
+      # produced no hash at all. `actions/checkout` trusts the path only for
+      # its own git calls, so it is trusted here for everyone else's.
+      - name: Trust the Workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       # A verdict is a function of its inputs, so a pull request whose inputs
       # already passed skips the work of re-deriving it: the Storybook build,
@@ -428,25 +453,20 @@ jobs:
       # Node is on the runner before `setup`, and this needs nothing else.
       - name: Rendering Inputs
         id: inputs
-        # The runner image is an input no tracked file records: a new
-        # `ubuntu-latest` can change fonts or rendering libraries, and under
-        # `maxDiffPixels: 0` that is a different verdict. `ImageOS` and
-        # `ImageVersion` are set on every hosted runner.
+        # The pinned container digest identifies the render environment.
         # Fail closed. A bare `$(...)` inside `echo` swallows a failing script and
         # yields a key ending in `-` with no hash: one constant key that every
         # later pull request would match, skipping the job on a verdict nothing
         # earned. So the hash is taken on its own line under `set -e`, checked for
-        # shape, and only then written. The image variables must be non-empty
-        # for the same reason.
+        # shape, and only then written. The key also names the pinned image.
         run: |
           set -euo pipefail
-          : "${ImageOS:?}" "${ImageVersion:?}"
           inputs="$(node scripts/render-inputs.mjs)"
           if ! [[ "${inputs}" =~ ^[0-9a-f]{64}$ ]]; then
             echo "::error::render-inputs.mjs printed '${inputs}', not a hash. Refusing to key a verdict on it."
             exit 1
           fi
-          echo "key=visual-verdict-${ImageOS}-${ImageVersion}-${inputs}" >> "$GITHUB_OUTPUT"
+          echo "key=visual-verdict-dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e-${inputs}" >> "$GITHUB_OUTPUT"
 
       - name: Previous Verdict
         id: verdict
@@ -535,11 +555,6 @@ jobs:
         if: steps.verdict.outputs.cache-hit != 'true' && matrix.shard == 1
         run: pnpm check:story-conventions
 
-      - name: Install Playwright Browsers
-        if: steps.verdict.outputs.cache-hit != 'true'
-        id: playwright
-        uses: ./.github/actions/install-playwright
-
       # Each suite names its own JSON report: they share one config, and a
       # fixed path would keep only whichever ran second.
       - name: Run Visual Regression Tests
@@ -574,7 +589,6 @@ jobs:
           --playwright visual=telemetry/visual.json
           --playwright a11y=telemetry/a11y.json
           --cache storybook=${{ steps.storybook-cache.outputs.cache-hit }}
-          --cache playwright=${{ steps.playwright.outputs.cache-hit }}
 
       - name: Upload Telemetry
         if: (success() || failure()) && steps.verdict.outputs.cache-hit != 'true'
@@ -606,7 +620,6 @@ jobs:
           name: playwright-snapshots-${{ matrix.shard }}
           path: packages/design-system/tests/__snapshots__/
           retention-days: 7
-
 
   # The verdict, recorded once every shard has passed.
   #
