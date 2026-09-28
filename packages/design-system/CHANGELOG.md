@@ -21,7 +21,6 @@ compare both theme-switching paths. Story selection remains in shadow mode.
 
 The report package's 0.1.1 release admits both 0.12.x and 0.13.x design-system peers.
 
-
 **ESM only.** The package is `"type": "module"` and ships one build: `dist/index.js` and one
 `.js` file per module. The CommonJS build, `main` and `module` are gone, and `exports["."]` is
 `{ types, default }`. No export was added or removed, and the CSS, token and terminal subpaths are
