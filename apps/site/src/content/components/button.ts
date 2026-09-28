@@ -47,7 +47,7 @@ export const button: ComponentPageDef = {
       id: 'pending',
       title: 'Pending state',
       description:
-        'The label says what happens: `PUBLISH`, then `PUBLISHING`, then `PUBLISHED`. While the work runs, `disabled` stops a second press, and a `Spinner` with a `label` gives assistive technology something to read.',
+        'While publishing, `pending` preserves focus and the button label while refusing a second press. `pendingLabel` announces progress through a separate status region. The label changes to `PUBLISHED` when the work finishes.',
       file: 'button/pending.tsx',
     },
   ],

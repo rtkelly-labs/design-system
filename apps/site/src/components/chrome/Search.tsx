@@ -127,6 +127,9 @@ function SearchDialog({
   };
 
   const activeId = results[active] ? `${uid}-opt-${results[active].id}` : undefined;
+  useEffect(() => {
+    if (isOpen && activeId) document.getElementById(activeId)?.scrollIntoView({ block: 'nearest' });
+  }, [isOpen, activeId]);
 
   return (
     <Modal

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button, Spinner } from '@rtkelly13/design-system';
+import { Button } from '@rtkelly13/design-system';
 
 type Phase = 'idle' | 'publishing' | 'published';
 
@@ -19,15 +19,11 @@ export default function PendingButton() {
       <Button
         variant="primary"
         bracketed
-        disabled={phase === 'publishing'}
-        aria-live="polite"
+        pending={phase === 'publishing'}
+        pendingLabel="Publishing"
         onClick={() => setPhase(phase === 'published' ? 'idle' : 'publishing')}
       >
-        {phase === 'publishing' ? (
-          <>
-            <Spinner size="sm" label="Publishing" /> PUBLISHING
-          </>
-        ) : phase === 'published' ? (
+        {phase === 'published' ? (
           'PUBLISHED'
         ) : (
           'PUBLISH'
