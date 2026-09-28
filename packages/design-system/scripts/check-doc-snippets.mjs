@@ -283,11 +283,11 @@ for (const file of DOCS) {
       }
 
       // A string literal assigned to a closed union must be one of its members.
-      for (const literal of attrs.matchAll(/([a-zA-Z][\w-]*)="([^"]*)"/g)) {
+      for (const literal of attrs.matchAll(/([a-zA-Z][\w-]*)=(["'])(.*?)\2/g)) {
         const allowed = STRING_VALUES.get(name)?.get(literal[1]);
-        if (allowed && !allowed.includes(literal[2])) {
+        if (allowed && !allowed.includes(literal[3])) {
           problems.push(
-            `${file}:${at} — <${name} ${literal[1]}="${literal[2]}"> must be one of: ${allowed.join(', ')}`
+            `${file}:${at} — <${name} ${literal[1]}="${literal[3]}"> must be one of: ${allowed.join(', ')}`
           );
         }
       }
