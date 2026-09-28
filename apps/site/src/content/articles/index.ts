@@ -27,7 +27,7 @@ export const installation: ArticleDef = {
   title: 'Installation',
   group: 'Getting started',
   lede:
-    'Install the package, import one stylesheet, and mount the provider. Then set up Next.js, which today needs a client boundary.',
+    'Install the package, import one stylesheet, and mount the provider. Then set up Next.js with Server Components and client islands.',
   sections: [
     { id: 'install', title: 'Install the package', depth: 2 },
     { id: 'stylesheet', title: 'Import the stylesheet', depth: 2 },

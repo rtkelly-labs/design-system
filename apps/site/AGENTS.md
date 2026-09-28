@@ -34,12 +34,10 @@ map, as an npm consumer would.
 
 ## Rules that are not discoverable
 
-1. **Server Components import the package through `src/ds.ts`, never directly.**
-   The package has no `"use client"` boundary, so any import from a Server
-   Component fails the build (issue 305). `ds.ts` is that boundary. Its exports
-   are named, because Next rejects `export *` there. Add a name the first time
-   you use it. Files starting with `'use client'` (every example) import the
-   package directly.
+1. **Import directly from `@rtkelly13/design-system`.** The package's per-module
+   build marks interactive components as client references. Server-safe components and
+   helpers remain on the server. Put event handlers in client components and pass
+   serialisable props across their boundaries. The site build verifies this against `dist/`.
 2. **Examples are files, not strings.** A page example is a component under
    `src/examples/<page>/<name>.tsx`, registered in `src/examples/index.ts`. The
    preview mounts it and the code block prints the same file, highlighted at
@@ -65,7 +63,7 @@ map, as an npm consumer would.
 7. **When the package can't express something, record it before working
    around it.** Open an issue on `rtkelly13/design-system` with a repro, then
    put the smallest site-local workaround in place with a comment naming the
-   issue. The current ones are 305, 306, 308, 309, 310, 311 and 312.
+   issue. The current ones are 306, 308, 309, 310, 311 and 312.
 
 ## Adding a component page
 

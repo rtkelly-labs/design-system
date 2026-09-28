@@ -2,7 +2,7 @@
 
 import NextLink from 'next/link';
 import { forwardRef } from 'react';
-import type { LinkComponentProps } from '@/ds';
+import type { LinkComponentProps } from '@rtkelly13/design-system';
 
 /**
  * `next/link`, in the shape the package's `LinkProvider` asks for. Every

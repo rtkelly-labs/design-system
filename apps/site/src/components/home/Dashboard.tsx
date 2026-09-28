@@ -14,8 +14,8 @@ import {
   TabsPanel,
   TabsTab,
   useToast,
-} from '@/ds';
-import type { Column } from '@/ds';
+} from '@rtkelly13/design-system';
+import type { Column } from '@rtkelly13/design-system';
 import {
   DEPLOYMENTS,
   DEPLOYS_14D,

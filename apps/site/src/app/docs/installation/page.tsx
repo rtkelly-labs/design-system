@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
-import { CodeTab, CodeTabs, NoteBlock } from '@/ds';
+import { CodeTab, CodeTabs } from '@rtkelly13/design-system';
 import { Article, Heading } from '@/components/docs/Article';
 import { Code } from '@/components/docs/Code';
 import { installation as article } from '@/content/articles';
 
 export const metadata: Metadata = { title: article.title, description: article.lede };
-
-const ISSUE_RSC = 'https://github.com/rtkelly13/design-system/issues/305';
 
 export default function InstallationPage() {
   return (
@@ -76,9 +74,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </p>
       <Code
         title="app/theme-init-script.tsx"
-        code={`'use client';
-
-import { getThemeInitScript } from '@rtkelly13/design-system';
+        code={`import { getThemeInitScript } from '@rtkelly13/design-system';
 
 export function ThemeInitScript() {
   return <script dangerouslySetInnerHTML={{ __html: getThemeInitScript({ defaultLevel: 'midnight' }) }} />;
@@ -105,8 +101,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       />
       <p>
         <code>suppressHydrationWarning</code> is needed because the script may change <code>data-theme</code> before
-        React hydrates. The script is in a client component only because of the limitation described next. It is still
-        rendered into the static HTML, so it runs before paint.
+        React hydrates. The helper is server-safe, so the server layout writes the script into the static HTML
+        before first paint.
       </p>
 
       <Heading article={article} id="nextjs" />
@@ -116,30 +112,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </p>
 
       <Heading article={article} id="client-boundary" />
-      <NoteBlock type="warning" title="KNOWN LIMITATION">
-        Today the package cannot be imported from a Server Component. It ships one bundle with no{' '}
-        <code>&quot;use client&quot;</code> directive, and that bundle calls <code>createContext</code> at module scope. Any
-        import from a Server Component fails the build with{' '}
-        <em>“You&apos;re importing a module that depends on createContext into a React Server Component module”</em>. This
-        includes a stateless <code>Card</code> and a pure function like <code>getThemeInitScript</code>. Tracked in{' '}
-        <a href={ISSUE_RSC}>issue 305</a>.
-      </NoteBlock>
       <p>
-        Until that is fixed, add one client boundary of your own and import the package only through it. Next.js rejects{' '}
-        <code>export *</code> from a client boundary, so list the names:
+        Import directly from the package in Server Components. Static components render on the server,
+        while interactive components carry their own client boundaries. Pass serialisable props to those
+        components and put event handlers inside your own client components.
       </p>
       <Code
-        title="src/ds.ts"
-        code={`'use client';
+        title="app/page.tsx"
+        code={`import { Card, Button } from '@rtkelly13/design-system';
 
-export { Button, Card, Modal, DataTable, Prose, CodeBlock } from '@rtkelly13/design-system';
-export type { ButtonVariant, Column } from '@rtkelly13/design-system';`}
+export default function Page() {
+  return <Card><Button href="/docs">READ THE DOCS</Button></Card>;
+}`}
       />
       <p>
-        Server Components can then render any of those. They become client references, so props must be serialisable
-        (no event handlers from a Server Component), and a pure helper imported through this file cannot be called on the
-        server. Client components (any file starting with <code>&apos;use client&apos;</code>) can import from the package
-        directly, as every example on this site does.
+        The default Turbopack build needs no extra setting. For webpack, add
+        <code>experimental.optimizePackageImports: ['@rtkelly13/design-system']</code> to
+        <code>next.config.ts</code> to keep unused client modules out of the browser bundle.
+        Call <code>getThemeInitScript</code> directly in the server layout's head.
       </p>
 
       <Heading article={article} id="router-links" />

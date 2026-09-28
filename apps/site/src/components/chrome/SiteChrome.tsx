@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { MobileNav, SiteFooter, SiteHeader, SiteNav, SiteNavItem } from '@/ds';
+import { MobileNav, SiteFooter, SiteHeader, SiteNav, SiteNavItem } from '@rtkelly13/design-system';
 import { REPO_URL, STORYBOOK_URL } from '@/lib/links';
 import { SearchButton } from './SearchButton';
 import { ThemeMenu } from './ThemeMenu';

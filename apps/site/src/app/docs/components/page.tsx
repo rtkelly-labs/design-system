@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { AnchorHeading } from '@/ds';
+import { AnchorHeading } from '@rtkelly13/design-system';
 import { Article } from '@/components/docs/Article';
 import { catalogue as article } from '@/content/articles';
 import { COMPONENT_PAGES, componentHref } from '@/content/registry';

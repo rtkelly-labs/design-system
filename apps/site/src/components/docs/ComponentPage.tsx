@@ -1,4 +1,4 @@
-import { AnchorHeading, Breadcrumbs, DocPager, Prose } from '@/ds';
+import { AnchorHeading, Breadcrumbs, DocPager, Prose } from '@rtkelly13/design-system';
 import { componentHref, pagerFor, propsSectionId } from '@/content/registry';
 import type { ComponentPageDef } from '@/content/types';
 import { catalogueEntry, componentDoc, sourceHref, storybookHref } from '@/lib/docs-data';

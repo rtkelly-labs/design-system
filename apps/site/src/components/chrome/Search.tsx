@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
-import { Input, Modal } from '@/ds';
+import { Input, Modal } from '@rtkelly13/design-system';
 import { searchEntries } from '@/lib/search';
 import type { SearchEntry } from '@/lib/search';
 

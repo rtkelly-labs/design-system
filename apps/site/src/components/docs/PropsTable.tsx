@@ -1,4 +1,4 @@
-import { Badge, Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/ds';
+import { Badge, Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@rtkelly13/design-system';
 import { componentDoc } from '@/lib/docs-data';
 import { Inline } from './Inline';
 

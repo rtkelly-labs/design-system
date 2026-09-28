@@ -1,4 +1,4 @@
-import { Button, CodeBlock, CTASection, Hero } from '@/ds';
+import { Button, CodeBlock, CTASection, Hero } from '@rtkelly13/design-system';
 import { SiteChrome } from '@/components/chrome/SiteChrome';
 import { ButtonPlayground } from '@/components/home/ButtonPlayground';
 import { Dashboard } from '@/components/home/Dashboard';

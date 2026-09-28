@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { LinkProvider, ThemeProvider, ToastProvider } from '@/ds';
+import { LinkProvider, ThemeProvider, ToastProvider } from '@rtkelly13/design-system';
 import type { SearchEntry } from '@/lib/search';
 import { RouterLink } from './RouterLink';
 import { SearchProvider } from './Search';

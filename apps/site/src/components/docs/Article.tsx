@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { AnchorHeading, DocPager, Prose } from '@/ds';
+import { AnchorHeading, DocPager, Prose } from '@rtkelly13/design-system';
 import { pagerFor } from '@/content/registry';
 import type { ArticleDef } from '@/content/types';
 import { PageIntro } from './PageIntro';
