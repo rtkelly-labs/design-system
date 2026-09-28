@@ -97,6 +97,12 @@ measurements rather than a guess:
   233); every push to `main` runs the full matrix with `A11Y_FULL_MATRIX=1`, so the
   claim that the rest agree with desktop is re-checked after every merge rather
   than trusted. The evidence and the rule are in `scannedIn`, `tests/a11y.spec.ts`.
+- **The a11y suite reaches its second Level without a second page load** on pull
+  requests: the story is loaded once and the Level switched through Storybook's
+  preview channel (`LEVEL_SWITCH` in `tests/a11y.spec.ts`). Each story is one test
+  with a step per Level, since Playwright gives every test a fresh page. `main`
+  runs `A11Y_LEVEL_SWITCH=compare`, which also loads the Level fresh and fails
+  if the two violation sets differ in any rule, impact or node.
 - **`visual` reuses a verdict its inputs already earned.** Its first step hashes
   every tracked file that can reach the job's result (`scripts/render-inputs.mjs`,
   default-deny; `--list` prints what it leaves out and why) and, on a pull request,
