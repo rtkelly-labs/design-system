@@ -26,9 +26,6 @@ export function SiteChrome({ children }: { children: ReactNode }) {
     <>
       <SiteHeader
         sticky
-        // `sticky` alone sits on z-raised, the same layer as a Tabs strip, so
-        // scrolled tabs paint over the header (issue 308).
-        className="z-top"
         brand={<span>[ RTK / DS ]</span>}
         nav={<SiteNav label="Primary">{items}</SiteNav>}
         mobileNav={<MobileNav label="Primary">{items}</MobileNav>}

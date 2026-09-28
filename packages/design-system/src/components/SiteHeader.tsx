@@ -80,7 +80,7 @@ const siteHeader = recipe({
       lg: { nav: 'lg:block', mobile: 'lg:hidden' },
     },
     sticky: {
-      true: { root: 'sticky top-0 z-raised' },
+      true: { root: 'sticky top-0 z-top' },
     },
   },
   defaultVariants: { collapseAt: 'md' },

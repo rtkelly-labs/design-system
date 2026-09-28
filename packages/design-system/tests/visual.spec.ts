@@ -38,6 +38,8 @@ interface VisualCase {
    * asserted as numbers rather than left for a reviewer to notice.
    */
   onScreen?: string;
+  /** Scroll the tab strip beneath the sticky banner, then assert its paint order. */
+  scrollUnderHeader?: boolean;
 }
 
 /**
@@ -108,6 +110,7 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-navigation-siteheader--blog', snapshot: 'siteheader-blog.png' },
   { id: 'components-navigation-siteheader--marketing', snapshot: 'siteheader-marketing.png' },
   { id: 'components-navigation-siteheader--project-site', snapshot: 'siteheader-project-site.png' },
+  { id: 'components-navigation-siteheader--sticky-tabs', snapshot: 'siteheader-sticky-tabs.png', scrollUnderHeader: true },
   // A group open on load: the `Menu` its links open in, anchored to the nav.
   { id: 'components-navigation-sitenav--with-children', snapshot: 'sitenav-with-children.png' },
   { id: 'components-navigation-sitefooter--columns', snapshot: 'sitefooter-columns.png' },
@@ -596,11 +599,31 @@ test.describe('Design System Visual Regression - Interaction states', () => {
 });
 
 test.describe('Design System Visual Regression - Components', () => {
-  for (const { id, snapshot, fullPage } of CASES) {
+  for (const { id, snapshot, fullPage, scrollUnderHeader } of CASES) {
     test(`${id}`, { tag: '@chromium-only' }, async ({ page }, testInfo) => {
       test.skip(testInfo.project.name !== 'chromium', 'Desktop baselines are the chromium project');
       await page.goto(`/iframe.html?id=${id}&viewMode=story`);
       await waitForStoryReady(page, id);
+      if (scrollUnderHeader) {
+        const header = page.locator('[data-slot="site-header"]');
+        const tab = page.getByRole('tab', { name: '24H' });
+        await tab.evaluate((element) => {
+          const banner = document.querySelector('[data-slot="site-header"]')!;
+          const bannerBox = banner.getBoundingClientRect();
+          const tabBox = element.getBoundingClientRect();
+          window.scrollBy({
+            top: tabBox.top - bannerBox.height / 2 + tabBox.height / 2,
+            behavior: 'instant',
+          });
+        });
+        const coveredByHeader = await tab.evaluate((element) => {
+          const box = element.getBoundingClientRect();
+          return Boolean(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
+            ?.closest('[data-slot="site-header"]'));
+        });
+        await expect(header).toBeVisible();
+        expect(coveredByHeader, 'Sticky banner paints above the scrolled selected tab').toBe(true);
+      }
       await expect(page).toHaveScreenshot(snapshot, fullPage ? { fullPage: true } : undefined);
     });
   }
