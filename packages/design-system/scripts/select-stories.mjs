@@ -169,7 +169,7 @@ function shadow(opts) {
   const base = opts.base ?? parentOfHead();
   const asserted = assertedIds(show(head, VISUAL) ?? '', show(head, A11Y) ?? '');
   const ctx = context(merged, index, asserted, base, head);
-  const image = process.env.ImageOS && process.env.ImageVersion ? `${process.env.ImageOS}-${process.env.ImageVersion}` : null;
+  const image = process.env.RENDER_IMAGE ?? null;
   const selection = selectStories(changesBetween(base, head), ctx, { asserted, image: { current: image } });
 
   const reports = (opts.playwright ?? [])
