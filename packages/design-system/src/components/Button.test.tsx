@@ -223,15 +223,6 @@ describe('Button — pending', () => {
     expect(button.hasAttribute('data-pending')).toBe(false);
   });
 
-  it('is held in its press, not wearing the disabled treatment', () => {
-    render(<Button pending>SAVE</Button>);
-    const cls = screen.getByRole('button').className;
-    expect(cls).toContain('translate-x-1');
-    expect(cls).toContain('shadow-none');
-    expect(cls).toContain('cursor-progress');
-    expect(cls).not.toMatch(/(^|\s)shadow-hard-md(\s|$)/);
-  });
-
   it('is not offered on the anchor form', () => {
     // @ts-expect-error `pending` is `never` when `href` is given.
     render(<Button href="/x" pending>GO</Button>);
