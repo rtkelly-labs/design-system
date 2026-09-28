@@ -286,6 +286,8 @@ for (const [cp, sites] of [...rendered].sort((a, b) => a[0] - b[0])) {
  * Routing them through the role variables changes typography, not glyph
  * coverage, so it is its own pull request (fix/role-font-stacks), which lowers
  * this budget to zero and deletes it. Until then the count may only fall.
+ * Retiring AdminDashboardLayout lowered the current count to 28, so the
+ * ratchet now records 28 rather than the original 43.
  */
 const INLINE_STACK_BUDGET = 28;
 if (listing) {

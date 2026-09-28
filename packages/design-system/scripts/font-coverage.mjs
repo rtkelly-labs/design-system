@@ -213,10 +213,12 @@ const NAMED = {
 /** Decode `&name;`, `&#123;` and `&#x7b;`. Unknown names are returned in `unknown`. */
 export function decodeEntities(text) {
   const unknown = [];
-  const decoded = text.replace(/&(#x[0-9a-fA-F]+|#[0-9]+|[a-zA-Z][a-zA-Z0-9]*);/g, (whole, body) => {
+  const decoded = text.replace(/&(#[xX][0-9a-fA-F]+|#[0-9]+|[a-zA-Z][a-zA-Z0-9]*);/g, (whole, body) => {
     if (body[0] === '#') {
       const cp = body[1] === 'x' || body[1] === 'X' ? parseInt(body.slice(2), 16) : parseInt(body.slice(1), 10);
-      return String.fromCodePoint(cp);
+      if (cp <= 0x10ffff && !(cp >= 0xd800 && cp <= 0xdfff)) return String.fromCodePoint(cp);
+      unknown.push(whole);
+      return whole;
     }
     if (body in NAMED) return NAMED[body];
     unknown.push(whole);

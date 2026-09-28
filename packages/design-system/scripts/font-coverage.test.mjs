@@ -112,6 +112,12 @@ describe('census extractors', () => {
 });
 
 describe('entities', () => {
+  it('reports invalid numeric entities without throwing, and accepts uppercase hex', () => {
+    expect(decodeEntities('&#x110000; &#99999999; &#xD800; &#X2713;')).toEqual({
+      decoded: '&#x110000; &#99999999; &#xD800; ✓',
+      unknown: ['&#x110000;', '&#99999999;', '&#xD800;'],
+    });
+  });
   it('decodes named, decimal and hex entities, and reports unknown names', () => {
     expect(decodeEntities('a &rarr; &#x2713; &#8984; &bogus;')).toEqual({ decoded: 'a → ✓ ⌘ &bogus;', unknown: ['&bogus;'] });
   });
