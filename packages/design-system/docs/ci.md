@@ -8,7 +8,7 @@ Which job runs what and why, and how to review what a change looks like.
 
 ## ⚙️ CI Shape
 
-`ci.yml` runs **four jobs in parallel**, then a fifth that reports their
+`ci.yml` runs **five jobs in parallel**, then a sixth that reports their
 combined verdict. `visual` is itself three runners — a matrix of shards, each
 taking a third of both browser suites — and `record` saves its verdict once all
 three have passed.
@@ -39,7 +39,8 @@ trigger is the post-merge signal for the default branch specifically.
 | `package` | `build`, `check:bundle-size`, `check:dep-cost`, `check:import-cost`, `check:api`, and the report generator | 85s | 10m |
 | `visual` | `build-storybook`, `check:visual-coverage`, `check:docgen-props`, `check:story-conventions`, `test:visual`, `test:a11y` | 430s | 25m |
 | `record` | nothing — saves the verdict key once every `visual` shard passed; not in `verify`'s `needs` | 5s | 5m |
-| `verify` | nothing — fails unless the four above succeeded | 10s | 5m |
+| `site` | builds this package, then the applied site in `apps/site` against its `dist/`: docgen, lint and the published colour scanner at zero, a typecheck and the static Next.js export | 90s | 15m |
+| `verify` | nothing — fails unless the five above succeeded | 10s | 5m |
 
 **Check names are lowercase, snake_case, and at most two words**, taken from the
 shared lexicon in `shared-utilities` (`ci`, `build`, `test`, `lint`, `visual`,

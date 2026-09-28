@@ -39,3 +39,11 @@ reference/bookofshapes/contact-sheet.html
 # npm pack output. Generated for local verification against a consumer before
 # publishing; never a committed artifact.
 *.tgz
+
+# The applied site: Next.js build output, the static export, and the docs data
+# generated from the package (a cache of the package, never a source).
+apps/site/.next/
+apps/site/out/
+apps/site/next-env.d.ts
+apps/site/src/generated/
+apps/site/*.tsbuildinfo

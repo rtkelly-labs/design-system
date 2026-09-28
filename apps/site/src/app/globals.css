@@ -1,0 +1,33 @@
+/* The package contract, exactly as a consumer is told to write it: the full
+ * stylesheet (Tailwind, the generated theme.css, prose.css and the fonts) and
+ * nothing re-declared. Tailwind scans this app's `src/` automatically; the
+ * package's own `@source` covers the compiled components. */
+@import "@rtkelly13/design-system/styles.css";
+
+/* Code colours, by role.
+ *
+ * Shiki's css-variables theme emits `var(--shiki-token-*)`; these point each
+ * slot at a design-system role. Declared on the code block rather than on
+ * `:root` on purpose: a custom property holding `var()` is substituted where it
+ * is declared, so a `:root` mapping would freeze every block at the page's
+ * level and a block inside a scoped `sketch` panel would keep midnight's ink.
+ * Declared here, it resolves against whatever level the block sits in.
+ *
+ * A stand-in for a syntax Group the package does not have yet (issue 148). */
+.docs-codeblock,
+[data-slot='inline-code'] {
+  --shiki-foreground: var(--ds-text-primary);
+  --shiki-background: transparent;
+  --shiki-token-keyword: var(--ds-accent-secondary);
+  --shiki-token-constant: var(--ds-accent-tertiary);
+  --shiki-token-string: var(--ds-intent-success);
+  --shiki-token-string-expression: var(--ds-intent-success);
+  --shiki-token-comment: var(--ds-text-muted);
+  --shiki-token-function: var(--ds-accent-primary);
+  --shiki-token-parameter: var(--ds-text-primary);
+  --shiki-token-punctuation: var(--ds-text-secondary);
+  --shiki-token-link: var(--ds-accent-primary);
+  --shiki-token-inserted: var(--ds-intent-success);
+  --shiki-token-deleted: var(--ds-intent-danger);
+  --shiki-token-changed: var(--ds-intent-warning);
+}

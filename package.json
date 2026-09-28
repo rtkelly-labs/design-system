@@ -1,7 +1,7 @@
 {
   "name": "@rtkelly13/design-system-workspace",
   "private": true,
-  "description": "Workspace root. The published packages live under packages/ \u2014 see README.md.",
+  "description": "Workspace root. The published packages live under packages/ — see README.md.",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -16,6 +16,8 @@
     "test:visual": "pnpm --filter @rtkelly13/design-system test:visual",
     "test:a11y": "pnpm --filter @rtkelly13/design-system test:a11y",
     "walkthrough": "pnpm --filter @rtkelly13/design-system walkthrough",
-    "report": "pnpm --filter @rtkelly13/design-system-report report"
+    "report": "pnpm --filter @rtkelly13/design-system-report report",
+    "site": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-site dev",
+    "site:build": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-site build"
   }
 }

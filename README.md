@@ -1,6 +1,7 @@
 # design-system — workspace
 
-The published packages live under [`packages/`](./packages). This root holds only what
+The published packages live under [`packages/`](./packages), and private applications that
+consume them under [`apps/`](./apps). This root holds only what
 belongs to the repository rather than to any one package: the workflows, the single
 `pnpm-lock.yaml` a workspace install writes, `vercel.json`, and the unlicensed
 [`reference/`](./reference) material that no package ships.
@@ -8,6 +9,10 @@ belongs to the repository rather than to any one package: the workflows, the sin
 | Package | |
 |---|---|
 | [`@rtkelly13/design-system`](./packages/design-system) | The design system itself — components, the two-level theme ladder, the tokens, and the gates that hold them. Start at its [`AGENTS.md`](./packages/design-system/AGENTS.md). |
+
+| App | |
+|---|---|
+| [`@rtkelly13/design-system-site`](./apps/site) | Private. The applied site: a Next.js App Router website built only from the package — a live homepage and the component documentation. Not deployed. See its [`AGENTS.md`](./apps/site/AGENTS.md). |
 
 One package, for now. The layout is what makes a second one a normal addition rather than a
 restructure — which is why it landed before there was a second package to justify it. The
@@ -21,6 +26,7 @@ pnpm install                 # one install, both packages
 pnpm build                   # build every package, in dependency order
 pnpm -r test                 # every package's unit suite
 pnpm storybook               # the design system's Storybook
+pnpm site                    # build the package, then the applied site on :3000
 ```
 
 Anything narrower is a package concern: `cd packages/design-system` and use the scripts
