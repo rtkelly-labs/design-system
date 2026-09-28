@@ -36,7 +36,7 @@ export const CATALOGUE = data.catalogue as readonly CatalogueEntry[];
 const COMPONENTS = data.components as Record<string, ComponentDoc>;
 
 export { REPO_URL, STORYBOOK_URL } from './links';
-import { REPO_URL, STORYBOOK_URL } from './links';
+import { REPO_URL, storybookUrl } from './links';
 
 export function componentDoc(name: string): ComponentDoc {
   const doc = COMPONENTS[name];
@@ -50,5 +50,5 @@ export function catalogueEntry(name: string): CatalogueEntry {
   return entry;
 }
 
-export const storybookHref = (entry: CatalogueEntry) => `${STORYBOOK_URL}/?path=/docs/${entry.storyId}--docs`;
+export const storybookHref = (entry: CatalogueEntry) => storybookUrl(`/docs/${entry.storyId}--docs`);
 export const sourceHref = (file: string) => `${REPO_URL}/blob/main/packages/design-system/${file}`;

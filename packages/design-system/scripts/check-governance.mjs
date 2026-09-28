@@ -474,6 +474,14 @@ const PLANNED = {
   'check:separation': 'OKLab ΔE separation gate — #76, specified in docs/theme-taxonomy.md § 5 and docs/palette-provenance.md',
   evidence: 'Piece 1 of the evidence pipeline — designed, not built, in docs/evidence-pipeline.md',
 };
+/**
+ * The workspace root's scripts. `build:deploy` assembles the Vercel output
+ * across the package and `apps/site`, so it lives at the root, and this
+ * package's docs (hosting.md) name it. A root script is as real as a package one.
+ */
+const ROOT_SCRIPTS = Object.keys(JSON.parse(readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8')).scripts ?? {});
+const isScript = (name) => scripts.includes(name) || ROOT_SCRIPTS.includes(name);
+
 /** The namespaces this package's scripts use, so `foo:bar` in prose is ignored. */
 const NAMESPACES = new Set(scripts.map((s) => s.split(':')[0]));
 
@@ -498,7 +506,7 @@ for (const file of PROSE) {
   lines(file).forEach((line, i) => {
     const at = `${file}:${i + 1}`;
     for (const [, name] of line.matchAll(/`pnpm ([\w:-]+)[^`]*`/g)) {
-      if (PNPM_BUILTINS.has(name) || scripts.includes(name)) continue;
+      if (PNPM_BUILTINS.has(name) || isScript(name)) continue;
       if (name in PLANNED) { note('names', true, `${at} — ${name} (planned: ${PLANNED[name]})`); continue; }
       problems.push(
         `${at}: names \`pnpm ${name}\`, which is not a script in package.json. ` +
@@ -508,7 +516,7 @@ for (const file of PROSE) {
     }
     for (const [, name] of line.matchAll(/`([a-z][\w-]*:[\w:-]+)`/g)) {
       if (!NAMESPACES.has(name.split(':')[0])) continue;
-      if (scripts.includes(name)) continue;
+      if (isScript(name)) continue;
       if (name in PLANNED) { note('names', true, `${at} — ${name} (planned: ${PLANNED[name]})`); continue; }
       problems.push(
         `${at}: names \`${name}\`, which looks like one of this package's ` +

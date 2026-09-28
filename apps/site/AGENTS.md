@@ -1,8 +1,11 @@
 # AGENTS.md — @rtkelly13/design-system-site
 
 The applied design-system website: a Next.js App Router site built only from
-`@rtkelly13/design-system`. It has a homepage of live demos and component docs.
-It is private, it is not published, and **nothing deploys it**.
+`@rtkelly13/design-system`. It has a homepage of live demos, component docs and
+full-page examples. It is private and not published. It **is** deployed, but not by a
+project of its own: the Storybook Vercel project serves it under `/site/`, beside
+Storybook at `/` ([`docs/hosting.md`](../../packages/design-system/docs/hosting.md),
+"The applied site, embedded").
 
 It is also the repo's one real Next.js consumer. It is where Server Components,
 client boundaries, SSR and hydration are tested against the package's built
@@ -24,9 +27,9 @@ map, as an npm consumer would.
 
 | | |
 |---|---|
-| `pnpm dev` | generate docs data, then `next dev` on :3000 |
+| `pnpm dev` | generate docs data, then `next dev` at http://localhost:3000/site |
 | `pnpm build` | generate docs data, then the static export to `out/` |
-| `pnpm start` | serve `out/` on :3100 with `npx serve` |
+| `pnpm start` | serve `out/` at http://localhost:3100/site the way Vercel serves it (`scripts/serve-deploy.mjs`) |
 | `pnpm generate` | rewrite `src/generated/docs-data.json` from the package (gitignored) |
 | `pnpm lint` | typescript-eslint, `react-hooks` and `jsx-a11y`, with zero warnings allowed |
 | `pnpm check:tokens` | the package's published `scanTokenRules` over `src/`, budget 0 |
@@ -64,6 +67,20 @@ map, as an npm consumer would.
    around it.** Open an issue on `rtkelly13/design-system` with a repro, then
    put the smallest site-local workaround in place with a comment naming the
    issue. The current ones are 306, 308, 309, 310, 311 and 312.
+
+8. **Everything is under the `/site` basePath, and Storybook is not.** `next/link`,
+   `router.push` and the package's links (through `RouterLink`) add the prefix, so
+   write internal hrefs as `/docs/...`, never `/site/docs/...`. A plain `<a>` to an
+   internal page does not get it and 404s. Storybook links are the reverse: build them
+   with `storybookUrl()` from `src/lib/links.ts`, which returns a root-relative
+   `/?path=...` that `RouterLink` leaves alone, so one build links correctly on every
+   domain. Under `next dev` they point at production, because nothing serves `/`.
+9. **Examples are compositions the package exports.** A sample page under
+   `/examples/<slug>/` is registered in `src/content/samples.ts` and rendered by
+   `src/samples/index.tsx`. Story fixtures in `packages/design-system/src/stories/`
+   import components from source by relative path, so importing one here would
+   compile a second copy of the library into the site. Move a fixture to where both
+   can import it first; do not copy it.
 
 ## Adding a component page
 

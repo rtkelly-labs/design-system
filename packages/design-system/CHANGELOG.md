@@ -9,7 +9,17 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
-## Unreleased
+## 0.13.0
+
+This batch adds the focus-preserving Button pending state, shipped symbol coverage and
+role-based typography. The package emits one file per module and supports imports from
+Next.js Server Components. It ships ESM only; the migration notes follow below.
+
+The applied documentation site and sample projects now share the Storybook deployment
+under `/site`. Browser CI uses a pinned Playwright container, and accessibility tests
+compare both theme-switching paths. Story selection remains in shadow mode.
+
+The report package's 0.1.1 release admits both 0.12.x and 0.13.x design-system peers.
 
 **ESM only.** The package is `"type": "module"` and ships one build: `dist/index.js` and one
 `.js` file per module. The CommonJS build, `main` and `module` are gone, and `exports["."]` is
