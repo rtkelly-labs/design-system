@@ -5,11 +5,8 @@ import { storybookUrl } from '@/lib/links';
  * full-page at `/examples/<slug>/` with no site chrome around it, so they read
  * as the product a consumer would ship rather than as a docs figure.
  *
- * Only compositions the package itself exports belong here. The site builds
- * against the package's `dist/` as an npm consumer does, so the story fixtures
- * under `packages/design-system/src/stories/` — which import components from
- * source by relative path — cannot be imported without compiling a second copy
- * of the library into the site. See docs/hosting.md, "Sample projects".
+ * Exported pages and generated canonical admin fixtures resolve all design-system
+ * components through the built package, sharing the site providers.
  *
  * Metadata only: the page components live in `src/samples/`, keyed by slug, so
  * the root layout can read this for search without importing client code.
@@ -36,10 +33,17 @@ export const SAMPLES: readonly SampleDef[] = [
   },
   {
     slug: 'admin-dashboard',
-    title: 'Admin dashboard',
+    title: 'Finance console',
     lede: 'An operations console: a navigation rail, status badges, summary cards, a level switch and a sync action acknowledged with a toast.',
-    components: ['AdminDashboardLayout', 'Card', 'Badge', 'Avatar', 'Toast'],
-    story: storybookUrl('/story/saas-admindashboardlayout--with-notifications'),
+    components: ['AppShell', 'DataTable', 'StatCard', 'Avatar', 'Toast'],
+    story: storybookUrl('/story/saas-admindashboard--finance-console'),
+  },
+  {
+    slug: 'content-studio',
+    title: 'Content studio',
+    lede: 'An editorial admin with a navigation rail, publication states and a content queue.',
+    components: ['AppShell', 'DataTable', 'Badge', 'Menu'],
+    story: storybookUrl('/story/saas-admindashboard--content-studio'),
   },
 ];
 

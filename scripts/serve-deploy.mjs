@@ -71,7 +71,8 @@ function resolveFile(pathname) {
     pathname = pathname.slice(mount.length) || '/';
   }
   const target = path.join(dir, pathname);
-  if (!target.startsWith(dir)) return null;
+  const relative = path.relative(dir, target);
+  if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) return null;
   if (!existsSync(target)) return null;
   const stat = statSync(target);
   if (stat.isFile()) return target;
@@ -118,6 +119,6 @@ function log(req, status) {
   console.log(`${status} ${req.method} ${req.url}`);
 }
 
-server.listen(port, () => {
-  console.log(`Serving ${path.relative(ROOT, dir) || dir} at http://localhost:${port}${mount || ''}/`);
+server.listen(port, '127.0.0.1', () => {
+  console.log(`Serving ${path.relative(ROOT, dir) || dir} at http://localhost:${server.address().port}${mount || ''}/`);
 });

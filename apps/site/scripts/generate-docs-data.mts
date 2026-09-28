@@ -213,3 +213,10 @@ console.log(
   `docs-data: ${catalogue.length} catalogue entries, ${Object.keys(docs).length} components with props ` +
     `(${componentFiles.length} files, ${((Date.now() - started) / 1000).toFixed(1)}s) → ${path.relative(SITE, OUT)}`,
 );
+
+// Render the canonical admin demos against the published package entry.
+// Rewriting imports prevents a second copy of its React contexts in the site.
+const adminSource = readFileSync(path.join(PKG, 'src/stories/admin/fixtures.tsx'), 'utf8');
+const admin = adminSource.replace(/from (['"])\.\.\/\.\.\/(?:components|theme)\/[^'"]+\1/g, "from '@rtkelly13/design-system'");
+if (/from ['"]\./.test(admin)) throw new Error('Admin fixture introduced an unsupported relative import');
+writeFileSync(path.join(SITE, 'src/generated/admin.tsx'), "'use client';\n\n" + admin);

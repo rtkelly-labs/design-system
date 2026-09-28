@@ -1,7 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { AdminDashboardLayout, SaasLandingPage } from '@rtkelly13/design-system';
+import { FinanceConsole, ContentStudio } from '@/generated/admin';
+import { SaasLandingPage } from '@rtkelly13/design-system';
 
 /**
  * The sample pages, keyed by the slug in `src/content/samples.ts`. Each is a
@@ -9,8 +10,6 @@ import { AdminDashboardLayout, SaasLandingPage } from '@rtkelly13/design-system'
  * the site's providers, so it follows the reader's level and the toast queue
  * is live.
  *
- * `SaasLandingPage` has no `<main>` of its own and `AdminDashboardLayout`
- * does, so only the first is wrapped.
  */
 const SAMPLE_PAGES: Record<string, () => ReactNode> = {
   'landing-page': () => (
@@ -18,10 +17,8 @@ const SAMPLE_PAGES: Record<string, () => ReactNode> = {
       <SaasLandingPage />
     </main>
   ),
-  // A fixed 280px rail and no narrow layout, so on a phone the page scrolls
-  // sideways. Left visible on purpose: issue 249 replaces it with two admins on
-  // `AppShell`, and this page should show the package as it is.
-  'admin-dashboard': () => <AdminDashboardLayout />,
+  'admin-dashboard': () => <FinanceConsole />,
+  'content-studio': () => <ContentStudio />,
 };
 
 export function SamplePage({ slug }: { slug: string }) {

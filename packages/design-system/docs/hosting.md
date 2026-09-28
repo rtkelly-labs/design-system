@@ -97,17 +97,17 @@ fetches `/site/` and `/site/docs/components/button/`, checks both are HTML, and 
 the assembly step or the basePath. On a production older than the embed, it means a train is
 due, like any other drift.
 
-**Sample projects.** An example is a composition the package exports, rendered by the site:
-today the `SaasLandingPage` (`SaaS/LandingPage`) and `AdminDashboardLayout`
-(`SaaS/AdminDashboardLayout`). The story-only compositions (the `ProductLaunch` and
-`ProjectSite` landing pages in `src/stories/marketing/fixtures.tsx` and the
-`AccountSettingsForm` in `src/stories/forms/`) are not included. They import components from
-source by relative path, and the site consumes `dist/` as an npm consumer would. Importing them
-would compile a second copy of the library into the site, with its own React contexts, so the
-site's `LinkProvider` and `ThemeProvider` would not reach them. They should move to a private
-workspace package, say `packages/fixtures`, that imports only `@rtkelly13/design-system`.
-Storybook aliases that specifier to `src/index.ts` in `viteFinal`, and the site resolves it to
-`dist/`, so both render the same fixture from one file.
+**Sample projects.** The site renders the exported `SaasLandingPage` and the finance
+console and content studio from Storybook's canonical admin fixtures. The site generator
+writes those fixtures to its ignored `src/generated/admin.tsx`, replacing component and
+theme imports with `@rtkelly13/design-system`. Both hosts render the same composition,
+while the site resolves components through the package's built exports and uses the site's
+providers. Generation fails if another relative import appears.
+
+The retired `AdminDashboardLayout` is replaced by the finance console at the existing
+`/site/examples/admin-dashboard/` URL. The content studio has its own
+`/site/examples/content-studio/` route. Marketing and account story fixtures remain
+outside this phase.
 
 ### Subdomain options for later
 
