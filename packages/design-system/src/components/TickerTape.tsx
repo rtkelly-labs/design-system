@@ -25,6 +25,8 @@ export interface TickerTapeProps extends HTMLAttributes<HTMLDivElement> {
   brakeDuration?: number;
   /** Acceleration duration in seconds when hover leaves (default 0.9s). */
   spoolDuration?: number;
+  /** Whether the marquee animation is paused at its resting position (default false). Useful for deterministic rendering, visual testing, or accessibility pause toggles. */
+  paused?: boolean;
   /** Optional callback receiving current normalized velocity rate (0.0 to 1.0) and percentage. */
   onVelocityChange?: (rate: number, percentage: number) => void;
 }
@@ -64,6 +66,7 @@ export const TickerTape = forwardRef<HTMLDivElement, TickerTapeProps>(
       title = 'TERMINAL // LATEST_DISPATCHES',
       brakeDuration = 0.7,
       spoolDuration = 0.9,
+      paused = false,
       onVelocityChange,
       className,
       onMouseEnter,
@@ -92,6 +95,14 @@ export const TickerTape = forwardRef<HTMLDivElement, TickerTapeProps>(
       const track = trackRef.current;
       if (track) {
         track.style.transform = 'translate3d(0, 0, 0)';
+      }
+
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+      if (paused || prefersReducedMotion) {
+        return;
       }
 
       let animationFrameId: number;
@@ -150,7 +161,7 @@ export const TickerTape = forwardRef<HTMLDivElement, TickerTapeProps>(
 
       animationFrameId = requestAnimationFrame(tick);
       return () => cancelAnimationFrame(animationFrameId);
-    }, [pixelsPerSecond, brakeDuration, spoolDuration, onVelocityChange]);
+    }, [paused, pixelsPerSecond, brakeDuration, spoolDuration, onVelocityChange]);
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
       const state = physicsRef.current;

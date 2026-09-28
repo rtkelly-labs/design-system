@@ -1866,6 +1866,8 @@ interface TickerTapeProps extends HTMLAttributes<HTMLDivElement> {
 
     spoolDuration?: number;
 
+    paused?: boolean;
+
     onVelocityChange?: (rate: number, percentage: number) => void;
 }
 

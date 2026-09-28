@@ -13,6 +13,7 @@ type Story = StoryObj<typeof TickerTape>;
 
 export const Default: Story = {
   args: {
+    paused: true,
     items: [
       'DISTRIBUTED CONSENSUS: RAFT CLUSTER ONLINE',
       'EVENT LOG: 1.2M OPS/SEC SUSTAINED',
@@ -30,8 +31,29 @@ export const Default: Story = {
   },
 };
 
+export const Live: Story = {
+  args: {
+    items: [
+      'DISTRIBUTED CONSENSUS: RAFT CLUSTER ONLINE',
+      'EVENT LOG: 1.2M OPS/SEC SUSTAINED',
+      'COMPILER EXTENSION: SOURCE GEN v0.8.0 PROMOTED',
+      'DESIGN SYSTEM: BRUTALIST TOKENS VERIFIED',
+    ],
+    paused: false,
+    endAddon: (
+      <TelemetryGauge
+        state="cruise"
+        value={100}
+        metricLabel="100%"
+        className="border-none shadow-none"
+      />
+    ),
+  },
+};
+
 export const CustomTitle: Story = {
   args: {
+    paused: true,
     title: 'CRITICAL ALERTS // SRE',
     items: [
       'INGEST NODE 04 DEGRADED (AUTO-REBALANCING)',

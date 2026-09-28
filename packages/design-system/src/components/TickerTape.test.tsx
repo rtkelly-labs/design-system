@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { TickerTape } from './TickerTape';
 
 describe('TickerTape', () => {
@@ -56,6 +56,36 @@ describe('TickerTape', () => {
       <TickerTape items={['CLASS']} className="opacity-50" />,
     );
     expect(container.firstElementChild?.className).toContain('opacity-50');
+  });
+
+  it('does not request animation frames when paused=true', () => {
+    const rafSpy = vi.spyOn(window, 'requestAnimationFrame');
+    render(<TickerTape items={['PAUSED']} paused />);
+    expect(rafSpy).not.toHaveBeenCalled();
+    rafSpy.mockRestore();
+  });
+
+  it('does not request animation frames under prefers-reduced-motion', () => {
+    const original = window.matchMedia;
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes('prefers-reduced-motion'),
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    try {
+      const rafSpy = vi.spyOn(window, 'requestAnimationFrame');
+      render(<TickerTape items={['REDUCED']} />);
+      expect(rafSpy).not.toHaveBeenCalled();
+      rafSpy.mockRestore();
+    } finally {
+      window.matchMedia = original;
+    }
   });
 
   it('emits no palette-pinned class', () => {
