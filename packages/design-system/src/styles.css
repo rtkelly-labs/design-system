@@ -76,6 +76,30 @@
   unicode-range: U+E000-F8FF, U+F0000-FFFFF, U+23FB-23FE, U+2B58;
 }
 
+/* Every symbol a story renders, drawn by a font this package ships.
+ *
+ * None of the text faces above carry arrows, box drawing, blocks, geometric
+ * shapes, dingbats or `⌘`; IBM Plex Mono is latin-only and Nerd Fonts' symbol
+ * set covers none of U+2500-259F. So `→`, `✓`, `⌘` and every ASCII-art rule
+ * were drawn by whatever the machine had installed — Courier New on one runner,
+ * nothing at all for `⌘` there, a different font in the Playwright image. The
+ * visual suite could not tell a regression from a different operating system.
+ *
+ * A 21 KB subset of JetBrains Mono (OFL-1.1, `fonts/DSSymbols-OFL.txt`), cut to
+ * these blocks only, so it never replaces a Latin glyph. Every advance is 600 of
+ * 1000 units, the same as IBM Plex Mono, so box drawing keeps the mono stack's
+ * column width. One weight declared across the whole axis, so bold text never
+ * gets a synthesised, fattened box-drawing line. `check:fonts` fails when a
+ * rendered character reaches no shipped face. */
+@font-face {
+  font-family: "DS Symbols";
+  src: url("./fonts/DSSymbols-Regular.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0370-03FF, U+2190-21FF, U+2300-23FF, U+2500-259F, U+25A0-25FF, U+2600-26FF, U+2700-27BF;
+}
+
 @import "tailwindcss";
 @import "./theme.css";
 @import "./prose.css";
