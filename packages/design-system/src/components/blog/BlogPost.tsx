@@ -113,7 +113,7 @@ export const BlogPost: React.FC<BlogPostProps> = ({
             padding: '1rem 0',
             borderTop: '2px solid var(--ds-border-strong)',
             borderBottom: '2px solid var(--ds-border-strong)',
-            fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
+            fontFamily: 'var(--ds-font-mono)',
             fontSize: '0.85rem',
             color: 'var(--ds-accent-primary)',
             alignItems: 'center',
@@ -151,7 +151,7 @@ export const BlogPost: React.FC<BlogPostProps> = ({
       {/* Main Narrative Body */}
       <div
         style={{
-          fontFamily: 'var(--font-inter, "Inter"), sans-serif',
+          fontFamily: 'var(--ds-font-body)',
           fontSize: '1.125rem',
           lineHeight: 1.8,
         }}
@@ -178,14 +178,14 @@ export const BlogPost: React.FC<BlogPostProps> = ({
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontFamily: 'var(--font-space-grotesk, "Space Grotesk"), sans-serif',
+                      fontFamily: 'var(--ds-font-display)',
                     }}
                   >
                     {initials}
                   </div>
                 )}
                 <div>
-                  <h4 style={{ fontFamily: 'var(--font-space-grotesk, "Space Grotesk"), sans-serif', margin: 0, fontSize: '1.1rem', fontWeight: 800, textTransform: 'uppercase' }}>
+                  <h4 style={{ fontFamily: 'var(--ds-font-display)', margin: 0, fontSize: '1.1rem', fontWeight: 800, textTransform: 'uppercase' }}>
                     Written by {author.url ? (
                       <SiteLink href={author.url} className="text-inherit underline decoration-2 underline-offset-4">
                         {author.name}
@@ -195,7 +195,7 @@ export const BlogPost: React.FC<BlogPostProps> = ({
                     )}
                   </h4>
                   {author.description ? (
-                    <span style={{ fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace', fontSize: '0.8rem', color: 'var(--ds-accent-secondary)' }}>
+                    <span style={{ fontFamily: 'var(--ds-font-mono)', fontSize: '0.8rem', color: 'var(--ds-accent-secondary)' }}>
                       {author.description}
                     </span>
                   ) : null}

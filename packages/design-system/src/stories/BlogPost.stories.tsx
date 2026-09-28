@@ -155,7 +155,7 @@ export const CustomAuthorCard: Story = {
     author: 'Ada Lovelace & Charles Babbage',
     authorCard: (
       <Card>
-        <p style={{ margin: 0, fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace', fontSize: '0.85rem' }}>
+        <p style={{ margin: 0, fontFamily: 'var(--ds-font-mono)', fontSize: '0.85rem' }}>
           Written by Ada Lovelace, from notes by Charles Babbage. Both are guests of this site.
         </p>
       </Card>

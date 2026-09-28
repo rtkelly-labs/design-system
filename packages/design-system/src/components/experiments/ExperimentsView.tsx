@@ -164,7 +164,7 @@ export const ExperimentsView: React.FC<ExperimentsViewProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.4rem' }}>
                 <h3
                   style={{
-                    fontFamily: 'var(--font-space-grotesk, "Space Grotesk"), sans-serif',
+                    fontFamily: 'var(--ds-font-display)',
                     fontSize: '1.4rem',
                     fontWeight: 800,
                     textTransform: 'uppercase',
@@ -178,7 +178,7 @@ export const ExperimentsView: React.FC<ExperimentsViewProps> = ({
               </div>
               <p
                 style={{
-                  fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace',
+                  fontFamily: 'var(--ds-font-mono)',
                   fontSize: '0.875rem',
                   color: 'var(--ds-text-primary)',
                   opacity: 0.8,
@@ -187,7 +187,7 @@ export const ExperimentsView: React.FC<ExperimentsViewProps> = ({
               >
                 {exp.description}
               </p>
-              <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', fontFamily: 'var(--font-ibm-plex-mono, "IBM Plex Mono"), monospace', color: 'var(--ds-accent-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', fontFamily: 'var(--ds-font-mono)', color: 'var(--ds-accent-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <Terminal size={14} />
                 <span>{exp.componentCount} primitives contained</span>
               </div>

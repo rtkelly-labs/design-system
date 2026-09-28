@@ -274,34 +274,22 @@ for (const [cp, sites] of [...rendered].sort((a, b) => a[0] - b[0])) {
 }
 
 /*
- * Font stacks written in place, as a ratchet.
+ * Font stacks written in place, at zero.
  *
  * The census above proves the four role stacks cover every rendered character.
- * That only matters for text that uses them: a component writing its own
- * `var(--font-*, "Name"), generic` inherits none of the symbol faces. On the
- * day this landed, 43 such stacks existed in 12 files, and two of the three
- * spellings name families nothing declares (\`"Inter"\`, \`"Space Grotesk"\`; the
- * shipped builds are the Variable ones), so that text is in a system sans.
- *
- * Routing them through the role variables changes typography, not glyph
- * coverage, so it is its own pull request (fix/role-font-stacks), which lowers
- * this budget to zero and deletes it. Until then the count may only fall.
- * Retiring AdminDashboardLayout lowered the current count to 28, so the
- * ratchet now records 28 rather than the original 43.
+ * That only holds for text that uses them: a component writing its own
+ * `var(--font-*, "Name"), generic` inherits none of the symbol faces. 43 of
+ * them existed when this was a ratchet, and two of the three spellings named
+ * families nothing declares (`"Inter"`, `"Space Grotesk"`; the shipped builds
+ * are the Variable ones), so that text was in a system sans outright. All now
+ * use the role variables, so there is no budget: one is a failure.
  */
-const INLINE_STACK_BUDGET = 28;
-if (listing) {
-  for (const { at, text } of bypasses) console.log(`  [STACK IN PLACE] ${at} — ${text.slice(0, 70)}`);
-}
-if (bypasses.length > INLINE_STACK_BUDGET) {
+for (const { at, text } of bypasses) {
   problems.push(
-    `${bypasses.length} font stacks are written in place, over the budget of ${INLINE_STACK_BUDGET}. A stack ` +
-      `written in a component skips the symbol faces the --ds-font-* stacks carry, so its non-Latin ` +
-      `characters reach a system font. Use var(--ds-font-body|display|mono|pixel), fontVar / ` +
-      `semanticTokens.font, or a font-* class. \`pnpm check:fonts:list\` lists them.`,
+    `${at}: font stack written in place — \`${text.slice(0, 70)}\`. It skips the symbol faces the ` +
+      `--ds-font-* stacks carry, so its non-Latin characters reach a system font. Use ` +
+      `var(--ds-font-body|display|mono|pixel), fontVar / semanticTokens.font, or a font-* class.`,
   );
-} else if (bypasses.length < INLINE_STACK_BUDGET) {
-  console.log(`  ${bypasses.length} font stacks written in place, of a budget of ${INLINE_STACK_BUDGET} — lower the budget.`);
 }
 
 if (listing) {
@@ -318,5 +306,5 @@ if (problems.length) {
 console.log(
   `Fonts OK — ${packages.length} @fontsource packages, every declared family named by a --ds-font-* stack; ` +
     `${rendered.size} non-ASCII characters rendered across ${sourceFiles.length} files, every one drawn by a ` +
-    `shipped face in all ${stackCoverage.length} stacks; ${bypasses.length} stacks written in place (budget ${INLINE_STACK_BUDGET}).`,
+    `shipped face in all ${stackCoverage.length} stacks, and no stack written outside them.`,
 );
