@@ -43,15 +43,14 @@ export function App() {
 export const INIT_SOURCE = `import { getThemeInitScript } from '@rtkelly13/design-system';
 
 // In your document <head>, before any stylesheet:
-<script dangerouslySetInnerHTML={{ __html: getThemeInitScript('${LEVEL}') }} />`;
+<script dangerouslySetInnerHTML={{ __html: getThemeInitScript({ defaultLevel: '${LEVEL}' }) }} />`;
 
 /**
- * Step 4 — the `@source` directive. Load-bearing rather than optional: Tailwind
- * v4 does not scan `node_modules`, so without it every utility this package's
- * components name is absent from the generated CSS and they render unstyled.
+ * Step 4 — the theme contract. Its own `@source` directive registers the
+ * package's utilities with Tailwind, so consumers need no manual dist path.
  */
 export const TAILWIND_SOURCE = `@import 'tailwindcss';
-@source '../node_modules/@rtkelly13/design-system/dist';`;
+@import '@rtkelly13/design-system/theme.css';`;
 
 /**
  * The live preview for step 2.

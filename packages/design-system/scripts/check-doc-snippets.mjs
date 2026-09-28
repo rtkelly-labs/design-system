@@ -10,14 +10,14 @@
  *
  * This is the complementary check: every JSX attribute written on a component
  * this package exports must exist on that component's props, and every string
- * literal assigned to a level-typed prop must be a real level.
+ * literal assigned to a closed string union must belong to that union.
  *
  * ## What this does not do
  *
  * It is not a typechecker. It does not evaluate the snippets, follow imports, or
  * understand spread props — a gate that claimed to compile prose would be
- * claiming more than it checks. It reads two things it can read exactly: the
- * attribute names on a known component, and the level names anywhere in a fence.
+ * claiming more than it checks. It reads attribute names on a known component,
+ * literal values for closed string unions, and level names in those attributes.
  *
  * Props on host elements (`<main style=…>`) and on components from other
  * packages (`<Link to=…>`) are skipped, because the API baseline says nothing
@@ -228,6 +228,34 @@ function declaredProps() {
 }
 
 const COMPONENTS = declaredProps();
+
+/** Closed string unions, resolved through aliases and inherited props by TypeScript. */
+function declaredStringValues() {
+  const apiPath = path.join(ROOT, 'api/index.d.ts');
+  const program = ts.createProgram([apiPath], { skipLibCheck: true });
+  const checker = program.getTypeChecker();
+  const source = program.getSourceFile(apiPath);
+  const values = new Map();
+  ts.forEachChild(source, (node) => {
+    if ((!ts.isInterfaceDeclaration(node) && !ts.isTypeAliasDeclaration(node))
+      || !node.name.text.endsWith('Props')) return;
+    const component = node.name.text.replace(/Props$/, '');
+    const props = new Map();
+    for (const property of checker.getTypeAtLocation(node).getProperties()) {
+      const type = checker.getTypeOfSymbolAtLocation(property, node);
+      const members = type.isUnion() ? type.types : [type];
+      const literals = members.filter((member) => member.flags & ts.TypeFlags.StringLiteral);
+      if (literals.length && members.every((member) =>
+        member.flags & (ts.TypeFlags.StringLiteral | ts.TypeFlags.Undefined))) {
+        props.set(property.name, literals.map((member) => member.value));
+      }
+    }
+    values.set(component, props);
+  });
+  return values;
+}
+
+const STRING_VALUES = declaredStringValues();
 const problems = [];
 const seen = [];
 
@@ -254,7 +282,16 @@ for (const file of DOCS) {
         }
       }
 
-      // A level named as a string literal must be a level.
+      // A string literal assigned to a closed union must be one of its members.
+      for (const literal of attrs.matchAll(/([a-zA-Z][\w-]*)=(["'])(.*?)\2/g)) {
+        const allowed = STRING_VALUES.get(name)?.get(literal[1]);
+        if (allowed && !allowed.includes(literal[3])) {
+          problems.push(
+            `${file}:${at} — <${name} ${literal[1]}="${literal[3]}"> must be one of: ${allowed.join(', ')}`
+          );
+        }
+      }
+      // Keep the level-name guard even where inherited props are unresolved.
       for (const lit of attrs.matchAll(/([a-zA-Z]*(?:[Ll]evel|[Tt]heme))="([a-z]+)"/g)) {
         if (!LEVELS.includes(lit[2])) {
           problems.push(

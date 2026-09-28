@@ -20,18 +20,10 @@ interface ButtonOwnProps {
    */
   children: ReactNode;
   /**
-   * Named for the colour it is on `midnight`, not for a colour it guarantees.
-   * All four resolve through the accent roles, so they remap with the theme
-   * level: `cyan` is `#22d3ee` on `midnight` and `#1d4ed8` on `white`.
-   *
-   * `white` follows the same rule — it is the inverted maximum-contrast button,
-   * so it is a white button with near-black text on `midnight` and inverts to
-   * dark-on-paper at the light end. Before 0.3.0 it alone was pinned to a
-   * literal `bg-white text-black`, which stayed white on a white page.
-   *
-   * The names are the honest complaint here, and they mislead for all four
-   * equally. Renaming them to the roles they resolve to is a breaking API
-   * change and is deliberately not bundled with the token migration.
+   * `primary`, `secondary` and `tertiary` use the corresponding accent role,
+   * which changes with the theme level. `inverse` uses the primary content
+   * role as its background for maximum contrast. `default` is identical to
+   * `primary`. Omitted, the variant is `tertiary`.
    */
   variant?: ButtonVariant;
   /**
@@ -170,13 +162,7 @@ const DISABLED =
 /**
  * One constant per rendered form, aliased by every name that resolves to it.
  *
- * `default`, `primary` and the deprecated `cyan` are the same button. Sharing
- * the constant is what makes "resolves identically" true rather than a comment
- * — a divergence would be a code change, not a drift.
- *
- * The hue names are deprecated because they mislead, not merely because they
- * are old: on `sketch`, `variant="primary"` paints `bg-accent-primary`, which is
- * `#1450d7`. Blue. It was never asking for cyan.
+ * `default` and `primary` share the same constant and render identically.
  */
 const PRIMARY = `bg-accent-primary text-content-inverse border-edge-strong ${PRESS}`;
 const SECONDARY = `bg-accent-secondary text-content-inverse border-edge-strong ${PRESS}`;

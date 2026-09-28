@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { getThemeInitScript } from '../../components/themeInitScript';
 import { THEME_LEVELS } from '../../theme/levels';
 import { INIT_SOURCE, LEVEL, MOUNT_SOURCE, MountedApp, TAILWIND_SOURCE } from './integration';
 
@@ -34,12 +35,17 @@ describe('the portal’s integration snippet', () => {
   it('passes the same level to the flash guard, which is the whole point of step 3', () => {
     // A guard seeded with a different level than the provider is worse than no
     // guard: it guarantees the mismatch it exists to prevent.
-    expect(INIT_SOURCE).toContain(`getThemeInitScript('${LEVEL}')`);
+    const call = INIT_SOURCE.match(/getThemeInitScript\(([^)]*)\)/)?.[0];
+    expect(call).toBeDefined();
+    const flashGuard = vi.fn(getThemeInitScript);
+    const script = new Function('getThemeInitScript', `return ${call};`)(flashGuard);
+    expect(flashGuard).toHaveBeenCalledWith({ defaultLevel: LEVEL });
+    expect(script).toBe(getThemeInitScript({ defaultLevel: LEVEL }));
   });
 
-  it('points Tailwind at dist, because v4 does not scan node_modules', () => {
-    expect(TAILWIND_SOURCE).toContain('@source');
-    expect(TAILWIND_SOURCE).toContain('@rtkelly13/design-system/dist');
+  it('imports the theme contract that registers its own Tailwind source', () => {
+    expect(TAILWIND_SOURCE).toContain('@import');
+    expect(TAILWIND_SOURCE).toContain('@rtkelly13/design-system/theme.css');
   });
 
   it('does not write to the host page’s storage', () => {

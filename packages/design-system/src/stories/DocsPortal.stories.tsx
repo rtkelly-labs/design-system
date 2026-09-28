@@ -41,7 +41,7 @@ const NAV: DocsNavNode[] = [
       { label: 'Install', href: '/docs/start/install' },
       { label: 'Mount the provider', href: '/docs/start/provider' },
       { label: 'Guard the first paint', href: '/docs/start/flash' },
-      { label: 'Point Tailwind at dist', href: '/docs/start/tailwind' },
+      { label: 'Import the theme contract', href: '/docs/start/tailwind' },
     ],
   },
   {
@@ -60,7 +60,7 @@ const TOC: TocEntry[] = [
   { id: 'install', title: 'Install', depth: 2 },
   { id: 'provider', title: 'Mount the provider', depth: 2 },
   { id: 'flash', title: 'Guard the first paint', depth: 3 },
-  { id: 'tailwind', title: 'Point Tailwind at dist', depth: 3 },
+  { id: 'tailwind', title: 'Import the theme contract', depth: 3 },
   { id: 'payoff', title: 'The payoff', depth: 2 },
 ];
 
@@ -136,12 +136,11 @@ function SampleBody() {
       </CodeBlock>
 
       <AnchorHeading level={3} id="tailwind">
-        Point Tailwind at dist
+        Import the theme contract
       </AnchorHeading>
-      <NoteBlock type="warning" title="Load-bearing, not optional">
-        Tailwind v4 does not scan <code>node_modules</code>. Without the{' '}
-        <code>@source</code> directive every utility these components name is absent from
-        your generated CSS, and they render unstyled.
+      <NoteBlock type="note" title="Source registration is included">
+        The theme stylesheet declares its own <code>@source</code>, so Tailwind
+        generates the package&rsquo;s utilities without a manual path to <code>dist</code>.
       </NoteBlock>
       <CodeBlock title="tailwind.css" language="css">
         {TAILWIND_SOURCE}
