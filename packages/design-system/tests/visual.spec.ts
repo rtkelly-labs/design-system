@@ -142,6 +142,14 @@ const CASES: readonly VisualCase[] = [
   { id: 'presentation-slide--with-subtitle', snapshot: 'slide-with-subtitle.png' },
   { id: 'showcase-experimentsview--default', snapshot: 'experimentsview-default.png', fullPage: true },
 
+  // Terminal telemetry and editorial foundations
+  { id: 'foundations-asciigauge--default', snapshot: 'asciigauge-default.png' },
+  { id: 'foundations-telemetrygauge--default', snapshot: 'telemetrygauge-default.png' },
+  { id: 'foundations-tickertape--default', snapshot: 'tickertape-default.png' },
+  { id: 'blog-metadatagrid--default', snapshot: 'metadatagrid-default.png' },
+  { id: 'blog-trackcard--default', snapshot: 'trackcard-default.png' },
+  { id: 'blog-colophoncard--default', snapshot: 'colophoncard-default.png' },
+
   // The remaining components, so that every component in the index has a
   // representative here and `check:visual-coverage` can demand that as the rule
   // rather than budgeting the gap.

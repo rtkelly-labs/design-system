@@ -1800,6 +1800,81 @@ interface GlyphProps extends HTMLAttributes<HTMLSpanElement> {
 
 declare function Glyph({ name, accent, size, bracketed, children, label, className, ...props }: GlyphProps): react.JSX.Element;
 
+type AsciiGaugeVariant = 'block' | 'shade' | 'line' | 'ascii';
+interface AsciiGaugeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
+
+    label?: string;
+
+    value: number;
+
+    min?: number;
+
+    max?: number;
+
+    target?: number;
+
+    length?: number;
+
+    brackets?: [string, string] | null;
+
+    variant?: AsciiGaugeVariant;
+
+    accent?: AccentToken;
+
+    showValue?: boolean;
+
+    valueFormat?: (value: number, ratio: number) => string;
+}
+
+declare const AsciiGauge: react.ForwardRefExoticComponent<AsciiGaugeProps & react.RefAttributes<HTMLSpanElement>>;
+
+type TelemetryMachineState = 'cruise' | 'braking' | 'halted' | 'spooling' | 'idle' | 'online';
+interface TelemetryGaugeProps extends HTMLAttributes<HTMLDivElement> {
+
+    state?: TelemetryMachineState;
+
+    stateLabel?: string;
+
+    value: number;
+
+    target?: number;
+
+    metricLabel?: string;
+
+    barSegments?: number;
+
+    gaugeVariant?: AsciiGaugeVariant;
+
+    compact?: boolean;
+
+    accent?: AccentToken;
+}
+
+declare const TelemetryGauge: react.ForwardRefExoticComponent<TelemetryGaugeProps & react.RefAttributes<HTMLDivElement>>;
+
+interface TickerTapeProps extends HTMLAttributes<HTMLDivElement> {
+
+    items: ReactNode[];
+
+    pixelsPerSecond?: number;
+
+    sticky?: boolean;
+
+    endAddon?: ReactNode;
+
+    title?: string;
+
+    brakeDuration?: number;
+
+    spoolDuration?: number;
+
+    paused?: boolean;
+
+    onVelocityChange?: (rate: number, percentage: number) => void;
+}
+
+declare const TickerTape: react.ForwardRefExoticComponent<TickerTapeProps & react.RefAttributes<HTMLDivElement>>;
+
 interface BarChartDatum {
     label: string;
     value: number;
@@ -1962,6 +2037,92 @@ interface BlogPostProps {
 declare const BlogPost: react__default.FC<BlogPostProps>;
 
 declare const LoremIpsumPost: react__default.FC;
+
+interface MetadataGridSeries {
+
+    name: string;
+
+    part?: number;
+
+    totalParts?: number;
+
+    href?: string;
+}
+interface MetadataGridCustomItem {
+
+    label: string;
+
+    value: ReactNode;
+
+    href?: string;
+}
+interface MetadataGridProps extends HTMLAttributes<HTMLDivElement> {
+
+    published?: string;
+
+    readTime?: string;
+
+    series?: MetadataGridSeries;
+
+    tags?: string[];
+
+    items?: MetadataGridCustomItem[];
+}
+
+declare const MetadataGrid: react.ForwardRefExoticComponent<MetadataGridProps & react.RefAttributes<HTMLDivElement>>;
+
+type TrackItemStatus = 'completed' | 'current' | 'upcoming';
+interface TrackItem {
+
+    id: string;
+
+    number: string;
+
+    title: string;
+
+    duration?: string;
+
+    status: TrackItemStatus;
+
+    href?: string;
+
+    summary?: string;
+}
+interface TrackCardProps extends HTMLAttributes<HTMLDivElement> {
+
+    trackNumber: string | number;
+
+    title: string;
+
+    description?: string;
+
+    items: TrackItem[];
+}
+
+declare const TrackCard: react.ForwardRefExoticComponent<TrackCardProps & react.RefAttributes<HTMLDivElement>>;
+
+interface ColophonLink {
+
+    label: string;
+
+    href: string;
+
+    icon?: 'code' | 'globe' | 'share' | 'rss' | 'external';
+}
+interface ColophonCardProps extends HTMLAttributes<HTMLElement> {
+
+    authorName?: string;
+
+    authorRole?: string;
+
+    bio?: string;
+
+    sectionMarker?: string;
+
+    links?: ColophonLink[];
+}
+
+declare const ColophonCard: react.ForwardRefExoticComponent<ColophonCardProps & react.RefAttributes<HTMLElement>>;
 
 interface ExperimentItem {
 
@@ -2623,6 +2784,9 @@ export {
   type AppTopbarProps,
   AsciiDivider,
   type AsciiDividerProps,
+  AsciiGauge,
+  type AsciiGaugeProps,
+  type AsciiGaugeVariant,
   Avatar,
   type AvatarProps,
   Badge,
@@ -2671,6 +2835,9 @@ export {
   CodeTabs,
   type CodeTabsProps,
   type CodeTabsVariant,
+  ColophonCard,
+  type ColophonCardProps,
+  type ColophonLink,
   type Column,
   type ContrastCheck,
   type ContrastFloor,
@@ -2779,6 +2946,10 @@ export {
   type MenuRadioItemProps,
   MenuSeparator,
   type MenuSeparatorProps,
+  MetadataGrid,
+  type MetadataGridCustomItem,
+  type MetadataGridProps,
+  type MetadataGridSeries,
   MobileNav,
   type MobileNavProps,
   Modal,
@@ -2931,6 +3102,9 @@ export {
   type TabsVariant,
   Tag,
   type TagProps,
+  TelemetryGauge,
+  type TelemetryGaugeProps,
+  type TelemetryMachineState,
   Terminal,
   type TerminalProps,
   TextArea,
@@ -2940,6 +3114,8 @@ export {
   type ThemeLevel,
   ThemeProvider,
   type ThemeProviderProps,
+  TickerTape,
+  type TickerTapeProps,
   Timeline,
   type TimelineEvent,
   type TimelineProps,
@@ -2954,6 +3130,10 @@ export {
   type TokenRule,
   Tooltip,
   type TooltipProps,
+  TrackCard,
+  type TrackCardProps,
+  type TrackItem,
+  type TrackItemStatus,
   TreeDiagram,
   type TreeDiagramProps,
   type TreeNode,

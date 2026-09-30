@@ -257,13 +257,16 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  * #301's per-module build: 387,723 B raw / 89,050 B gzip before, 387,260 B /
  * 89,033 B after — 463 B smaller, and every byte of it an `m`: 346 import
  * specifiers and 117 `sourceMappingURL` comments that said `.mjs` and now
- * say `.js`. Same 117 modules. The ceilings are unchanged,
- * which leaves the same ~2% over the new measurement.
+ * say `.js`. Same 117 modules.
+ *
+ * Raised for editorial and terminal primitives (AsciiGauge, TelemetryGauge,
+ * TickerTape, MetadataGrid, TrackCard, ColophonCard): +19.8 KB raw / +4.4 KB gzip
+ * ESM across the six new component modules.
  */
 const BUDGETS = {
   'dist/**/*.js': {
-    maxRaw: 395_000,
-    maxGzip: 91_000,
+    maxRaw: 420_000,
+    maxGzip: 97_500,
     desc: 'ESM output, every module',
   },
   'src/theme.css': {
