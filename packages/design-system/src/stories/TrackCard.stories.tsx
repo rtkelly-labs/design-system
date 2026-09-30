@@ -10,6 +10,9 @@ const meta: Meta<typeof TrackCard> = {
 export default meta;
 type Story = StoryObj<typeof TrackCard>;
 
+/**
+ * Default multi-part learning curriculum card displaying mixed progress states and upcoming milestones.
+ */
 export const Default: Story = {
   args: {
     trackNumber: '01',
@@ -50,6 +53,64 @@ export const Default: Story = {
         duration: '22 min',
         status: 'upcoming',
         summary: 'Tombstone retention policies and safe atomic swapping.',
+      },
+    ],
+  },
+};
+
+/**
+ * Completed curriculum track showing full progress bar fill and verified completion indicators.
+ */
+export const AllCompleted: Story = {
+  args: {
+    trackNumber: '02',
+    title: 'RAFT REPLICATION PROTOCOL',
+    description:
+      'Master leader election, log replication, and cluster membership reconfiguration.',
+    items: [
+      {
+        id: '1',
+        number: '01',
+        title: 'Leader Election & Heartbeat Timers',
+        duration: '10 min',
+        status: 'completed',
+        href: '#',
+      },
+      {
+        id: '2',
+        number: '02',
+        title: 'Log Replication & Safety Invariants',
+        duration: '14 min',
+        status: 'completed',
+        href: '#',
+      },
+    ],
+  },
+};
+
+/**
+ * Series track at inception with no started milestones.
+ */
+export const NotStarted: Story = {
+  args: {
+    trackNumber: '03',
+    title: 'LSM STORAGE ENGINES',
+    description:
+      'Building disk-backed SSTables, memtables, and Bloom filter lookups.',
+    items: [
+      {
+        id: '1',
+        number: '01',
+        title: 'Memtable SkipList Architecture',
+        duration: '20 min',
+        status: 'upcoming',
+      },
+      {
+        id: '2',
+        number: '02',
+        title: 'SSTable Block Builders & Compression',
+        duration: '25 min',
+        status: 'upcoming',
       },
     ],
   },

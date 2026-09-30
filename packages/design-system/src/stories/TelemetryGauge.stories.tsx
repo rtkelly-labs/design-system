@@ -10,6 +10,9 @@ const meta: Meta<typeof TelemetryGauge> = {
 export default meta;
 type Story = StoryObj<typeof TelemetryGauge>;
 
+/**
+ * Default telemetry HUD instrument in steady-state cruise mode with target pin.
+ */
 export const Default: Story = {
   args: {
     state: 'cruise',
@@ -19,6 +22,9 @@ export const Default: Story = {
   },
 };
 
+/**
+ * All six machine operating states showing semantic status badges and corresponding accent treatments.
+ */
 export const MachineStates: Story = {
   render: () => (
     <div className="flex flex-col gap-3">
@@ -32,6 +38,9 @@ export const MachineStates: Story = {
   ),
 };
 
+/**
+ * Compact mode omitting the state badge pill for dense layouts or narrow viewports.
+ */
 export const Compact: Story = {
   args: {
     state: 'cruise',

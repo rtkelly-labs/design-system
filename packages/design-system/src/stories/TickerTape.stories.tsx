@@ -11,6 +11,9 @@ const meta: Meta<typeof TickerTape> = {
 export default meta;
 type Story = StoryObj<typeof TickerTape>;
 
+/**
+ * The default ticker tape with pinned state for deterministic rendering and telemetry addon.
+ */
 export const Default: Story = {
   args: {
     paused: true,
@@ -31,6 +34,9 @@ export const Default: Story = {
   },
 };
 
+/**
+ * Live rolling marquee demonstrating continuous virtual RAF motion and momentum braking on hover.
+ */
 export const Live: Story = {
   args: {
     items: [
@@ -51,6 +57,9 @@ export const Live: Story = {
   },
 };
 
+/**
+ * Ticker tape configured with custom section prefix title and contextual alert dispatches.
+ */
 export const CustomTitle: Story = {
   args: {
     paused: true,

@@ -12,6 +12,8 @@ export type AsciiGaugeVariant =
 
 export interface AsciiGaugeProps
   extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
+  /** Accessible label describing what the meter measures (default 'Progress'). */
+  label?: string;
   /** Current value between min and max. */
   value: number;
   /** Minimum value range (default 0). */
@@ -61,6 +63,7 @@ const GLYPH_SETS: Record<
 export const AsciiGauge = forwardRef<HTMLSpanElement, AsciiGaugeProps>(
   function AsciiGauge(
     {
+      label = 'Progress',
       value,
       min = 0,
       max = 100,
@@ -127,6 +130,7 @@ export const AsciiGauge = forwardRef<HTMLSpanElement, AsciiGaugeProps>(
       <span
         ref={ref}
         role="meter"
+        aria-label={label ?? (props['aria-label'] || 'Progress')}
         aria-valuenow={clampedValue}
         aria-valuemin={min}
         aria-valuemax={max}
@@ -138,11 +142,19 @@ export const AsciiGauge = forwardRef<HTMLSpanElement, AsciiGaugeProps>(
         {...props}
       >
         {openBracket && (
-          <span data-slot="ascii-gauge-bracket" className="text-content-muted">
+          <span
+            data-slot="ascii-gauge-bracket"
+            aria-hidden="true"
+            className="text-content-muted"
+          >
             {openBracket}
           </span>
         )}
-        <span data-slot="ascii-gauge-bar" className="inline-flex">
+        <span
+          data-slot="ascii-gauge-bar"
+          aria-hidden="true"
+          className="inline-flex"
+        >
           {chars.map((item, idx) => (
             <span
               key={`gauge-char-${idx}`}
@@ -159,14 +171,18 @@ export const AsciiGauge = forwardRef<HTMLSpanElement, AsciiGaugeProps>(
           ))}
         </span>
         {closeBracket && (
-          <span data-slot="ascii-gauge-bracket" className="text-content-muted">
+          <span
+            data-slot="ascii-gauge-bracket"
+            aria-hidden="true"
+            className="text-content-muted"
+          >
             {closeBracket}
           </span>
         )}
         {showValue && (
           <span
             data-slot="ascii-gauge-value"
-            className="ml-1.5 font-mono text-xs font-bold text-content-secondary"
+            className="ml-1.5 font-mono text-xs font-bold text-content-primary"
           >
             {formattedValue}
           </span>

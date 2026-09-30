@@ -161,7 +161,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
                     ? 'bg-surface-raised border-accent-primary shadow-hard-sm'
                     : isCompleted
                       ? 'bg-surface-raised/80 hover:bg-surface-raised'
-                      : 'bg-surface-raised/30 opacity-60 hover:opacity-100',
+                      : 'bg-surface-base border-dashed hover:bg-surface-raised/40',
                   'hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-hard-sm',
                 )}
               >
