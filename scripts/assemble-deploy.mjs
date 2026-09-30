@@ -55,9 +55,6 @@ if (existsSync(path.join(STORYBOOK, BASE))) {
 
 rmSync(OUT, { recursive: true, force: true });
 cpSync(STORYBOOK, OUT, { recursive: true });
-// Shadow selection needs this graph in CI, but it exposes source paths and
-// belongs outside the public deployment.
-rmSync(path.join(OUT, 'preview-stats.json'), { force: true });
 cpSync(SITE, path.join(OUT, BASE), { recursive: true });
 
 const walk = (dir) =>
