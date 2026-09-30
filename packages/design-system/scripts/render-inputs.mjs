@@ -90,8 +90,20 @@ export const INERT_PATHS = [
   [/^\.github\//, 'a workflow that does not run the gated suites'],
 ];
 
-/** The `package.json` fields that change what is installed or resolved. */
-export const RESOLUTION_FIELDS = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'pnpm', 'overrides', 'exports', 'type'];
+/**
+ * The `package.json` fields that cannot change a build or a render, so a change
+ * to them leaves the verdict standing. Default-deny: every field NOT named here
+ * counts, so a field this forgets costs a re-run, never a skipped one. It was an
+ * allowlist of "resolution fields", which let `sideEffects` — read by the
+ * bundler for tree-shaking — move without moving the key. `scripts` is judged
+ * separately, by which scripts a job reaches.
+ */
+export const INERT_PACKAGE_FIELDS = ['version', 'description', 'keywords', 'author', 'contributors', 'license', 'repository', 'homepage', 'bugs', 'funding', 'publishConfig', 'files', 'scripts'];
+
+/** Every `package.json` field that can reach a build, as comparable text. */
+export function manifestFields(json) {
+  return JSON.stringify(Object.keys(json).filter((field) => !INERT_PACKAGE_FIELDS.includes(field)).sort().map((field) => [field, json[field]]));
+}
 
 /** A job's lines in a workflow file, up to the next job. */
 export function jobBody(workflow, job) {
@@ -188,12 +200,12 @@ export function reachableScripts({ files, read, visualCommands, packageScripts, 
  * `visual` job's scripts; the workflow-level keys and the `visual` job — so a
  * version bump or an edit to another job leaves the verdict standing.
  */
-export function verdictEntry(file, blob, { read, reachable }) {
+export function verdictEntry(file, blob, { read, reachable, roots = [] }) {
   if (file === `${PKG}package.json` || file === 'package.json') {
     const json = JSON.parse(read(file));
     const scripts = json.scripts ?? {};
-    const reach = [...scriptClosure(scripts, visualScripts(read(CI)))].sort();
-    return JSON.stringify([RESOLUTION_FIELDS.map((field) => json[field] ?? null), reach.map((name) => [name, scripts[name]])]);
+    const reach = [...scriptClosure(scripts, [...visualScripts(read(CI)), ...roots])].sort();
+    return JSON.stringify([manifestFields(json), reach.map((name) => [name, scripts[name]])]);
   }
   if (file === CI) {
     const text = read(file);
@@ -211,6 +223,14 @@ function main() {
   const root = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: here, encoding: 'utf8' }).trim();
   const read = (file) => readFileSync(path.join(root, file), 'utf8');
   const also = new Set(process.argv.flatMap((arg, i) => (process.argv[i - 1] === '--also' ? [arg] : [])));
+  // `--job <workflow>:<job>`: another job whose `pnpm` scripts, and the scripts
+  // those reach, belong in this key — derived from its steps, not listed by
+  // hand, so a step added there is counted without anyone remembering to.
+  const jobs = process.argv.flatMap((arg, i) => (process.argv[i - 1] === '--job' ? [arg] : [])).map((spec) => {
+    const at = spec.lastIndexOf(':');
+    return jobBody(read(spec.slice(0, at)), spec.slice(at + 1));
+  });
+  const roots = jobs.flatMap(jobCommands);
   // Stage entries carry the blob id, so a file is hashed by git's own content
   // hash and nothing is read twice. Mode is kept: an executable bit is content.
   const rows = execFileSync('git', ['ls-files', '-s'], { cwd: root, encoding: 'utf8', maxBuffer: 64 << 20 })
@@ -223,15 +243,15 @@ function main() {
   const reachable = reachableScripts({
     files,
     read,
-    visualCommands: jobCommands(visual),
+    visualCommands: [...jobCommands(visual), ...roots],
     packageScripts: JSON.parse(read(`${PKG}package.json`)).scripts,
-    jobText: [visual, ...files.filter((file) => /^\.github\/actions\/.+\.ya?ml$/.test(file)).map(read)].join('\n'),
+    jobText: [visual, ...jobs, ...files.filter((file) => /^\.github\/actions\/.+\.ya?ml$/.test(file)).map(read)].join('\n'),
   });
 
   const counted = [];
   const skipped = [];
   for (const { file, blob } of rows) {
-    const entry = also.has(file) ? blob : verdictEntry(file, blob, { read, reachable });
+    const entry = also.has(file) ? blob : verdictEntry(file, blob, { read, reachable, roots });
     if (entry === null) skipped.push(file);
     else counted.push(`${file}\t${entry}`);
   }

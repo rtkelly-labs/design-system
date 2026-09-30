@@ -156,6 +156,12 @@ describe('packageJsonChange', () => {
     expect(packageJsonChange(base, pkg({ scripts }), visual)).toBeNull();
   });
 
+  it('reaches every story for sideEffects or any field it does not know, and not for metadata', () => {
+    expect(packageJsonChange(base, pkg({ sideEffects: false }), visual)).toMatch(/field/);
+    expect(packageJsonChange(base, pkg({ someFutureField: 1 }), visual)).toMatch(/field/);
+    expect(packageJsonChange(base, pkg({ description: 'x', keywords: ['k'] }), visual)).toBeNull();
+  });
+
   it('reaches every story for a dependency', () => {
     expect(packageJsonChange(base, pkg({ dependencies: { r: '2' } }), visual)).toMatch(/dependency/);
   });

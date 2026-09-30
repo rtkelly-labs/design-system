@@ -89,6 +89,29 @@ describe('verdictEntry', () => {
     expect(entry(`${P}package.json`, { [`${P}package.json`]: pkg({ scripts: { 'build-storybook': 'storybook build --quiet' } }) })).not.toBe(base);
   });
 
+  it('is default-deny over package.json fields: sideEffects, main or any new field moves the key', () => {
+    const base = entry(`${P}package.json`);
+    for (const over of [{ sideEffects: ['**/*.css'] }, { main: './dist/index.js' }, { someFutureField: true }]) {
+      expect(entry(`${P}package.json`, { [`${P}package.json`]: pkg(over) }), JSON.stringify(over)).not.toBe(base);
+    }
+    for (const over of [{ description: 'x' }, { keywords: ['a'] }, { repository: 'r' }]) {
+      expect(entry(`${P}package.json`, { [`${P}package.json`]: pkg(over) }), JSON.stringify(over)).toBe(base);
+    }
+  });
+
+  it('counts the scripts of another job named by --job, such as the walkthrough', () => {
+    const withWalk = (walk) => pkg({ scripts: { 'build-storybook': 'storybook build', lint: 'eslint', walkthrough: walk } });
+    const walkEntry = (walk) =>
+      verdictEntry(`${P}package.json`, 'blob', {
+        read: (f) => ({ ...texts, [`${P}package.json`]: withWalk(walk) })[f],
+        reachable: new Set(),
+        roots: ['walkthrough'],
+      });
+    expect(walkEntry('playwright test -c a.ts')).not.toBe(walkEntry('playwright test -c b.ts'));
+    // Without the root, the walkthrough script is tooling to the visual key.
+    expect(entry(`${P}package.json`, { [`${P}package.json`]: withWalk('x') })).toBe(entry(`${P}package.json`, { [`${P}package.json`]: withWalk('y') }));
+  });
+
   it('keys ci.yml on the workflow-level keys and the visual job, not the other jobs', () => {
     const base = entry('.github/workflows/ci.yml');
     const other = ci.replace('pnpm check:governance', 'pnpm check:docs');

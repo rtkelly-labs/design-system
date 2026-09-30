@@ -81,7 +81,7 @@ jobs:
         # shape, and only then written. The key also names the pinned image.
         run: |
           set -euo pipefail
-          inputs="$(node scripts/render-inputs.mjs --also .github/workflows/storybook-walkthrough.yml --also packages/design-system/playwright.walkthrough.config.ts)"
+          inputs="$(node scripts/render-inputs.mjs --also .github/workflows/storybook-walkthrough.yml --also packages/design-system/playwright.walkthrough.config.ts --job .github/workflows/storybook-walkthrough.yml:walkthrough)"
           if ! [[ "${inputs}" =~ ^[0-9a-f]{64}$ ]]; then
             echo "::error::render-inputs.mjs printed '${inputs}', not a hash. Refusing to key a verdict on it."
             exit 1

@@ -38,7 +38,7 @@ import {
   GLOBAL_PATHS,
   INERT_PATHS,
   PKG,
-  RESOLUTION_FIELDS,
+  manifestFields,
   jobBody,
   scriptClosure,
   visualScripts,
@@ -265,7 +265,8 @@ export function specChange(base, head, lists) {
  * ------------------------------------------------------------------ */
 
 /**
- * Whether a `package.json` edit can reach a story: a resolution field, or the
+ * Whether a `package.json` edit can reach a story: any field but version and
+ * metadata (`INERT_PACKAGE_FIELDS`, default-deny), or the
  * body of a script the `visual` job runs — named by `visualScripts`, which the
  * caller reads from `ci.yml` on both sides of the change. Any other script is
  * tooling. Returns the reason, or null.
@@ -280,8 +281,7 @@ export function packageJsonChange(base, head, visualScripts = []) {
   };
   const [a, b] = [parse(base), parse(head)];
   if (!a || !b) return 'package.json: unparseable on one side';
-  const fields = (json) => JSON.stringify(RESOLUTION_FIELDS.map((field) => json[field] ?? null));
-  if (fields(a) !== fields(b)) return 'package.json: a dependency, exports or resolution field';
+  if (manifestFields(a) !== manifestFields(b)) return 'package.json: a dependency or another field that can reach the build (anything but version and metadata)';
   const reach = new Set([
     ...scriptClosure(a.scripts ?? {}, visualScripts),
     ...scriptClosure(b.scripts ?? {}, visualScripts),
