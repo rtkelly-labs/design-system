@@ -100,13 +100,19 @@ measurements rather than a guess:
   than trusted. The evidence and the rule are in `scannedIn`, `tests/a11y.spec.ts`.
 - **`visual` reuses a verdict its inputs already earned.** Its first step hashes
   every tracked file that can reach the job's result (`scripts/render-inputs.mjs`,
-  default-deny; `--list` prints what it leaves out and why) and, on a pull request,
+  default-deny; `--list` prints what it leaves out) and, on a pull request,
   looks that hash up as a cache key. A hit skips everything after checkout, which is
   the whole ~5 minutes, on every shard; a pass of every shard records one. `main` never looks up and always
   records, so it is both the source most PRs hit and the run where a wrong
   exclusion would show. The key is inputs rather than `storybook-static/` because
   the build is not reproducible: `react-docgen-typescript` reorders props between
   runs of one tree, moving 79 of 313 files.
+  The path rules are the ones story selection judges a change by, and live in
+  `render-inputs.mjs`: a PR that only edits another workflow, prose or the version
+  keeps the verdict, where it used to re-run everything that selection had
+  already said it could not reach. One difference is deliberate — the key counts
+  every non-test file under `src/` and `.storybook/`, because the index gates read
+  every story and component, not only the asserted closures.
   A reused run is visible: the job's summary opens with *Visual verdict reused*
   and names the key, and every step after the lookup reports skipped.
 - **The walkthrough reuses a report the same way.** Same hash, keyed

@@ -34,9 +34,21 @@
 
 import path from 'node:path';
 import ts from 'typescript';
-import { jobBody, jobCommands } from './render-inputs.mjs';
+import {
+  GLOBAL_PATHS,
+  INERT_PATHS,
+  PKG,
+  RESOLUTION_FIELDS,
+  jobBody,
+  scriptClosure,
+  visualScripts,
+  workflowOutsideJobs,
+} from './render-inputs.mjs';
 
-export const PKG = 'packages/design-system/';
+// The path rules live in `render-inputs.mjs`, which keys the visual verdict, so
+// the key and the selection judge a path the same way.
+export { PKG };
+
 
 /* ------------------------------------------------------------------ *
  * Graphs
@@ -252,25 +264,6 @@ export function specChange(base, head, lists) {
  * package.json: only the fields that change what is installed or resolved
  * ------------------------------------------------------------------ */
 
-const RESOLUTION_FIELDS = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'pnpm', 'overrides', 'exports', 'type'];
-
-/**
- * The package scripts a job reaches: the ones it runs, and every `pnpm <name>`
- * those invoke in turn. `build-storybook` calling `tokens:build` makes the
- * second as much a part of the job as the first.
- */
-export function scriptClosure(scripts, roots) {
-  const seen = new Set();
-  const queue = [...roots];
-  while (queue.length) {
-    const name = queue.pop();
-    if (seen.has(name) || !(name in scripts)) continue;
-    seen.add(name);
-    for (const [, next] of String(scripts[name]).matchAll(/\bpnpm\s+(?:run\s+)?([\w:-]+)/g)) queue.push(next);
-  }
-  return seen;
-}
-
 /**
  * Whether a `package.json` edit can reach a story: a resolution field, or the
  * body of a script the `visual` job runs — named by `visualScripts`, which the
@@ -297,62 +290,9 @@ export function packageJsonChange(base, head, visualScripts = []) {
   return moved.length ? `package.json: a script the visual job runs (${moved.join(', ')})` : null;
 }
 
-/** The `pnpm` scripts `ci.yml`'s `visual` job runs, or null when it has none. */
-export function visualScripts(workflow) {
-  try {
-    return workflow ? jobCommands(jobBody(workflow, 'visual')) : [];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * `ci.yml` with the `jobs:` block cut out and comment-only lines dropped.
- * Top-level `env`, `defaults`, `permissions` and `concurrency` are inherited
- * by every job, `visual` included, so a change here reaches it.
- */
-export function workflowOutsideJobs(text) {
-  const out = [];
-  let inJobs = false;
-  for (const line of (text ?? '').split('\n')) {
-    if (/^jobs:\s*$/.test(line)) { inJobs = true; continue; }
-    if (inJobs && /^\S/.test(line) && !/^#/.test(line)) inJobs = false;
-    if (inJobs || /^\s*(#.*)?$/.test(line)) continue;
-    out.push(line.replace(/\s+#.*$/, '').trimEnd());
-  }
-  return out.join('\n');
-}
-
 /* ------------------------------------------------------------------ *
  * The rules
  * ------------------------------------------------------------------ */
-
-/** Files that change what every story renders or how every story is judged. */
-const GLOBAL_PATHS = [
-  [/^pnpm-(lock|workspace)\.yaml$/, 'the dependency tree'],
-  [/^\.gitignore$/, "Tailwind's source detection honours .gitignore"],
-  [/^\.github\/actions\//, 'an action the suites run under'],
-  [new RegExp(`^${PKG}src/.*\\.css$`), 'a stylesheet: Tailwind compiles one sheet for every story'],
-  [new RegExp(`^${PKG}\\.storybook/`), 'Storybook configuration'],
-  [new RegExp(`^${PKG}tests/(?!__snapshots__/)(?!(visual|a11y)\\.spec\\.ts$)`), 'the test harness'],
-  [new RegExp(`^${PKG}(playwright\\.config\\.ts|serve\\.json|tsconfig\\.json)$`), 'suite or server configuration'],
-];
-
-/** Files that reach no gated story, each with the reason. */
-const INERT_PATHS = [
-  [new RegExp(`^${PKG}docs/`), 'prose'],
-  [new RegExp(`^${PKG}src/(.*\\.test\\.tsx?|test-setup\\.ts)$`), 'a unit test or its set-up; Vitest runs it, no story imports it'],
-  [new RegExp(`^${PKG}[^/]+\\.md$`), 'prose'],
-  [new RegExp(`^${PKG}scripts/`), 'tooling; the index gates run in full whatever is selected'],
-  [new RegExp(`^${PKG}(api|skills|terminal)/`), 'published artefacts no story imports'],
-  [new RegExp(`^${PKG}(vitest\\.config\\.mts|eslint\\.config\\.mjs|knip\\.json|licenses\\.baseline\\.json|tsup\\.config\\.ts|LICENSE)$`), 'unit, lint or package-build configuration'],
-  [new RegExp(`^${PKG}playwright\\.walkthrough\\.config\\.ts$`), 'the walkthrough, which is not a gate'],
-  [/^packages\/design-system-report\//, 'the second package, which depends on this one'],
-  [/^(README\.md|LICENSE|vercel\.json|reference\/|docs\/)/, 'repository metadata and prose'],
-  // Release train, drift, walkthrough, snapshot commands: none runs the gated
-  // suites, so none can change their verdict. `ci.yml` is in GLOBAL_PATHS.
-  [/^\.github\//, 'a workflow that does not run the gated suites'],
-];
 
 /**
  * Classify one changed path. `ctx` carries the closures, the global set, the

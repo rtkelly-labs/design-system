@@ -450,9 +450,10 @@ jobs:
       # A verdict is a function of its inputs, so a pull request whose inputs
       # already passed skips the work of re-deriving it: the Storybook build,
       # the three index gates and both browser suites, ~5 minutes. The key is
-      # `scripts/render-inputs.mjs` — every tracked file, default-deny, minus
-      # prose and scripts this job neither runs nor imports. Twenty of the last
-      # hundred merged PRs touched none of it.
+      # `scripts/render-inputs.mjs` — default-deny over every tracked file, by
+      # the same path rules story selection uses, so a change selection says
+      # reaches no story (another workflow, prose, a version bump) keeps the
+      # verdict too.
       #
       # Only pull requests look the verdict up. A push to `main` always runs in
       # full, with the full a11y matrix, and records the verdict it reached —

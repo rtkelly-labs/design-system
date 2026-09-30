@@ -13,13 +13,12 @@ import {
   graphNodes,
   packageJsonChange,
   parseCases,
-  scriptClosure,
-  workflowOutsideJobs,
   selectStories,
   snapshotMap,
   specChange,
   storyClosures,
 } from './story-selection.mjs';
+import { scriptClosure, workflowOutsideJobs } from './render-inputs.mjs';
 import { PACKAGE_ROOT } from './repo-root.mjs';
 
 const P = (f) => PKG + f;
