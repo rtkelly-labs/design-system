@@ -13,13 +13,12 @@ import {
   graphNodes,
   packageJsonChange,
   parseCases,
-  scriptClosure,
-  workflowOutsideJobs,
   selectStories,
   snapshotMap,
   specChange,
   storyClosures,
 } from './story-selection.mjs';
+import { scriptClosure, workflowOutsideJobs } from './render-inputs.mjs';
 import { PACKAGE_ROOT } from './repo-root.mjs';
 
 const P = (f) => PKG + f;
@@ -155,6 +154,12 @@ describe('packageJsonChange', () => {
     expect(packageJsonChange(base, pkg({ version: '0.2.0' }), visual)).toBeNull();
     const scripts = { ...JSON.parse(base).scripts, 'release:train': 'node r.mjs --dry-run' };
     expect(packageJsonChange(base, pkg({ scripts }), visual)).toBeNull();
+  });
+
+  it('reaches every story for sideEffects or any field it does not know, and not for metadata', () => {
+    expect(packageJsonChange(base, pkg({ sideEffects: false }), visual)).toMatch(/field/);
+    expect(packageJsonChange(base, pkg({ someFutureField: 1 }), visual)).toMatch(/field/);
+    expect(packageJsonChange(base, pkg({ description: 'x', keywords: ['k'] }), visual)).toBeNull();
   });
 
   it('reaches every story for a dependency', () => {

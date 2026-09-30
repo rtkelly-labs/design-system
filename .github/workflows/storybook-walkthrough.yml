@@ -63,9 +63,10 @@ jobs:
       - name: Trust the Workspace
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      # The report is a function of its inputs, the same ones the `visual` job's
-      # verdict is keyed on (`scripts/render-inputs.mjs` — this workflow and the
-      # walkthrough config are tracked files, so they count). When a run with
+      # The report is a function of its inputs: the ones the `visual` job's
+      # verdict is keyed on (`scripts/render-inputs.mjs`), plus this workflow and
+      # the walkthrough config, which that key leaves out because they do not
+      # touch the gated suites — hence `--also`. When a run with
       # identical inputs already produced a report, a pull request restores it
       # and attaches it again rather than re-rendering every story on every
       # Level: ~3 minutes, and the report a reviewer downloads is byte-for-byte
@@ -80,7 +81,7 @@ jobs:
         # shape, and only then written. The key also names the pinned image.
         run: |
           set -euo pipefail
-          inputs="$(node scripts/render-inputs.mjs)"
+          inputs="$(node scripts/render-inputs.mjs --also .github/workflows/storybook-walkthrough.yml --also packages/design-system/playwright.walkthrough.config.ts --job .github/workflows/storybook-walkthrough.yml:walkthrough)"
           if ! [[ "${inputs}" =~ ^[0-9a-f]{64}$ ]]; then
             echo "::error::render-inputs.mjs printed '${inputs}', not a hash. Refusing to key a verdict on it."
             exit 1

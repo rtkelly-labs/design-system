@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { classify, jobBody, jobCommands, reachableScripts } from './render-inputs.mjs';
+import { jobBody, jobCommands, reachableScripts, verdictEntry } from './render-inputs.mjs';
 
 const P = 'packages/design-system/';
-const row = (file) => `100644 ${'0'.repeat(40)}\t${file}`;
 
 describe('reachableScripts', () => {
   const sources = {
@@ -13,18 +12,20 @@ describe('reachableScripts', () => {
     [`${P}scripts/authored-classes.mjs`]: '',
     [`${P}scripts/release-train.mjs`]: "import './release-train-checks.mjs';",
     [`${P}scripts/release-train-checks.mjs`]: '',
-    [`${P}eslint.config.mjs`]: "import { authoredClasses } from './scripts/authored-classes.mjs';",
+    [`${P}.storybook/main.ts`]: "import { authoredClasses } from '../scripts/authored-classes.mjs';",
+    [`${P}eslint.config.mjs`]: "import './scripts/eslint-token-rule.mjs';",
+    [`${P}scripts/eslint-token-rule.mjs`]: '',
     [`${P}docs/notes.mjs`]: "import '../scripts/release-train.mjs';",
   };
   const reach = reachableScripts({
     files: Object.keys(sources),
     read: (file) => sources[file],
     visualCommands: ['check:visual-coverage'],
-    packageScripts: { 'check:visual-coverage': 'node scripts/check-visual-coverage.mjs' },
+    packageScripts: { 'check:visual-coverage': 'pnpm coverage:core', 'coverage:core': 'node scripts/check-visual-coverage.mjs' },
     jobText: 'run: node packages/design-system/scripts/check-lockfile.mjs',
   });
 
-  it('follows the job’s gates through their imports', () => {
+  it('follows the job’s gates through the pnpm scripts they call and their imports', () => {
     expect(reach).toContain(`${P}scripts/check-visual-coverage.mjs`);
     expect(reach).toContain(`${P}scripts/repo-root.mjs`);
   });
@@ -38,36 +39,87 @@ describe('reachableScripts', () => {
     expect(reach).toContain(`${P}scripts/authored-classes.mjs`);
   });
 
-  it('leaves out scripts only an excluded file imports', () => {
+  it('leaves out scripts only an inert file imports — prose, lint configuration', () => {
     expect(reach).not.toContain(`${P}scripts/release-train.mjs`);
     expect(reach).not.toContain(`${P}scripts/release-train-checks.mjs`);
+    expect(reach).not.toContain(`${P}scripts/eslint-token-rule.mjs`);
   });
 });
 
-describe('classify', () => {
+describe('verdictEntry', () => {
+  const ci = [
+    'name: CI',
+    'jobs:',
+    '  lint:',
+    '    steps:',
+    '      - run: pnpm check:governance',
+    '  visual:',
+    '    steps:',
+    '      - run: pnpm build-storybook',
+  ].join('\n');
+  const pkg = (over = {}) =>
+    JSON.stringify({ version: '0.12.0', dependencies: { react: '19' }, scripts: { 'build-storybook': 'storybook build', lint: 'eslint' }, ...over });
+  const texts = { '.github/workflows/ci.yml': ci, [`${P}package.json`]: pkg() };
+  const entry = (file, over = {}) =>
+    verdictEntry(file, 'blob', { read: (f) => ({ ...texts, ...over })[f], reachable: new Set([`${P}scripts/check-visual-coverage.mjs`]) });
+
   it('is default-deny: anything no rule names counts', () => {
-    const { counted, skipped } = classify(
-      [
-        row(`${P}src/Button.tsx`),
-        row(`${P}some-new-config.json`),
-        row('.github/workflows/ci.yml'),
-        row(`${P}docs/ci.md`),
-        row(`${P}CHANGELOG.md`),
-        row('packages/design-system-report/src/cli.ts'),
-        row(`${P}scripts/release-train.mjs`),
-      ],
-      new Set(),
-    );
-    expect(counted.map((r) => r.split('\t')[1])).toEqual([
-      `${P}src/Button.tsx`,
-      `${P}some-new-config.json`,
-      '.github/workflows/ci.yml',
-    ]);
-    expect(skipped.map(([file]) => file)).toHaveLength(4);
+    expect(entry(`${P}some-new-config.json`)).toBe('blob');
+    expect(entry('scripts/assemble-deploy.mjs')).toBe('blob');
   });
 
-  it('does not treat Markdown under src as prose', () => {
-    expect(classify([row(`${P}src/stories/Intro.md`)], new Set()).counted).toHaveLength(1);
+  it('counts every component and story, not only the asserted closures — the index gates read them all', () => {
+    expect(entry(`${P}src/components/Orphan.tsx`)).toBe('blob');
+    expect(entry(`${P}src/stories/Intro.md`)).toBe('blob');
+    expect(entry(`${P}src/components/Button.test.tsx`)).toBeNull();
+  });
+
+  it('leaves out prose, other workflows, the second package and scripts the job cannot reach', () => {
+    for (const file of [`${P}docs/ci.md`, `${P}CHANGELOG.md`, '.github/workflows/publish-package.yml', 'packages/design-system-report/src/cli.ts', `${P}scripts/release-train.mjs`]) {
+      expect(entry(file), file).toBeNull();
+    }
+    expect(entry(`${P}scripts/check-visual-coverage.mjs`)).toBe('blob');
+  });
+
+  it('keys package.json on resolution fields and visual scripts, not the version', () => {
+    const base = entry(`${P}package.json`);
+    expect(entry(`${P}package.json`, { [`${P}package.json`]: pkg({ version: '0.13.0' }) })).toBe(base);
+    expect(entry(`${P}package.json`, { [`${P}package.json`]: pkg({ scripts: { 'build-storybook': 'storybook build', lint: 'eslint --fix' } }) })).toBe(base);
+    expect(entry(`${P}package.json`, { [`${P}package.json`]: pkg({ dependencies: { react: '20' } }) })).not.toBe(base);
+    expect(entry(`${P}package.json`, { [`${P}package.json`]: pkg({ scripts: { 'build-storybook': 'storybook build --quiet' } }) })).not.toBe(base);
+  });
+
+  it('is default-deny over package.json fields: sideEffects, main or any new field moves the key', () => {
+    const base = entry(`${P}package.json`);
+    for (const over of [{ sideEffects: ['**/*.css'] }, { main: './dist/index.js' }, { someFutureField: true }]) {
+      expect(entry(`${P}package.json`, { [`${P}package.json`]: pkg(over) }), JSON.stringify(over)).not.toBe(base);
+    }
+    for (const over of [{ description: 'x' }, { keywords: ['a'] }, { repository: 'r' }]) {
+      expect(entry(`${P}package.json`, { [`${P}package.json`]: pkg(over) }), JSON.stringify(over)).toBe(base);
+    }
+  });
+
+  it('counts the scripts of another job named by --job, such as the walkthrough', () => {
+    const withWalk = (walk) => pkg({ scripts: { 'build-storybook': 'storybook build', lint: 'eslint', walkthrough: walk } });
+    const walkEntry = (walk) =>
+      verdictEntry(`${P}package.json`, 'blob', {
+        read: (f) => ({ ...texts, [`${P}package.json`]: withWalk(walk) })[f],
+        reachable: new Set(),
+        roots: ['walkthrough'],
+      });
+    expect(walkEntry('playwright test -c a.ts')).not.toBe(walkEntry('playwright test -c b.ts'));
+    // Without the root, the walkthrough script is tooling to the visual key.
+    expect(entry(`${P}package.json`, { [`${P}package.json`]: withWalk('x') })).toBe(entry(`${P}package.json`, { [`${P}package.json`]: withWalk('y') }));
+  });
+
+  it('keys ci.yml on the workflow-level keys and the visual job, not the other jobs', () => {
+    const base = entry('.github/workflows/ci.yml');
+    const other = ci.replace('pnpm check:governance', 'pnpm check:docs');
+    const visual = ci.replace('pnpm build-storybook', 'pnpm build-storybook --quiet');
+    const env = ci.replace('name: CI', 'name: CI\nenv:\n  A: 1');
+    expect(entry('.github/workflows/ci.yml', { '.github/workflows/ci.yml': other })).toBe(base);
+    expect(entry('.github/workflows/ci.yml', { '.github/workflows/ci.yml': visual })).not.toBe(base);
+    expect(entry('.github/workflows/ci.yml', { '.github/workflows/ci.yml': env })).not.toBe(base);
   });
 });
 
