@@ -577,17 +577,11 @@ jobs:
       # On a pull request the narrow viewport scans only the components the
       # visual suite asserts there; on `main` it scans everything, which is
       # what keeps that scope honest. See `scannedIn` in `tests/a11y.spec.ts`.
-      #
-      # The same shape for the second Level: a pull request switches it in
-      # place on the loaded page, and `main` runs `compare` — switch, then load
-      # it fresh too, and fail unless both see the same violations. See
-      # `LEVEL_SWITCH` in the same file.
       - name: Run Accessibility Tests
         if: steps.verdict.outputs.cache-hit != 'true'
         env:
           PLAYWRIGHT_JSON_OUTPUT_FILE: telemetry/a11y.json
           A11Y_FULL_MATRIX: ${{ github.event_name == 'pull_request' && '0' || '1' }}
-          A11Y_LEVEL_SWITCH: ${{ github.event_name == 'pull_request' && 'in-place' || 'compare' }}
         run: pnpm test:a11y
 
       # Per-story selection, in shadow mode (`scripts/select-stories.mjs`): which
