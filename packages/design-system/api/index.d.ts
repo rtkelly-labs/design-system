@@ -1800,7 +1800,7 @@ interface GlyphProps extends HTMLAttributes<HTMLSpanElement> {
 
 declare function Glyph({ name, accent, size, bracketed, children, label, className, ...props }: GlyphProps): react.JSX.Element;
 
-type AsciiGaugeVariant = 'block' | 'shade' | 'line' | 'ascii' | 'braille';
+type AsciiGaugeVariant = 'block' | 'shade' | 'line' | 'ascii';
 interface AsciiGaugeProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
 
     label?: string;

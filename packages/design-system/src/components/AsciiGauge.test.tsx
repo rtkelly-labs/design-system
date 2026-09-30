@@ -47,11 +47,6 @@ describe('AsciiGauge', () => {
       <AsciiGauge value={50} variant="ascii" length={10} />,
     );
     expect(asciiContainer.textContent).toContain('#');
-
-    const { container: brailleContainer } = render(
-      <AsciiGauge value={50} variant="braille" length={10} />,
-    );
-    expect(brailleContainer.textContent).toContain('⣿');
   });
 
   it('formats custom value readout', () => {

@@ -7,8 +7,7 @@ export type AsciiGaugeVariant =
   | 'block'
   | 'shade'
   | 'line'
-  | 'ascii'
-  | 'braille';
+  | 'ascii';
 
 export interface AsciiGaugeProps
   extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
@@ -44,7 +43,6 @@ const GLYPH_SETS: Record<
   shade: { fill: '▓', empty: '░', target: '|', shades: ['▓', '▒', '░'] },
   line: { fill: '=', empty: '-', target: '|' },
   ascii: { fill: '#', empty: '-', target: '|' },
-  braille: { fill: '⣿', empty: '⠀', target: '⡇' },
 };
 
 /**

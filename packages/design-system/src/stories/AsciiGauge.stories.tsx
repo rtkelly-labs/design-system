@@ -47,10 +47,6 @@ export const GlyphVariants: Story = {
         <span className="w-20 text-content-muted">ASCII:</span>
         <AsciiGauge value={66} target={80} variant="ascii" accent="warning" showValue />
       </div>
-      <div className="flex items-center gap-4">
-        <span className="w-20 text-content-muted">BRAILLE:</span>
-        <AsciiGauge value={66} target={80} variant="braille" accent="success" showValue />
-      </div>
     </div>
   ),
 };
