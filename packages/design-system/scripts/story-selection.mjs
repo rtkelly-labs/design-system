@@ -58,6 +58,13 @@ const CSS_URL = /url\(\s*['"]?(\.{1,2}\/[^'")\s]+)['"]?\s*\)/g;
 const CANDIDATES = ['', '.ts', '.tsx', '.js', '.mjs', '.jsx', '.mdx', '.css', '.json', '/index.ts', '/index.tsx'];
 
 /**
+ * `tsconfig.json`'s `paths`, as prefix → package-relative directory. Nothing
+ * imports through one today; the first file that does would otherwise lose
+ * that edge, and a test compares this with the tsconfig so the two cannot drift.
+ */
+export const ALIASES = { '@/': 'src/' };
+
+/**
  * Forward edges from source text. `files` is every tracked repo path; `exports`
  * is the package's `exports` map, for `@rtkelly13/design-system/<subpath>`.
  */
@@ -74,7 +81,11 @@ export function graphFromSource(files, read, { pkg = PKG, name = '@rtkelly13/des
       base = path.posix.normalize(pkg + file.replace(/^\.\//, ''));
       // `dist/` is build output; the source of `./styles.css` is `src/styles.css`.
       base = base.replace(`${pkg}dist/`, `${pkg}src/`);
-    } else return null;
+    } else {
+      const alias = Object.keys(ALIASES).find((prefix) => spec.startsWith(prefix));
+      if (!alias) return null;
+      base = path.posix.normalize(pkg + ALIASES[alias] + bare(spec).slice(alias.length));
+    }
     // `./x.js` in TypeScript names `./x.ts`.
     const stems = [base, base.replace(/\.js$/, '')];
     for (const stem of stems) for (const ext of CANDIDATES) if (tracked.has(stem + ext)) return stem + ext;

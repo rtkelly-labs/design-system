@@ -1,5 +1,9 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import ts from 'typescript';
 import { describe, expect, it } from 'vitest';
 import {
+  ALIASES,
   PKG,
   assertedIds,
   classifyChange,
@@ -16,8 +20,24 @@ import {
   specChange,
   storyClosures,
 } from './story-selection.mjs';
+import { PACKAGE_ROOT } from './repo-root.mjs';
 
 const P = (f) => PKG + f;
+
+describe('ALIASES', () => {
+  it('matches tsconfig.json’s paths, so an alias added there is followed here', () => {
+    const text = readFileSync(path.join(PACKAGE_ROOT, 'tsconfig.json'), 'utf8');
+    const { paths = {} } = ts.parseConfigFileTextToJson('tsconfig.json', text).config.compilerOptions;
+    const fromTsconfig = Object.fromEntries(Object.entries(paths).map(([key, [target]]) => [key.replace(/\*$/, ''), target.replace(/^\.\//, '').replace(/\*$/, '')]));
+    expect(ALIASES).toEqual(fromTsconfig);
+  });
+
+  it('resolves an aliased import to the file it names', () => {
+    const files = [P('src/stories/A.stories.tsx'), P('src/components/Card.tsx')];
+    const graph = graphFromSource(files, (f) => (f.endsWith('A.stories.tsx') ? "import { Card } from '@/components/Card';" : ''));
+    expect([...graph.get(P('src/stories/A.stories.tsx'))]).toEqual([P('src/components/Card.tsx')]);
+  });
+});
 
 describe('graphFromSource', () => {
   const src = {
