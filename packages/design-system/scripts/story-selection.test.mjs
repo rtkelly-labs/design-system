@@ -3,13 +3,10 @@ import {
   PKG,
   assertedIds,
   classifyChange,
-  compareClosures,
   detect,
   globalFiles,
   graphFromSource,
   graphNodes,
-  graphFromStats,
-  mergeGraphs,
   packageJsonChange,
   parseCases,
   scriptClosure,
@@ -21,21 +18,6 @@ import {
 } from './story-selection.mjs';
 
 const P = (f) => PKG + f;
-
-describe('graphFromStats', () => {
-  it('inverts importers into forward edges, as repo paths, dropping node_modules and virtual ids', () => {
-    const graph = graphFromStats({
-      modules: [
-        { id: './src/components/Button.tsx', reasons: [{ moduleName: './src/stories/Button.stories.tsx' }] },
-        { id: './src/lib/cn.ts?raw', reasons: [{ moduleName: './src/components/Button.tsx' }] },
-        { id: './../../node_modules/react/index.js', reasons: [{ moduleName: './src/components/Button.tsx' }] },
-        { id: '/virtual:/x.js', reasons: [] },
-      ],
-    });
-    expect([...graph.get(P('src/stories/Button.stories.tsx'))]).toEqual([P('src/components/Button.tsx')]);
-    expect([...graph.get(P('src/components/Button.tsx'))]).toEqual([P('src/lib/cn.ts')]);
-  });
-});
 
 describe('graphFromSource', () => {
   const src = {
@@ -179,14 +161,12 @@ describe('workflowOutsideJobs', () => {
 });
 
 describe('classifyChange and selectStories', () => {
-  const graph = mergeGraphs(
-    new Map([
+  const graph = new Map([
       [P('.storybook/preview.ts'), new Set([P('src/components/ThemeProvider.tsx')])],
       [P('src/stories/Button.stories.tsx'), new Set([P('src/components/Button.tsx')])],
       [P('src/stories/Card.stories.tsx'), new Set([P('src/components/Card.tsx'), P('src/components/Button.tsx')])],
       [P('src/components/Orphan.tsx'), new Set()],
-    ]),
-  );
+  ]);
   const index = {
     'button--default': { importPath: './src/stories/Button.stories.tsx' },
     'card--default': { importPath: './src/stories/Card.stories.tsx' },
@@ -292,15 +272,5 @@ describe('detect', () => {
 
   it('never misses when everything was selected, and never counts a flake as a miss', () => {
     expect(detect({ all: true, ids: [] }, [report]).misses).toEqual([]);
-  });
-});
-
-describe('compareClosures', () => {
-  it('lists the source files one graph sees and the other does not', () => {
-    const diff = compareClosures(
-      { a: new Set([P('src/x.ts'), P('src/y.ts')]) },
-      { a: new Set([P('src/x.ts'), P('src/z.ts')]) },
-    );
-    expect(diff).toEqual([{ id: 'a', onlyA: [P('src/y.ts')], onlyB: [P('src/z.ts')] }]);
   });
 });

@@ -6,16 +6,14 @@
  *                                              change reaches, and whether any
  *                                              failure fell outside it
  *   pnpm stories:replay [--prs 100]            the same selection over merged PRs
- *   pnpm stories:graphs                        where the bundle and source graphs
- *                                              disagree, story by story
  *
  * **Nothing here skips anything.** `shadow` writes its answer to the job
  * summary and `telemetry/story-selection.json` and exits 0 whatever it finds;
  * both suites still run every story. The criteria for letting it decide are
  * in `docs/ci.md`, and they are counted from the `misses` this writes.
  *
- * The graph wants a Storybook build with `--stats-json`, which is what
- * `pnpm build-storybook` does. Without one, `shadow` reports that and stops.
+ * It needs `storybook-static/index.json`, for the story ids and the files they
+ * import. Without a build, `shadow` reports that and stops.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -25,13 +23,10 @@ import { PACKAGE_ROOT, REPO_ROOT } from './repo-root.mjs';
 import {
   PKG,
   assertedIds,
-  compareClosures,
   detect,
   globalFiles,
   graphFromSource,
   graphNodes,
-  graphFromStats,
-  mergeGraphs,
   selectStories,
   snapshotMap,
   storyClosures,
@@ -50,14 +45,11 @@ const readJson = (file) => JSON.parse(readFileSync(path.join(PACKAGE_ROOT, file)
 const VISUAL = `${PKG}tests/visual.spec.ts`;
 const A11Y = `${PKG}tests/a11y.spec.ts`;
 
-/** Both graphs from the tree as checked out, unioned; and each alone. */
-function loadGraphs() {
+/** The source graph of the tree as checked out. */
+function loadGraph() {
   const files = git('ls-files').trim().split('\n');
   const read = (file) => readFileSync(path.join(REPO_ROOT, file), 'utf8');
-  const source = graphFromSource(files, read, { exports: readJson('package.json').exports });
-  const statsFile = path.join(PACKAGE_ROOT, 'storybook-static/preview-stats.json');
-  const stats = existsSync(statsFile) ? graphFromStats(JSON.parse(readFileSync(statsFile, 'utf8'))) : null;
-  return { source, stats, merged: stats ? mergeGraphs(stats, source) : source };
+  return graphFromSource(files, read, { exports: readJson('package.json').exports });
 }
 
 function loadIndex() {
@@ -131,7 +123,7 @@ function render(selection, detection, extra) {
       ? `**Every story** (${selection.total}): at least one change reaches all of them.`
       : `**${selection.ids.length} of ${selection.total}** asserted stories are reachable from this change.`,
     '',
-    `Graph: ${extra.graph}. Runner image: \`${extra.image || 'unknown'}\` (not yet compared with the base's).`,
+    `Runner image: \`${extra.image || 'unknown'}\` (not yet compared with the base's).`,
     '',
   ];
   const global = byKind('global');
@@ -164,11 +156,11 @@ function shadow(opts) {
     console.log('select-stories: no storybook-static/index.json — the build did not run; nothing to report.');
     return;
   }
-  const { stats, merged } = loadGraphs();
+  const graph = loadGraph();
   const head = 'HEAD';
   const base = opts.base ?? parentOfHead();
   const asserted = assertedIds(show(head, VISUAL) ?? '', show(head, A11Y) ?? '');
-  const ctx = context(merged, index, asserted, base, head);
+  const ctx = context(graph, index, asserted, base, head);
   const image = process.env.RENDER_IMAGE ?? null;
   const selection = selectStories(changesBetween(base, head), ctx, { asserted, image: { current: image } });
 
@@ -182,7 +174,6 @@ function shadow(opts) {
     sha: process.env.GITHUB_SHA ?? git('rev-parse', 'HEAD').trim(),
     base,
     event: process.env.GITHUB_EVENT_NAME ?? 'local',
-    graph: stats ? 'bundle ∪ source' : 'source only',
     image,
     all: selection.all,
     selected: selection.ids.length,
@@ -196,7 +187,7 @@ function shadow(opts) {
   mkdirSync(path.dirname(out), { recursive: true });
   writeFileSync(out, `${JSON.stringify(record, null, 2)}\n`);
 
-  const markdown = render(selection, detection, { graph: record.graph, image });
+  const markdown = render(selection, detection, { image });
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
   else console.log(markdown);
 }
@@ -205,7 +196,7 @@ function shadow(opts) {
 function replay(opts) {
   const index = loadIndex();
   if (!index) throw new Error('replay needs storybook-static/ — run `pnpm build-storybook` first');
-  const { stats, merged } = loadGraphs();
+  const graph = loadGraph();
   const count = Number(opts.prs ?? 100);
   const prs = JSON.parse(
     execFileSync('gh', ['pr', 'list', '--state', 'merged', '-L', String(count), '--json', 'number,title,mergeCommit'], {
@@ -224,7 +215,7 @@ function replay(opts) {
       continue; // not in this clone
     }
     const then = { base: layoutAt(`${sha}^`), head: layoutAt(sha) };
-    const ctx = context(merged, index, asserted, `${sha}^`, sha, { base: then.base.toThen, head: then.head.toThen });
+    const ctx = context(graph, index, asserted, `${sha}^`, sha, { base: then.base.toThen, head: then.head.toThen });
     const changes = changesBetween(`${sha}^`, sha).map((c) => ({
       ...c,
       path: then.head.toNow(c.path),
@@ -241,7 +232,6 @@ function replay(opts) {
   const causes = {};
   for (const r of render_.filter((x) => x.all)) for (const why of new Set(r.why)) causes[why] = (causes[why] ?? 0) + 1;
   const summary = {
-    graph: stats ? 'bundle ∪ source' : 'source only',
     prs: rows.length,
     reachNothing: rows.length - render_.length,
     reachEverything: render_.filter((r) => r.all).length,
@@ -254,7 +244,7 @@ function replay(opts) {
   };
   if (opts.json) console.log(JSON.stringify({ summary, rows }, null, 2));
   else {
-    console.log(`Replayed ${summary.prs} merged PRs against ${total} asserted stories (${summary.graph}).\n`);
+    console.log(`Replayed ${summary.prs} merged PRs against ${total} asserted stories.\n`);
     console.log(`  reach no story        ${summary.reachNothing}`);
     console.log(`  reach every story     ${summary.reachEverything}`);
     console.log(`  reach some            ${summary.reachSome}  (median ${summary.medianSelected}, p90 ${summary.p90Selected})`);
@@ -262,26 +252,6 @@ function replay(opts) {
     console.log('  why a PR reached every story:');
     for (const [why, n] of Object.entries(causes).sort((a, b) => b[1] - a[1])) console.log(`    ${String(n).padStart(3)}  ${why}`);
   }
-}
-
-function graphs() {
-  const index = loadIndex();
-  const { stats, source } = loadGraphs();
-  if (!index || !stats) throw new Error('graphs needs a `pnpm build-storybook` with --stats-json first');
-  const asserted = assertedIds(show('HEAD', VISUAL) ?? '', show('HEAD', A11Y) ?? '');
-  const a = storyClosures(stats, index, asserted);
-  const b = storyClosures(source, index, asserted);
-  const diff = compareClosures(a, b);
-  console.log(`${Object.keys(a).length} stories; closures differ for ${diff.length}.\n`);
-  const tally = (key) => {
-    const counts = {};
-    for (const d of diff) for (const f of d[key]) counts[f] = (counts[f] ?? 0) + 1;
-    return Object.entries(counts).sort((x, y) => y[1] - x[1]);
-  };
-  console.log('Only the bundle graph sees (file — stories):');
-  for (const [f, n] of tally('onlyA').slice(0, 25)) console.log(`  ${n}  ${f}`);
-  console.log('\nOnly the source graph sees:');
-  for (const [f, n] of tally('onlyB').slice(0, 25)) console.log(`  ${n}  ${f}`);
 }
 
 function parse(argv) {
@@ -305,10 +275,8 @@ if (command === 'shadow') {
     console.log(`::warning::story selection failed and was skipped: ${error.stack ?? error}`);
   }
 } else if (command === 'replay') replay(opts);
-else if (command === 'graphs') graphs();
 else {
   console.error('usage: select-stories.mjs shadow [--base <rev>] [--playwright <report.json>]... [--out <file>]\n' +
-    '       select-stories.mjs replay [--prs 100] [--json]\n' +
-    '       select-stories.mjs graphs');
+    '       select-stories.mjs replay [--prs 100] [--json]');
   process.exit(2);
 }

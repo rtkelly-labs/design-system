@@ -9,23 +9,19 @@
  * shadow mode, beside the full suites, so the answer can be checked against
  * what the suites actually found before anything is skipped on its word.
  *
- * ## Two graphs, unioned
+ * ## One graph, from the source
  *
- * - **What Vite bundled** — `storybook-static/preview-stats.json`, written by
- *   `storybook build --stats-json` (the graph Chromatic's TurboSnap reads).
- *   Every module lists the modules that import it; inverted, that is the
- *   story's closure as the browser actually receives it, dynamic imports and
- *   MDX included.
- * - **What the source says** — the relative, dynamic and CSS `@import`
- *   specifiers in `src/` and `.storybook/`, and bare self-imports resolved
- *   through the package's `exports` map.
+ * The relative, dynamic, CSS `@import` and `url()` specifiers in `src/` and
+ * `.storybook/`, and bare self-imports resolved through the package's
+ * `exports` map. Type-only imports are left out: they are erased before
+ * anything renders.
  *
- * Neither is complete alone, which is why both are used. The bundle graph has
- * no CSS `@import` edges (`theme.css` and `prose.css` are folded into
- * `styles.css` by Tailwind before Vite sees them) and no JSON (the tokens a
- * specimen story imports through `@rtkelly13/design-system/tokens/...`). The
- * source graph cannot see what a plugin or a virtual module adds. A file in
- * either closure counts.
+ * Vite's own graph (`storybook build --stats-json`) was unioned with this one
+ * until it was measured: over 137 stories it saw no file this graph misses,
+ * while missing the CSS `@import`, `url()` and tokens-JSON edges this one has,
+ * and a replay of 100 merged PRs selected identically with and without it. It
+ * cost a 2.4 MB build artifact and a deploy step to delete it. A file this
+ * graph cannot see still selects every story, by the default-deny rule below.
  *
  * ## Rules before the graph
  *
@@ -48,32 +44,6 @@ export const PKG = 'packages/design-system/';
 
 /** Drop a query or hash suffix Vite adds (`?raw`, `?inline`, `#x`). */
 const bare = (id) => id.replace(/[?#].*$/, '');
-
-/**
- * Forward edges from `preview-stats.json`, as repo paths. Ids are relative to
- * the package (`./src/x.tsx`); `node_modules` and virtual modules are dropped,
- * because the lockfile rule covers the first and the second have no file.
- */
-export function graphFromStats(stats, pkg = PKG) {
-  const toRepo = (id) => {
-    const clean = bare(id);
-    if (!clean.startsWith('./') || clean.includes('node_modules')) return null;
-    return path.posix.normalize(pkg + clean.slice(2));
-  };
-  const graph = new Map();
-  for (const mod of stats.modules ?? []) {
-    const to = toRepo(mod.id);
-    if (!to) continue;
-    if (!graph.has(to)) graph.set(to, new Set());
-    for (const reason of mod.reasons ?? []) {
-      const from = toRepo(reason.moduleName ?? '');
-      if (!from) continue;
-      if (!graph.has(from)) graph.set(from, new Set());
-      graph.get(from).add(to);
-    }
-  }
-  return graph;
-}
 
 const SPECIFIER = [
   /(?:^|[^\w.])(?:import|export)\s[^'"]*?from\s*['"]([^'"]+)['"]/g, // import x from '…', export … from '…'
@@ -143,15 +113,6 @@ export function graphFromSource(files, read, { pkg = PKG, name = '@rtkelly13/des
 export function graphNodes(graph) {
   const out = new Set(graph.keys());
   for (const tos of graph.values()) for (const to of tos) out.add(to);
-  return out;
-}
-
-export function mergeGraphs(...graphs) {
-  const out = new Map();
-  for (const graph of graphs) for (const [from, tos] of graph) {
-    if (!out.has(from)) out.set(from, new Set());
-    for (const to of tos) out.get(from).add(to);
-  }
   return out;
 }
 
@@ -499,17 +460,4 @@ export function detect(selection, reports) {
   const selected = new Set(selection.ids);
   const judged = failures.map((f) => ({ ...f, selected: selection.all || (f.id !== null && selected.has(f.id)) }));
   return { failures: judged, misses: judged.filter((f) => !f.selected && f.status === 'unexpected') };
-}
-
-/** Where two graphs disagree about a story's source files — the cross-check. */
-export function compareClosures(a, b, only = (file) => file.includes('/src/')) {
-  const out = [];
-  for (const id of Object.keys(a)) {
-    const left = new Set([...(a[id] ?? [])].filter(only));
-    const right = new Set([...(b[id] ?? [])].filter(only));
-    const onlyA = [...left].filter((f) => !right.has(f));
-    const onlyB = [...right].filter((f) => !left.has(f));
-    if (onlyA.length || onlyB.length) out.push({ id, onlyA, onlyB });
-  }
-  return out;
 }

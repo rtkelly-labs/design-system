@@ -145,22 +145,22 @@ measurements rather than a guess:
 **Per-story selection runs in shadow mode.** `visual` ends with
 `scripts/select-stories.mjs shadow`, which says which asserted stories the change
 can reach and why, in the job summary and `telemetry/story-selection.json`. It skips
-nothing. Its graph is the union of what Vite bundled (`preview-stats.json` — `pnpm
-build-storybook` passes `--stats-json` for it; `vercel.json` deletes the 2.4 MB file
-after the build, because the published Storybook has no use for it) and the source imports: the bundle
-graph has no CSS `@import` or JSON edges, the source graph cannot see what a plugin
-adds, and with type-only imports left out the two agree on 118 of 120 stories. Files
-outside any graph — the lockfile, `ci.yml`'s `visual` job, a snapshot, a `CASES` row,
+nothing. Its graph is the source imports — relative, dynamic, CSS `@import` and
+`url()`, and self-imports through `exports`, type-only imports left out. Vite's bundle
+graph (`--stats-json`) was unioned in until it was measured: over 137 stories it saw
+no file the source graph misses, and a 100-PR replay selected identically without it,
+so it and the 2.4 MB artifact it needed are gone. Files
+outside the graph — the lockfile, `ci.yml`'s `visual` job, a snapshot, a `CASES` row,
 `package.json`'s dependency fields — have rules in `story-selection.mjs`, and a path
 no rule names reaches every story.
 
 `pnpm stories:replay` runs the same code over the last 100 merged PRs: 34 reached no
 asserted story, 35 reached all of them, and 31 reached a median of 6 (p90 28) —
 **39% of today's story scans across all PRs**. It uses today's graph for old PRs, so
-it is an estimate; `pnpm stories:graphs` prints where the two graphs disagree.
+it is an estimate.
 Three rules added after review — a `package.json` edit to a script the `visual` job
 runs (read from `ci.yml`, followed through the scripts it calls), a workflow-level key
-`visual` inherits, and default-deny inside `src/` for a file neither graph holds
+`visual` inherits, and default-deny inside `src/` for a file the graph does not hold
 (the source graph now follows CSS `url()`, so the self-hosted font is reached
 through `styles.css`) — left these figures unchanged: the three PRs that trip them
 already reached every story for another reason.
