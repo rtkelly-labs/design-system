@@ -32,6 +32,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  type TableAppearance,
+  type TableDensity,
 } from './Table';
 
 // Legacy column interface for backwards-compatibility
@@ -96,6 +98,16 @@ export interface DataTableVirtualization {
 
 type DataTableSharedProps<T> = {
   /**
+   * `grid` keeps the framed default, `quiet` removes the full cell grid, and
+   * `index` adds a keyline to row headers for catalog-style scanning.
+   */
+  appearance?: TableAppearance;
+  /**
+   * `comfortable` preserves the existing cell spacing. `compact` reduces it
+   * for reference tables with many rows.
+   */
+  density?: TableDensity;
+  /**
    * `index` is the row's position in `data`, not on screen, so a key built
    * from it follows its row through a sort rather than staying with the slot.
    */
@@ -149,6 +161,8 @@ export function DataTable<T>({
   data,
   keyExtractor,
   caption,
+  appearance = 'grid',
+  density = 'comfortable',
   emptyText = 'No items found.',
   className = '',
   containerClassName = '',
@@ -165,7 +179,7 @@ export function DataTable<T>({
   );
   const {
     height = 480,
-    rowHeight = 44,
+    rowHeight = density === 'compact' ? 36 : 44,
     overscan = 8,
     scrollElementRef,
   } = virtualization ?? {};
@@ -341,6 +355,8 @@ export function DataTable<T>({
     <Table
       className={className}
       label={regionLabel}
+      appearance={appearance}
+      density={density}
       aria-rowcount={windowed ? headerGroups.length + totalRows : undefined}
       containerClassName={
         virtualization && !scrollElementRef
@@ -429,7 +445,10 @@ export function DataTable<T>({
           <TableRow>
             <TableCell
               colSpan={colSpan}
-              className="px-4 py-8 text-center text-content-muted font-mono"
+              className={cn(
+                density === 'compact' ? 'px-3 py-4' : 'px-4 py-8',
+                'text-center text-content-muted font-mono',
+              )}
             >
               &gt; {emptyText}
             </TableCell>

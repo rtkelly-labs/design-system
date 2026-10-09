@@ -7,7 +7,9 @@ import {
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { Badge } from '../components/Badge';
-import { DataTable } from '../components/DataTable';
+import { DataTable, type Column } from '../components/DataTable';
+import { ThemeProvider } from '../components/ThemeProvider';
+import { LEVELS, THEME_LEVELS } from '../theme/levels';
 import {
   Table,
   TableBody,
@@ -30,6 +32,13 @@ const rows: Deployment[] = [
   { id: 'dpl_2', branch: 'preview', state: 'building', duration: '—', commits: 18 },
   { id: 'dpl_3', branch: 'fix/theme', state: 'error', duration: '0m 41s', commits: 5 },
   { id: 'dpl_4', branch: 'feat/headless-primitives', state: 'ready', duration: '2m 04s', commits: 99 },
+];
+
+const appearanceColumns: Column<Deployment>[] = [
+  { header: 'BRANCH', accessor: 'branch', rowHeader: true },
+  { header: 'STATE', accessor: 'state' },
+  { header: 'DURATION', accessor: 'duration' },
+  { header: 'COMMITS', accessor: 'commits' },
 ];
 
 const STATE_ACCENT = { ready: 'success', building: 'info', error: 'danger' } as const;
@@ -230,5 +239,71 @@ export const CompoundTable: Story = {
         </TableRow>
       </TableBody>
     </Table>
+  ),
+};
+
+/**
+ * Compares the quiet ruled and keyline index appearances at compact density.
+ * Each panel scopes the same two tables to one theme level, so their contrast
+ * and hierarchy can be reviewed together without changing the Storybook toolbar.
+ */
+export const AppearanceMatrix: Story = {
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      description: {
+        story:
+          'Use Quiet ruled when the data should carry the hierarchy. Use Keyline index when readers need a stronger row-name anchor. Both appearances keep the same table semantics and sort controls.',
+      },
+    },
+  },
+  render: () => (
+    <div className="grid grid-cols-1 gap-4 p-4 xl:grid-cols-2">
+      {THEME_LEVELS.map((level) => (
+        <ThemeProvider
+          key={level}
+          scoped
+          defaultLevel={level}
+          persist={false}
+          followSystem={false}
+          className="flex min-w-0 flex-col gap-4 border-2 border-edge-strong bg-surface-base p-4 text-content-primary"
+        >
+          <div className="flex items-baseline justify-between gap-4 border-b border-edge-subtle pb-2">
+            <h2 className="font-display text-xl font-bold">[ {LEVELS[level].label} ]</h2>
+            <span className="font-mono text-xs uppercase text-content-muted">
+              {LEVELS[level].polarity} level
+            </span>
+          </div>
+
+          <section className="space-y-2">
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-content-secondary">
+              01 // Quiet ruled
+            </h3>
+            <DataTable
+              appearance="quiet"
+              density="compact"
+              columns={appearanceColumns}
+              data={rows}
+              keyExtractor={(row) => row.id}
+              caption="Deployments with horizontal rules only"
+            />
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-content-secondary">
+              02 // Keyline index
+            </h3>
+            <DataTable
+              appearance="index"
+              density="compact"
+              columns={appearanceColumns}
+              data={rows}
+              keyExtractor={(row) => row.id}
+              caption="Deployments anchored by row headers"
+            />
+          </section>
+        </ThemeProvider>
+      ))}
+    </div>
   ),
 };

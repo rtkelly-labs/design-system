@@ -944,10 +944,17 @@ interface StatCardProps {
 }
 declare function StatCard({ title, value, change, changeType, subtitle, icon: Icon, accent, className, }: StatCardProps): react.JSX.Element;
 
-declare function Table({ className, containerClassName, label, ...props }: TableHTMLAttributes<HTMLTableElement> & {
+type TableAppearance = 'grid' | 'quiet' | 'index';
+
+type TableDensity = 'comfortable' | 'compact';
+declare function Table({ className, containerClassName, label, appearance, density, ...props }: TableHTMLAttributes<HTMLTableElement> & {
     containerClassName?: string;
 
     label?: string;
+
+    appearance?: TableAppearance;
+
+    density?: TableDensity;
 }): react.JSX.Element;
 declare function TableHeader({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
 declare function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
@@ -980,6 +987,10 @@ interface DataTableVirtualization {
 }
 type DataTableSharedProps<T> = {
 
+    appearance?: TableAppearance;
+
+    density?: TableDensity;
+
     keyExtractor?: (row: T, index: number) => string | number;
 
     caption?: ReactNode;
@@ -1004,7 +1015,7 @@ type DataTableProps<T> = DataTableSharedProps<T> & ({
     pageSize?: number;
 });
 
-declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, emptyText, className, containerClassName, virtualize, ...rest }: DataTableProps<T>): react.JSX.Element;
+declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, appearance, density, emptyText, className, containerClassName, virtualize, ...rest }: DataTableProps<T>): react.JSX.Element;
 
 interface ModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
     isOpen: boolean;
@@ -3081,9 +3092,11 @@ export {
   type TLDRProps,
   TOKEN_RULES,
   Table,
+  type TableAppearance,
   TableBody,
   TableCaption,
   TableCell,
+  type TableDensity,
   TableFooter,
   TableHead,
   TableHeader,

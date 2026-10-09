@@ -1,10 +1,36 @@
-import type {
-  HTMLAttributes,
-  TableHTMLAttributes,
-  TdHTMLAttributes,
-  ThHTMLAttributes,
+"use client";
+
+import {
+  createContext,
+  useContext,
+  type HTMLAttributes,
+  type TableHTMLAttributes,
+  type TdHTMLAttributes,
+  type ThHTMLAttributes,
 } from 'react';
 import { cn, recipe } from '../lib/recipe';
+
+/** The visual treatment of a table. `grid` preserves the original framed style. */
+export type TableAppearance = 'grid' | 'quiet' | 'index';
+
+/** Cell spacing for roomy reading or dense reference data. */
+export type TableDensity = 'comfortable' | 'compact';
+
+interface TablePresentation {
+  appearance: TableAppearance;
+  density: TableDensity;
+}
+
+const DEFAULT_PRESENTATION: TablePresentation = {
+  appearance: 'grid',
+  density: 'comfortable',
+};
+
+const TablePresentationContext = createContext<TablePresentation>(DEFAULT_PRESENTATION);
+
+function useTablePresentation() {
+  return useContext(TablePresentationContext);
+}
 
 const tableStyles = recipe({
   slots: {
@@ -19,12 +45,54 @@ const tableStyles = recipe({
     footer: 'bg-surface-raised border-t-2 border-edge-strong font-mono text-xs font-bold text-content-primary',
     caption: 'mt-3 text-xs font-mono text-content-muted text-center',
   },
+  variants: {
+    appearance: {
+      grid: {},
+      quiet: {
+        container: 'border-0 bg-transparent',
+        header: 'bg-transparent border-b border-edge-subtle',
+        head: 'text-content-secondary border-r-0',
+        rowHead: 'border-r-0',
+        body: 'divide-y divide-edge-subtle',
+        row: 'border-b border-edge-subtle',
+        cell: 'border-r-0',
+        footer: 'bg-transparent border-t border-edge-subtle',
+        caption: 'text-left',
+      },
+      index: {
+        container: 'border-0 bg-transparent',
+        header: 'bg-transparent border-b border-edge-subtle',
+        head: 'text-content-secondary border-r-0',
+        rowHead: 'border-l-2 border-accent-primary border-r-0 pl-3',
+        body: 'divide-y divide-edge-subtle',
+        row: 'border-b border-edge-subtle',
+        cell: 'border-r-0',
+        footer: 'bg-transparent border-t border-edge-subtle',
+        caption: 'text-left',
+      },
+    },
+    density: {
+      comfortable: {},
+      compact: {
+        head: 'h-9 px-3 py-2',
+        rowHead: 'px-3 py-1.5',
+        cell: 'px-3 py-1.5',
+        caption: 'mt-2',
+      },
+    },
+  },
+  defaultVariants: {
+    appearance: 'grid',
+    density: 'comfortable',
+  },
 });
 
 export function Table({
   className,
   containerClassName,
   label = 'Table',
+  appearance = 'grid',
+  density = 'comfortable',
   ...props
 }: TableHTMLAttributes<HTMLTableElement> & {
   containerClassName?: string;
@@ -34,8 +102,19 @@ export function Table({
    * table's subject where it is known.
    */
   label?: string;
+  /**
+   * `grid` keeps the framed default, `quiet` removes the full cell grid, and
+   * `index` adds a keyline to row headers for catalog-style scanning.
+   */
+  appearance?: TableAppearance;
+  /**
+   * `comfortable` preserves the existing cell spacing. `compact` reduces it
+   * for reference tables with many rows.
+   */
+  density?: TableDensity;
 }) {
-  const styles = tableStyles();
+  const presentation = { appearance, density };
+  const styles = tableStyles(presentation);
   /*
    * `tabIndex={0}` on the container because it is `overflow-x-auto`: any table
    * wider than its column becomes a scrollable region, and a scrollable region
@@ -54,17 +133,19 @@ export function Table({
    *
    * `label` exists so the name can be the table's own — "Failing checks"
    * rather than "Table" — for the callers that know it.
-   */
+  */
   return (
-    <div
-      data-slot="table-container"
-      tabIndex={0}
-      role="region"
-      aria-label={label}
-      className={styles.container({ class: containerClassName })}
-    >
-      <table data-slot="table" className={styles.table({ class: className })} {...props} />
-    </div>
+    <TablePresentationContext.Provider value={presentation}>
+      <div
+        data-slot="table-container"
+        tabIndex={0}
+        role="region"
+        aria-label={label}
+        className={styles.container({ class: containerClassName })}
+      >
+        <table data-slot="table" className={styles.table({ class: className })} {...props} />
+      </div>
+    </TablePresentationContext.Provider>
   );
 }
 
@@ -72,7 +153,7 @@ export function TableHeader({
   className,
   ...props
 }: HTMLAttributes<HTMLTableSectionElement>) {
-  const styles = tableStyles();
+  const styles = tableStyles(useTablePresentation());
   return <thead data-slot="table-header" className={styles.header({ class: className })} {...props} />;
 }
 
@@ -80,7 +161,7 @@ export function TableBody({
   className,
   ...props
 }: HTMLAttributes<HTMLTableSectionElement>) {
-  const styles = tableStyles();
+  const styles = tableStyles(useTablePresentation());
   return <tbody data-slot="table-body" className={styles.body({ class: className })} {...props} />;
 }
 
@@ -88,7 +169,7 @@ export function TableFooter({
   className,
   ...props
 }: HTMLAttributes<HTMLTableSectionElement>) {
-  const styles = tableStyles();
+  const styles = tableStyles(useTablePresentation());
   return <tfoot data-slot="table-footer" className={styles.footer({ class: className })} {...props} />;
 }
 
@@ -96,7 +177,7 @@ export function TableRow({
   className,
   ...props
 }: HTMLAttributes<HTMLTableRowElement>) {
-  const styles = tableStyles();
+  const styles = tableStyles(useTablePresentation());
   return <tr data-slot="table-row" className={styles.row({ class: className })} {...props} />;
 }
 
@@ -110,7 +191,7 @@ export function TableHead({
   scope = 'col',
   ...props
 }: ThHTMLAttributes<HTMLTableCellElement>) {
-  const styles = tableStyles();
+  const styles = tableStyles(useTablePresentation());
   const slot = scope === 'row' || scope === 'rowgroup' ? styles.rowHead : styles.head;
   return <th data-slot="table-head" scope={scope} className={slot({ class: className })} {...props} />;
 }
@@ -119,7 +200,7 @@ export function TableCell({
   className,
   ...props
 }: TdHTMLAttributes<HTMLTableCellElement>) {
-  const styles = tableStyles();
+  const styles = tableStyles(useTablePresentation());
   return <td data-slot="table-cell" className={styles.cell({ class: className })} {...props} />;
 }
 
@@ -127,6 +208,6 @@ export function TableCaption({
   className,
   ...props
 }: HTMLAttributes<HTMLTableCaptionElement>) {
-  const styles = tableStyles();
+  const styles = tableStyles(useTablePresentation());
   return <caption data-slot="table-caption" className={styles.caption({ class: className })} {...props} />;
 }
