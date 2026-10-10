@@ -28,6 +28,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "report": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/report.mjs",
+    "manifesto": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/report.mjs reports/manifesto.tsx --strict --pdf --no-typecheck --title \"Design Manifesto\"",
     "verify:report-cli": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-report-cli.mjs",
     "check:deps": "knip --no-progress --include dependencies,unlisted,unresolved"
   },

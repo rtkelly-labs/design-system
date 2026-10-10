@@ -18,7 +18,7 @@
     "types": ["node"],
     "typeRoots": ["../../node_modules/@types", "./node_modules/@types"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "reports/*.tsx"],
   // A fixture that is *meant* not to typecheck — it is what the report
   // typechecker is pointed at to prove it reports something.
   "exclude": ["src/__fixtures__/broken-types.tsx"]

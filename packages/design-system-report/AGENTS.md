@@ -33,6 +33,8 @@ release of the components.
 ## 📜 Commands
 
 - `pnpm report <file.tsx>`: Renders a report straight from `src/`, no build first.
+- `pnpm manifesto`: Renders the Design Manifesto (`reports/manifesto.tsx`) — a repo-local
+  report — to HTML and `--pdf` paper. Lint-strict; output is ignored, the `.tsx` is the artefact.
 - `pnpm verify:report-cli`: Packs both packages, installs them into a throwaway project and drives `ds-report` as a consumer. Runs in CI.
 - `pnpm build`: Bundles ESM, CJS and types via `tsup`, and copies the templates to `dist/`.
 - `pnpm typecheck`: Validates TypeScript strict mode. Needs the design system built first — it resolves the peer through that package's `exports` map.
