@@ -23,6 +23,11 @@ describe('DocsHeader without a ThemeProvider', () => {
     expect(screen.getByRole('banner')).toBeDefined();
   });
 
+  it('drops the docs header on paper', () => {
+    render(<DocsHeader title="Docs" />);
+    expect(screen.getByRole('banner').className).toContain('print:hidden');
+  });
+
   it('omits the level control, because there is no level to choose', () => {
     render(<DocsHeader title="Docs" />);
     expect(screen.queryByLabelText(/Theme level/)).toBeNull();

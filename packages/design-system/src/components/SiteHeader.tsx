@@ -62,7 +62,7 @@ export interface SiteHeaderProps
 // `${at}:flex` would generate no CSS at all.
 const siteHeader = recipe({
   slots: {
-    root: 'relative border-b-4 border-edge-strong bg-surface-raised font-mono text-content-primary',
+    root: 'relative border-b-4 border-edge-strong bg-surface-raised font-mono text-content-primary print:hidden',
     skip: 'sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-top '
       + 'focus:border-2 focus:border-edge-strong focus:bg-surface-base focus:px-4 focus:py-2 '
       + 'focus:font-bold focus:uppercase focus:text-content-primary',

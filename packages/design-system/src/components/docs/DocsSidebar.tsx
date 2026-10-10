@@ -53,7 +53,7 @@ export function DocsSidebar({
   }, []);
 
   return (
-    <nav className={cn('not-prose', className)} aria-label="Documentation">
+    <nav className={cn('not-prose print:hidden', className)} aria-label="Documentation">
       {label && <p className="docs-sidebar-label">[ {label} ]</p>}
       <NodeList
         nodes={nav}
