@@ -2602,6 +2602,76 @@ declare const Node: ((props: NodeProps & {
 
 declare const TreeDiagram: react.ForwardRefExoticComponent<TreeDiagramProps & react.RefAttributes<HTMLDivElement>>;
 
+type FileChange = 'add' | 'modify' | 'remove' | 'rename';
+type FileChangeView = 'before' | 'changes' | 'after';
+interface FileChangeNode {
+
+    name: string;
+
+    change?: FileChange;
+
+    note?: ReactNode;
+
+    children?: FileChangeNode[];
+}
+interface FileChangeTreeProps extends Omit<react.HTMLAttributes<HTMLDivElement>, 'children'> {
+
+    label?: string;
+
+    nodes: FileChangeNode[];
+
+    view?: FileChangeView;
+
+    defaultView?: FileChangeView;
+
+    onViewChange?: (view: FileChangeView) => void;
+
+    hideFooter?: boolean;
+
+    viewGroupLabel?: string;
+
+    viewLabels?: Partial<Record<FileChangeView, string>>;
+
+    changeLabels?: Partial<Record<FileChange, string>>;
+
+    className?: string;
+}
+
+declare const FileChangeTree: react.ForwardRefExoticComponent<FileChangeTreeProps & react.RefAttributes<HTMLDivElement>>;
+
+interface DrawingSheetProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    columns?: number;
+
+    rows?: number;
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const DrawingSheet: react.ForwardRefExoticComponent<DrawingSheetProps & react.RefAttributes<HTMLDivElement>>;
+
+interface IndexedSectionProps extends Omit<react.HTMLAttributes<HTMLElement>, 'title'> {
+
+    index: ReactNode;
+
+    title: ReactNode;
+
+    headingLevel?: 2 | 3 | 4;
+
+    actions?: ReactNode;
+
+    children?: ReactNode;
+
+    className?: string;
+}
+
+declare const IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
+
+declare const SheetSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
+type SheetSectionProps = IndexedSectionProps;
+
 type Glyphs = 'shade' | 'ascii' | 'hash' | 'bar' | readonly string[];
 type FigurePalette = 'mono' | 'duo' | 'multi';
 interface ActivityDay {
@@ -2742,6 +2812,10 @@ declare const mdxComponents: {
     GanttChart: react.ForwardRefExoticComponent<GanttChartProps & react.RefAttributes<HTMLElement>>;
     Timeline: react.ForwardRefExoticComponent<TimelineProps & react.RefAttributes<HTMLDivElement>>;
     TreeDiagram: react.ForwardRefExoticComponent<TreeDiagramProps & react.RefAttributes<HTMLDivElement>>;
+    FileChangeTree: react.ForwardRefExoticComponent<FileChangeTreeProps & react.RefAttributes<HTMLDivElement>>;
+    DrawingSheet: react.ForwardRefExoticComponent<DrawingSheetProps & react.RefAttributes<HTMLDivElement>>;
+    SheetSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
+    IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
     UptimeStrip: react.ForwardRefExoticComponent<UptimeStripProps & react.RefAttributes<HTMLDivElement>>;
     Terminal: react.ForwardRefExoticComponent<TerminalProps & react.RefAttributes<HTMLDivElement>>;
     Steps: react.ForwardRefExoticComponent<StepsProps & react.RefAttributes<HTMLDivElement>>;
@@ -2902,6 +2976,8 @@ export {
   Drawer,
   type DrawerPlacement,
   type DrawerProps,
+  DrawingSheet,
+  type DrawingSheetProps,
   type Emphasis,
   EmptyState,
   type EmptyStateProps,
@@ -2921,6 +2997,11 @@ export {
   type FieldsetProps,
   FigureFrame,
   type FigureFrameProps,
+  type FileChange,
+  type FileChangeNode,
+  FileChangeTree,
+  type FileChangeTreeProps,
+  type FileChangeView,
   type Finding,
   type FixedColour,
   FlowDiagram,
@@ -2943,6 +3024,8 @@ export {
   type HueAgreementCheck,
   type HueRef,
   INK_WEIGHT,
+  IndexedSection,
+  type IndexedSectionProps,
   Input,
   type InputProps,
   type Intent,
@@ -3054,6 +3137,8 @@ export {
   type SelectionDeviceCheck,
   ServerErrorPage,
   type ServerErrorPageProps,
+  SheetSection,
+  type SheetSectionProps,
   SiteFooter,
   type SiteFooterProps,
   SiteHeader,
