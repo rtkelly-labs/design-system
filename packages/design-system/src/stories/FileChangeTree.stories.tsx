@@ -20,13 +20,15 @@ export const Default: Story = { render: (args) => <FigureFrame title="WHAT CHANG
 /** The `after` view drops removed files and the change marks, leaving the tree as it now stands. */
 export const AfterView: Story = { args: { defaultView: 'after' }, render: (args) => <FigureFrame title="AFTER"><FileChangeTree {...args} /></FigureFrame> };
 
-/** Labels are props, so a translated page translates the switch and the tallies too. */
+/** Labels are props, so a translated page translates the switch and the tallies too.
+ *  Spanish rather than a CJK language on purpose: the shipped faces are latin-only,
+ *  and `pnpm check:fonts` fails a story whose glyphs no shipped face draws. */
 export const Translated: Story = {
   args: {
-    viewLabels: { before: '改前', changes: '变更', after: '改后' },
-    changeLabels: { add: '新增', modify: '修改', remove: '删除', rename: '重命名' },
+    viewLabels: { before: 'antes', changes: 'cambios', after: 'después' },
+    changeLabels: { add: 'añadido', modify: 'modificado', remove: 'eliminado', rename: 'renombrado' },
   },
-  render: (args) => <FigureFrame title="改了什么"><FileChangeTree {...args} /></FigureFrame>,
+  render: (args) => <FigureFrame title="QUÉ CAMBIÓ"><FileChangeTree {...args} /></FigureFrame>,
 };
 
 /** The marks keep their intent roles against the sketch surface. */
