@@ -8,6 +8,7 @@ export * from './UptimeStrip';
 export * from './TreeDiagram';
 export * from './FileChangeTree';
 export * from './DrawingSheet';
+export * from './IndexedSection';
 export * from './ActivityGrid';
 export * from './GanttChart';
 export * from './Terminal';

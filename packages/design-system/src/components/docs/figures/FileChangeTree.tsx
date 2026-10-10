@@ -32,6 +32,8 @@ export interface FileChangeTreeProps extends Omit<React.HTMLAttributes<HTMLDivEl
   onViewChange?: (view: FileChangeView) => void;
   /** Hide the before / changes / after switch and the tallies. */
   hideFooter?: boolean;
+  /** Accessible label for the view selection button group. */
+  viewGroupLabel?: string;
   /** Replaces the switch's button text, for translated pages. */
   viewLabels?: Partial<Record<FileChangeView, string>>;
   /** Replaces the tally words, for translated pages. */
@@ -105,12 +107,12 @@ function Entries({ nodes, view, changeLabels }: { nodes: FileChangeNode[]; view:
             <span aria-hidden="true" className="absolute left-0 top-[0.8em] w-4 border-t-2 border-edge-subtle" />
             <div className="flex items-center gap-2">
               {change ? <ChangeMark change={change} /> : null}
-              <span className={cn('min-w-0 break-all', change ? TONE[change].text : 'text-content-primary', change === 'remove' && 'line-through')}>
+              <span data-slot="file-change-tree-name" className={cn('min-w-0 break-all font-mono', change ? TONE[change].text : 'text-content-primary', change === 'remove' && 'line-through')}>
                 {node.name}
               </span>
               {change ? <span className="sr-only">({changeLabels[change]})</span> : null}
             </div>
-            {node.note != null && !isDirectory(node) ? <p className="m-0 mt-1 text-pretty text-content-secondary">{node.note}</p> : null}
+            {node.note != null && !isDirectory(node) ? <p data-slot="file-change-tree-note" className="m-0 mt-1 text-pretty text-content-secondary">{node.note}</p> : null}
             {isDirectory(node) && (node.children?.length ?? 0) > 0 ? (
               <div className="mt-3">
                 <Entries nodes={node.children ?? []} view={view} changeLabels={changeLabels} />
@@ -131,7 +133,7 @@ function Entries({ nodes, view, changeLabels }: { nodes: FileChangeNode[]; view:
  * Stacks into one column below the `sm` breakpoint, where the connector is dropped.
  */
 export const FileChangeTree = React.forwardRef<HTMLDivElement, FileChangeTreeProps>(function FileChangeTree(
-  { label = 'File changes', nodes, view: viewProp, defaultView = 'changes', onViewChange, hideFooter = false, viewLabels, changeLabels, className, ...rest },
+  { label = 'File changes', nodes, view: viewProp, defaultView = 'changes', onViewChange, hideFooter = false, viewGroupLabel, viewLabels, changeLabels, className, ...rest },
   ref,
 ) {
   const [uncontrolled, setUncontrolled] = React.useState<FileChangeView>(defaultView);
@@ -148,7 +150,7 @@ export const FileChangeTree = React.forwardRef<HTMLDivElement, FileChangeTreePro
   };
 
   return (
-    <AsciiFrameBody ref={ref} {...rest} data-slot="file-change-tree" className={cn('flex flex-col gap-6 font-sans', className)}>
+    <AsciiFrameBody ref={ref} {...rest} data-slot="file-change-tree" className={cn('flex flex-col gap-6 font-mono text-sm', className)}>
       <div role="list" aria-label={label} className="flex flex-col gap-8 sm:flex-row sm:gap-6">
         {columns.map((column, index) => {
           const first = index === 0;
@@ -168,7 +170,7 @@ export const FileChangeTree = React.forwardRef<HTMLDivElement, FileChangeTreePro
                 <span className={cn('break-all', marked && column.change ? TONE[column.change].text : undefined)}>{column.name}</span>
                 {marked && column.change ? <span className="sr-only">({changes[column.change]})</span> : null}
               </div>
-              {column.note != null ? <p className="m-0 mt-2 text-pretty text-content-secondary">{column.note}</p> : null}
+              {column.note != null ? <p data-slot="file-change-tree-note" className="m-0 mt-2 text-pretty text-content-secondary">{column.note}</p> : null}
               {(column.children?.length ?? 0) > 0 ? (
                 <div className="ml-4 mt-4">
                   <Entries nodes={column.children ?? []} view={view} changeLabels={changes} />
@@ -188,7 +190,7 @@ export const FileChangeTree = React.forwardRef<HTMLDivElement, FileChangeTreePro
               </span>
             ))}
           </p>
-          <div role="group" aria-label="View" className="flex border-2 border-edge-default" data-slot="file-change-tree-views">
+          <div role="group" aria-label={viewGroupLabel ?? 'View'} className="flex border-2 border-edge-default" data-slot="file-change-tree-views">
             {VIEWS.map((option, index) => (
               <button
                 key={option}

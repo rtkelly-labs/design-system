@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MessageSquare } from 'lucide-react';
-import { DrawingSheet, SheetSection } from '../components/docs/figures/DrawingSheet';
+import { DrawingSheet } from '../components/docs/figures/DrawingSheet';
+import { SheetSection } from '../components/docs/figures/IndexedSection';
 import { FileChangeTree } from '../components/docs/figures/FileChangeTree';
 import { MATH_CHANGESET } from './figures/fixtures';
 

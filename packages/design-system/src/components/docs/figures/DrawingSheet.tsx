@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import * as React from 'react';
 import { cn } from '../../../lib/recipe';
 
+
+
 const LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
 /** Row reference for an index — drawing-sheet convention skips I and O, which read as 1 and 0. */
@@ -15,7 +17,7 @@ export interface DrawingSheetProps extends React.HTMLAttributes<HTMLDivElement> 
   columns?: number;
   /** Grid references down the left edge, lettered from A. `0` hides the side ruler. */
   rows?: number;
-  /** Sheet content, usually one or more `SheetSection`s. */
+  /** Sheet content, usually one or more `IndexedSection`s. */
   children?: ReactNode;
   /** Additional classes for the root. */
   className?: string;
@@ -66,45 +68,5 @@ export const DrawingSheet = React.forwardRef<HTMLDivElement, DrawingSheetProps>(
         {children}
       </div>
     </div>
-  );
-});
-
-export interface SheetSectionProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
-  /** Short reference drawn in the solid tab, such as `A` or `B2`. */
-  index: ReactNode;
-  /** Section heading. */
-  title: ReactNode;
-  /** Heading level for `title`, so the section sits correctly in the page outline. */
-  headingLevel?: 2 | 3 | 4;
-  /** Controls drawn at the right of the header, such as a comment button. */
-  actions?: ReactNode;
-  /** Section content. */
-  children?: ReactNode;
-  /** Additional classes for the root. */
-  className?: string;
-}
-
-/**
- * One boxed, referenced section of a sheet: a solid index tab, a heading, an optional actions
- * slot, and a hard-ruled body. Works on its own or inside a `DrawingSheet`.
- */
-export const SheetSection = React.forwardRef<HTMLElement, SheetSectionProps>(function SheetSection({ index, title, headingLevel = 3, actions, children, className, ...rest }, ref) {
-  const headingId = React.useId();
-  const Heading = `h${headingLevel}` as const;
-  return (
-    <section ref={ref} aria-labelledby={headingId} {...rest} data-slot="sheet-section" className={cn('flex min-w-0 flex-col border-2 border-edge-strong bg-surface-base', className)}>
-      <header data-slot="sheet-section-header" className="flex items-stretch border-b-2 border-edge-strong">
-        <span data-slot="sheet-section-index" className="flex min-w-12 items-center justify-center bg-content-primary px-3 font-mono text-lg font-bold text-content-inverse">
-          {index}
-        </span>
-        <Heading id={headingId} className="m-0 flex flex-1 items-center px-4 py-3 font-display text-xl font-bold text-content-primary">
-          {title}
-        </Heading>
-        {actions != null ? <div data-slot="sheet-section-actions" className="flex items-center gap-2 px-3">{actions}</div> : null}
-      </header>
-      <div data-slot="sheet-section-body" className="min-w-0 p-4 sm:p-6">
-        {children}
-      </div>
-    </section>
   );
 });

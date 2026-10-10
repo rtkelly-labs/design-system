@@ -65,5 +65,7 @@ describe('FileChangeTree', () => {
     expect(ref.current).toBe(screen.getByTestId('tree'));
     rerender(<FileChangeTree nodes={NODES} hideFooter />);
     expect(screen.queryByRole('group', { name: 'View' })).toBeNull();
+    rerender(<FileChangeTree nodes={NODES} viewGroupLabel="Select view" />);
+    expect(screen.getByRole('group', { name: 'Select view' })).toBeTruthy();
   });
 });

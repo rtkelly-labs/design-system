@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it } from 'vitest';
-import { DrawingSheet, SheetSection } from './DrawingSheet';
+import { DrawingSheet } from './DrawingSheet';
+import { SheetSection } from './IndexedSection';
 
 describe('DrawingSheet', () => {
   it('draws numbered columns and lettered rows, hidden from assistive technology', () => {

@@ -2612,6 +2612,8 @@ interface FileChangeTreeProps extends Omit<react.HTMLAttributes<HTMLDivElement>,
 
     hideFooter?: boolean;
 
+    viewGroupLabel?: string;
+
     viewLabels?: Partial<Record<FileChangeView, string>>;
 
     changeLabels?: Partial<Record<FileChange, string>>;
@@ -2633,7 +2635,8 @@ interface DrawingSheetProps extends react.HTMLAttributes<HTMLDivElement> {
 }
 
 declare const DrawingSheet: react.ForwardRefExoticComponent<DrawingSheetProps & react.RefAttributes<HTMLDivElement>>;
-interface SheetSectionProps extends Omit<react.HTMLAttributes<HTMLElement>, 'title'> {
+
+interface IndexedSectionProps extends Omit<react.HTMLAttributes<HTMLElement>, 'title'> {
 
     index: ReactNode;
 
@@ -2648,7 +2651,10 @@ interface SheetSectionProps extends Omit<react.HTMLAttributes<HTMLElement>, 'tit
     className?: string;
 }
 
-declare const SheetSection: react.ForwardRefExoticComponent<SheetSectionProps & react.RefAttributes<HTMLElement>>;
+declare const IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
+
+declare const SheetSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
+type SheetSectionProps = IndexedSectionProps;
 
 type Glyphs = 'shade' | 'ascii' | 'hash' | 'bar' | readonly string[];
 type FigurePalette = 'mono' | 'duo' | 'multi';
@@ -2792,7 +2798,8 @@ declare const mdxComponents: {
     TreeDiagram: react.ForwardRefExoticComponent<TreeDiagramProps & react.RefAttributes<HTMLDivElement>>;
     FileChangeTree: react.ForwardRefExoticComponent<FileChangeTreeProps & react.RefAttributes<HTMLDivElement>>;
     DrawingSheet: react.ForwardRefExoticComponent<DrawingSheetProps & react.RefAttributes<HTMLDivElement>>;
-    SheetSection: react.ForwardRefExoticComponent<SheetSectionProps & react.RefAttributes<HTMLElement>>;
+    SheetSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
+    IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
     UptimeStrip: react.ForwardRefExoticComponent<UptimeStripProps & react.RefAttributes<HTMLDivElement>>;
     Terminal: react.ForwardRefExoticComponent<TerminalProps & react.RefAttributes<HTMLDivElement>>;
     Steps: react.ForwardRefExoticComponent<StepsProps & react.RefAttributes<HTMLDivElement>>;
@@ -3000,6 +3007,8 @@ export {
   type Hue,
   type HueAgreementCheck,
   type HueRef,
+  IndexedSection,
+  type IndexedSectionProps,
   Input,
   type InputProps,
   type Intent,
