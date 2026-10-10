@@ -17,6 +17,7 @@
     "test:a11y": "pnpm --filter @rtkelly13/design-system test:a11y",
     "walkthrough": "pnpm --filter @rtkelly13/design-system walkthrough",
     "report": "pnpm --filter @rtkelly13/design-system-report report",
+    "manifesto": "pnpm --filter @rtkelly13/design-system-report manifesto",
     "site": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-site dev",
     "site:build": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-site build",
     "build:deploy": "node scripts/assemble-deploy.mjs",
