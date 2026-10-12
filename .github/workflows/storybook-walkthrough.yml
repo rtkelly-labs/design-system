@@ -15,6 +15,7 @@ on:
   pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   workflow_dispatch:
 
 # A walkthrough for an outdated commit is noise — drop in-flight runs when the
@@ -26,6 +27,7 @@ concurrency:
 jobs:
   walkthrough:
     name: Capture Screenshot Walkthrough
+    if: "!contains(github.event.pull_request.labels.*.name, 'skip-walkthrough')"
     runs-on: ubuntu-latest
     # The render environment, pinned: the official Playwright image at the
     # lockfile's Playwright version, by digest — rule 14's reasoning applied to
