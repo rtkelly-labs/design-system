@@ -2669,9 +2669,6 @@ interface IndexedSectionProps extends Omit<react.HTMLAttributes<HTMLElement>, 't
 
 declare const IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
 
-declare const SheetSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
-type SheetSectionProps = IndexedSectionProps;
-
 type Glyphs = 'shade' | 'ascii' | 'hash' | 'bar' | readonly string[];
 type FigurePalette = 'mono' | 'duo' | 'multi';
 interface ActivityDay {
@@ -2814,7 +2811,6 @@ declare const mdxComponents: {
     TreeDiagram: react.ForwardRefExoticComponent<TreeDiagramProps & react.RefAttributes<HTMLDivElement>>;
     FileChangeTree: react.ForwardRefExoticComponent<FileChangeTreeProps & react.RefAttributes<HTMLDivElement>>;
     DrawingSheet: react.ForwardRefExoticComponent<DrawingSheetProps & react.RefAttributes<HTMLDivElement>>;
-    SheetSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
     IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
     UptimeStrip: react.ForwardRefExoticComponent<UptimeStripProps & react.RefAttributes<HTMLDivElement>>;
     Terminal: react.ForwardRefExoticComponent<TerminalProps & react.RefAttributes<HTMLDivElement>>;
@@ -3137,8 +3133,6 @@ export {
   type SelectionDeviceCheck,
   ServerErrorPage,
   type ServerErrorPageProps,
-  SheetSection,
-  type SheetSectionProps,
   SiteFooter,
   type SiteFooterProps,
   SiteHeader,

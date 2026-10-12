@@ -61,9 +61,3 @@ export const IndexedSection = React.forwardRef<HTMLElement, IndexedSectionProps>
     </section>
   );
 });
-
-/**
- * @deprecated Use `IndexedSection` instead. Retained for backwards compatibility with `DrawingSheet`.
- */
-export const SheetSection = IndexedSection;
-export type SheetSectionProps = IndexedSectionProps;
