@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it } from 'vitest';
 import { DrawingSheet } from './DrawingSheet';
-import { SheetSection } from './IndexedSection';
+import { IndexedSection } from './IndexedSection';
 
 describe('DrawingSheet', () => {
   it('draws numbered columns and lettered rows, hidden from assistive technology', () => {
@@ -32,9 +32,9 @@ describe('DrawingSheet', () => {
   });
 });
 
-describe('SheetSection', () => {
+describe('DrawingSheet with IndexedSection', () => {
   it('is a region named by its heading, at the requested level', () => {
-    render(<SheetSection index="A" title="What changed" headingLevel={2} actions={<button type="button">Comment</button>}>content</SheetSection>);
+    render(<IndexedSection index="A" title="What changed" headingLevel={2} actions={<button type="button">Comment</button>}>content</IndexedSection>);
     expect(screen.getByRole('region', { name: 'What changed' })).toBeTruthy();
     expect(screen.getByRole('heading', { level: 2, name: 'What changed' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Comment' })).toBeTruthy();
@@ -44,7 +44,7 @@ describe('SheetSection', () => {
   it('forwards refs on both parts', () => {
     const sheet = createRef<HTMLDivElement>();
     const section = createRef<HTMLElement>();
-    render(<DrawingSheet ref={sheet} data-testid="sheet"><SheetSection ref={section} index="B" title="Checks" /></DrawingSheet>);
+    render(<DrawingSheet ref={sheet} data-testid="sheet"><IndexedSection ref={section} index="B" title="Checks" /></DrawingSheet>);
     expect(sheet.current).toBe(screen.getByTestId('sheet'));
     expect(section.current).toBe(screen.getByRole('region', { name: 'Checks' }));
   });

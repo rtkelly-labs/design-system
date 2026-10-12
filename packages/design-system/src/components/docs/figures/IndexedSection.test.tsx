@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it } from 'vitest';
-import { IndexedSection, SheetSection } from './IndexedSection';
+import { IndexedSection } from './IndexedSection';
 
 describe('IndexedSection', () => {
   it('is a region named by its heading, at the requested level', () => {
@@ -21,10 +21,6 @@ describe('IndexedSection', () => {
     const title = container.querySelector('[data-slot="indexed-section-title"]');
     expect(title).toBeTruthy();
     expect(title?.textContent).toBe('Summary');
-  });
-
-  it('provides SheetSection alias for backward compatibility', () => {
-    expect(SheetSection).toBe(IndexedSection);
   });
 
   it('forwards refs', () => {
