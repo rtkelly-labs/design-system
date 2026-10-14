@@ -32,7 +32,7 @@ export const Default: Story = {
 /** Verdicts say what happened to each column; a hatched cell means no value existed. */
 export const Verdicts: Story = {
   args: {
-    label: 'Midnight against sketch',
+    label: 'Midnight palette, one hue new',
     columns: hues.map((h, i) => ({ name: h, verdict: i === 0 ? 'new' : 'kept', tone: i === 0 ? 'info' : 'success' })),
     rows: [
       { label: 'Before', values: hues.map((h, i) => (i === 0 ? null : LEVELS.midnight.palette[h])) },
