@@ -18,10 +18,13 @@ const meta: Meta<typeof SiteNav> = {
 export default meta;
 type Story = StoryObj<typeof SiteNav>;
 
-/** The ground a nav sits on — the header's raised surface. */
-function Bar({ children }: { children: ReactNode }) {
+/**
+ * The ground a nav sits on — the header's raised surface. `reserve` holds
+ * room under the bar for a menu that is open on load; a bare row needs none.
+ */
+function Bar({ children, reserve = false }: { children: ReactNode; reserve?: boolean }) {
   return (
-    <div className="min-h-64 border-b-4 border-edge-strong bg-surface-raised p-6 text-content-primary">
+    <div className={`${reserve ? 'min-h-64 ' : ''}border-b-4 border-edge-strong bg-surface-raised p-6 text-content-primary`}>
       {children}
     </div>
   );
@@ -56,7 +59,7 @@ export const Default: Story = {
 export const WithChildren: Story = {
   render: () => (
     <LinkProvider isCurrent={(href) => href === marketing.currentPath}>
-      <Bar>
+      <Bar reserve>
         <SiteNav label="Primary">
           <SiteNavItem href="/features">Features</SiteNavItem>
           <SiteNavItem href="/pricing">Pricing</SiteNavItem>

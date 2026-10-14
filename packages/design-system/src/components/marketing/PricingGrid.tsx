@@ -3,6 +3,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import { recipe } from '../../lib/recipe';
 import { accentTextClass } from '../../lib/accentClasses';
+import { accentVar } from '../../lib/theme';
 import { Card } from '../Card';
 import { SectionGrid } from './SectionGrid';
 import type { SectionAlign, SectionColumns } from './SectionGrid';
@@ -116,7 +117,8 @@ export interface PricingTierProps extends Omit<HTMLAttributes<HTMLDivElement>, '
 
 const pricingTier = recipe({
   slots: {
-    root: 'flex flex-col justify-between',
+    root: 'relative flex flex-col justify-between',
+    badge: 'absolute -top-3 left-4 inline-block px-2 py-[0.15rem] font-mono text-[0.65rem] font-bold uppercase text-content-inverse',
     name: 'mb-2 font-display text-[1.1rem] font-extrabold uppercase text-content-primary',
     priceRow: 'mb-4',
     price: 'font-display text-[3rem] font-black',
@@ -162,11 +164,17 @@ export const PricingTier = forwardRef<HTMLDivElement, PricingTierProps>(function
       ref={ref}
       variant="panel"
       accent={accent}
-      badge={badge}
       data-slot="pricing-tier"
       {...props}
       className={styles.root({ class: className })}
     >
+      {badge ? (
+        // Hung on the card's top edge rather than set in its flow: in flow it
+        // pushes this tier's name, price and list below its neighbours'.
+        <span data-slot="pricing-tier-badge" className={styles.badge()} style={{ backgroundColor: accentVar(accent) }}>
+          {badge}
+        </span>
+      ) : null}
       <div data-slot="pricing-tier-body">
         <h3 className={styles.name()}>{name}</h3>
         <div data-slot="pricing-tier-price" className={styles.priceRow()}>

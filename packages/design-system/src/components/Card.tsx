@@ -231,6 +231,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
               color: semanticTokens.accent.secondary,
               fontWeight: 700,
               textTransform: 'uppercase',
+              // A file name is one unbreakable token: in a narrow card it must wrap inside the
+              // header strip, not run out past the card border.
+              minWidth: 0,
+              overflowWrap: 'anywhere',
             }}
           >
             {computedFilename}
