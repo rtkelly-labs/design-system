@@ -29,10 +29,26 @@ describe('compendium pagination', () => {
     expect(a.pageOf.get('D')).toBe(a.pageOf.get('A'));
   });
 
-  it('removing the last plate leaves every earlier plate where it was', () => {
-    const before = paginate(plates).pageOf;
-    const after = paginate(plates.filter((p) => p.component !== 'G')).pageOf;
-    for (const name of ['A', 'B', 'C', 'D', 'E', 'F']) expect(after.get(name)).toBe(before.get(name));
+  it('keeps the rungs of a split plate on one sheet when the pair fits', () => {
+    const split = [
+      { key: 'S#sketch', component: 'S', group: 'g', height: 100 },
+      { key: 'S#midnight', component: 'S', group: 'g', height: 100, continuation: true },
+      plate('T', 'g', 130),
+      plate('U', 'g', 100),
+    ];
+    const { pageOf } = paginate(split);
+    expect(pageOf.get('S#midnight')).toBe(pageOf.get('S#sketch'));
+    // Too tall as a pair: the two blocks go to separate sheets rather than overflowing one.
+    const tall = paginate([
+      { key: 'V#sketch', component: 'V', group: 'g', height: 150 },
+      { key: 'V#midnight', component: 'V', group: 'g', height: 150, continuation: true },
+    ]);
+    expect(tall.sheets.length).toBe(2);
+  });
+
+  it('fills sheets better than registry-order first-fit would', () => {
+    const { sheets } = paginate([plate('a', 'g', 130), plate('b', 'g', 130), plate('c', 'g', 100), plate('d', 'g', 100)]);
+    expect(sheets.length).toBe(2);
   });
 
   it('page numbers start after the index sheets', () => {
