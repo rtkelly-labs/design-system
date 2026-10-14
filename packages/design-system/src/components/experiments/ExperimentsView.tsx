@@ -132,7 +132,7 @@ export const ExperimentsView: React.FC<ExperimentsViewProps> = ({
   onSelectExperiment,
 }) => {
   return (
-    <div
+    <div data-slot="experiments-view"
       style={{
         maxWidth: '1000px',
         margin: '0 auto',

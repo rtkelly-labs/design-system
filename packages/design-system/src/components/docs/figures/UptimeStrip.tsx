@@ -55,7 +55,7 @@ export const UptimeStrip = React.forwardRef<HTMLDivElement, UptimeStripProps>(fu
   for (let index = 0; index < days.length; index += cols) rows.push(days.slice(index, index + cols));
 
   return (
-      <AsciiFrameBody ref={ref} {...rest} className={cn('flex flex-col items-start gap-4', className)}>
+      <AsciiFrameBody data-slot="uptime-strip" ref={ref} {...rest} className={cn('flex flex-col items-start gap-4', className)}>
         <div className="flex w-fit max-w-full flex-col gap-4 overflow-x-auto" role="region" tabIndex={0} aria-label={`${label} status chart`}>
           <div aria-hidden="true" className="flex select-none flex-col gap-1">
             {rows.map((row, rowIndex) => (

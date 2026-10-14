@@ -29,11 +29,43 @@ renaming one breaks them exactly as renaming a prop would — and under the crit
 [`research.md`](./research.md) §1 that makes it a breaking change, not a refactor. Name a slot for
 the *part*, never for how it currently looks: `field-label`, not `field-uppercase-text`.
 
-Single-element components do not need one. The rule is that a consumer should be able to reach
-anything they can see as a distinct thing, and in a component that renders one element the root
-already is that.
+**Every standalone component, and every composition part, carries one** (this replaced an earlier
+rule that single-element components did not need it). The slot is the marker that says *what this
+element is*, independent of its class names, and it is what lets a test, a visual-regression mask, a
+browser-automation script, a consumer's stylesheet, an agent reading the DOM, and the compendium's
+completeness check all point at the same thing.
 
-Convention: `<component>` for the root, `<component>-<part>` below it, kebab-case throughout.
+Naming, exactly:
+
+- The root (or documented element) of a component is the kebab-case of its export name:
+  `SiteFooter` -> `site-footer`, `TabsList` -> `tabs-list`. A part is named the same way, from its own
+  export name, which is prefixed by its parent's (`TableRow`, `MetadataGridCell`).
+- Sub-elements that are not exports are `<root>-<part>`: `site-footer-body`, `toast-icon`.
+- Kebab-case only: `^[a-z][a-z0-9]*(-[a-z0-9]+)*$`.
+- Two different components never share a slot of their own. The exceptions are typed, with a reason,
+  in `scripts/slot-contract.mjs` (`ALIASES`): a thin wrapper that renders another component carries
+  its delegate's slot, a component built on a shared frame (`FieldFrame`, `GroupFrame`) is identified
+  by a slot on a descendant, and a few names predate the rule (`barchart`) and stay, because renaming
+  breaks consumers.
+
+**Slot names are a quasi-public contract.** Renaming or removing one is a breaking change for anyone
+who selects on it. Pre-1.0 the policy is still to break freely, with no compatibility shims and no
+per-version notes; that is a deliberate choice, not an oversight. What the contract adds is
+visibility: `api/slots.txt` is the committed inventory (like `api/index.d.ts` for types), so every
+add, rename or removal is a reviewable diff in the PR.
+
+How it is enforced, from cheapest up:
+
+1. `pnpm check:slots` (source only, no build, first in CI): every exported component's source must
+   spell out `data-slot="<its name, kebab-cased>"` or have an `ALIASES` entry; stale entries fail.
+2. `src/slots/slots.test.tsx`: the exports are classified from the running module (a new component or
+   part is held to the contract the moment it exists), each is rendered through its stories (a part
+   through its parent's) or a fixture in `src/slots/fixtures.tsx`, and the markup must carry the slot,
+   in kebab-case, unique across components, and `api/slots.txt` must match.
+3. `pnpm slots:update` rewrites the inventory after an intended change.
+
+The attribute is shipped, not compiled away: it costs a few bytes and its removal would break tests
+and the compendium. A consumer who wants it stripped from production markup does that on their side.
 
 
 ## Inline styles, and the one case that is legitimate

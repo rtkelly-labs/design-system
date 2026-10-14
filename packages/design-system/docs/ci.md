@@ -34,7 +34,7 @@ trigger is the post-merge signal for the default branch specifically.
 
 | Job | What it runs | Roughly | Ceiling |
 | --- | --- | --- | --- |
-| `gates` | `tokens:check`, `tokens:design:check`, `check:contrast`, `check:docs`, `check:doc-snippets`, `check:skills`, `check:component-docs`, `check:story-docs`, `check:component-contract`, `check:licences`, `check:reference-material`, `check:lint-budget`, `check:css`, `check:tokens`, `ansi:check`, `check:fonts`, `check:deps`, `check:governance` | 55s | 10m |
+| `gates` | `tokens:check`, `tokens:design:check`, `check:contrast`, `check:docs`, `check:doc-snippets`, `check:skills`, `check:component-docs`, `check:story-docs`, `check:component-contract`, `check:slots`, `check:licences`, `check:reference-material`, `check:lint-budget`, `check:css`, `check:tokens`, `ansi:check`, `check:fonts`, `check:deps`, `check:governance` | 55s | 10m |
 | `unit` | `typecheck`, `test:coverage` | 95s | 10m |
 | `package` | `build`, `check:bundle-size`, `check:dep-cost`, `check:import-cost`, `check:api`, and the report generator | 85s | 10m |
 | `visual` | `build-storybook`, `check:visual-coverage`, `check:docgen-props`, `check:story-conventions`, `test:visual`, `test:a11y` | 430s | 25m |

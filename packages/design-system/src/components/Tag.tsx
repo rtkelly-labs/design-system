@@ -34,14 +34,14 @@ export const Tag = forwardRef<HTMLAnchorElement | HTMLSpanElement, TagProps>(fun
 
   if (href) {
     return (
-      <a ref={ref as Ref<HTMLAnchorElement>} href={href} className={combinedClasses} onClick={onClick}>
+      <a data-slot="tag" ref={ref as Ref<HTMLAnchorElement>} href={href} className={combinedClasses} onClick={onClick}>
         {label}
       </a>
     );
   }
 
   return (
-    <span ref={ref as Ref<HTMLSpanElement>} className={combinedClasses} onClick={onClick}>
+    <span data-slot="tag" ref={ref as Ref<HTMLSpanElement>} className={combinedClasses} onClick={onClick}>
       {label}
     </span>
   );

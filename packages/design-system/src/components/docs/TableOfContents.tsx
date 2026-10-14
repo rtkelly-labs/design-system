@@ -70,7 +70,7 @@ export function TableOfContents({
   if (visible.length === 0) return null;
 
   return (
-    <nav className={cn('not-prose', className)} aria-label="Table of contents">
+    <nav data-slot="table-of-contents" className={cn('not-prose', className)} aria-label="Table of contents">
       {label && <p className="docs-toc-label">[ {label} ]</p>}
       <ul className="docs-toc-list">
         {visible.map((entry) => (

@@ -92,7 +92,7 @@ export const ChangeSummary = React.forwardRef<HTMLDivElement, ChangeSummaryProps
   const footer = footerLine ? { ...footerLine, label: footerLine.label ?? '' } : undefined;
 
   return (
-      <AsciiFrameBody ref={ref} {...rest} className={cn('flex flex-col gap-3', className)}>
+      <AsciiFrameBody data-slot="change-summary" ref={ref} {...rest} className={cn('flex flex-col gap-3', className)}>
         <ul className="flex flex-col gap-2" aria-label={label}>
           {rows.map((row, index) => {
             const sign = row.sign ?? 'keep';

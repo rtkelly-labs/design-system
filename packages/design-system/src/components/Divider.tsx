@@ -83,7 +83,7 @@ export const Divider: React.FC<DividerProps> = ({
       : VARIANT_POLARITY[variant];
 
   return (
-    <div
+    <div data-slot="divider"
       className={cn(
         'font-mono text-accent-primary tracking-[0.2em] select-none my-6 overflow-hidden whitespace-nowrap',
         className

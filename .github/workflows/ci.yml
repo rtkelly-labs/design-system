@@ -168,6 +168,12 @@ jobs:
       - name: Component contract
         run: pnpm check:component-contract
 
+      # Every exported component carries a kebab-case data-slot, or a typed
+      # alias saying why not. Source-only, no build; the runtime half and the
+      # api/slots.txt inventory are in the unit tests.
+      - name: Slot contract
+        run: pnpm check:slots
+
       # Default-deny: every shipped package, and the licence it had last time.
       - name: Shipped licences
         run: pnpm check:licences

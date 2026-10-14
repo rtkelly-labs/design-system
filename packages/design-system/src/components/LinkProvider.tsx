@@ -169,6 +169,7 @@ export const SiteLink = forwardRef<HTMLAnchorElement, SiteLinkProps>(function Si
       ref={ref}
       component={Component}
       href={href}
+      data-slot="site-link"
       {...props}
       className={merged}
       aria-current={isCurrent ? 'page' : ariaCurrent}

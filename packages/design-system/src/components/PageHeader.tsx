@@ -30,7 +30,7 @@ export function PageHeader({
   const accentText = accentTextClass(accent);
 
   return (
-    <header className={cn('bg-surface-raised px-6 pt-8 pb-10', className)}>
+    <header data-slot="page-header" className={cn('bg-surface-raised px-6 pt-8 pb-10', className)}>
       <div className="mb-4 flex items-center gap-4">
         {Icon && <Icon className={cn('h-10 w-10', accentText)} />}
         <h1 className="font-display text-4xl font-bold uppercase text-content-primary md:text-6xl">
