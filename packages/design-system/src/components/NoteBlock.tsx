@@ -3,7 +3,7 @@ import { AlertCircle, CheckCircle2, Info, AlertTriangle } from 'lucide-react';
 import { semanticTokens } from '../lib/theme';
 
 export interface NoteBlockProps {
-  type?: 'note' | 'tip' | 'warning' | 'important';
+  type?: 'note' | 'tip' | 'warning' | 'danger';
   title?: string;
   children: React.ReactNode;
 }
@@ -24,17 +24,17 @@ export const NoteBlock: React.FC<NoteBlockProps> = ({
         };
       case 'warning':
         return {
-          borderColor: semanticTokens.intent.danger,
-          color: semanticTokens.intent.danger,
+          borderColor: semanticTokens.intent.warning,
+          color: semanticTokens.intent.warning,
           icon: AlertTriangle,
           defaultTitle: 'WARNING'
         };
-      case 'important':
+      case 'danger':
         return {
-          borderColor: semanticTokens.intent.warning,
-          color: semanticTokens.intent.warning,
+          borderColor: semanticTokens.intent.danger,
+          color: semanticTokens.intent.danger,
           icon: AlertCircle,
-          defaultTitle: 'IMPORTANT'
+          defaultTitle: 'DANGER'
         };
       default:
         return {
