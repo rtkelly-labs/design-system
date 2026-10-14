@@ -188,7 +188,7 @@ export const Pagination = forwardRef<HTMLDivElement, PaginationProps>(function P
         <span data-slot="pagination-status" className="md:hidden whitespace-nowrap text-content-primary font-bold border-2 border-edge-strong px-3 py-3 bg-surface-base">
           [ {current} / {totalPages} ]
         </span>
-        <ul data-slot="pagination-list" className="hidden md:flex items-center gap-2">
+        <ul data-slot="pagination-list" className="hidden md:flex items-center gap-3">
           {items.map((item) =>
             typeof item === 'number' ? (
               <li key={item}>{renderPage(item)}</li>

@@ -137,6 +137,7 @@ pricing-grid-header	PricingGrid
 pricing-grid-items	PricingGrid
 pricing-tier	PricingTier
 pricing-tier-action	PricingTier
+pricing-tier-badge	PricingTier
 pricing-tier-body	PricingTier
 pricing-tier-features	PricingTier
 pricing-tier-price	PricingTier
