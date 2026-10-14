@@ -26,6 +26,7 @@ import { EXEMPT, analyse, type Analysis } from './compendium.coverage';
 import { BACKLOG } from './compendium.backlog';
 import { PLATES } from './compendium.registry';
 import { MATRICES } from './compendium.states';
+import { showsComponent, slotLabel } from './compendium.slots';
 
 const seen = vi.hoisted(() => new Set<unknown>());
 vi.mock('react/jsx-runtime', async (importOriginal) => {
@@ -144,5 +145,16 @@ describe('compendium coverage', () => {
       const base = html(m.render(resting!));
       for (const id of rest) expect(html(m.render(id)), `${m.component} forced state "${id}" renders the same as "${resting}"`).not.toBe(base);
     }
+  });
+
+  it('every plated component, and every part of one, shows its data-slot in its plate', () => {
+    const slotsOf = (html: string) => [...html.matchAll(/data-slot="([^"]+)"/g)].map((m) => m[1]!);
+    const missing: string[] = [];
+    for (const plate of PLATES) {
+      const slots = plate.states.flatMap((s) => slotsOf(renderToStaticMarkup(s.render() as never)));
+      const parts = analysis.exports.filter((e) => e.class === 'part' && e.parent === plate.component).map((e) => e.name);
+      for (const name of [plate.component, ...parts]) if (!showsComponent(name, slots)) missing.push(`${plate.component}${name === plate.component ? '' : ` -> ${name}`}: no data-slot="${slotLabel(name)}" in the plate`);
+    }
+    expect(missing, 'The design system carries the slot (see scripts/slot-contract.mjs); a plate must show the component or part it claims').toEqual([]);
   });
 });

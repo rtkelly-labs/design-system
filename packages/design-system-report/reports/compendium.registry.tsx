@@ -107,6 +107,9 @@ import { BeforeAfter, Slope } from '../../design-system/src/components/docs/figu
 import { ChangeSummary, Line } from '../../design-system/src/components/docs/figures/ChangeSummary';
 import { TreeDiagram, Node } from '../../design-system/src/components/docs/figures/TreeDiagram';
 import { badgeStates, buttonStates, checkboxStates, inputStates, radioGroupStates, selectStates, switchStates } from './compendium.states';
+import { ReportDocument, ReportSection } from '../../design-system/src/components/ReportDocument';
+import { DrawingSheet } from '../../design-system/src/components/docs/figures/DrawingSheet';
+import { IndexedSection } from '../../design-system/src/components/docs/figures/IndexedSection';
 import { Glyph } from '../../design-system/src/components/Glyph';
 import { AsciiDivider } from '../../design-system/src/components/AsciiDivider';
 import { SiteLink } from '../../design-system/src/components/LinkProvider';
@@ -342,7 +345,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'UptimeStrip', group: 'Figures', height: 70, layout: 'side', states: fromStories(UptimeStripStories, ['Default']) },
   { component: 'BeforeAfter', group: 'Figures', height: 125, layout: 'side', states: [...fromStories(BeforeAfterStories, ['Default']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><BeforeAfter fromLabel="before" toLabel="after"><Slope from={160} to={142}>p95</Slope><Slope from={420} to={390}>p99</Slope></BeforeAfter></FigureFrame>))] },
   { component: 'ChangeSummary', group: 'Figures', height: 130, layout: 'side', states: [...fromStories(ChangeSummaryStories, ['Default']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><ChangeSummary><Line sign="add" value="+31 kb">app</Line><Line sign="remove" value="-4 kb">vendor</Line></ChangeSummary></FigureFrame>))] },
-  { component: 'DrawingSheet', group: 'Figures', height: 90, layout: 'stack', states: fromStories(DrawingSheetStories, ['StandaloneSection']) },
+  { component: 'DrawingSheet', split: true, group: 'Figures', height: 140, layout: 'stack', states: [custom('sheet', () => (<DrawingSheet columns={3} rows={2}><IndexedSection index="A" title="What changed"><p>One file.</p></IndexedSection><IndexedSection index="B" title="How it was checked"><p>All tests pass.</p></IndexedSection></DrawingSheet>)), ...fromStories(DrawingSheetStories, ['StandaloneSection'])] },
   { component: 'FigureFrame', group: 'Figures', height: 80, layout: 'side', states: fromStories(FigureFrameStories, ['EditorialFigure']) },
   { component: 'GanttChart', group: 'Figures', height: 155, layout: 'stack', states: fromStories(GanttChartStories, ['ReleasePlan']) },
   { component: 'IndexedSection', group: 'Figures', height: 65, layout: 'side', states: fromStories(IndexedSectionStories, ['Numbered']) },
@@ -357,7 +360,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'TrackCard', group: 'Blog', height: 130, layout: 'side', states: fromStories(TrackCardStories, ['Default']) },
   { component: 'Slide', group: 'Presentation', height: 120, layout: 'side', states: fromStories(SlideStories, ['Default']) },
   { component: 'SlideDeck', clips: 'chrome badges straddle the slide frame', rungs: ['sketch'], group: 'Presentation', height: 140, layout: 'stack', states: fromStories(SlideDeckStories, ['DefaultDeck']) },
-  { component: 'ReportDocument', rungs: ['sketch'], group: 'Content', height: 70, layout: 'stack', states: fromStories(ReportDocumentStories, ['Disclosure']) },
+  { component: 'ReportDocument', rungs: ['sketch'], group: 'Content', height: 180, layout: 'stack', states: [...fromStories(ReportDocumentStories, ['Minimal', 'Disclosure']), custom('section', () => (<ReportDocument title="Link Audit"><ReportSection title="Findings"><p>None.</p></ReportSection></ReportDocument>))] },
 
   { component: 'Glyph', group: 'Icons', height: 50, layout: 'side', states: [custom('named', () => <Glyph name="git-branch" accent="primary" label="branch" />), custom('typographic', () => <Glyph bracketed accent="secondary">{'->'}</Glyph>)] },
   { component: 'AsciiDivider', group: 'Layout', height: 40, layout: 'side', states: [custom('deprecated-alias', () => <AsciiDivider />)] },
