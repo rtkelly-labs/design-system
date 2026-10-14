@@ -310,6 +310,7 @@
 /* Midnight — Neon on blue-black. The maximal end of the ladder. */
 :root, [data-theme="midnight"] {
   color-scheme: dark;
+  --ds-ink-weight: 400;
 
   --ds-surface-base: #0a0a1a;
   --ds-surface-raised: #14142a;
@@ -418,6 +419,7 @@
 /* Sketch — Warm paper and pen ink. The light half of the pair. */
 [data-theme="sketch"] {
   color-scheme: light;
+  --ds-ink-weight: 450;
 
   --ds-surface-base: #f5f3ec;
   --ds-surface-raised: #ffffff;
@@ -526,4 +528,15 @@
 /* Native form controls, scrollbars and the caret follow `color-scheme`, which
  * each level declares above. Without it a light level renders dark scrollbars
  * and an unreadable date picker while every styled element looks correct. */
+
+/* Running text is drawn heavier on a light level than on a dark one — see
+ * `INK_WEIGHT` in src/theme/levels.ts. Applied on every themed root, not only
+ * the document, so a nested panel of the other polarity takes its own weight.
+ * In the base layer because the level blocks above are unlayered: written there,
+ * the weight would beat `font-bold` on the element that carries data-theme. */
+@layer base {
+  :root, [data-theme] {
+    font-weight: var(--ds-ink-weight);
+  }
+}
 

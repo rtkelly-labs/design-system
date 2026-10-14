@@ -342,6 +342,27 @@ export const SYSTEM_LEVEL: Readonly<Record<Polarity, ThemeLevel>> = {
   light: 'sketch',
 };
 
+/**
+ * The weight running text is drawn at, by polarity — not by level.
+ *
+ * Light strokes on a dark ground spread optically and read heavier than they
+ * are; dark strokes on a light ground do not, so one weight cannot look the
+ * same at both ends. The type was tuned on `midnight`, and on `sketch` body copy
+ * read thin, most visibly on paper (#372). Same argument as `syntaxEmphasis`:
+ * light grounds compress the usable luma band, so weight does work colour cannot.
+ *
+ * Keyed on Polarity because a Level carries colour and only colour (ADR 0004,
+ * asserted in `media.test.ts`), and this is exactly the non-colour,
+ * light-vs-dark property the polarity variants exist for. Emitted per level as
+ * `--ds-ink-weight` and applied in `styles.css`'s base layer, so any weight
+ * utility still wins. Inter and Space Grotesk are variable and draw 450 as
+ * asked; IBM Plex Mono ships static cuts and resolves 450 to its 500.
+ */
+export const INK_WEIGHT: Readonly<Record<Polarity, number>> = {
+  dark: 400,
+  light: 450,
+};
+
 /** Type guard for values arriving from `localStorage`, URLs, or props. */
 export function isThemeLevel(value: unknown): value is ThemeLevel {
   return typeof value === 'string' && (THEME_LEVELS as readonly string[]).includes(value);
