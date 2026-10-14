@@ -185,7 +185,10 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
     text: {
       primary: '#ffffff',
       secondary: '#c3c3d4',
-      muted: '#8b8ba3',
+      // Was #8b8ba3: 5.90:1, but APCA Lc -41, the weakest text pair in the
+      // system. WCAG 2 overrates light-on-dark. Now 7.39:1 / Lc -50, still 21 Lc
+      // below `secondary`. accent.quiet keeps the old value — a fill, not text.
+      muted: '#9d9db4',
       inverse: '#0a0a1a',
     },
     border: {
@@ -261,7 +264,11 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
     text: {
       primary: '#23262e', // sketch ink
       secondary: '#33373f',
-      muted: '#6a6252',
+      // Was #6a6252: 5.03:1 / APCA Lc 68 on `sunken`, carried by 11px labels.
+      // Now 6.16:1 / Lc 73 there. Darker still (#4f4a3d) left muted 7 Lc from
+      // `secondary`, and the two tones stopped reading as two. accent.quiet keeps
+      // the old value.
+      muted: '#5c5546',
       inverse: '#f5f3ec',
     },
     border: {
