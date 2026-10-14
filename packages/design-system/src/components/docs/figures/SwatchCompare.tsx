@@ -68,10 +68,10 @@ export const SwatchCompare = React.forwardRef<HTMLDivElement, SwatchCompareProps
                 return (
                   <td key={c.name} className="px-1 py-1 align-top">
                     {value === null ? (
-                      <span
-                        aria-label={`${row.label}: no ${c.name}`}
-                        className="block h-10 w-full border-2 border-dashed border-edge-subtle"
-                      />
+                      <>
+                        <span aria-hidden="true" className="block h-10 w-full border-2 border-dashed border-edge-subtle" />
+                        <span className="sr-only">{`${row.label}: no ${c.name}`}</span>
+                      </>
                     ) : (
                       <Swatch value={value} name={value} size="md" className="flex-col items-start gap-1 [&>[data-slot=swatch-well]]:w-full" />
                     )}
@@ -82,7 +82,7 @@ export const SwatchCompare = React.forwardRef<HTMLDivElement, SwatchCompareProps
           ))}
           {columns.some((c) => c.verdict) && (
             <tr>
-              <td />
+              <th scope="row" className="sr-only">Verdict</th>
               {columns.map((c) => (
                 <td key={c.name} className="px-1 pt-2 text-center">
                   {c.verdict && (

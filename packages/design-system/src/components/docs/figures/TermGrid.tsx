@@ -14,7 +14,7 @@ export interface TermItem {
 /** MDX-only glossary entry, for example `<Term term="Chroma" scale="0 = grey">How colourful.</Term>`. */
 export const Term = defineAsciiItem<TermItem>('Term');
 
-export interface TermGridProps extends React.HTMLAttributes<HTMLDListElement> {
+export interface TermGridProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Accessible name for the glossary. */
   label?: string;
   /** Data form. If omitted, the component reads `<Term>` children. */
@@ -26,13 +26,14 @@ export interface TermGridProps extends React.HTMLAttributes<HTMLDListElement> {
 }
 
 /** A glossary of the words a page depends on, each with a plain-language scale. */
-export const TermGrid = React.forwardRef<HTMLDListElement, TermGridProps>(function TermGrid(
+export const TermGrid = React.forwardRef<HTMLDivElement, TermGridProps>(function TermGrid(
   { label = 'Terms', terms: termsProp, children, className, ...rest },
   ref,
 ) {
   const terms = termsProp ?? childItems(children, Term);
   return (
-    <dl ref={ref} role="group" aria-label={label} {...rest} className={cn('m-0 grid border-2 border-edge-strong sm:grid-cols-2', className)}>
+    <div ref={ref} role="group" aria-label={label} {...rest} className={cn('border-2 border-edge-strong', className)}>
+    <dl className="m-0 grid sm:grid-cols-2">
       {terms.map((t) => (
         <div key={t.term} className="flex flex-col gap-1 border-b border-r border-edge-subtle p-4">
           <dt className="font-display text-sm font-bold text-content-primary">{t.term}</dt>
@@ -41,5 +42,6 @@ export const TermGrid = React.forwardRef<HTMLDListElement, TermGridProps>(functi
         </div>
       ))}
     </dl>
+    </div>
   );
 });

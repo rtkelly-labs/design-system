@@ -21,7 +21,7 @@ describe('SwatchCompare', () => {
     expect(screen.getByRole('table', { name: 'Light palette' })).toBeTruthy();
     expect(screen.getAllByText(red)).toHaveLength(2);
     expect(screen.getByText(blue)).toBeTruthy();
-    expect(screen.getByLabelText('Today: no blue')).toBeTruthy();
+    expect(screen.getByText('Today: no blue')).toBeTruthy();
     expect(screen.getByText('lifted')).toBeTruthy();
   });
 

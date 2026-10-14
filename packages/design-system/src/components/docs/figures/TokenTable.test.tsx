@@ -19,6 +19,7 @@ describe('TokenTable', () => {
     expect(screen.getByText('text.muted')).toBeTruthy();
     expect(screen.getByText(muted)).toBeTruthy();
     expect(screen.getByText('6.16:1')).toBeTruthy();
+    expect(screen.queryByRole('columnheader', { name: 'Before' })).toBeNull();
   });
 
   it('adds a before column only when some row has one', () => {

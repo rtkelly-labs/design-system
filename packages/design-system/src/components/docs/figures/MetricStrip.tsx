@@ -12,7 +12,7 @@ export interface Metric {
   tone?: MetricTone;
 }
 
-export interface MetricStripProps extends React.HTMLAttributes<HTMLDListElement> {
+export interface MetricStripProps extends React.HTMLAttributes<HTMLDivElement> {
   /** Accessible name for the strip. */
   label?: string;
   /** Two to five metrics, left to right. */
@@ -29,18 +29,13 @@ const TONE: Record<MetricTone, string> = {
 };
 
 /** A row of headline figures, each with a short label, read before the detail. */
-export const MetricStrip = React.forwardRef<HTMLDListElement, MetricStripProps>(function MetricStrip(
+export const MetricStrip = React.forwardRef<HTMLDivElement, MetricStripProps>(function MetricStrip(
   { label = 'Metrics', items, className, ...rest },
   ref,
 ) {
   return (
-    <dl
-      ref={ref}
-      role="group"
-      aria-label={label}
-      {...rest}
-      className={cn('m-0 grid grid-cols-2 border-2 border-edge-strong sm:grid-flow-col sm:auto-cols-fr sm:grid-cols-none', className)}
-    >
+    <div ref={ref} role="group" aria-label={label} {...rest} className={cn('border-2 border-edge-strong', className)}>
+    <dl className="m-0 grid grid-cols-2 sm:grid-flow-col sm:auto-cols-fr sm:grid-cols-none">
       {items.map((m) => (
         <div key={m.label} className="flex min-w-0 flex-col-reverse gap-1 border-b border-r border-edge-subtle p-3 last:border-r-0">
           <dt className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.1em] text-content-muted">{m.label}</dt>
@@ -48,5 +43,6 @@ export const MetricStrip = React.forwardRef<HTMLDListElement, MetricStripProps>(
         </div>
       ))}
     </dl>
+    </div>
   );
 });
