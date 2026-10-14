@@ -58,7 +58,7 @@ export function DocsLayout({
   });
 
   return (
-    <div className={cn('docs-layout', className)}>
+    <div data-slot="docs-layout" className={cn('docs-layout', className)}>
       {header}
 
       <div className="docs-layout-body">

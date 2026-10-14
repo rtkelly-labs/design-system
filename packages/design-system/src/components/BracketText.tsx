@@ -26,7 +26,7 @@ export function BracketText({
   const accentClass = accent ? accentTextClass(accent) : '';
 
   return (
-    <span className={cn(accentClass, className)} {...props}>
+    <span data-slot="bracket-text" className={cn(accentClass, className)} {...props}>
       <span aria-hidden="true">
         [
       </span>{' '}

@@ -36,7 +36,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
   ref,
 ) {
   return (
-    <span
+    <span data-slot="badge"
       ref={ref}
       className={cn(
         'inline-flex items-center gap-[0.4rem] border-2 border-edge-strong bg-surface-base px-[0.6rem] py-[0.2rem] font-mono text-[0.75rem] font-bold',

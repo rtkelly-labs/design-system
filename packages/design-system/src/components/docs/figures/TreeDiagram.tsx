@@ -103,7 +103,7 @@ export const TreeDiagram = React.forwardRef<HTMLDivElement, TreeDiagramProps>(fu
   const hasAccent = rows.some((row) => row.accent);
 
   return (
-      <AsciiFrameBody ref={ref} {...rest} className={cn('overflow-x-auto', className)}>
+      <AsciiFrameBody data-slot="tree-diagram" ref={ref} {...rest} className={cn('overflow-x-auto', className)}>
         <ul className="flex min-w-max flex-col gap-1" aria-label={label}>
           {rows.map((row) => {
             const emphasized = hasAccent && row.accent;

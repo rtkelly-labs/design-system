@@ -14,7 +14,7 @@ export function SectionContainer({ children, className = '' }: SectionContainerP
      * `max-w-3xl` against `max-w-7xl` by CSS source order, not by the order the
      * classes appear in the attribute. `cn()` merges, so the caller wins.
      */
-    <section className={cn('mx-auto max-w-3xl px-4 sm:px-6 xl:max-w-5xl xl:px-0', className)}>
+    <section data-slot="section-container" className={cn('mx-auto max-w-3xl px-4 sm:px-6 xl:max-w-5xl xl:px-0', className)}>
       {children}
     </section>
   );

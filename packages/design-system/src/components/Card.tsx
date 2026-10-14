@@ -155,7 +155,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
   // Simple panel mode: no filename header, no width constraints
   if (form === 'panel') {
     return (
-      <div
+      <div data-slot="card"
         ref={ref}
         className={cn(className)}
         style={{ ...baseCardStyle, padding: '1.5rem' }}
@@ -207,7 +207,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
   const computedFilename = filename || (title ? `${title.toLowerCase().replace(/\s+/g, '_')}.md` : 'card.md');
 
   return (
-    <div ref={ref} className={cn('p-4 md:w-1/2', className)} style={{ maxWidth: '544px' }} {...props}>
+    <div data-slot="card" ref={ref} className={cn('p-4 md:w-1/2', className)} style={{ maxWidth: '544px' }} {...props}>
       <div
         style={{
           height: '100%',

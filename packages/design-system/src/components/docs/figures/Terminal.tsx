@@ -40,7 +40,7 @@ function parse(source: string, prompt: string): TerminalLine[] {
 export const Terminal = React.forwardRef<HTMLDivElement, TerminalProps>(function Terminal({ label = 'Shell', prompt = '$', children, className, ...rest }, ref) {
   const lines = parse(textOf(children), prompt);
   return (
-      <AsciiFrameBody ref={ref} {...rest} className={cn('overflow-x-auto', className)}>
+      <AsciiFrameBody data-slot="terminal" ref={ref} {...rest} className={cn('overflow-x-auto', className)}>
         <pre className="m-0 flex min-w-max flex-col gap-0.5 whitespace-pre leading-relaxed" role="region" tabIndex={0} aria-label={`${label} terminal output`}>
           {lines.map((line, index) => <code className={cn('grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2', line.kind === 'command' ? 'text-content-primary' : line.kind === 'ok' ? 'text-accent-primary' : 'text-content-muted')} key={`${index}-${line.text}`}>
             <span aria-hidden="true" className={cn('select-none text-center', line.kind === 'command' ? 'text-accent-primary' : 'text-transparent')}>{line.kind === 'command' ? prompt : ' '}</span>

@@ -26,7 +26,7 @@ export function Breadcrumbs({ items, separator = '/', className = '' }: Breadcru
   if (items.length === 0) return null;
 
   return (
-    <nav className={cn('not-prose', className)} aria-label="Breadcrumb">
+    <nav data-slot="breadcrumbs" className={cn('not-prose', className)} aria-label="Breadcrumb">
       <ol className="docs-breadcrumbs-list">
         {items.map((crumb, index) => {
           const isLast = index === items.length - 1;

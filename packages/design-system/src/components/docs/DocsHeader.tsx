@@ -101,7 +101,7 @@ export function DocsHeader({
   }, []);
 
   return (
-    <header ref={ref} className={cn('not-prose docs-header print:hidden', className)}>
+    <header data-slot="docs-header" ref={ref} className={cn('not-prose docs-header print:hidden', className)}>
       <div className="docs-header-left">
         {onToggleSidebar && (
           <button

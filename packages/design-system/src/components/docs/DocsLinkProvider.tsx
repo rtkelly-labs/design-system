@@ -53,5 +53,5 @@ export function useDocsLinkComponent(): ElementType<DocsLinkProps> {
  */
 export function DocsLink(props: DocsLinkProps) {
   const Component = useLinkComponent();
-  return renderProvidedLink(Component, props);
+  return renderProvidedLink(Component, { 'data-slot': 'docs-link', ...props } as DocsLinkProps);
 }

@@ -50,7 +50,7 @@ export const NoteBlock: React.FC<NoteBlockProps> = ({
   const Icon = config.icon;
 
   return (
-    <div
+    <div data-slot="note-block"
       style={{
         margin: '1.5rem 0',
         padding: '1.25rem 1.5rem',
