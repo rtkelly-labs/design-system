@@ -35,6 +35,7 @@ release of the components.
 - `pnpm report <file.tsx>`: Renders a report straight from `src/`, no build first.
 - `pnpm manifesto`: Renders the Design Manifesto (`reports/manifesto.tsx`) — a repo-local
   report — to HTML and `--pdf` paper. Lint-strict; output is ignored, the `.tsx` is the artefact.
+- `pnpm compendium`: Renders the Compendium (`reports/compendium.tsx`), one plate per component, to HTML and `--pdf` A4. See below.
 - `pnpm verify:report-cli`: Packs both packages, installs them into a throwaway project and drives `ds-report` as a consumer. Runs in CI.
 - `pnpm build`: Bundles ESM, CJS and types via `tsup`, and copies the templates to `dist/`.
 - `pnpm typecheck`: Validates TypeScript strict mode. Needs the design system built first — it resolves the peer through that package's `exports` map.
@@ -182,6 +183,30 @@ is a fresh design decision every time, and it inherits nothing: not the four run
 of the ladder, not roles whose contrast `pnpm check:contrast` has audited, not a
 layout the visual suite has pinned. A report built from these components inherits
 all of it and costs the agent less code than the HTML would.
+
+### The compendium: every component, as a golden artifact
+
+`reports/compendium.tsx` is a repo-local report with one A4 plate per component, each shown on the
+`sketch` and `midnight` rungs. The self-contained HTML is the golden artifact; the PDF is its human
+rendering and is never byte-compared. Every cell carries `data-component`, `data-state` and
+`data-rung`, so a text diff localises to one component.
+
+- **Generated from the stories, not retyped.** `compendium.registry.tsx` names story exports and
+  renders them (meta args, `render`, decorators); a deleted story throws. Hand-written states exist
+  only where no story does (Table, the MDX-only `Path` and `Event`). The report imports the design
+  system's `src/` (stories import `../components/*`), which is the allowed direction; the design
+  system never imports the report.
+- **Coverage is a test, `reports/compendium.test.ts`.** Every export is classified from the running
+  module: `component`, `part` (parent derived from a story's `subcomponents`, the defining file, or a
+  name prefix), `provider`, or `nonvisual`. A component needs a plate, an `EXEMPT` entry (typed, tiny)
+  or a `BACKLOG` entry (a ratchet that only shrinks); a part must be exercised inside its parent's
+  plate, proved by an instrumented render, so a new export fails until it is classified.
+- **Source to printed is `reports/compendium.print.test.ts`** (needs Chromium): every expected cell is
+  present once, visible, non-empty, unclipped, wholly on its own sheet, and the PDF has one page per
+  sheet. The PDF has no DOM and no text extractor is a dependency, so what reached it is inferred from
+  the print-layout DOM and the page count.
+- **Ids.** `useId` ids depend on tree position, so each plate is rendered as its own root with its
+  component as `identifierPrefix`; otherwise adding a plate renumbers every later id.
 
 ### Checking the thing consumers actually get
 
