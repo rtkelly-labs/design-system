@@ -12,10 +12,13 @@
  *   on its page  the cell sits wholly inside its own sheet, and sheet n carries exactly the cells
  *                the registry says page n does (a per-page manifest taken from the DOM)
  *   printed      the PDF has one page per sheet (the overflow check's own count)
+ *   in the PDF   read back from the PDF with pdfjs-dist (compendium.pdfcheck.ts): every cell's words
+ *                are among the text items inside that cell's rectangle on its page, and the cell body
+ *                is not one flat colour when the PDF page is rasterised. Mutation-tested in
+ *                compendium.pdfcheck.test.ts
  *
- * The PDF has no DOM, so what reached it is inferred from the same print-layout DOM plus the page
- * count; no text is read back from the PDF itself (no PDF text extractor is a dependency). That
- * leaves one gap, documented in AGENTS.md: a component that paints nothing but is present in the DOM.
+ * Residual gap, by construction: text clipped away by an overflow:hidden ancestor is still emitted
+ * into the PDF, so only the DOM-side `clipped` check above sees it, not the PDF read-back.
  *
  * Skipped without a local Chromium, like pdf.e2e.test.ts.
  */
@@ -28,6 +31,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { describeOverflow, htmlToPdf } from '../src/pdf';
 import { renderReport } from '../src/render';
 import { orderedPlates } from './compendium.registry';
+import { checkPdf, collectGeometry, type CellGeometry } from './compendium.pdfcheck';
 import { SLACK_MM, paginate } from './compendium.layout';
 
 const scratch = path.resolve('.compendium-print-tmp');
@@ -126,6 +130,7 @@ describe.skipIf(!chromiumAvailable())('compendium: rendered and printed (needs a
     const expected = new Map<string, number>();
     plates.forEach((p) => p.states.forEach((s) => ['sketch', 'midnight'].forEach((r) => expected.set(`${p.component}/${s.id}/${r}`, paging.pageOf.get(p.component) ?? 0))));
 
+    let geometry: CellGeometry[] = [];
     const browser = await playwright().chromium.launch();
     try {
       const page = await browser.newPage({ viewport: { width: PAPER_W, height: 1123 } });
@@ -133,6 +138,7 @@ describe.skipIf(!chromiumAvailable())('compendium: rendered and printed (needs a
       await page.emulateMedia({ media: 'print' });
       await page.evaluate('document.fonts.ready');
       const { cells, sheets, plates: heights } = await page.evaluate(measure);
+      geometry = await page.evaluate(collectGeometry);
 
       const keys = cells.map((c) => c.key);
       expect(keys.filter((k, i) => keys.indexOf(k) !== i), 'duplicate cells').toEqual([]);
@@ -158,5 +164,10 @@ describe.skipIf(!chromiumAvailable())('compendium: rendered and printed (needs a
     const pdf = await htmlToPdf(result.output);
     expect(describeOverflow(pdf, 'A4')).toBeNull();
     expect(pdf.pages).toBe(paging.total);
+    // The PDF itself: every cell's words are among the text items at its position on its page, and
+    // its body is not flat when rasterised from the PDF.
+    expect(geometry.length).toBe(expected.size);
+    const failures = await checkPdf(pdf.output, geometry);
+    expect(failures.map((f) => `${f.key} [${f.kind}] ${f.detail}`), 'cells whose content did not reach the PDF').toEqual([]);
   }, 180_000);
 });

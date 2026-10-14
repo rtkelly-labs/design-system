@@ -1,6 +1,18 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["src/index.ts", "src/cli.ts", "src/templates/*.tsx", "scripts/*.mjs"],
-  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.mjs"],
-  "ignoreDependencies": ["playwright"]
+  "entry": [
+    "src/index.ts",
+    "src/cli.ts",
+    "src/templates/*.tsx",
+    "scripts/*.mjs",
+    "reports/*.test.ts"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "scripts/**/*.mjs",
+    "reports/*.{ts,tsx}"
+  ],
+  "ignoreDependencies": [
+    "playwright"
+  ]
 }

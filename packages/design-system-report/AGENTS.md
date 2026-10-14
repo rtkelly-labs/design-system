@@ -202,9 +202,19 @@ rendering and is never byte-compared. Every cell carries `data-component`, `data
   or a `BACKLOG` entry (a ratchet that only shrinks); a part must be exercised inside its parent's
   plate, proved by an instrumented render, so a new export fails until it is classified.
 - **Source to printed is `reports/compendium.print.test.ts`** (needs Chromium): every expected cell is
-  present once, visible, non-empty, unclipped, wholly on its own sheet, and the PDF has one page per
-  sheet. The PDF has no DOM and no text extractor is a dependency, so what reached it is inferred from
-  the print-layout DOM and the page count.
+  present once, visible, non-empty, unclipped, wholly on its own sheet, the sheet manifest matches the
+  registry, and every plate fits its declared height. Then the PDF itself is read back with
+  `pdfjs-dist` (`compendium.pdfcheck.ts`): each cell's words must be among the PDF text items inside
+  that cell's rectangle on that page (positional, because the sketch and midnight twins share text), and
+  the cell body, rasterised from the PDF, must not be one flat colour. `compendium.pdfcheck.test.ts`
+  mutation-tests it (opacity 0, hidden or transparent content, an unfilled graphic, text moved off its
+  cell). Known gaps: text clipped by an `overflow:hidden` ancestor is still in the PDF (the DOM
+  `clipped` check sees it); transparent text next to other painted content is not flagged (a pending
+  Button hides its label on purpose); icon-font glyphs are checked by pixels only.
+- **Pagination is a function of the registry.** Each plate declares a `height` in mm
+  (`compendium.layout.ts`); sheets are filled first-fit within a group, the index is paginated, and the
+  footer, the index and the print test read one page map. The print test fails a plate taller than its
+  declared height or more than `SLACK_MM` shorter, so the declarations cannot lie.
 - **Ids.** `useId` ids depend on tree position, so each plate is rendered as its own root with its
   component as `identifierPrefix`; otherwise adding a plate renumbers every later id.
 
