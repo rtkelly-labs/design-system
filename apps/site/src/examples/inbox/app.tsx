@@ -393,7 +393,7 @@ export default function InboxApp() {
               label="Issues. Use J and K to move, X to select, Enter to open, E to archive."
               appearance="quiet"
               density={density}
-              containerClassName="max-h-[max(20rem,calc(100vh-17rem))] overflow-y-auto border-2 border-edge-strong"
+              containerClassName="max-h-[max(20rem,calc(100vh-17rem))] overflow-y-auto border-2 border-edge-strong print:max-h-none print:overflow-visible"
               className="table-fixed md:table-auto"
               aria-rowcount={rows.length + 1}
             >
