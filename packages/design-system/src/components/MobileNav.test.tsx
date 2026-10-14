@@ -40,7 +40,7 @@ describe('MobileNav', () => {
     const trigger = screen.getByRole('button', { name: 'MENU' });
     fireEvent.click(trigger);
 
-    const drawer = await screen.findByRole('dialog', { name: '[ Menu ]' });
+    const drawer = await screen.findByRole('dialog', { name: '[\u00a0Menu\u00a0]' });
     expect(drawer.getAttribute('data-slot')).toBe('drawer');
     expect(drawer.getAttribute('data-placement')).toBe('left');
     const nav = within(drawer).getByRole('navigation', { name: 'Primary' });
@@ -212,7 +212,7 @@ describe('MobileNav', () => {
         <Items />
       </MobileNav>,
     );
-    expect(await screen.findByRole('dialog', { name: '[ Sections ]' })).toBeDefined();
+    expect(await screen.findByRole('dialog', { name: '[\u00a0Sections\u00a0]' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'SECTIONS', hidden: true })).toBeDefined();
   });
 

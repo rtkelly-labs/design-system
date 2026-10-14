@@ -71,7 +71,7 @@ export function TableOfContents({
 
   return (
     <nav data-slot="table-of-contents" className={cn('not-prose', className)} aria-label="Table of contents">
-      {label && <p className="docs-toc-label">[ {label} ]</p>}
+      {label && <p className="docs-toc-label">[&nbsp;{label}&nbsp;]</p>}
       <ul className="docs-toc-list">
         {visible.map((entry) => (
           <li

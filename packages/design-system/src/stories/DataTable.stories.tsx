@@ -221,9 +221,9 @@ export const CompoundTable: Story = {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>[ CLUSTER ]</TableHead>
-          <TableHead>[ HEALTH ]</TableHead>
-          <TableHead>[ LATENCY ]</TableHead>
+          <TableHead>[&nbsp;CLUSTER&nbsp;]</TableHead>
+          <TableHead>[&nbsp;HEALTH&nbsp;]</TableHead>
+          <TableHead>[&nbsp;LATENCY&nbsp;]</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

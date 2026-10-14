@@ -27,7 +27,7 @@ export const TLDR: React.FC<TLDRProps> = ({ children }) => {
             color: 'var(--ds-accent-secondary)',
           }}
         >
-          [ TL;DR ]
+          [&nbsp;TL;DR&nbsp;]
         </span>
       </div>
       <div

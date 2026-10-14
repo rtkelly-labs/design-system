@@ -309,7 +309,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
               }}
               aria-label={`Link to ${title || 'details'}`}
             >
-              [ Learn More &rarr; ]
+              [&nbsp;Learn More &rarr;&nbsp;]
             </a>
           )}
         </div>

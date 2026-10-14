@@ -165,9 +165,9 @@ function SearchDialog({
       <p className="mt-4 mb-2 font-mono text-xs font-bold uppercase tracking-wider text-content-muted" aria-live="polite">
         {query.trim()
           ? results.length
-            ? `[ ${results.length} RESULT${results.length === 1 ? '' : 'S'} ]`
-            : `[ NO MATCHES FOR “${query.trim()}” ]`
-          : '[ PAGES ]'}
+            ? `[\u00a0${results.length} RESULT${results.length === 1 ? '' : 'S'}\u00a0]`
+            : `[\u00a0NO MATCHES FOR “${query.trim()}”\u00a0]`
+          : '[\u00a0PAGES\u00a0]'}
       </p>
 
       <ul id={listId} role="listbox" aria-label="Results" className="m-0 max-h-[50vh] list-none overflow-y-auto p-0">
