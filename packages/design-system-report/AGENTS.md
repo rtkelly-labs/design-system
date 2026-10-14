@@ -35,7 +35,7 @@ release of the components.
 - `pnpm report <file.tsx>`: Renders a report straight from `src/`, no build first.
 - `pnpm manifesto`: Renders the Design Manifesto (`reports/manifesto.tsx`) — a repo-local
   report — to HTML and `--pdf` paper. Lint-strict; output is ignored, the `.tsx` is the artefact.
-- `pnpm compendium`: Renders the Compendium (`reports/compendium.tsx`), one plate per component, to HTML and `--pdf` A4. See below.
+- `pnpm compendium`: Renders the Compendium (`reports/compendium.tsx`), one plate per component, packed several to an A4 sheet, to HTML and `--pdf`. See below.
 - `pnpm verify:report-cli`: Packs both packages, installs them into a throwaway project and drives `ds-report` as a consumer. Runs in CI.
 - `pnpm build`: Bundles ESM, CJS and types via `tsup`, and copies the templates to `dist/`.
 - `pnpm typecheck`: Validates TypeScript strict mode. Needs the design system built first — it resolves the peer through that package's `exports` map.
@@ -186,8 +186,9 @@ all of it and costs the agent less code than the HTML would.
 
 ### The compendium: every component, as a golden artifact
 
-`reports/compendium.tsx` is a repo-local report with one A4 plate per component, each shown on the
-`sketch` and `midnight` rungs. The self-contained HTML is the golden artifact; the PDF is its human
+`reports/compendium.tsx` is a repo-local report with one plate per component, packed several to an A4
+sheet, each shown on the `sketch` and `midnight` rungs (page-scale templates on `sketch` only, or one
+rung per sheet when a pair is too tall). The self-contained HTML is the golden artifact; the PDF is its human
 rendering and is never byte-compared. Every cell carries `data-component`, `data-state` and
 `data-rung`, so a text diff localises to one component.
 
@@ -217,6 +218,26 @@ rendering and is never byte-compared. Every cell carries `data-component`, `data
   declared height or more than `SLACK_MM` shorter, so the declarations cannot lie.
 - **Ids.** `useId` ids depend on tree position, so each plate is rendered as its own root with its
   component as `identifierPrefix`; otherwise adding a plate renumbers every later id.
+- **State matrix.** `compendium.states.tsx` holds a typed list of forced props per control (Button,
+  Badge, Checkbox, Switch, Input, Select, RadioGroup), typed `Partial<ComponentProps>` so a prop the
+  component lacks is a compile error; a test proves each forced state changes the markup, so none is
+  invented. Cells are `data-state="forced-<id>"`. `:hover`, `:focus`, `:active` cannot be forced in a
+  static document and are not faked.
+- **Backlog, with reasons.** `compendium.backlog.ts` is a record of typed reasons and a pinned ceiling.
+  What remains: six overlays (below) and five components taller than a sheet even for one rung.
+- **Overlays (Modal, Drawer, AlertDialog, Popover, Menu, Tooltip, Toast).** All take `open`,
+  `defaultOpen` or `isOpen`, and none shows its popup in a static render: every one portals through
+  Base UI, whose Portal mounts on the client only, so `renderToStaticMarkup` emits the trigger
+  (`aria-expanded="false"` even with `defaultOpen`) and nothing else. Options for the owner: render the
+  open state client-side (jsdom or the browser) and serialise it into the plate, or add a portal-less
+  static mode to the design system. Neither was done here.
+- **Slots.** The design system's `data-slot` contract (`packages/design-system/docs/styling.md`) is the
+  marker convention; `compendium.slots.ts` maps components to slots from the design system's own
+  contract and inventory (`api/slots.txt`), and the coverage test checks that each plate shows the
+  slot of the component, and of each part, it claims. The classification of exports now lives in the
+  design system (`src/slots/exports.ts`) and is reused here.
+- **What a plate neutralises.** Viewport units (`min-h-screen` etc.) and `print:hidden` inside a cell,
+  because a plate shows the screen rendering at content height, printed at 0.8 scale.
 
 ### Checking the thing consumers actually get
 
