@@ -213,7 +213,8 @@ rendering and is never byte-compared. Every cell carries `data-component`, `data
   `clipped` check sees it); transparent text next to other painted content is not flagged (a pending
   Button hides its label on purpose); icon-font glyphs are checked by pixels only.
 - **Pagination is a function of the registry.** Each plate declares a `height` in mm
-  (`compendium.layout.ts`); sheets are filled first-fit within a group, the index is paginated, and the
+  (`compendium.layout.ts`); sheets are packed best-fit decreasing over whole plates (both rungs of a plate stay
+  on one sheet; only a plate too tall for that splits), the index is one sheet, and the
   footer, the index and the print test read one page map. The print test fails a plate taller than its
   declared height or more than `SLACK_MM` shorter, so the declarations cannot lie.
 - **Ids.** `useId` ids depend on tree position, so each plate is rendered as its own root with its
@@ -237,7 +238,11 @@ rendering and is never byte-compared. Every cell carries `data-component`, `data
   slot of the component, and of each part, it claims. The classification of exports now lives in the
   design system (`src/slots/exports.ts`) and is reused here.
 - **What a plate neutralises.** Viewport units (`min-h-screen` etc.) and `print:hidden` inside a cell,
-  because a plate shows the screen rendering at content height, printed at 0.8 scale.
+  because a plate shows the screen rendering at content height, printed at 0.65 scale (`PLATE_ZOOM`; 0.6 is about two sheets fewer, at 4pt captions). A `side` plate puts its
+  rungs next to each other, a `stack` plate one above the other (use it for anything wider than half a sheet, such as
+  the `Divider` rule); `COLUMNS` in `compendium.tsx` packs small controls four cells to a row; `FIT` trims a page
+  template's own page padding. Declared heights are mechanical: after any change that moves a plate's height, set each
+  `height` to its measured mm rounded up plus one, then re-run the print test.
 
 ### Checking the thing consumers actually get
 

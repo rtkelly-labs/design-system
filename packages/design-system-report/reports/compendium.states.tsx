@@ -29,11 +29,26 @@ export interface Matrix<P> {
   base: P;
   /** Forced props per state, merged over `base`. An empty object is the resting state. */
   states: Readonly<Record<string, Partial<P>>>;
+  /**
+   * States the DOM carries and no stylesheet draws (`required`, `read-only`): the markup gains
+   * `aria-required` / `readonly` / `data-required`, the class list does not move, so the cell would
+   * be a pixel copy of the resting one. They are kept out of the plate and still proven by the matrix
+   * test, which requires each to differ from the resting state in those attributes alone, so this
+   * list cannot hide a state that does change the look. Giving them a cue is a design-system
+   * decision, not a plate fix; when a component gains one, delete the id here and the cell returns.
+   */
+  markupOnly?: readonly string[];
 }
+
+/** The attributes that carry required / read-only without drawing it. Stripped to compare looks. */
+const STATE_ONLY_ATTRS = /\s(?:data-required|data-readonly|aria-required|aria-readonly|required|readOnly)(?:="[^"]*")?(?=[\s/>])/g;
+export const stripStateOnlyAttrs = (html: string) => html.replace(STATE_ONLY_ATTRS, '');
 
 /** Binds a matrix to its component and returns plate states. */
 function plateStates<P extends object>(Component: ComponentType<P>, m: Matrix<P>, wrap?: (el: ReactNode) => ReactNode): PlateState[] {
-  return Object.entries(m.states).map(([id, forced]) => {
+  return Object.entries(m.states)
+    .filter(([id]) => !m.markupOnly?.includes(id))
+    .map(([id, forced]) => {
     const props = { ...m.base, ...forced } as P;
     return { id: `forced-${id}`, from: 'custom' as const, render: () => (wrap ? wrap(<Component {...props} />) : <Component {...props} />), authored: props };
   });
@@ -74,6 +89,7 @@ export const CHECKBOX: Matrix<CheckboxP> = {
     invalid: { error: 'You must accept to continue' },
     required: { required: true },
   },
+  markupOnly: ['required'],
 };
 
 type SwitchP = ComponentProps<typeof Switch>;
@@ -87,6 +103,7 @@ export const SWITCH: Matrix<SwitchP> = {
     invalid: { error: 'Telemetry is required by policy' },
     required: { required: true },
   },
+  markupOnly: ['required'],
 };
 
 type InputP = ComponentProps<typeof Input>;
@@ -100,6 +117,7 @@ export const INPUT: Matrix<InputP> = {
     'read-only': { readOnly: true },
     helper: { helperText: 'Shown in the dashboard' },
   },
+  markupOnly: ['required', 'read-only'],
 };
 
 type SelectP = ComponentProps<typeof Select>;
@@ -116,6 +134,7 @@ export const SELECT: Matrix<SelectP> = {
     required: { required: true },
     native: { native: true },
   },
+  markupOnly: ['required'],
 };
 
 type RadioGroupP = ComponentProps<typeof RadioGroup>;
@@ -133,6 +152,7 @@ export const RADIO_GROUP: Matrix<RadioGroupP> = {
     required: { required: true },
     'read-only': { readOnly: true },
   },
+  markupOnly: ['required', 'read-only'],
 };
 
 /** What a matrix cannot show, for the record and for the docs. */
@@ -147,7 +167,7 @@ export const selectStates = () => plateStates(Select, SELECT);
 export const radioGroupStates = () => plateStates(RadioGroup, RADIO_GROUP);
 
 /** Every matrix with its component, for the test that proves no state is invented. */
-export const MATRICES: readonly { component: string; render: (id: string) => ReactNode; ids: string[] }[] = (
+export const MATRICES: readonly { component: string; render: (id: string) => ReactNode; ids: string[]; markupOnly: readonly string[] }[] = (
   [
     ['Button', Button as ComponentType<ButtonP>, BUTTON],
     ['Badge', Badge, BADGE],
@@ -160,5 +180,6 @@ export const MATRICES: readonly { component: string; render: (id: string) => Rea
 ).map(([component, Component, m]) => ({
   component,
   ids: Object.keys(m.states),
+  markupOnly: m.markupOnly ?? [],
   render: (id: string) => <Component {...m.base} {...m.states[id]} />,
 }));

@@ -1,6 +1,6 @@
 /**
  * Pagination for the compendium, as a pure function of the registry. No hand-kept page numbers:
- * each plate declares a size class, sheets are filled greedily in registry order, and everything
+ * each plate declares a height, sheets are filled best-fit, and everything
  * that prints or asserts a page number (footer, index, print test) reads the same result.
  *
  * Heights are DECLARED (millimetres, a ceiling), not measured at render, so the HTML stays a pure
@@ -8,7 +8,7 @@
  * one outgrows its declared height, or is declared more than SLACK_MM taller than it measures (so
  * the declarations cannot rot into wasted paper). The strict overflow check backstops the sheet.
  *
- * Packing is first-fit (see paginate), so small plates backfill gaps.
+ * Packing is best-fit decreasing over whole plates (see paginate), so small plates backfill gaps.
  */
 
 /** Usable body height of one sheet, and the gap between two plates on it. `FULL` is a plate that keeps a sheet. */
@@ -18,9 +18,9 @@ export const GAP_MM = 6;
 /** How much taller than measured a declared height may be. */
 export const SLACK_MM = 25;
 
-/** Index rows per sheet (two columns): the first carries the title block, so fewer. */
-export const INDEX_FIRST_ROWS = 40;
-export const INDEX_ROWS = 60;
+/** Index rows per sheet (three columns, one sheet for ~100 plates and groups): the first carries the title block. The strict overflow check fails the build if the rows stop fitting; lower these to spill onto a second sheet. */
+export const INDEX_FIRST_ROWS = 120;
+export const INDEX_ROWS = 120;
 
 export interface Packable {
   /** Unique per block: the component, or `component#rung` for a plate split across sheets. */
@@ -55,28 +55,47 @@ export function paginate<P extends Packable>(plates: readonly P[]): Pagination<P
   const index: IndexRow<P>[][] = [rows.slice(0, INDEX_FIRST_ROWS)];
   for (let i = INDEX_FIRST_ROWS; i < rows.length; i += INDEX_ROWS) index.push(rows.slice(i, i + INDEX_ROWS));
 
-  // First-fit over every sheet, in registry order: a small plate backfills the first gap that holds
-  // it. Deterministic, and denser than next-fit (measured: 48 sheets against 52 for 85 blocks).
-  // Adding or removing a plate can pull later plates back a sheet; the plate ids do not move,
-  // because every plate is its own React root.
-  const sheets: P[][] = [];
-  const used: number[] = [];
-  for (const plate of plates) {
-    let at = -1;
-    for (let i = 0; i < sheets.length; i++) {
-      if ((used[i] ?? 0) + GAP_MM + plate.height <= BODY_MM) {
-        at = i;
-        break;
+  // Best-fit decreasing over "units". A unit is a whole plate: a split plate's rung blocks stay
+  // together on one sheet whenever the two fit (only a plate too tall for that is packed as separate
+  // blocks). Units go in tallest first, each onto the sheet it leaves least room on, so the big
+  // plates make the sheets and the small ones fill the gaps (measured against first-fit in registry
+  // order, which left most sheets 20-55% empty). Deterministic: ties fall back to registry order.
+  // Sheets are then ordered by their earliest plate and each sheet's plates by registry order, so a
+  // group still reads in sequence. Adding or removing a plate can move later plates between sheets;
+  // plate ids do not move, because every plate is its own React root.
+  const units: { at: number; blocks: P[]; height: number }[] = [];
+  plates.forEach((plate, at) => {
+    const last = units[units.length - 1];
+    if (plate.continuation && last && last.blocks[0]!.component === plate.component) {
+      last.blocks.push(plate);
+      last.height += GAP_MM + plate.height;
+    } else units.push({ at, blocks: [plate], height: plate.height });
+  });
+  const items = units.flatMap((u) => (u.height <= BODY_MM ? [u] : u.blocks.map((b, i) => ({ at: u.at + i, blocks: [b], height: b.height }))));
+  items.sort((a, b) => b.height - a.height || a.at - b.at);
+
+  const packed: { used: number; items: typeof items }[] = [];
+  for (const item of items) {
+    let best = -1;
+    let left = Infinity;
+    packed.forEach((sheet, i) => {
+      const room = BODY_MM - (sheet.used + GAP_MM + item.height);
+      if (room >= 0 && room < left) {
+        best = i;
+        left = room;
       }
+    });
+    if (best === -1) {
+      packed.push({ used: -GAP_MM, items: [] });
+      best = packed.length - 1;
     }
-    if (at === -1) {
-      sheets.push([]);
-      used.push(-GAP_MM);
-      at = sheets.length - 1;
-    }
-    sheets[at]!.push(plate);
-    used[at] = (used[at] ?? 0) + GAP_MM + plate.height;
+    packed[best]!.items.push(item);
+    packed[best]!.used += GAP_MM + item.height;
   }
+  const sheets: P[][] = packed
+    .map((s) => s.items.sort((a, b) => a.at - b.at))
+    .sort((a, b) => a[0]!.at - b[0]!.at)
+    .map((s) => s.flatMap((u) => u.blocks));
 
   const pageOf = new Map<string, number>();
   sheets.forEach((s, i) => s.forEach((p) => pageOf.set(p.key, index.length + 1 + i)));

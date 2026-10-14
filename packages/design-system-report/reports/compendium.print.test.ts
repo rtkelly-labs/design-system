@@ -8,7 +8,7 @@
  *   present      exactly one element with that data-component / data-state / data-rung
  *   shown        not display:none / visibility:hidden / zero-size, and not collapsed to its chrome
  *   non-empty    visible text, a replaced/graphic element (svg, img, input, canvas) or a painted box in the body
- *   not clipped  no descendant is cut off by an overflow:hidden ancestor inside the cell
+ *   not clipped  no descendant is cut off by an overflow:hidden/clip/auto/scroll ancestor inside the cell (a scroll region cannot scroll on paper)
  *   no spill     nothing runs out past the cell's right edge unclipped (it would print over its neighbour)
  *   on its page  the cell sits wholly inside its own sheet, and sheet n carries exactly the cells
  *                the registry says page n does (a per-page manifest taken from the DOM)
@@ -95,7 +95,7 @@ function measure(): { cells: CellFacts[]; sheets: { page: number; height: number
       if (dr.width === 0 && dr.height === 0) return false;
       for (let a = d.parentElement; a && a !== el; a = a.parentElement) {
         const o = getComputedStyle(a);
-        if (/hidden|clip/.test(o.overflowX + o.overflowY)) {
+        if (/hidden|clip|auto|scroll/.test(o.overflowX + o.overflowY)) {
           const ar = a.getBoundingClientRect();
           if (dr.right > ar.right + 1 || dr.bottom > ar.bottom + 1) return true;
         }
