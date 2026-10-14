@@ -14,6 +14,7 @@
  */
 
 import type { ReactNode } from 'react';
+import type { ThemeLevel } from '../../design-system/src/index';
 
 import * as ButtonStories from '../../design-system/src/stories/Button.stories';
 import * as BadgeStories from '../../design-system/src/stories/Badge.stories';
@@ -26,6 +27,72 @@ import * as CheckboxStories from '../../design-system/src/stories/Checkbox.stori
 import * as FlowDiagramStories from '../../design-system/src/stories/FlowDiagram.stories';
 import * as TimelineStories from '../../design-system/src/stories/Timeline.stories';
 import * as TabsStories from '../../design-system/src/stories/Tabs.stories';
+import * as AppShellStories from '../../design-system/src/stories/AppShell.stories';
+import * as AvatarStories from '../../design-system/src/stories/Avatar.stories';
+import * as BracketTextStories from '../../design-system/src/stories/BracketText.stories';
+import * as NoteBlockStories from '../../design-system/src/stories/NoteBlock.stories';
+import * as TagStories from '../../design-system/src/stories/Tag.stories';
+import * as ProseStories from '../../design-system/src/stories/Prose.stories';
+import * as CodeBlockStories from '../../design-system/src/stories/CodeBlock.stories';
+import * as CodeTabsStories from '../../design-system/src/stories/CodeTabs.stories';
+import * as TerminalStories from '../../design-system/src/stories/Terminal.stories';
+import * as StepsStories from '../../design-system/src/stories/Steps.stories';
+import * as SwatchStories from '../../design-system/src/stories/Swatch.stories';
+import * as AnchorHeadingStories from '../../design-system/src/stories/AnchorHeading.stories';
+import * as DividerStories from '../../design-system/src/stories/Divider.stories';
+import * as PageHeaderStories from '../../design-system/src/stories/PageHeader.stories';
+import * as PageTitleStories from '../../design-system/src/stories/PageTitle.stories';
+import * as SectionContainerStories from '../../design-system/src/stories/SectionContainer.stories';
+import * as NerdIconStories from '../../design-system/src/stories/NerdIcon.stories';
+import * as SocialIconStories from '../../design-system/src/stories/SocialIcon.stories';
+import * as BreadcrumbsStories from '../../design-system/src/stories/Breadcrumbs.stories';
+import * as PaginationStories from '../../design-system/src/stories/Pagination.stories';
+import * as SiteNavStories from '../../design-system/src/stories/SiteNav.stories';
+import * as SiteFooterStories from '../../design-system/src/stories/SiteFooter.stories';
+import * as SiteHeaderStories from '../../design-system/src/stories/SiteHeader.stories';
+import * as MobileNavStories from '../../design-system/src/stories/MobileNav.stories';
+import * as DocsHeaderStories from '../../design-system/src/stories/DocsHeader.stories';
+import * as DocsSidebarStories from '../../design-system/src/stories/DocsSidebar.stories';
+import * as TableOfContentsStories from '../../design-system/src/stories/TableOfContents.stories';
+import * as DocPagerStories from '../../design-system/src/stories/DocPager.stories';
+import * as SwitchStories from '../../design-system/src/stories/Switch.stories';
+import * as RadioGroupStories from '../../design-system/src/stories/RadioGroup.stories';
+import * as SelectStories from '../../design-system/src/stories/Select.stories';
+import * as FieldsetStories from '../../design-system/src/stories/Fieldset.stories';
+import * as ErrorSummaryStories from '../../design-system/src/stories/ErrorSummary.stories';
+import * as ProgressStories from '../../design-system/src/stories/Progress.stories';
+import * as SpinnerStories from '../../design-system/src/stories/Spinner.stories';
+import * as SkeletonStories from '../../design-system/src/stories/Skeleton.stories';
+import * as EmptyStateStories from '../../design-system/src/stories/EmptyState.stories';
+import * as NotFoundPageStories from '../../design-system/src/stories/NotFoundPage.stories';
+import * as ServerErrorPageStories from '../../design-system/src/stories/ServerErrorPage.stories';
+import * as StatusPageStories from '../../design-system/src/stories/StatusPage.stories';
+import * as ChartTooltipStories from '../../design-system/src/stories/ChartTooltip.stories';
+import * as BarChartStories from '../../design-system/src/stories/BarChart.stories';
+import * as BulletChartStories from '../../design-system/src/stories/BulletChart.stories';
+import * as ActivityGridStories from '../../design-system/src/stories/ActivityGrid.stories';
+import * as AsciiGaugeStories from '../../design-system/src/stories/AsciiGauge.stories';
+import * as TelemetryGaugeStories from '../../design-system/src/stories/TelemetryGauge.stories';
+import * as TickerTapeStories from '../../design-system/src/stories/TickerTape.stories';
+import * as UptimeStripStories from '../../design-system/src/stories/UptimeStrip.stories';
+import * as BeforeAfterStories from '../../design-system/src/stories/BeforeAfter.stories';
+import * as ChangeSummaryStories from '../../design-system/src/stories/ChangeSummary.stories';
+import * as DrawingSheetStories from '../../design-system/src/stories/DrawingSheet.stories';
+import * as FigureFrameStories from '../../design-system/src/stories/FigureFrame.stories';
+import * as GanttChartStories from '../../design-system/src/stories/GanttChart.stories';
+import * as IndexedSectionStories from '../../design-system/src/stories/IndexedSection.stories';
+import * as TreeDiagramStories from '../../design-system/src/stories/TreeDiagram.stories';
+import * as CTASectionStories from '../../design-system/src/stories/CTASection.stories';
+import * as FeatureGridStories from '../../design-system/src/stories/FeatureGrid.stories';
+import * as HeroStories from '../../design-system/src/stories/Hero.stories';
+import * as PricingGridStories from '../../design-system/src/stories/PricingGrid.stories';
+import * as BlogPostStories from '../../design-system/src/stories/BlogPost.stories';
+import * as ColophonCardStories from '../../design-system/src/stories/ColophonCard.stories';
+import * as MetadataGridStories from '../../design-system/src/stories/MetadataGrid.stories';
+import * as TrackCardStories from '../../design-system/src/stories/TrackCard.stories';
+import * as SlideStories from '../../design-system/src/stories/Slide.stories';
+import * as SlideDeckStories from '../../design-system/src/stories/SlideDeck.stories';
+import * as ReportDocumentStories from '../../design-system/src/stories/ReportDocument.stories';
 import {
   Table,
   TableBody,
@@ -39,9 +106,19 @@ import {
 import { FlowDiagram, Path } from '../../design-system/src/components/docs/figures/FlowDiagram';
 import { Timeline, Event } from '../../design-system/src/components/docs/figures/Timeline';
 import { FigureFrame } from '../../design-system/src/components/docs/figures/FigureFrame';
+import { CodeBlock, CodeBlockAttachment } from '../../design-system/src/components/docs/CodeBlock';
+import { GitHubIcon, LinkedInIcon, BlueskyIcon, XIcon, MailIcon } from '../../design-system/src/components/SocialIcon';
+import { BarChart } from '../../design-system/src/components/BarChart';
+import { BeforeAfter, Slope } from '../../design-system/src/components/docs/figures/BeforeAfter';
+import { ChangeSummary, Line } from '../../design-system/src/components/docs/figures/ChangeSummary';
+import { TreeDiagram, Node } from '../../design-system/src/components/docs/figures/TreeDiagram';
+import { Glyph } from '../../design-system/src/components/Glyph';
+import { AsciiDivider } from '../../design-system/src/components/AsciiDivider';
+import { SiteLink } from '../../design-system/src/components/LinkProvider';
+import { DocsLink } from '../../design-system/src/components/docs/DocsLinkProvider';
 
-export type Group = 'Primitives' | 'Data display' | 'Forms' | 'Figures' | 'Composite';
-export const GROUPS: readonly Group[] = ['Primitives', 'Data display', 'Forms', 'Figures', 'Composite'];
+export const GROUPS = ['Primitives', 'Content', 'Layout', 'Navigation', 'Forms', 'Feedback', 'Data display', 'Figures', 'Marketing', 'Blog', 'Presentation', 'Icons'] as const;
+export type Group = (typeof GROUPS)[number];
 
 export interface PlateState {
   /** The story export name, or a stable id for a hand-written state. Goes on `data-state`. */
@@ -61,7 +138,42 @@ export interface PlateSpec {
   height: number;
   /** `side`: the two rungs next to each other. `stack`: one under the other, for wide components. */
   layout: 'side' | 'stack';
+  /**
+   * Too tall for both rungs on one sheet: show each rung as its own block, packed independently
+   * (the sketch block, then the midnight block). `height` is then per block.
+   */
+  split?: boolean;
+  /** Show only these rungs (default both). For page-scale templates, where a second rung would double a full sheet. */
+  rungs?: readonly ThemeLevel[];
+  /** The component clips its own content on purpose (a marquee window, a track, a bleeding watermark). Exempts it from the print test's clipped-content check; say why. */
+  clips?: string;
   states: PlateState[];
+}
+
+export const RUNGS: readonly ThemeLevel[] = ['sketch', 'midnight'];
+
+/** What the paginator packs: a whole plate, or one rung of a split plate. */
+export interface Block {
+  key: string;
+  component: string;
+  continuation: boolean;
+  group: Group;
+  height: number;
+  plate: PlateSpec;
+  rungs: readonly ThemeLevel[];
+}
+
+export const blockKey = (plate: PlateSpec, rung: ThemeLevel) => (plate.split && rungsOf(plate).length > 1 ? `${plate.component}#${rung}` : plate.component);
+
+/** The rungs a plate is shown on. */
+export const rungsOf = (plate: PlateSpec): readonly ThemeLevel[] => plate.rungs ?? RUNGS;
+
+export function blocksOf(plates: readonly PlateSpec[]): Block[] {
+  return plates.flatMap((plate): Block[] =>
+    plate.split && rungsOf(plate).length > 1
+      ? RUNGS.map((rung, i) => ({ key: blockKey(plate, rung), component: plate.component, continuation: i > 0, group: plate.group, height: plate.height, plate, rungs: [rung] }))
+      : [{ key: plate.component, component: plate.component, continuation: false, group: plate.group, height: plate.height, plate, rungs: rungsOf(plate) }],
+  );
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -121,18 +233,23 @@ function mdxState(id: string, render: () => ReactNode): PlateState {
   return { id, from: 'custom', render };
 }
 
-export const PLATES: readonly PlateSpec[] = [
-  { component: 'Button', group: 'Primitives', height: 230, layout: 'side', states: fromStories(ButtonStories, ['Default', 'Bracketed', 'Disabled', 'Pending']) },
-  { component: 'Badge', group: 'Primitives', height: 110, layout: 'side', states: fromStories(BadgeStories, ['Default', 'Emphasis', 'Intent']) },
-  { component: 'Card', group: 'Primitives', height: 180, layout: 'side', states: fromStories(CardStories, ['FullCard']) },
+/** A hand-written state, for a component no story shows (or only shows inside something else). */
+function custom(id: string, render: () => ReactNode): PlateState {
+  return { id, from: 'custom', render };
+}
 
-  { component: 'StatCard', group: 'Data display', height: 125, layout: 'side', states: fromStories(StatCardStories, ['SystemHealth', 'ComputeLatency']) },
+export const PLATES: readonly PlateSpec[] = [
+  { component: 'Button', group: 'Primitives', height: 150, layout: 'side', states: fromStories(ButtonStories, ['Default', 'Bracketed', 'Disabled', 'Pending']) },
+  { component: 'Badge', group: 'Primitives', height: 70, layout: 'side', states: fromStories(BadgeStories, ['Default', 'Emphasis', 'Intent']) },
+  { component: 'Card', group: 'Primitives', height: 120, layout: 'side', states: fromStories(CardStories, ['FullCard']) },
+
+  { component: 'StatCard', group: 'Data display', height: 100, layout: 'side', states: fromStories(StatCardStories, ['SystemHealth', 'ComputeLatency']) },
   {
     // No story exists for Table (DataTable's stories cover it), so this one is written by hand, and
     // it is the proof that a part is exercised: the coverage test fails if any Table* is dropped.
     component: 'Table',
     group: 'Data display',
-    height: 160,
+    height: 125,
     layout: 'stack',
     states: [
       {
@@ -172,16 +289,89 @@ export const PLATES: readonly PlateSpec[] = [
       },
     ],
   },
-  { component: 'DataTable', group: 'Data display', height: 170, layout: 'stack', states: fromStories(DataTableStories, ['Default']) },
-  { component: 'Sparkline', group: 'Data display', height: 65, layout: 'side', states: fromStories(SparklineStories, ['PrimaryTrend', 'DangerLatencySpike']) },
+  { component: 'DataTable', group: 'Data display', height: 135, layout: 'stack', states: fromStories(DataTableStories, ['Default']) },
+  { component: 'Sparkline', group: 'Data display', height: 55, layout: 'side', states: fromStories(SparklineStories, ['PrimaryTrend', 'DangerLatencySpike']) },
 
-  { component: 'Input', group: 'Forms', height: 150, layout: 'side', states: fromStories(InputStories, ['DefaultInput', 'InputWithError', 'TextAreaStory']) },
-  { component: 'Checkbox', group: 'Forms', height: 90, layout: 'side', states: fromStories(CheckboxStories, ['Checked', 'Indeterminate', 'WithError']) },
+  { component: 'Input', group: 'Forms', height: 115, layout: 'side', states: fromStories(InputStories, ['DefaultInput', 'InputWithError', 'TextAreaStory']) },
+  { component: 'Checkbox', group: 'Forms', height: 70, layout: 'side', states: fromStories(CheckboxStories, ['Checked', 'Indeterminate', 'WithError']) },
 
-  { component: 'FlowDiagram', group: 'Figures', height: 150, layout: 'side', states: [...fromStories(FlowDiagramStories, ['OptimisticUi']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><FlowDiagram><Path>write → review → ship</Path><Path>hotfix → ship</Path></FlowDiagram></FigureFrame>))] },
-  { component: 'Timeline', group: 'Figures', height: 200, layout: 'side', states: [...fromStories(TimelineStories, ['Shipped']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><Timeline><Event date="Mar 12" state="done">CLI copies the files</Event><Event date="Mar 18" state="now">Launch</Event></Timeline></FigureFrame>))] },
+  { component: 'FlowDiagram', group: 'Figures', height: 120, layout: 'side', states: [...fromStories(FlowDiagramStories, ['OptimisticUi']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><FlowDiagram><Path>write → review → ship</Path><Path>hotfix → ship</Path></FlowDiagram></FigureFrame>))] },
+  { component: 'Timeline', group: 'Figures', height: 140, layout: 'side', states: [...fromStories(TimelineStories, ['Shipped']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><Timeline><Event date="Mar 12" state="done">CLI copies the files</Event><Event date="Mar 18" state="now">Launch</Event></Timeline></FigureFrame>))] },
 
-  { component: 'Tabs', group: 'Composite', height: 195, layout: 'stack', states: fromStories(TabsStories, ['Default', 'Underline']) },
+  { component: 'Avatar', group: 'Content', height: 35, layout: 'side', states: fromStories(AvatarStories, ['Default']) },
+  { component: 'BracketText', group: 'Content', height: 50, layout: 'side', states: fromStories(BracketTextStories, ['Emphasis']) },
+  { component: 'NoteBlock', group: 'Content', height: 155, layout: 'side', states: fromStories(NoteBlockStories, ['AllTypes']) },
+  { component: 'Tag', group: 'Content', height: 30, layout: 'side', states: fromStories(TagStories, ['Row']) },
+  { component: 'Prose', group: 'Content', height: 180, layout: 'stack', states: fromStories(ProseStories, ['Default']) },
+  { component: 'CodeBlock', group: 'Content', height: 145, layout: 'side', states: [...fromStories(CodeBlockStories, ['Default', 'NotCopyable']), custom('attached', () => (<CodeBlockAttachment value={true}><CodeBlock title="app.ts" language="ts">{'export const answer = 42;'}</CodeBlock></CodeBlockAttachment>))] },
+  { component: 'CodeTabs', split: true, group: 'Content', height: 60, layout: 'stack', states: fromStories(CodeTabsStories, ['Merged']) },
+  { component: 'Terminal', group: 'Content', height: 75, layout: 'side', states: fromStories(TerminalStories, ['Default']) },
+  { component: 'Steps', group: 'Content', height: 110, layout: 'side', states: fromStories(StepsStories, ['Default']) },
+  { component: 'Swatch', group: 'Content', height: 55, layout: 'side', states: fromStories(SwatchStories, ['Group']) },
+  { component: 'AnchorHeading', group: 'Content', height: 45, layout: 'side', states: fromStories(AnchorHeadingStories, ['Levels']) },
+  { component: 'Divider', group: 'Layout', height: 60, layout: 'side', states: fromStories(DividerStories, ['Variants']) },
+  { component: 'PageHeader', group: 'Layout', height: 125, layout: 'stack', states: fromStories(PageHeaderStories, ['WithChildren']) },
+  { component: 'PageTitle', group: 'Layout', height: 105, layout: 'stack', states: fromStories(PageTitleStories, ['WithSubtitle']) },
+  { component: 'SectionContainer', group: 'Layout', height: 55, layout: 'side', states: fromStories(SectionContainerStories, ['Default']) },
+  { component: 'NerdIcon', split: true, group: 'Icons', height: 105, layout: 'stack', states: fromStories(NerdIconStories, ['DeveloperGlyphs']) },
+  { component: 'SocialIcon', group: 'Icons', height: 60, layout: 'side', states: [...fromStories(SocialIconStories, ['BrandMarks']), custom('named-icons', () => (<div className="flex gap-3"><GitHubIcon /><LinkedInIcon /><BlueskyIcon /><XIcon /><MailIcon /></div>))] },
+  { component: 'Breadcrumbs', group: 'Navigation', height: 35, layout: 'side', states: fromStories(BreadcrumbsStories, ['WithUnlinkedGroup']) },
+  { component: 'Pagination', group: 'Navigation', height: 85, layout: 'stack', states: fromStories(PaginationStories, ['ManyPages']) },
+  { component: 'SiteNav', group: 'Navigation', height: 80, layout: 'side', states: fromStories(SiteNavStories, ['Default']) },
+  { component: 'SiteFooter', group: 'Navigation', height: 195, layout: 'stack', states: fromStories(SiteFooterStories, ['Columns']) },
+  { component: 'SiteHeader', group: 'Navigation', height: 160, layout: 'stack', states: fromStories(SiteHeaderStories, ['Portfolio']) },
+  { component: 'MobileNav', group: 'Navigation', height: 100, layout: 'side', states: fromStories(MobileNavStories, ['Open']) },
+  { component: 'DocsHeader', group: 'Navigation', height: 75, layout: 'stack', states: fromStories(DocsHeaderStories, ['WithSearch']) },
+  { component: 'DocsSidebar', group: 'Navigation', height: 85, layout: 'side', states: fromStories(DocsSidebarStories, ['Default']) },
+  { component: 'TableOfContents', group: 'Navigation', height: 60, layout: 'side', states: fromStories(TableOfContentsStories, ['Default']) },
+  { component: 'DocPager', group: 'Navigation', height: 130, layout: 'stack', states: fromStories(DocPagerStories, ['Both']) },
+  { component: 'Switch', group: 'Forms', height: 30, layout: 'side', states: fromStories(SwitchStories, ['On']) },
+  { component: 'RadioGroup', group: 'Forms', height: 50, layout: 'side', states: fromStories(RadioGroupStories, ['Default']) },
+  { component: 'Select', group: 'Forms', height: 45, layout: 'side', states: fromStories(SelectStories, ['Default']) },
+  { component: 'Fieldset', group: 'Forms', height: 55, layout: 'side', states: fromStories(FieldsetStories, ['CheckboxSet']) },
+  { component: 'ErrorSummary', group: 'Forms', height: 120, layout: 'side', states: fromStories(ErrorSummaryStories, ['Default']) },
+  { component: 'Progress', clips: 'the fill is clipped by its track', group: 'Feedback', height: 30, layout: 'side', states: fromStories(ProgressStories, ['Determinate']) },
+  { component: 'Spinner', group: 'Feedback', height: 30, layout: 'side', states: fromStories(SpinnerStories, ['Sizes']) },
+  { component: 'Skeleton', group: 'Feedback', height: 80, layout: 'side', states: fromStories(SkeletonStories, ['Shapes']) },
+  { component: 'EmptyState', group: 'Feedback', height: 80, layout: 'side', states: fromStories(EmptyStateStories, ['EmptySearchResult']) },
+  { component: 'NotFoundPage', rungs: ['sketch'], group: 'Feedback', height: 140, layout: 'stack', states: fromStories(NotFoundPageStories, ['Standalone']) },
+  { component: 'ServerErrorPage', rungs: ['sketch'], group: 'Feedback', height: 140, layout: 'stack', states: fromStories(ServerErrorPageStories, ['Standalone']) },
+  { component: 'StatusPage', rungs: ['sketch'], group: 'Feedback', height: 140, layout: 'stack', states: fromStories(StatusPageStories, ['Maintenance']) },
+  { component: 'ChartTooltip', group: 'Data display', height: 45, layout: 'side', states: fromStories(ChartTooltipStories, ['Primary']) },
+  { component: 'BarChart', split: true, group: 'Data display', height: 85, layout: 'side', states: [...fromStories(BarChartStories, ['Vertical']), custom('responsive', () => (<div style={{ height: 280 }}><BarChart responsive data={[{ label: 'Mon', value: 4 }, { label: 'Tue', value: 7 }, { label: 'Wed', value: 5 }]} /></div>))] },
+  { component: 'BulletChart', group: 'Data display', height: 30, layout: 'side', states: fromStories(BulletChartStories, ['PrimaryBenchmark']) },
+  { component: 'ActivityGrid', group: 'Data display', height: 165, layout: 'stack', states: fromStories(ActivityGridStories, ['Commits']) },
+  { component: 'AsciiGauge', group: 'Data display', height: 30, layout: 'side', states: fromStories(AsciiGaugeStories, ['Default']) },
+  { component: 'TelemetryGauge', group: 'Data display', height: 30, layout: 'side', states: fromStories(TelemetryGaugeStories, ['Default']) },
+  { component: 'TickerTape', clips: 'a marquee: the tape is wider than its window by design', group: 'Data display', height: 55, layout: 'stack', states: fromStories(TickerTapeStories, ['Default']) },
+  { component: 'UptimeStrip', group: 'Figures', height: 70, layout: 'side', states: fromStories(UptimeStripStories, ['Default']) },
+  { component: 'BeforeAfter', group: 'Figures', height: 125, layout: 'side', states: [...fromStories(BeforeAfterStories, ['Default']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><BeforeAfter fromLabel="before" toLabel="after"><Slope from={160} to={142}>p95</Slope><Slope from={420} to={390}>p99</Slope></BeforeAfter></FigureFrame>))] },
+  { component: 'ChangeSummary', group: 'Figures', height: 130, layout: 'side', states: [...fromStories(ChangeSummaryStories, ['Default']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><ChangeSummary><Line sign="add" value="+31 kb">app</Line><Line sign="remove" value="-4 kb">vendor</Line></ChangeSummary></FigureFrame>))] },
+  { component: 'DrawingSheet', group: 'Figures', height: 90, layout: 'stack', states: fromStories(DrawingSheetStories, ['StandaloneSection']) },
+  { component: 'FigureFrame', group: 'Figures', height: 80, layout: 'side', states: fromStories(FigureFrameStories, ['EditorialFigure']) },
+  { component: 'GanttChart', group: 'Figures', height: 155, layout: 'stack', states: fromStories(GanttChartStories, ['ReleasePlan']) },
+  { component: 'IndexedSection', group: 'Figures', height: 65, layout: 'side', states: fromStories(IndexedSectionStories, ['Numbered']) },
+  { component: 'TreeDiagram', group: 'Figures', height: 115, layout: 'side', states: [...fromStories(TreeDiagramStories, ['Default']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><TreeDiagram><Node meta="ui">graph-frame.tsx</Node><Node meta="lib">theme.ts</Node></TreeDiagram></FigureFrame>))] },
+  { component: 'CTASection', rungs: ['sketch'], group: 'Marketing', height: 105, layout: 'stack', states: fromStories(CTASectionStories, ['Default']) },
+  { component: 'FeatureGrid', rungs: ['sketch'], group: 'Marketing', height: 125, layout: 'stack', states: fromStories(FeatureGridStories, ['Default']) },
+  { component: 'Hero', rungs: ['sketch'], group: 'Marketing', height: 125, layout: 'stack', states: fromStories(HeroStories, ['WithMedia']) },
+  { component: 'PricingGrid', rungs: ['sketch'], group: 'Marketing', height: 160, layout: 'stack', states: fromStories(PricingGridStories, ['TwoTiers']) },
+  { component: 'BlogPost', rungs: ['sketch'], group: 'Blog', height: 155, layout: 'stack', states: fromStories(BlogPostStories, ['Default']) },
+  { component: 'ColophonCard', clips: 'a decorative watermark glyph bleeds off the card', group: 'Blog', height: 95, layout: 'side', states: fromStories(ColophonCardStories, ['Default']) },
+  { component: 'MetadataGrid', group: 'Blog', height: 55, layout: 'side', states: fromStories(MetadataGridStories, ['Default']) },
+  { component: 'TrackCard', group: 'Blog', height: 130, layout: 'side', states: fromStories(TrackCardStories, ['Default']) },
+  { component: 'Slide', group: 'Presentation', height: 120, layout: 'side', states: fromStories(SlideStories, ['Default']) },
+  { component: 'SlideDeck', clips: 'chrome badges straddle the slide frame', rungs: ['sketch'], group: 'Presentation', height: 140, layout: 'stack', states: fromStories(SlideDeckStories, ['DefaultDeck']) },
+  { component: 'ReportDocument', rungs: ['sketch'], group: 'Content', height: 70, layout: 'stack', states: fromStories(ReportDocumentStories, ['Disclosure']) },
+
+  { component: 'Glyph', group: 'Icons', height: 50, layout: 'side', states: [custom('named', () => <Glyph name="git-branch" accent="primary" label="branch" />), custom('typographic', () => <Glyph bracketed accent="secondary">{'->'}</Glyph>)] },
+  { component: 'AsciiDivider', group: 'Layout', height: 40, layout: 'side', states: [custom('deprecated-alias', () => <AsciiDivider />)] },
+  { component: 'SiteLink', group: 'Navigation', height: 50, layout: 'side', states: [custom('link', () => <SiteLink href="/docs">Docs</SiteLink>), custom('current', () => <SiteLink href="/docs" current>Docs</SiteLink>)] },
+  { component: 'DocsLink', group: 'Navigation', height: 50, layout: 'side', states: [custom('internal', () => <DocsLink href="/guide">Guide</DocsLink>), custom('external', () => <DocsLink href="https://example.com">Example</DocsLink>)] },
+
+  { component: 'AppShell', rungs: ['sketch'], group: 'Layout', height: 170, layout: 'stack', states: fromStories(AppShellStories, ['Default']) },
+
+  { component: 'Tabs', group: 'Navigation', height: 155, layout: 'stack', states: fromStories(TabsStories, ['Default', 'Underline']) },
 ];
 
 /** Plates in the document's order: by group, then as listed. Stable, so the index is deterministic. */

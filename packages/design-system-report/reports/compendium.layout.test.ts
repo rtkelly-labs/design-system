@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { BODY_MM, GAP_MM, paginate, type Packable } from './compendium.layout';
 
-const plate = (component: string, group: string, height: number): Packable => ({ component, group, height });
+const plate = (component: string, group: string, height: number): Packable => ({ key: component, component, group, height });
 const sheetCost = (s: Packable[]) => s.reduce((n, p) => n + p.height, 0) + GAP_MM * (s.length - 1);
 
 describe('compendium pagination', () => {
@@ -22,14 +22,14 @@ describe('compendium pagination', () => {
     expect(pageOf.size).toBe(plates.length);
   });
 
-  it('backfills within a group, and is deterministic', () => {
+  it('backfills earlier sheets, and is deterministic', () => {
     const a = paginate(plates);
     expect(paginate(plates).pageOf).toEqual(a.pageOf);
     // D (40) fits beside A (120) on the first sheet even though C and B came before it and did not.
     expect(a.pageOf.get('D')).toBe(a.pageOf.get('A'));
   });
 
-  it('removing a plate leaves other groups on their own pages or earlier-group pages unchanged', () => {
+  it('removing the last plate leaves every earlier plate where it was', () => {
     const before = paginate(plates).pageOf;
     const after = paginate(plates.filter((p) => p.component !== 'G')).pageOf;
     for (const name of ['A', 'B', 'C', 'D', 'E', 'F']) expect(after.get(name)).toBe(before.get(name));

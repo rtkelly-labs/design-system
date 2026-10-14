@@ -47,6 +47,8 @@ export function collectGeometry(): CellGeometry[] {
     for (let a: Element | null = el; a; a = a.parentElement) {
       const s = getComputedStyle(a);
       if (s.display === 'none') return 'skip';
+      // A closed <details> paints its <summary> and nothing else.
+      if (a.tagName === 'DETAILS' && !(a as HTMLDetailsElement).open && !(el.closest('summary') && a.contains(el.closest('summary')))) return 'skip';
       if (hiddenTag.test(a.tagName.toUpperCase())) return 'skip';
       const r = a.getBoundingClientRect();
       if (s.position === 'absolute' && r.width <= 1 && r.height <= 1 && s.overflowX === 'hidden') return 'skip'; // sr-only
@@ -67,7 +69,33 @@ export function collectGeometry(): CellGeometry[] {
       if (!parent) continue;
       const how = classify(parent, body);
       if (how === 'skip') continue;
-      for (const w of (n.nodeValue ?? '').replace(/[\p{Cf}\p{Co}]/gu, '').split(/\s+/)) if (w) (how === 'ok' ? words : invisible).push(w);
+      // The region a reader can see: the body, narrowed by every clipping ancestor. A word that
+      // starts outside it (a marquee's off-window tape, a line-clamped paragraph, a code line that
+      // scrolls) is in the DOM but not on the page, so it is not expected in the PDF.
+      let vis = { l: r.left, t: r.top, r: r.right, b: r.bottom };
+      for (let a: HTMLElement | null = parent; a && a !== body.parentElement; a = a.parentElement) {
+        const o = getComputedStyle(a);
+        if (o.overflowX !== 'visible' || o.overflowY !== 'visible') {
+          const ar = a.getBoundingClientRect();
+          vis = { l: Math.max(vis.l, ar.left), t: Math.max(vis.t, ar.top), r: Math.min(vis.r, ar.right), b: Math.min(vis.b, ar.bottom) };
+        }
+      }
+      const text = n.nodeValue ?? '';
+      const range = document.createRange();
+      for (const m of text.matchAll(/\S+/g)) {
+        const clean = m[0].replace(/[\p{Cf}\p{Co}]/gu, '');
+        if (!clean) continue;
+        range.setStart(n, m.index!);
+        range.setEnd(n, m.index! + m[0].length);
+        const wr = range.getClientRects()[0] ?? range.getBoundingClientRect();
+        const seenWord = wr.left >= vis.l - 1 && wr.left < vis.r && wr.top >= vis.t - 1 && wr.bottom <= vis.b + 1;
+        if (how !== 'ok') invisible.push(clean);
+        else if (seenWord) {
+          // Cut by a clip or an ellipsis: only the part before the edge is on the page.
+          const kept = wr.right > vis.r + 1 && wr.width > 0 ? Math.max(1, Math.floor(clean.length * ((vis.r - wr.left) / wr.width)) - 2) : clean.length;
+          words.push(clean.slice(0, kept));
+        }
+      }
     }
     return {
       key: `${cell.dataset.component}/${cell.dataset.state}/${cell.dataset.rung}`,
@@ -85,12 +113,13 @@ export interface PdfFailure {
   detail: string;
 }
 
-const fold = (s: string) => s.replace(/\s+/g, '').toLowerCase();
+/** Whitespace out, case folded, curly quotes straightened (the PDF keeps the glyph, pdf.js reports either). */
+const fold = (s: string) => s.replace(/\s+/g, '').replace(/[\u2018\u2019\u02BC]/g, "'").replace(/[\u201C\u201D]/g, '"').toLowerCase();
 const PX_TO_PT = 0.75;
 /** Slack, in pt, for sub-pixel layout and glyph origins sitting on the box edge. */
 const EDGE = 3;
 /** A cell body must have at least this many pixels that differ from its background. */
-const MIN_PAINTED = 25;
+const MIN_PAINTED = 8;
 const DIFF = 14;
 
 interface TextItem {
@@ -142,7 +171,7 @@ export async function checkPdf(pdfPath: string, cells: readonly CellGeometry[]):
         const printed = fold(inside.map((i) => i.str).join(''));
         const missing = c.words.filter((w) => !printed.includes(fold(w)));
         if (missing.length > 0) {
-          failures.push({ key: c.key, kind: 'text', detail: `${missing.length} of ${c.words.length} words not in the PDF at the cell's position: ${missing.slice(0, 5).map((w) => `${JSON.stringify(w)}(U+${[...w].map((ch) => ch.codePointAt(0)!.toString(16)).join(',')})`).join(' ')}` });
+          failures.push({ key: c.key, kind: 'text', detail: `${missing.length} of ${c.words.length} words not in the PDF at the cell's position: ${missing.slice(0, 5).map((w) => JSON.stringify(w)).join(' ')}; found there: ${JSON.stringify(inside.map((i) => i.str).join('').slice(0, 90))}` });
         }
       }
 

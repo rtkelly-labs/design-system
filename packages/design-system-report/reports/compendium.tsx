@@ -20,25 +20,35 @@
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { ThemeProvider, type ThemeLevel } from '@rtkelly13/design-system';
-import { orderedPlates, type PlateSpec } from './compendium.registry';
+import { RUNGS, blockKey, blocksOf, orderedPlates, type Block, type PlateSpec } from './compendium.registry';
 import { FULL, paginate } from './compendium.layout';
 
 /** Display only: `data-state` keeps the story export name verbatim. */
 const words = (id: string) => id.replace(/([a-z])([A-Z])/g, '$1 $2');
-const RUNGS: readonly ThemeLevel[] = ['sketch', 'midnight'];
 const REV = 'REV 2026.10';
+/** Plates print at this fraction of their natural size: a component sheet is a reference, not a proof of the real size, and the scale is what keeps ~100 components near 30 sheets. */
+const PLATE_ZOOM = 0.8;
 
 function Kicker({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <span className={`font-mono text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-content-muted ${className}`}>{children}</span>;
 }
 
-/** Fixed sheet: the report owns its page box. */
+/**
+ * Fixed sheet: the report owns its page box. Two things that mean something on a screen and
+ * nothing on paper are neutralised inside a cell. Viewport units (a `min-h-screen` root would fill a
+ * whole sheet per cell): the component shows at its content height, which is what a static
+ * document can honestly say about it. And `print:hidden`, below.
+ */
+const STATIC_CSS =
+  // `print:hidden` is how navigation chrome (DocsSidebar, SiteFooter) opts out of paper; a plate shows the screen rendering, so it is undone in a cell.
+  '@media print { @page { size: A4; margin: 0; } [data-component] .print\\:hidden { display: revert !important; } }' +
+  '[data-component] :is(.min-h-screen,.min-h-dvh,.h-screen,[class*="vh]"]){min-height:0!important;height:auto!important}';
 function PageBox() {
-  return <style>{'@media print { @page { size: A4; margin: 0; } }'}</style>;
+  return <style>{STATIC_CSS}</style>;
 }
 
 const PLATES = orderedPlates();
-const PAGING = paginate(PLATES);
+const PAGING = paginate(blocksOf(PLATES));
 const PAGES = PAGING.total;
 
 function Sheet({ n, head, children }: { n: number; head: string; children: ReactNode }) {
@@ -77,22 +87,33 @@ function Cell({ plate, state, rung, node }: { plate: PlateSpec; state: string; r
 }
 
 /** The plate's cells: header, then each state on each rung. */
-function PlateBody({ plate }: { plate: PlateSpec }) {
+function PlateBody({ block }: { block: Block }) {
+  const { plate } = block;
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-end justify-between gap-4 border-b border-edge-default pb-2">
         <h2 className={`m-0 font-display font-bold leading-none tracking-tight ${plate.height >= FULL ? 'text-[2.5rem]' : 'text-[1.5rem]'}`}>{plate.component}</h2>
         <Kicker>
           {plate.group} · {plate.states.length} state{plate.states.length === 1 ? '' : 's'}
+          {block.rungs.length === 1 ? ` · ${block.rungs[0]} only` : ''}
         </Kicker>
       </div>
-      {plate.states.map((s) => (
-        <div key={s.id} className={plate.layout === 'side' ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
-          {RUNGS.map((rung) => (
-            <Cell key={rung} plate={plate} state={s.id} rung={rung} node={s.render()} />
+      {block.rungs.length === 1 && plate.layout === 'side' ? (
+        // A split block of a `side` plate has one rung, so its states take the two columns instead.
+        <div className="grid grid-cols-2 gap-3">
+          {plate.states.map((s) => (
+            <Cell key={s.id} plate={plate} state={s.id} rung={block.rungs[0]!} node={s.render()} />
           ))}
         </div>
-      ))}
+      ) : (
+        plate.states.map((s) => (
+          <div key={s.id} className={plate.layout === 'side' ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
+            {block.rungs.map((rung) => (
+              <Cell key={rung} plate={plate} state={s.id} rung={rung} node={s.render()} />
+            ))}
+          </div>
+        ))
+      )}
     </div>
   );
 }
@@ -104,9 +125,10 @@ function PlateBody({ plate }: { plate: PlateSpec }) {
  * localising to a component. A root per plate with the component name as `identifierPrefix` makes
  * a plate's ids a function of that plate alone, wherever pagination puts it.
  */
-function Plate({ plate }: { plate: PlateSpec }) {
-  const html = renderToStaticMarkup(<PlateBody plate={plate} />, { identifierPrefix: plate.component });
-  return <div data-plate={plate.component} data-group={plate.group} data-height={plate.height} id={`plate-${plate.component}`} className="break-inside-avoid" dangerouslySetInnerHTML={{ __html: html }} />;
+function Plate({ block }: { block: Block }) {
+  const { plate } = block;
+  const html = renderToStaticMarkup(<PlateBody block={block} />, { identifierPrefix: block.key.replace('#', '-') });
+  return <div data-plate={plate.component} data-block={block.key} data-group={plate.group} data-height={block.height} id={block.rungs[0] === RUNGS[0] ? `plate-${plate.component}` : undefined} className="break-inside-avoid" style={{ zoom: PLATE_ZOOM }} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 export default function Compendium() {
@@ -124,19 +146,19 @@ export default function Compendium() {
               </p>
             </div>
           )}
-          <nav aria-label="Index" className="flex flex-col">
+          <nav aria-label="Index" className="columns-2 gap-10">
             {rows.map((row) =>
               row.kind === 'group' ? (
-                <div key={`g-${row.group}`} className="mt-3 border-t-2 border-edge-strong pb-1 pt-1.5 first:mt-0">
+                <div key={`g-${row.group}`} className="mt-3 break-after-avoid break-inside-avoid border-t-2 border-edge-strong pb-1 pt-1.5 first:mt-0">
                   <Kicker>{row.group}</Kicker>
                 </div>
               ) : (
-                <a key={row.plate.component} href={`#plate-${row.plate.component}`} className="grid grid-cols-[1fr_auto_3rem] items-baseline gap-4 border-t border-edge-default py-1">
+                <a key={row.plate.key} href={`#plate-${row.plate.component}`} className="grid break-inside-avoid grid-cols-[1fr_auto_3.5rem] items-baseline gap-3 border-t border-edge-default py-1">
                   <span className="font-display text-base font-bold leading-tight">{row.plate.component}</span>
                   <Kicker>
-                    {row.plate.states.length} state{row.plate.states.length === 1 ? '' : 's'}
+                    {row.plate.plate.states.length} state{row.plate.plate.states.length === 1 ? '' : 's'}
                   </Kicker>
-                  <Kicker className="text-right">p. {String(PAGING.pageOf.get(row.plate.component)).padStart(2, '0')}</Kicker>
+                  <Kicker className="text-right">p. {[...new Set(RUNGS.map((r) => PAGING.pageOf.get(blockKey(row.plate.plate, r))))].map((n) => String(n).padStart(2, '0')).join('–')}</Kicker>
                 </a>
               ),
             )}
@@ -145,8 +167,8 @@ export default function Compendium() {
       ))}
       {PAGING.sheets.map((plates, i) => (
         <Sheet key={`sheet-${i}`} n={PAGING.index.length + i + 1} head={[...new Set(plates.map((p) => p.group))].join(' · ')}>
-          {plates.map((plate) => (
-            <Plate key={plate.component} plate={plate} />
+          {plates.map((block) => (
+            <Plate key={block.key} block={block} />
           ))}
         </Sheet>
       ))}

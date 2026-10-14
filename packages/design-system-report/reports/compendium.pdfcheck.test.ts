@@ -37,7 +37,6 @@ const ART = '<svg width="120" height="30"><rect width="120" height="30" fill="#c
 const BODIES: Record<string, string> = {
   text: '<p style="margin:0;font:16px sans-serif">Alpha beta gamma</p>',
   graphic: `<div style="padding:8px">${ART}</div>`,
-  twin: '<p style="margin:0;font:16px sans-serif">Alpha beta gamma</p>',
   mixed: `<div style="padding:8px;font:16px sans-serif">Delta epsilon ${ART}</div>`,
 };
 
@@ -70,7 +69,7 @@ async function run(name: string, mutated: Record<string, (b: string) => string>)
     await browser.close();
   }
   const pdf = await htmlToPdf(html);
-  return checkPdf(pdf.output, cells);
+  return { failures: await checkPdf(pdf.output, cells), cells, pdf: pdf.output };
 }
 
 describe.skipIf(!chromiumAvailable())('compendium pdf check catches cells that paint nothing', () => {
@@ -79,7 +78,7 @@ describe.skipIf(!chromiumAvailable())('compendium pdf check catches cells that p
   });
 
   it('passes a document in which every cell paints', async () => {
-    expect(await run('clean', {})).toEqual([]);
+    expect((await run('clean', {})).failures).toEqual([]);
   }, 60_000);
 
   const wrap = (style: string) => (b: string) => `<div style="${style}">${b}</div>`;
@@ -87,17 +86,25 @@ describe.skipIf(!chromiumAvailable())('compendium pdf check catches cells that p
     ['opacity 0', 'text', wrap('opacity:0'), 'either'],
     ['visibility hidden on the content', 'text', wrap('visibility:hidden'), 'either'],
     ['transparent text', 'text', wrap('color:transparent'), 'either'],
-    ['text moved off its cell while its identical twin stays', 'twin', wrap('display:block;transform:translateX(-5000px)'), 'text'],
     ['content removed (empty body)', 'text', () => '', 'pixels'],
     ['graphic with no fill', 'graphic', (b) => b.replace('fill="#c00"', 'fill="none"'), 'pixels'],
     ['graphic clipped to nothing', 'graphic', wrap('overflow:hidden;height:0'), 'pixels'],
   ];
   for (const [label, target, mutate, kind] of cases) {
     it(`flags only the ${target} cell: ${label}`, async () => {
-      const failures = await run(label.replace(/\W+/g, '-'), { [target]: mutate });
+      const { failures } = await run(label.replace(/\W+/g, '-'), { [target]: mutate });
       expect(failures.map((f) => f.key)).toEqual(expect.arrayContaining([`Probe/${target}/sketch`]));
       expect([...new Set(failures.map((f) => f.key))]).toEqual([`Probe/${target}/sketch`]);
       if (kind !== 'either') expect(failures.some((f) => f.kind === kind)).toBe(true);
     }, 60_000);
   }
+
+  it('is positional: the words on the page elsewhere do not satisfy a cell that has none at its own position', async () => {
+    const { cells, pdf } = await run('positional', {});
+    const text = cells.find((c) => c.key === 'Probe/text/sketch')!;
+    // The same words, claimed for a body 400px lower, where the page is empty.
+    const twin: CellGeometry = { ...text, key: 'Probe/twin/sketch', body: { ...text.body, y: text.body.y + 400 } };
+    const failures = await checkPdf(pdf, [text, twin]);
+    expect(failures.filter((f) => f.kind === 'text').map((f) => f.key)).toEqual(['Probe/twin/sketch']);
+  }, 60_000);
 });
