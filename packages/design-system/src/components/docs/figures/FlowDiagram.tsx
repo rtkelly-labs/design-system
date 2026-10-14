@@ -118,7 +118,7 @@ export const FlowDiagram = React.forwardRef<HTMLDivElement, FlowDiagramProps>(fu
   const rows = rowsProp ?? rowsOf(children);
 
   return (
-      <AsciiFrameBody ref={ref} {...rest} className={cn('flex flex-col gap-7', className)}>
+      <AsciiFrameBody data-slot="flow-diagram" ref={ref} {...rest} className={cn('flex flex-col gap-7', className)}>
         <div className="flex flex-col gap-7" role="list" aria-label={`${label} paths`}>
           {rows.map((row, rowIndex) => (
             <div

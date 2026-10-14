@@ -156,7 +156,7 @@ export function NerdIcon({
   const styles = iconStyles({ accent, size });
 
   return (
-    <span
+    <span data-slot="nerd-icon"
       className={styles.root({ class: className })}
       role={label ? 'img' : undefined}
       aria-label={label}

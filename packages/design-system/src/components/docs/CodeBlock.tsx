@@ -69,7 +69,7 @@ export function CodeBlock({
   }, [copy]);
 
   return (
-    <div
+    <div data-slot="code-block"
       className={cn('docs-codeblock', className)}
       style={isAttached ? ATTACHED_STYLE : undefined}
       data-attached={isAttached ? 'true' : undefined}

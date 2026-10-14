@@ -56,7 +56,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(functio
   const empty = !visible.length || rangeStart == null || rangeEnd == null || rangeStart > rangeEnd || days > MAX_RANGE_DAYS;
   const cells = Math.max(1, Math.min(MAX_COLUMNS, Math.round(Number.isFinite(columns) ? columns : 48)));
 
-  if (empty) return <section ref={ref} aria-label="Gantt chart" {...rest} className={cn('font-mono text-sm text-content-primary', className)}><p className="text-content-muted">{items.length ? 'No valid schedule in the selected date range.' : 'No schedule items to display.'}</p><p className="sr-only">Empty schedule.</p></section>;
+  if (empty) return <section data-slot="gantt-chart" ref={ref} aria-label="Gantt chart" {...rest} className={cn('font-mono text-sm text-content-primary', className)}><p className="text-content-muted">{items.length ? 'No valid schedule in the selected date range.' : 'No schedule items to display.'}</p><p className="sr-only">Empty schedule.</p></section>;
 
   const span = rangeEnd! - rangeStart! + DAY_MS;
   const summary = `Schedule date range: ${iso(rangeStart!)} through ${iso(rangeEnd!)}.`;
@@ -72,7 +72,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(functio
     tickLabels.set(cell, label);
   }
 
-  return <section ref={ref} aria-label="Gantt chart" {...rest} className={cn('flex min-w-0 flex-col gap-3 font-mono text-sm text-content-primary', className)}>
+  return <section data-slot="gantt-chart" ref={ref} aria-label="Gantt chart" {...rest} className={cn('flex min-w-0 flex-col gap-3 font-mono text-sm text-content-primary', className)}>
     <p className="sr-only">{summary}</p>
     <ul aria-label="Scheduled items" className="flex flex-col gap-2">
       {visible.map((item, row) => {

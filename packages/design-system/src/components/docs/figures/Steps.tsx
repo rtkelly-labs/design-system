@@ -63,7 +63,7 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(function Steps
   const steps = stepsOf(children);
   const digits = String(steps.length).length;
   return (
-      <AsciiFrameBody ref={ref} {...rest} className={className}>
+      <AsciiFrameBody data-slot="steps" ref={ref} {...rest} className={className}>
         <ol className="flex flex-col" aria-label={`${label} procedure`}>
           {steps.map((step, index) => {
             const state = step.state ?? 'done';

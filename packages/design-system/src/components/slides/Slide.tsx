@@ -23,7 +23,7 @@ export const Slide: React.FC<SlideProps> = ({
   children,
 }) => {
   return (
-    <div
+    <div data-slot="slide"
       style={{
         width: '100%',
         height: '100%',

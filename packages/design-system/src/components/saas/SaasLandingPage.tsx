@@ -179,7 +179,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
   deployLog = DEFAULT_DEPLOY_LOG,
 }) => {
   return (
-    <div
+    <div data-slot="saas-landing-page"
       style={{
         maxWidth: '1200px',
         margin: '0 auto',

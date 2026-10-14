@@ -87,6 +87,7 @@ export function AnchorHeading({
 
   return (
     <Tag
+      data-slot="anchor-heading"
       id={headingId}
       className={cn('docs-anchor-heading group', className)}
       {...rest}
