@@ -2,8 +2,7 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import { recipe } from '../../lib/recipe';
-import { accentTextClass } from '../../lib/accentClasses';
-import { accentVar } from '../../lib/theme';
+import { ACCENT_CLASS_MAPS, accentTextClass, canonicalAccent } from '../../lib/accentClasses';
 import { Card } from '../Card';
 import { SectionGrid } from './SectionGrid';
 import type { SectionAlign, SectionColumns } from './SectionGrid';
@@ -171,7 +170,7 @@ export const PricingTier = forwardRef<HTMLDivElement, PricingTierProps>(function
       {badge ? (
         // Hung on the card's top edge rather than set in its flow: in flow it
         // pushes this tier's name, price and list below its neighbours'.
-        <span data-slot="pricing-tier-badge" className={styles.badge()} style={{ backgroundColor: accentVar(accent) }}>
+        <span data-slot="pricing-tier-badge" className={styles.badge({ class: ACCENT_CLASS_MAPS.FILL[canonicalAccent(accent)] })}>
           {badge}
         </span>
       ) : null}
