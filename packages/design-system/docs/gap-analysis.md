@@ -212,7 +212,7 @@ absence in a component library but nothing in either consumer is currently reach
 them — building them now would be speculative.
 
 **`Alert` is probably already built.** `NoteBlock` takes
-`type?: 'note' | 'tip' | 'warning' | 'important'` and resolves each through
+`type?: 'note' | 'tip' | 'warning' | 'danger'` and resolves each through
 `semanticTokens.intent` — it is the one component in the repo that models the semantic
 guidance correctly, and it covers the banner case. The gap here is naming and
 discoverability (`NoteBlock` reads as editorial chrome, not an app-level alert), not a

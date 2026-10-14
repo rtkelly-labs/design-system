@@ -721,7 +721,7 @@ interface BracketTextProps extends HTMLAttributes<HTMLSpanElement> {
 declare function BracketText({ children, accent, className, ...props }: BracketTextProps): react.JSX.Element;
 
 interface NoteBlockProps {
-    type?: 'note' | 'tip' | 'warning' | 'important';
+    type?: 'note' | 'tip' | 'warning' | 'danger';
     title?: string;
     children: react__default.ReactNode;
 }

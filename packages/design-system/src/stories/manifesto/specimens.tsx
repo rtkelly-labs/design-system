@@ -265,7 +265,7 @@ export function ContrastGate() {
           accent="secondary"
         />
       </div>
-      <NoteBlock type="important" title="CONTRAST IS A GATE, NOT A GUIDELINE">
+      <NoteBlock type="warning" title="CONTRAST IS A GATE, NOT A GUIDELINE">
         If <code style={MONO}>pnpm check:contrast</code> fails, the colour is wrong — not the gate.
         The Hue floor sits above WCAG AA on purpose: an editor draws selection, diff and
         find-match backgrounds behind these same tokens, and a palette solved to exactly 4.5 has
