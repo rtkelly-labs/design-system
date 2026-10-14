@@ -16,6 +16,7 @@ Everything is a `pnpm` script; these are the ones whose names do not give them a
 | `pnpm tokens:check` | fail if that generated file is stale |
 | `pnpm tokens:design` | regenerate `tokens/palette.<level>.tokens.json` — the DTCG export |
 | `pnpm tokens:design:check` | fail if a token file is stale **or orphaned** |
+| `pnpm check:slots` | every exported component carries `data-slot="<kebab-case name>"` or a typed alias; `pnpm slots:update` rewrites `api/slots.txt` after an intended change |
 | `pnpm check:contrast` | every role pair on every level, as arithmetic |
 | `pnpm check:docs` | figures written in prose against the source they describe — `--list` for the census |
 | `pnpm check:skills` | the agent-facing skills tree (`skills/**/SKILL.md`) parses and its frontmatter is schema-valid |
@@ -112,8 +113,8 @@ Load these when the task is in them, not before.
 | What a theme declares, and what it can emit | [`docs/theme-taxonomy.md`](./docs/theme-taxonomy.md) |
 | Where the base palette came from, and how it was solved | [`docs/palette-provenance.md`](./docs/palette-provenance.md) |
 | Retired colours, and the five design eras | [`docs/colour-heritage.md`](./docs/colour-heritage.md) |
-| Styling in TSX, and the CSS ratchet | [`docs/styling.md`](./docs/styling.md) |
-| Rendering deterministically — for capture, print, video | [`docs/deterministic-rendering.md`](./docs/deterministic-rendering.md) |
+| Styling in TSX, the CSS ratchet, and the `data-slot` contract (every component and part carries one; `pnpm check:slots`, `api/slots.txt`) | [`docs/styling.md`](./docs/styling.md) |
+| Rendering deterministically — for capture, print, video | [`docs/deterministic-rendering.md`](./docs/deterministic-rendering.md); `ds-report --pdf` in the report package applies all three switches for paper |
 | Visual regression — determinism contract, operating instructions | [`docs/visual-regression.md`](./docs/visual-regression.md) |
 | CI shape, and the screenshot walkthrough | [`docs/ci.md`](./docs/ci.md) |
 | Evidence on a PR — design, not yet built | [`docs/evidence-pipeline.md`](./docs/evidence-pipeline.md) |

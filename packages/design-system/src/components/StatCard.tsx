@@ -43,7 +43,7 @@ export function StatCard({
   className,
 }: StatCardProps) {
   return (
-    <div
+    <div data-slot="stat-card"
       className={cn(
         'bg-surface-raised border-2 border-edge-strong p-6 transition-all duration-200',
         accentHoverEdgeClass(accent),

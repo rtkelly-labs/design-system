@@ -189,6 +189,36 @@ to one invocation; never loop the CLI.
 The lint runs before any bundling for the same reason: a batch containing a bad
 file should fail in milliseconds rather than after rendering its siblings.
 
+### To PDF
+
+`--pdf` is one line of Chromium wrapped in a peer check, and that is the whole
+design: the PDF is the *print rendering of the same HTML*, not a second
+renderer. Everything the paper rules say is honoured once, in one place —
+
+- **The margin.** `@page { margin: 16mm 14mm }` in `styles.css` is the single
+  owner; the driver passes `preferCSSPageSize: true` and never restates it.
+- **The media.** `emulateMedia({ media: 'print' })` before the print, so the
+  `print:` utilities the chrome components carry apply — and apply *only* here,
+  never at render time.
+- **The fonts.** `document.fonts.ready` before the print. This is switch 2 of
+  [the determinism contract](../../design-system/docs/deterministic-rendering.md):
+  print before a face registers and the page silently goes to Courier New.
+- **The motion.** Switch 3 of the same contract — the print block in
+  `styles.css` kills every transition and loop for the one consumer that has
+  no capture harness.
+- **The ink.** `printBackground: true` plus `print-color-adjust: exact`, so a
+  border that passed the contrast gate arrives on paper instead of being
+  ink-saved by the driver.
+
+The paper rung is `sketch` — the rung the ladder documents for bright rooms and
+printing. And one honesty note: the HTML beside the PDF stays byte-deterministic,
+but a PDF embeds a `CreationDate`. Diff the HTML; print the PDF.
+
+Chromium comes from the report's own project as an optional `playwright` peer,
+resolved from the document's directory in the same shape as the design-system
+peer. A machine without it gets the install instruction, not a stack trace;
+`pdf.e2e.test.ts` skips rather than fails when no Chromium is installed.
+
 ---
 
 ## The typecheck

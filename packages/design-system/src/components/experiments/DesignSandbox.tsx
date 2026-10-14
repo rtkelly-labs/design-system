@@ -57,7 +57,7 @@ export const DesignSandbox: React.FC = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 text-content-primary font-mono">
+    <div data-slot="design-sandbox" className="max-w-7xl mx-auto px-4 sm:px-6 py-8 text-content-primary font-mono">
       {/* Sandbox Header */}
       <div className="flex justify-between items-start flex-wrap gap-4 mb-8">
         <div>

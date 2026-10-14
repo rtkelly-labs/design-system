@@ -27,7 +27,7 @@ export function DocPager({ prev, next, className = '' }: DocPagerProps) {
   if (!prev && !next) return null;
 
   return (
-    <nav className={cn('not-prose docs-pager', className)} aria-label="Page navigation">
+    <nav data-slot="doc-pager" className={cn('not-prose docs-pager print:hidden', className)} aria-label="Page navigation">
       {prev ? (
         <DocsLink href={prev.href} className="docs-pager-link" rel="prev">
           <span className="docs-pager-dir">

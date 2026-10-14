@@ -33,6 +33,9 @@ release of the components.
 ## 📜 Commands
 
 - `pnpm report <file.tsx>`: Renders a report straight from `src/`, no build first.
+- `pnpm manifesto`: Renders the Design Manifesto (`reports/manifesto.tsx`) — a repo-local
+  report — to HTML and `--pdf` paper. Lint-strict; output is ignored, the `.tsx` is the artefact.
+- `pnpm compendium`: Renders the Compendium (`reports/compendium.tsx`), one plate per component, packed several to an A4 sheet, to HTML and `--pdf`. See below.
 - `pnpm verify:report-cli`: Packs both packages, installs them into a throwaway project and drives `ds-report` as a consumer. Runs in CI.
 - `pnpm build`: Bundles ESM, CJS and types via `tsup`, and copies the templates to `dist/`.
 - `pnpm typecheck`: Validates TypeScript strict mode. Needs the design system built first — it resolves the peer through that package's `exports` map.
@@ -54,6 +57,7 @@ components render inert in a static document — is
 ```bash
 ds-report audit.tsx --theme white               # → audit.html, self-contained
 ds-report audit.tsx --theme midnight,white      # both rungs, one render
+ds-report audit.tsx --pdf                       # → audit.html + audit.pdf: the same markup on paper
 ds-report a.tsx b.tsx c.tsx --strict            # a batch, lint warnings fatal
 pnpm report src/templates/sample.tsx            # the same thing from a checkout
 ```
@@ -180,6 +184,66 @@ of the ladder, not roles whose contrast `pnpm check:contrast` has audited, not a
 layout the visual suite has pinned. A report built from these components inherits
 all of it and costs the agent less code than the HTML would.
 
+### The compendium: every component, as a golden artifact
+
+`reports/compendium.tsx` is a repo-local report with one plate per component, packed several to an A4
+sheet, each shown on the `sketch` and `midnight` rungs (page-scale templates on `sketch` only, or one
+rung per sheet when a pair is too tall). The self-contained HTML is the golden artifact; the PDF is its human
+rendering and is never byte-compared. Every cell carries `data-component`, `data-state` and
+`data-rung`, so a text diff localises to one component.
+
+- **Generated from the stories, not retyped.** `compendium.registry.tsx` names story exports and
+  renders them (meta args, `render`, decorators); a deleted story throws. Hand-written states exist
+  only where no story does (Table, the MDX-only `Path` and `Event`). The report imports the design
+  system's `src/` (stories import `../components/*`), which is the allowed direction; the design
+  system never imports the report.
+- **Coverage is a test, `reports/compendium.test.ts`.** Every export is classified from the running
+  module: `component`, `part` (parent derived from a story's `subcomponents`, the defining file, or a
+  name prefix), `provider`, or `nonvisual`. A component needs a plate, an `EXEMPT` entry (typed, tiny)
+  or a `BACKLOG` entry (a ratchet that only shrinks); a part must be exercised inside its parent's
+  plate, proved by an instrumented render, so a new export fails until it is classified.
+- **Source to printed is `reports/compendium.print.test.ts`** (needs Chromium): every expected cell is
+  present once, visible, non-empty, unclipped, wholly on its own sheet, the sheet manifest matches the
+  registry, and every plate fits its declared height. Then the PDF itself is read back with
+  `pdfjs-dist` (`compendium.pdfcheck.ts`): each cell's words must be among the PDF text items inside
+  that cell's rectangle on that page (positional, because the sketch and midnight twins share text), and
+  the cell body, rasterised from the PDF, must not be one flat colour. `compendium.pdfcheck.test.ts`
+  mutation-tests it (opacity 0, hidden or transparent content, an unfilled graphic, text moved off its
+  cell). Known gaps: text clipped by an `overflow:hidden` ancestor is still in the PDF (the DOM
+  `clipped` check sees it); transparent text next to other painted content is not flagged (a pending
+  Button hides its label on purpose); icon-font glyphs are checked by pixels only.
+- **Pagination is a function of the registry.** Each plate declares a `height` in mm
+  (`compendium.layout.ts`); sheets are packed best-fit decreasing over whole plates (both rungs of a plate stay
+  on one sheet; only a plate too tall for that splits), the index is one sheet, and the
+  footer, the index and the print test read one page map. The print test fails a plate taller than its
+  declared height or more than `SLACK_MM` shorter, so the declarations cannot lie.
+- **Ids.** `useId` ids depend on tree position, so each plate is rendered as its own root with its
+  component as `identifierPrefix`; otherwise adding a plate renumbers every later id.
+- **State matrix.** `compendium.states.tsx` holds a typed list of forced props per control (Button,
+  Badge, Checkbox, Switch, Input, Select, RadioGroup), typed `Partial<ComponentProps>` so a prop the
+  component lacks is a compile error; a test proves each forced state changes the markup, so none is
+  invented. Cells are `data-state="forced-<id>"`. `:hover`, `:focus`, `:active` cannot be forced in a
+  static document and are not faked.
+- **Backlog, with reasons.** `compendium.backlog.ts` is a record of typed reasons and a pinned ceiling.
+  What remains: six overlays (below) and five components taller than a sheet even for one rung.
+- **Overlays (Modal, Drawer, AlertDialog, Popover, Menu, Tooltip, Toast).** All take `open`,
+  `defaultOpen` or `isOpen`, and none shows its popup in a static render: every one portals through
+  Base UI, whose Portal mounts on the client only, so `renderToStaticMarkup` emits the trigger
+  (`aria-expanded="false"` even with `defaultOpen`) and nothing else. Options for the owner: render the
+  open state client-side (jsdom or the browser) and serialise it into the plate, or add a portal-less
+  static mode to the design system. Neither was done here.
+- **Slots.** The design system's `data-slot` contract (`packages/design-system/docs/styling.md`) is the
+  marker convention; `compendium.slots.ts` maps components to slots from the design system's own
+  contract and inventory (`api/slots.txt`), and the coverage test checks that each plate shows the
+  slot of the component, and of each part, it claims. The classification of exports now lives in the
+  design system (`src/slots/exports.ts`) and is reused here.
+- **What a plate neutralises.** Viewport units (`min-h-screen` etc.) and `print:hidden` inside a cell,
+  because a plate shows the screen rendering at content height, printed at 0.65 scale (`PLATE_ZOOM`; 0.6 is about two sheets fewer, at 4pt captions). A `side` plate puts its
+  rungs next to each other, a `stack` plate one above the other (use it for anything wider than half a sheet, such as
+  the `Divider` rule); `COLUMNS` in `compendium.tsx` packs small controls four cells to a row; `FIT` trims a page
+  template's own page padding. Declared heights are mechanical: after any change that moves a plate's height, set each
+  `height` to its measured mm rounded up plus one, then re-run the print test.
+
 ### Checking the thing consumers actually get
 
 Everything else that tests the generator runs from `src/` inside this repo, where
@@ -257,17 +321,19 @@ against a generator that emitted all of Tailwind.
 | Async | `renderToStaticMarkup` is synchronous. Do the fetching before the render and pass the data in as props. |
 | Resolution | Imports resolve from the report file's own directory, so a report can import the author's modules — but it has to sit inside a project where `react` resolves. |
 | Version skew | `@rtkelly13/design-system` is aliased to the copy of the package that owns the renderer, so the markup and the CSS can never come from two versions. |
+| PDF | `--pdf` prints the finished HTML through headless Chromium with print media emulated — it is not a second renderer, so the `@page` rule in `styles.css` owns the margin (`preferCSSPageSize`) and every `print:` utility applies. Chromium comes from the report's own project as an optional `playwright` peer; a missing one is an install instruction. `--pdf` also compares the page count Chromium produced with the pages the document's own `break-after: page` rules declare, measured at paper width: a sheet that outgrows the paper warns, and fails under `--strict`. Webfonts are inlined into the HTML as latin-subset data URIs, so the one file carries its own type. The HTML stays byte-deterministic; the PDF carries a `CreationDate`, so byte equality is never asserted on it. |
 
-### Where it lives, and the two optional peers
+### Where it lives, and the optional peers
 
 This is a **separate package** for that reason: it needs `esbuild`, Tailwind's
 compiler and a TypeScript compiler to do its job, and none of that belongs in the
 dependency graph of an app that installs the design system for its components.
 
 Both are **optional peer dependencies**, the same shape `@tailwindcss/typography`
-already has. The trade is only defensible because the CLI turns a missing one into
-an install instruction rather than a stack trace — see `explain()` in
-`src/cli.ts`, and keep that true.
+already has — `playwright`, needed only by `--pdf`, is the third. The trade is only
+defensible because the CLI turns a missing one into an install instruction rather
+than a stack trace — see `explain()` in `src/cli.ts` and `resolvePlaywright()` in
+`src/pdf.ts`, and keep that true.
 
 `ReportDocument`, `ReportSection` and `ReportDetails` ship from
 **`@rtkelly13/design-system`**, not from here: they are ordinary components with

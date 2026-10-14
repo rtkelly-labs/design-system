@@ -23,7 +23,7 @@ export const Default: Story = {
       {
         id: '1',
         number: '01',
-        title: 'Segment Allocation & Binary Header Layout',
+        title: 'Segment Header Layout',
         duration: '12 min',
         status: 'completed',
         href: '#',
@@ -32,7 +32,7 @@ export const Default: Story = {
       {
         id: '2',
         number: '02',
-        title: 'Memory Mapped Sparse Indices',
+        title: 'Mapped Sparse Indices',
         duration: '18 min',
         status: 'current',
         href: '#',
@@ -41,7 +41,7 @@ export const Default: Story = {
       {
         id: '3',
         number: '03',
-        title: 'Zero-Copy OS Transfers & Socket Splice',
+        title: 'Zero-Copy Transfers',
         duration: '15 min',
         status: 'upcoming',
         summary: 'Bypassing user space buffers with sendfile and vmsplice.',
@@ -49,7 +49,7 @@ export const Default: Story = {
       {
         id: '4',
         number: '04',
-        title: 'Segment Roll-over & Active Compaction',
+        title: 'Segment Roll-over',
         duration: '22 min',
         status: 'upcoming',
         summary: 'Tombstone retention policies and safe atomic swapping.',

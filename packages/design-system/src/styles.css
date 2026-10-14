@@ -170,3 +170,34 @@ code, pre {
   outline: var(--ds-focus-width) solid var(--ds-accent-primary);
   outline-offset: var(--ds-focus-offset);
 }
+
+/* Paper.
+
+ * The document-level half of the PDF flow: what a report or a docs page does
+ * when it leaves the screen. Element selectors and at-rules only — `check:css`
+ * keeps its budget at zero here, and the per-component decisions (hide the
+ * header, drop the sidebar) are `print:` utilities on the element, which is
+ * where all styling lives.
+ *
+ * The margin is declared once, on `@page`, and `ds-report --pdf` reads it with
+ * `preferCSSPageSize` rather than restating it at the driver. The motion kill
+ * is switch 3 of `docs/deterministic-rendering.md` applied to the one
+ * consumer that has no capture harness: the browser's own print pipeline. A
+ * stylesheet is where it belongs because it is wrong on screen and right
+ * exactly once — on paper. Colour-exact is what keeps a border that took the
+ * contrast gate onto the page instead of into a driver's ink-saving guess. */
+@media print {
+  @page { margin: 16mm 14mm; }
+
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  h1, h2, h3, h4 { break-after: avoid; }
+  p { orphans: 3; widows: 3; }
+}

@@ -11,6 +11,7 @@ import process from 'node:process';
 import { THEME_LEVELS, type ThemeLevel } from '@rtkelly13/design-system';
 import { formatProblems } from './lint';
 import path from 'node:path';
+import { describeOverflow, htmlToPdf, type PaperSize } from './pdf';
 import { renderReports } from './render';
 
 const USAGE = `ds-report — render a TSX report to one self-contained HTML file
@@ -24,7 +25,14 @@ Options
   -t, --theme <levels>  Comma-separated rungs: ${THEME_LEVELS.join(' | ')}.
                         Default: sketch. Several levels cost one render, not two.
       --title <text>    Document <title>. Default: the input's filename.
-      --strict          Treat lint warnings as errors. Use this in CI.
+      --pdf             Also emit <name>[.level].pdf beside each HTML, printing
+                        the finished document through headless Chromium under
+                        print media. Needs playwright as a devDependency and a
+                        downloaded Chromium — it is an optional peer.
+      --paper <size>    A4 (default) or Letter. Read with --pdf: the page's own
+                        @page rule wins over the format when it declares one.
+      --strict          Treat lint warnings and --pdf page overflow as errors.
+                        Use this in CI.
       --no-lint         Skip the design system lint. For files you did not write.
       --no-typecheck    Skip the type check. It is on by default.
   -h, --help            This text.
@@ -41,6 +49,8 @@ interface Parsed {
   output?: string;
   theme?: string;
   title?: string;
+  pdf: boolean;
+  paper: PaperSize;
   strict: boolean;
   lint: boolean;
   typecheck: boolean;
@@ -48,7 +58,15 @@ interface Parsed {
 }
 
 function parse(argv: readonly string[]): Parsed {
-  const parsed: Parsed = { inputs: [], strict: false, lint: true, typecheck: true, help: false };
+  const parsed: Parsed = {
+    inputs: [],
+    pdf: false,
+    paper: 'A4',
+    strict: false,
+    lint: true,
+    typecheck: true,
+    help: false,
+  };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index] as string;
     const next = () => {
@@ -69,6 +87,17 @@ function parse(argv: readonly string[]): Parsed {
       case '--title':
         parsed.title = next();
         break;
+      case '--pdf':
+        parsed.pdf = true;
+        break;
+      case '--paper': {
+        const value = next();
+        if (value !== 'A4' && value !== 'Letter') {
+          throw new Error(`--paper must be A4 or Letter, not "${value}".`);
+        }
+        parsed.paper = value;
+        break;
+      }
       case '--strict':
         parsed.strict = true;
         break;
@@ -143,11 +172,32 @@ async function main(argv: readonly string[]) {
         '  (--strict makes these fail)\n\n',
     );
   }
+  // Printing is a post-step on finished documents, not a second render: the
+  // outputs are absolute already, so the peer walk finds the author's project.
+  const pdfs: string[] = [];
+  const overflows: string[] = [];
+  if (options.pdf) {
+    for (const result of results) {
+      const printed = await htmlToPdf(result.output, { paper: options.paper });
+      pdfs.push(printed.output);
+      // Chromium adds a page without a word when a sheet outgrows the paper, so
+      // the page count against the document's own break rules is the only tell.
+      const overflow = describeOverflow(printed, options.paper);
+      if (overflow) overflows.push(overflow);
+    }
+  }
+  for (const message of overflows) {
+    process.stderr.write(`  ${options.strict ? 'error  ' : 'warning'} page overflow: ${message}\n\n`);
+  }
   for (const result of results) {
     process.stdout.write(
       `${result.output}  ${(result.bytes / 1024).toFixed(1)}kB, ${result.candidates} utilities\n`,
     );
   }
+  for (const pdf of pdfs) {
+    process.stdout.write(`${pdf}\n`);
+  }
+  if (options.strict && overflows.length > 0) process.exitCode = 1;
 }
 
 main(process.argv.slice(2)).catch((error: unknown) => {

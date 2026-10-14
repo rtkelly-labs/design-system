@@ -56,23 +56,26 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(functio
   const empty = !visible.length || rangeStart == null || rangeEnd == null || rangeStart > rangeEnd || days > MAX_RANGE_DAYS;
   const cells = Math.max(1, Math.min(MAX_COLUMNS, Math.round(Number.isFinite(columns) ? columns : 48)));
 
-  if (empty) return <section ref={ref} aria-label="Gantt chart" {...rest} className={cn('font-mono text-sm text-content-primary', className)}><p className="text-content-muted">{items.length ? 'No valid schedule in the selected date range.' : 'No schedule items to display.'}</p><p className="sr-only">Empty schedule.</p></section>;
+  if (empty) return <section data-slot="gantt-chart" ref={ref} aria-label="Gantt chart" {...rest} className={cn('font-mono text-sm text-content-primary', className)}><p className="text-content-muted">{items.length ? 'No valid schedule in the selected date range.' : 'No schedule items to display.'}</p><p className="sr-only">Empty schedule.</p></section>;
 
   const span = rangeEnd! - rangeStart! + DAY_MS;
   const summary = `Schedule date range: ${iso(rangeStart!)} through ${iso(rangeEnd!)}.`;
   const ticks = Array.from({ length: days }, (_, i) => rangeStart! + i * DAY_MS)
-    .filter((time) => { const day = new Date(time).getUTCDate(); return day === 1 || (days <= 42 && new Date(time).getUTCDay() === 1); });
+    .filter((time) => { const day = new Date(time).getUTCDate(); return days <= 42 ? new Date(time).getUTCDay() === 1 : day === 1; });
   if (!ticks.includes(rangeStart!)) ticks.unshift(rangeStart!);
   const tickLabels = new Map<number, string>();
   for (const time of ticks) {
     const cell = Math.min(cells - 1, Math.floor((time - rangeStart!) / span * cells));
-    const label = new Date(time).getUTCDate() === 1
+    // A short range is ticked weekly (plus its start) with dated labels; a
+    // month-start tick beside "May 4" printed as "May May 4". Longer ranges
+    // tick on month starts and name the month.
+    const label = new Date(time).getUTCDate() === 1 && days > 42
       ? new Intl.DateTimeFormat('en', { month: 'short', timeZone: 'UTC' }).format(new Date(time))
       : shortDate(time);
     tickLabels.set(cell, label);
   }
 
-  return <section ref={ref} aria-label="Gantt chart" {...rest} className={cn('flex min-w-0 flex-col gap-3 font-mono text-sm text-content-primary', className)}>
+  return <section data-slot="gantt-chart" ref={ref} aria-label="Gantt chart" {...rest} className={cn('flex min-w-0 flex-col gap-3 font-mono text-sm text-content-primary', className)}>
     <p className="sr-only">{summary}</p>
     <ul aria-label="Scheduled items" className="flex flex-col gap-2">
       {visible.map((item, row) => {
@@ -90,7 +93,7 @@ export const GanttChart = React.forwardRef<HTMLElement, GanttChartProps>(functio
       })}
     </ul>
     <div aria-hidden="true" className="grid grid-cols-[minmax(0,8rem)_minmax(0,1fr)] gap-3"><span />
-      <div className="flex h-[2.5em] border-t border-dashed border-edge-subtle">{Array.from({ length: cells }, (_, index) => <span className="relative min-w-0 flex-1" key={index}>{tickLabels.has(index) ? <span className={cn('absolute top-1 whitespace-nowrap text-[0.75em] text-content-muted', index > cells * 0.84 ? 'right-0' : 'left-0')}>{tickLabels.get(index)}</span> : null}</span>)}</div>
+      <div className="flex h-[2.5em] border-t border-dashed border-edge-subtle">{Array.from({ length: cells }, (_, index) => <span className="relative min-w-0 flex-1" key={index}>{tickLabels.has(index) ? <span className={cn('absolute top-1 whitespace-nowrap text-[0.8em] text-content-secondary', index > cells * 0.84 ? 'right-0' : 'left-0')}>{tickLabels.get(index)}</span> : null}</span>)}</div>
     </div>
   </section>;
 });

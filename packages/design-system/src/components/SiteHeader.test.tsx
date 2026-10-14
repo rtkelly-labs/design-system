@@ -29,6 +29,11 @@ describe('SiteHeader', () => {
     expect(screen.getByRole('banner').tagName).toBe('HEADER');
   });
 
+  it('drops the banner on paper', () => {
+    render(<Page />);
+    expect(screen.getByRole('banner').className).toContain('print:hidden');
+  });
+
   it('opens with a skip link to the main content, first in the tab order', () => {
     render(<Page />);
     const banner = screen.getByRole('banner');

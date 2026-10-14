@@ -75,7 +75,7 @@ export interface FigureFrameProps extends Omit<React.ComponentProps<'figure'>, '
  */
 export const FigureFrame = React.forwardRef<HTMLElement, FigureFrameProps>(function FigureFrame({ title, corner = '+', className, children, ...rest }, ref) {
   return (
-    <figure
+    <figure data-slot="figure-frame"
       ref={ref}
       aria-label={title ?? 'Document figure'}
       className={cn(
@@ -84,16 +84,16 @@ export const FigureFrame = React.forwardRef<HTMLElement, FigureFrameProps>(funct
       )}
       {...rest}
     >
-      <span aria-hidden="true" className="pointer-events-none absolute -left-2 -top-2 z-10 bg-surface-base px-1 text-content-muted">
+      <span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-10 flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-surface-base font-mono text-xs leading-none text-content-muted">
         {corner}
       </span>
-      <span aria-hidden="true" className="pointer-events-none absolute -right-2 -top-2 z-10 bg-surface-base px-1 text-content-muted">
+      <span aria-hidden="true" className="pointer-events-none absolute right-0 top-0 z-10 flex size-4 translate-x-1/2 -translate-y-1/2 items-center justify-center bg-surface-base font-mono text-xs leading-none text-content-muted">
         {corner}
       </span>
-      <span aria-hidden="true" className="pointer-events-none absolute -bottom-2 -left-2 z-10 bg-surface-base px-1 text-content-muted">
+      <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 z-10 flex size-4 -translate-x-1/2 translate-y-1/2 items-center justify-center bg-surface-base font-mono text-xs leading-none text-content-muted">
         {corner}
       </span>
-      <span aria-hidden="true" className="pointer-events-none absolute -bottom-2 -right-2 z-10 bg-surface-base px-1 text-content-muted">
+      <span aria-hidden="true" className="pointer-events-none absolute bottom-0 right-0 z-10 flex size-4 translate-x-1/2 translate-y-1/2 items-center justify-center bg-surface-base font-mono text-xs leading-none text-content-muted">
         {corner}
       </span>
       {title ? <figcaption className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap bg-surface-base px-3 uppercase tracking-wide text-accent-primary">[ {title} ]</figcaption> : null}
@@ -104,13 +104,13 @@ export const FigureFrame = React.forwardRef<HTMLElement, FigureFrameProps>(funct
 
 /** Internal root for a renderer. The frame owns the inset. */
 export const AsciiFrameBody = React.forwardRef<HTMLDivElement, React.ComponentProps<'div'>>(function AsciiFrameBody({ className, ...props }, ref) {
-  return <div ref={ref} className={cn('min-w-0', className)} {...props} />;
+  return <div data-slot="ascii-frame-body" ref={ref} className={cn('min-w-0', className)} {...props} />;
 });
 
 /** Markdown children inside a documentation visual. */
 export function AsciiFrameProse({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div
+    <div data-slot="ascii-frame-prose"
       className={cn(
         'flex min-w-0 flex-col gap-3 leading-relaxed',
         '[&_p]:m-0 [&_p]:text-pretty',
@@ -131,28 +131,28 @@ export function AsciiFrameProse({ className, ...props }: React.ComponentProps<'d
 
 /** A dashed horizontal rule inside a documentation visual. */
 export function AsciiFrameRule({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div aria-hidden="true" className={cn('my-1 h-px w-full border-t border-dashed border-edge-subtle', className)} {...props} />;
+  return <div data-slot="ascii-frame-rule" aria-hidden="true" className={cn('my-1 h-px w-full border-t border-dashed border-edge-subtle', className)} {...props} />;
 }
 
 /** A dashed vertical rule inside a documentation visual. */
 export function AsciiFrameRuleY({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div aria-hidden="true" className={cn('w-px self-stretch border-l border-dashed border-edge-subtle', className)} {...props} />;
+  return <div data-slot="ascii-frame-rule-y" aria-hidden="true" className={cn('w-px self-stretch border-l border-dashed border-edge-subtle', className)} {...props} />;
 }
 
 /** A full-width character track used by uptime and related figures. */
 export function AsciiFrameTrack({ className, ...props }: React.ComponentProps<'span'>) {
-  return <span aria-hidden="true" className={cn('flex w-full min-w-0 select-none', className)} {...props} />;
+  return <span data-slot="ascii-frame-track" aria-hidden="true" className={cn('flex w-full min-w-0 select-none', className)} {...props} />;
 }
 
 /** One flexible cell in a character track. */
 export function AsciiFrameTick({ className, ...props }: React.ComponentProps<'span'>) {
-  return <span className={cn('min-w-0 flex-1 overflow-hidden text-center', className)} {...props} />;
+  return <span data-slot="ascii-frame-tick" className={cn('min-w-0 flex-1 overflow-hidden text-center', className)} {...props} />;
 }
 
 /** ASCII arrow used by flow diagrams. */
 export function AsciiFrameArrow({ accent = false, stretch = false, className }: { accent?: boolean; stretch?: boolean; className?: string }) {
   return (
-    <span aria-hidden="true" className={cn('flex min-w-6 items-center text-content-muted', stretch && 'flex-1', className)}>
+    <span data-slot="ascii-frame-arrow" aria-hidden="true" className={cn('flex min-w-6 items-center text-content-muted', stretch && 'flex-1', className)}>
       <span className={cn('w-full border-t border-dashed border-current', accent && 'text-accent-primary')} />
       <span className={cn('-ml-1', accent ? 'text-accent-primary' : 'text-content-muted')}>▶</span>
     </span>

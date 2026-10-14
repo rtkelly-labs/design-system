@@ -23,7 +23,7 @@ export const Slide: React.FC<SlideProps> = ({
   children,
 }) => {
   return (
-    <div
+    <div data-slot="slide"
       style={{
         width: '100%',
         height: '100%',
@@ -50,7 +50,7 @@ export const Slide: React.FC<SlideProps> = ({
               margin: 0,
             }}
           >
-            [ {title} ]
+            {`[\u00a0${title}\u00a0]`}
           </h2>
           {subtitle && (
             <p

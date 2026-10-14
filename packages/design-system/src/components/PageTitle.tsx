@@ -20,7 +20,7 @@ export function PageTitle({
     'text-3xl font-display font-bold leading-tight tracking-tight text-[var(--ds-text-primary)] uppercase sm:text-4xl md:text-5xl border-4 border-double border-[var(--ds-border-strong)] inline-block px-6 py-4';
 
   return (
-    <div className="mb-8">
+    <div data-slot="page-title" className="mb-8">
       <h1 className={cn(baseClasses, className)} {...props}>
         {bracketed ? <BracketText>{children}</BracketText> : children}
       </h1>

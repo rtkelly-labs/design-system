@@ -276,7 +276,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
       ...anchorProps
     } = rest as Omit<ButtonLinkProps, keyof ButtonOwnProps>;
     return (
-      <a
+      <a data-slot="button"
         ref={ref as Ref<HTMLAnchorElement>}
         {...anchorProps}
         // A `target="_blank"` document can reach back through `window.opener`
@@ -302,7 +302,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
   const isPending = pending === true && !buttonProps.disabled;
 
   const element = (
-    <button
+    <button data-slot="button"
       ref={ref as Ref<HTMLButtonElement>}
       {...buttonProps}
       // The `disabled` attribute is what drops focus, so a pending button says

@@ -91,7 +91,7 @@ export interface ProseProps extends Omit<HTMLAttributes<HTMLDivElement>, 'classN
 
 export function Prose({ children, brutalist = true, className = '', ...rest }: ProseProps) {
   return (
-    <div className={prose({ brutalist, class: className })} {...rest}>
+    <div data-slot="prose" className={prose({ brutalist, class: className })} {...rest}>
       {children}
     </div>
   );

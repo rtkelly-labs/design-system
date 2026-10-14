@@ -10,6 +10,7 @@
  */
 
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -58,6 +59,61 @@ function hasTypographyPlugin(base: string) {
   }
 }
 
+/**
+ * A report is one file, so its fonts have to travel inside it. `@fontsource`
+ * stylesheets reference `./files/*.woff2` relative to themselves, and a copied
+ * `.html` has no such folder — every face silently fell back to Courier and
+ * Helvetica, in print as on screen. Each `@font-face` is therefore rewritten
+ * to carry its woff2 as a data URI.
+ *
+ * Only the `latin` subsets of the `@fontsource` families are kept. The browser downloads a subset only when a
+ * glyph in its `unicode-range` is used, but a data URI is paid for up front:
+ * inlining every script's subset is ~3MB per report for glyphs a report
+ * written in English never draws. Glyphs outside latin fall back, as they do
+ * for any face that lacks them.
+ */
+const FONT_FACE = /@font-face\s*\{[^}]*\}/g;
+
+function inlineFonts(css: string, base: string): string {
+  if (!css.includes('@font-face')) return css;
+  return css.replace(FONT_FACE, (block) => {
+    const woff2 = /url\((['"]?)(\.[^)'"]*?\.woff2)\1\)/.exec(block)?.[2];
+    if (!woff2 || !/-latin-(?!ext)/.test(woff2)) return '';
+    const data = readFileSync(path.resolve(base, woff2)).toString('base64');
+    return block.replace(
+      /src:[^;]*;/,
+      `src: url(data:font/woff2;base64,${data}) format('woff2');`,
+    );
+  });
+}
+
+/**
+ * The design system's own faces — DS Symbols (arrows, box drawing, ✓ ⌘) and the
+ * Nerd Font set (icons) — are declared in `styles.css` itself, with relative
+ * `./fonts/` urls, so they never pass through the import loader above. They
+ * differ in cost: DS Symbols is 21KB, the Nerd Font is ~1MB. So a face is
+ * inlined only when the finished document contains a character in its
+ * `unicode-range`; a report with no icons carries no icon font, and a report
+ * with a stray one is not silently drawn in tofu.
+ */
+function inlineOwnFonts(css: string, base: string, text: string): string {
+  const points = new Set([...text].map((c) => c.codePointAt(0) as number));
+  const used = (range: string) =>
+    range.split(',').some((part) => {
+      const [lo, hi = lo] = part.trim().replace(/^U\+/i, '').split('-').map((h) => parseInt(h, 16));
+      for (const point of points) if (point >= (lo as number) && point <= (hi as number)) return true;
+      return false;
+    });
+  return css.replace(FONT_FACE, (block) => {
+    const file = /url\((['"]?)(\.\/fonts\/[^)'"]*?\.woff2)\1\)/.exec(block)?.[2];
+    if (!file) return block;
+    const range = /unicode-range:\s*([^;]*);/.exec(block)?.[1];
+    if (range && !used(range)) return '';
+    const data = readFileSync(path.resolve(base, file)).toString('base64');
+    return block.replace(/src:[^;]*;/, `src: url(data:font/woff2;base64,${data}) format('woff2');`);
+  });
+}
+
 /*
  * There is no webfont import to drop, and that is the design system's doing
  * rather than an omission here.
@@ -87,7 +143,8 @@ export interface ReportCssOptions {
  * cost once, and `renderReports` is what does.
  */
 export interface ReportCssCompiler {
-  build(candidates: readonly string[]): string;
+  /** `text` is the finished document: the design system's own faces are inlined only if it uses them. */
+  build(candidates: readonly string[], text?: string): string;
   /** Degradations the caller should pass on — a dropped optional plugin. */
   notes: string[];
 }
@@ -112,14 +169,18 @@ export async function createReportCssCompiler({
 
   const resolve: typeof loadStylesheet = async (id, from) => {
     const sheet = await loadStylesheet(id, from);
-    return typography ? sheet : { ...sheet, content: sheet.content.replace(TYPOGRAPHY_PLUGIN, '') };
+    const content = inlineFonts(sheet.content, sheet.base);
+    return typography ? { ...sheet, content } : { ...sheet, content: content.replace(TYPOGRAPHY_PLUGIN, '') };
   };
 
   let source = await readFile(entry, 'utf8');
   if (!typography) source = source.replace(TYPOGRAPHY_PLUGIN, '');
 
   const compiler = await compile(source, { base, loadStylesheet: resolve, loadModule });
-  return { build: (candidates) => compiler.build([...candidates]), notes };
+  return {
+    build: (candidates, text = '') => inlineOwnFonts(compiler.build([...candidates]), base, text),
+    notes,
+  };
 }
 
 /** One-shot convenience over {@link createReportCssCompiler}. */

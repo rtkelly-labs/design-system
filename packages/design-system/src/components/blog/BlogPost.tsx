@@ -90,7 +90,7 @@ export const BlogPost: React.FC<BlogPostProps> = ({
   const author = resolveAuthor(authorProp);
   const initials = author.initials ?? deriveInitials(author.name);
   return (
-    <article
+    <article data-slot="blog-post"
       style={{
         maxWidth: '840px',
         margin: '0 auto',

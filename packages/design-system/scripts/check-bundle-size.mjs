@@ -265,8 +265,12 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
  */
 const BUDGETS = {
   'dist/**/*.js': {
-    maxRaw: 420_000,
-    maxGzip: 97_500,
+    // #362 adds three figure components — FileChangeTree, DrawingSheet and
+    // IndexedSection: 430,262 B raw / 98,604 B gzip locally, and those three
+    // modules are the whole increase; the stories ship nowhere. The usual
+    // ~2% headroom is kept for CI's zlib.
+    maxRaw: 440_000,
+    maxGzip: 100_500,
     desc: 'ESM output, every module',
   },
   'src/theme.css': {

@@ -120,7 +120,10 @@ export const Spinner = forwardRef<HTMLSpanElement, SpinnerProps>(function Spinne
         // Through the recipe's `class` slot rather than appended, so a caller
         // who reaches the mark through `className` still wins the conflict.
         className={styles.mark({
-          class: accent === 'current' ? undefined : accentTextClass(accent),
+          // `current` is for a spinner on a fill (a pending Button): `edge-subtle`
+          // is as light as the leading edge there and the mark reads as one flat
+          // ring, so the resting edge is the text colour at low alpha instead.
+          class: accent === 'current' ? 'border-current/30 border-t-current' : accentTextClass(accent),
         })}
       />
       <span className="sr-only">{label}</span>

@@ -77,7 +77,7 @@ export const Timeline = React.forwardRef<HTMLDivElement, TimelineProps>(function
   const events = eventsProp ?? eventsOf(children);
 
   return (
-      <AsciiFrameBody ref={ref} {...rest} className={className}>
+      <AsciiFrameBody data-slot="timeline" ref={ref} {...rest} className={className}>
         <ol className="flex flex-col" aria-label={label}>
           {events.map((event, index) => {
             const state = event.state ?? 'done';

@@ -78,7 +78,7 @@ export const BeforeAfter = React.forwardRef<HTMLDivElement, BeforeAfterProps>(fu
   }));
 
   return (
-      <AsciiFrameBody ref={ref} {...rest} className={cn('flex flex-col gap-3', className)}>
+      <AsciiFrameBody data-slot="before-after" ref={ref} {...rest} className={cn('flex flex-col gap-3', className)}>
         <div className="grid grid-cols-[minmax(0,1fr)_6.5rem_2rem_6.5rem] items-end gap-x-3">
           <span />
           <span className="text-right text-content-muted">{fromLabel}</span>

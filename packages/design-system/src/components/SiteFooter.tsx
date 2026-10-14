@@ -26,7 +26,7 @@ export interface SiteFooterProps
 
 const siteFooter = recipe({
   slots: {
-    root: 'border-t-4 border-edge-strong bg-surface-raised font-mono text-content-primary',
+    root: 'border-t-4 border-edge-strong bg-surface-raised font-mono text-content-primary print:hidden',
     body: 'mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 md:flex-row md:justify-between md:px-6',
     lead: 'max-w-sm text-sm leading-relaxed',
     nav: 'flex flex-wrap gap-x-12 gap-y-6',
