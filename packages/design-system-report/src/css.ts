@@ -66,7 +66,7 @@ function hasTypographyPlugin(base: string) {
  * Helvetica, in print as on screen. Each `@font-face` is therefore rewritten
  * to carry its woff2 as a data URI.
  *
- * Only the `latin` subsets are kept. The browser downloads a subset only when a
+ * Only the `latin` subsets of the `@fontsource` families are kept. The browser downloads a subset only when a
  * glyph in its `unicode-range` is used, but a data URI is paid for up front:
  * inlining every script's subset is ~3MB per report for glyphs a report
  * written in English never draws. Glyphs outside latin fall back, as they do
@@ -84,6 +84,33 @@ function inlineFonts(css: string, base: string): string {
       /src:[^;]*;/,
       `src: url(data:font/woff2;base64,${data}) format('woff2');`,
     );
+  });
+}
+
+/**
+ * The design system's own faces — DS Symbols (arrows, box drawing, ✓ ⌘) and the
+ * Nerd Font set (icons) — are declared in `styles.css` itself, with relative
+ * `./fonts/` urls, so they never pass through the import loader above. They
+ * differ in cost: DS Symbols is 21KB, the Nerd Font is ~1MB. So a face is
+ * inlined only when the finished document contains a character in its
+ * `unicode-range`; a report with no icons carries no icon font, and a report
+ * with a stray one is not silently drawn in tofu.
+ */
+function inlineOwnFonts(css: string, base: string, text: string): string {
+  const points = new Set([...text].map((c) => c.codePointAt(0) as number));
+  const used = (range: string) =>
+    range.split(',').some((part) => {
+      const [lo, hi = lo] = part.trim().replace(/^U\+/i, '').split('-').map((h) => parseInt(h, 16));
+      for (const point of points) if (point >= (lo as number) && point <= (hi as number)) return true;
+      return false;
+    });
+  return css.replace(FONT_FACE, (block) => {
+    const file = /url\((['"]?)(\.\/fonts\/[^)'"]*?\.woff2)\1\)/.exec(block)?.[2];
+    if (!file) return block;
+    const range = /unicode-range:\s*([^;]*);/.exec(block)?.[1];
+    if (range && !used(range)) return '';
+    const data = readFileSync(path.resolve(base, file)).toString('base64');
+    return block.replace(/src:[^;]*;/, `src: url(data:font/woff2;base64,${data}) format('woff2');`);
   });
 }
 
@@ -116,7 +143,8 @@ export interface ReportCssOptions {
  * cost once, and `renderReports` is what does.
  */
 export interface ReportCssCompiler {
-  build(candidates: readonly string[]): string;
+  /** `text` is the finished document: the design system's own faces are inlined only if it uses them. */
+  build(candidates: readonly string[], text?: string): string;
   /** Degradations the caller should pass on — a dropped optional plugin. */
   notes: string[];
 }
@@ -149,7 +177,10 @@ export async function createReportCssCompiler({
   if (!typography) source = source.replace(TYPOGRAPHY_PLUGIN, '');
 
   const compiler = await compile(source, { base, loadStylesheet: resolve, loadModule });
-  return { build: (candidates) => compiler.build([...candidates]), notes };
+  return {
+    build: (candidates, text = '') => inlineOwnFonts(compiler.build([...candidates]), base, text),
+    notes,
+  };
 }
 
 /** One-shot convenience over {@link createReportCssCompiler}. */
