@@ -2,6 +2,11 @@
 
 import type { ReactNode } from 'react';
 import { FinanceConsole, ContentStudio } from '@/generated/admin';
+import KanbanBoard from '@/examples/kanban/board';
+import InboxApp from '@/examples/inbox/app';
+import RepositorySettings from '@/examples/settings/repository-settings';
+import CalendarApp from '@/examples/calendar/app';
+import EditorWorkbench from '@/examples/editor/workbench';
 import { SaasLandingPage } from '@rtkelly-labs/design-system';
 
 /**
@@ -19,6 +24,23 @@ const SAMPLE_PAGES: Record<string, () => ReactNode> = {
   ),
   'admin-dashboard': () => <FinanceConsole />,
   'content-studio': () => <ContentStudio />,
+  kanban: () => <KanbanBoard />,
+  inbox: () => (
+    <main id="main-content">
+      <InboxApp />
+    </main>
+  ),
+  settings: () => (
+    <div className="mx-auto flex max-w-4xl flex-col gap-8 p-4 sm:p-6">
+      <RepositorySettings />
+    </div>
+  ),
+  calendar: () => (
+    <main id="main-content">
+      <CalendarApp />
+    </main>
+  ),
+  editor: () => <EditorWorkbench />,
 };
 
 export function SamplePage({ slug }: { slug: string }) {
