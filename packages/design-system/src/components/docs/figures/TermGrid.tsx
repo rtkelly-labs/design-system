@@ -33,15 +33,15 @@ export const TermGrid = React.forwardRef<HTMLDivElement, TermGridProps>(function
   const terms = termsProp ?? childItems(children, Term);
   return (
     <div ref={ref} role="group" aria-label={label} {...rest} className={cn('border-2 border-edge-strong', className)}>
-    <dl className="m-0 grid sm:grid-cols-2">
-      {terms.map((t) => (
-        <div key={t.term} className="flex flex-col gap-1 border-b border-r border-edge-subtle p-4">
-          <dt className="font-display text-sm font-bold text-content-primary">{t.term}</dt>
-          <dd className="m-0 text-sm text-content-secondary [&_p]:m-0">{t.children}</dd>
-          {t.scale && <dd className="m-0 font-mono text-xs text-content-muted">{t.scale}</dd>}
-        </div>
-      ))}
-    </dl>
+      <dl className="m-0 grid sm:grid-cols-2">
+        {terms.map((t) => (
+          <div key={t.term} className="flex flex-col gap-1 border-b border-r border-edge-subtle p-4">
+            <dt className="font-display text-sm font-bold text-content-primary">{t.term}</dt>
+            <dd className="m-0 text-sm text-content-secondary [&_p]:m-0">{t.children}</dd>
+            {t.scale && <dd className="m-0 font-mono text-xs text-content-muted">{t.scale}</dd>}
+          </div>
+        ))}
+      </dl>
     </div>
   );
 });

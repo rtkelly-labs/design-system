@@ -13,3 +13,8 @@ export * from './ActivityGrid';
 export * from './GanttChart';
 export * from './Terminal';
 export * from './Steps';
+export * from './SwatchCompare';
+export * from './MetricStrip';
+export * from './TokenTable';
+export * from './Decision';
+export * from './TermGrid';

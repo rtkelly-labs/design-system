@@ -33,6 +33,13 @@ import {
   Step,
   Steps,
   Terminal,
+  SwatchCompare,
+  MetricStrip,
+  TokenTable,
+  Decision,
+  Option,
+  TermGrid,
+  Term,
 } from './figures';
 
 /**
@@ -122,6 +129,13 @@ export const mdxComponents = {
   Slope,
   Node,
   Step,
+  SwatchCompare,
+  MetricStrip,
+  TokenTable,
+  Decision,
+  Option,
+  TermGrid,
+  Term,
 };
 
 export type MdxComponents = typeof mdxComponents;
