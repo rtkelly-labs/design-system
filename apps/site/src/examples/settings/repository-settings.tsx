@@ -165,7 +165,7 @@ export default function RepositorySettings() {
                       <Radio value="internal" label="Internal" helperText="Everyone in the organisation can read it." />
                       <Radio value="private" label="Private" helperText="Only people you invite can see it." />
                     </RadioGroup>
-                    <NoteBlock type="important" title="Large repositories">
+                    <NoteBlock type="warning" title="Large repositories">
                       Repositories over 5 GB cannot change visibility without support. Archive the history first.
                     </NoteBlock>
                   </>

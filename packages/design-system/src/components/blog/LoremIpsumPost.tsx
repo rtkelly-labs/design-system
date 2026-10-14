@@ -28,7 +28,7 @@ export const LoremIpsumPost: React.FC = () => {
         Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.
       </p>
 
-      <NoteBlock type="important" title="SYSTEM RULE ENFORCEMENT">
+      <NoteBlock type="warning" title="SYSTEM RULE ENFORCEMENT">
         Never hardcode pixel border radii or hex literals inside downstream component code.
         All colors must resolve through standard CSS tokens (<code style={{ color: 'var(--ds-accent-primary)' }}>--ds-accent-primary</code>, <code style={{ color: 'var(--ds-accent-tertiary)' }}>--ds-accent-tertiary</code>) to preserve paper-and-ink theme remapping.
       </NoteBlock>

@@ -163,7 +163,7 @@ export const DesignSandbox: React.FC = () => {
           </div>
 
           {/* Callouts */}
-          <NoteBlock title="SECURITY COMPLIANCE DIRECTIVE" type="warning">
+          <NoteBlock title="SECURITY COMPLIANCE DIRECTIVE" type="danger">
             All design system primitives strictly enforce dual-mode token remappings. Direct hardcoded hex literals are forbidden to ensure ink-on-paper sketch mode readability.
           </NoteBlock>
         </div>
