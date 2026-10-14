@@ -156,7 +156,7 @@ function NodeItem({
             aria-hidden="true"
             style={{
               transform: expanded ? 'rotate(90deg)' : 'none',
-              transition: 'transform 0.15s ease',
+              transition: 'transform var(--ds-duration-quick) var(--ds-ease)',
             }}
           />
         </button>

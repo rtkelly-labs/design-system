@@ -130,7 +130,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
             >
               <div
                 data-slot="track-card-progress-fill"
-                className="h-full bg-intent-success transition-all duration-500 ease-out"
+                className="h-full bg-intent-success transition-all duration-considered ease-brutalist"
                 style={progressStyle}
               />
             </div>
@@ -156,7 +156,7 @@ export const TrackCard = forwardRef<HTMLDivElement, TrackCardProps>(
               <div
                 data-slot="track-card-item-row"
                 className={cn(
-                  'group flex items-center justify-between gap-4 p-3 border border-edge-subtle transition-all duration-150',
+                  'group flex items-center justify-between gap-4 p-3 border border-edge-subtle transition-all duration-quick ease-brutalist',
                   isCurrent
                     ? 'bg-surface-raised border-accent-primary shadow-hard-sm'
                     : isCompleted

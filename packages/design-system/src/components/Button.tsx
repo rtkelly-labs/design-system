@@ -235,7 +235,7 @@ const DANGER =
 const SQUARE = 'inline-flex items-center justify-center p-0';
 
 const button = recipe({
-  base: `font-mono font-bold uppercase border-2 transition-all duration-200 ${DISABLED}`,
+  base: `font-mono font-bold uppercase border-2 transition-all duration-quick ease-brutalist ${DISABLED}`,
   variants: {
     size: {
       xs: 'h-7 px-2 text-xs',
