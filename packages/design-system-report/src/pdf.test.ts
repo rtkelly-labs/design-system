@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pdfPathFor, resolvePlaywright } from './pdf';
+import { countPdfPages, describeOverflow, overflowingUnits, pdfPathFor, resolvePlaywright, type PdfResult } from './pdf';
 
 describe('pdfPathFor', () => {
   it('names the PDF beside its HTML, level suffix kept', () => {
@@ -27,5 +27,35 @@ describe('resolvePlaywright', () => {
     expect(() => resolvePlaywright('/somewhere', missing)).toThrowError(
       /needs playwright[\s\S]*pnpm add -D playwright/,
     );
+  });
+});
+
+describe('countPdfPages', () => {
+  it('counts page objects and ignores the /Pages tree node', () => {
+    const pdf = '1 0 obj<</Type /Pages /Count 2>>endobj 2 0 obj<</Type /Page>>endobj 3 0 obj<</Type /Page>>endobj';
+    expect(countPdfPages(Buffer.from(pdf))).toBe(2);
+  });
+});
+
+describe('page overflow', () => {
+  const base: PdfResult = {
+    output: '/tmp/m.pdf',
+    pages: 3,
+    expectedPages: 2,
+    printableHeightPx: 1000,
+    units: [
+      { index: 1, label: 'Cover', heightPx: 900 },
+      { index: 2, label: 'Plate 02', heightPx: 1024 },
+    ],
+  };
+
+  it('names the unit that outgrew the paper, and by how much', () => {
+    expect(overflowingUnits(base).map((u) => [u.label, u.overflowPx])).toEqual([['Plate 02', 24]]);
+    expect(describeOverflow(base, 'A4')).toMatch(/printed 3 pages.*declare 2.*Plate 02 \(page 2\).*24px over/);
+  });
+
+  it('is silent when the page count matches or no breaks are declared', () => {
+    expect(describeOverflow({ ...base, pages: 2 }, 'A4')).toBeNull();
+    expect(describeOverflow({ ...base, expectedPages: null }, 'A4')).toBeNull();
   });
 });
