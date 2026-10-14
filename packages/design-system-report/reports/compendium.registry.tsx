@@ -16,14 +16,11 @@
 import type { ReactNode } from 'react';
 import type { ThemeLevel } from '../../design-system/src/index';
 
-import * as ButtonStories from '../../design-system/src/stories/Button.stories';
-import * as BadgeStories from '../../design-system/src/stories/Badge.stories';
 import * as CardStories from '../../design-system/src/stories/Card.stories';
 import * as StatCardStories from '../../design-system/src/stories/StatCard.stories';
 import * as DataTableStories from '../../design-system/src/stories/DataTable.stories';
 import * as SparklineStories from '../../design-system/src/stories/Sparkline.stories';
 import * as InputStories from '../../design-system/src/stories/Input.stories';
-import * as CheckboxStories from '../../design-system/src/stories/Checkbox.stories';
 import * as FlowDiagramStories from '../../design-system/src/stories/FlowDiagram.stories';
 import * as TimelineStories from '../../design-system/src/stories/Timeline.stories';
 import * as TabsStories from '../../design-system/src/stories/Tabs.stories';
@@ -55,9 +52,6 @@ import * as DocsHeaderStories from '../../design-system/src/stories/DocsHeader.s
 import * as DocsSidebarStories from '../../design-system/src/stories/DocsSidebar.stories';
 import * as TableOfContentsStories from '../../design-system/src/stories/TableOfContents.stories';
 import * as DocPagerStories from '../../design-system/src/stories/DocPager.stories';
-import * as SwitchStories from '../../design-system/src/stories/Switch.stories';
-import * as RadioGroupStories from '../../design-system/src/stories/RadioGroup.stories';
-import * as SelectStories from '../../design-system/src/stories/Select.stories';
 import * as FieldsetStories from '../../design-system/src/stories/Fieldset.stories';
 import * as ErrorSummaryStories from '../../design-system/src/stories/ErrorSummary.stories';
 import * as ProgressStories from '../../design-system/src/stories/Progress.stories';
@@ -112,6 +106,7 @@ import { BarChart } from '../../design-system/src/components/BarChart';
 import { BeforeAfter, Slope } from '../../design-system/src/components/docs/figures/BeforeAfter';
 import { ChangeSummary, Line } from '../../design-system/src/components/docs/figures/ChangeSummary';
 import { TreeDiagram, Node } from '../../design-system/src/components/docs/figures/TreeDiagram';
+import { badgeStates, buttonStates, checkboxStates, inputStates, radioGroupStates, selectStates, switchStates } from './compendium.states';
 import { Glyph } from '../../design-system/src/components/Glyph';
 import { AsciiDivider } from '../../design-system/src/components/AsciiDivider';
 import { SiteLink } from '../../design-system/src/components/LinkProvider';
@@ -239,8 +234,8 @@ function custom(id: string, render: () => ReactNode): PlateState {
 }
 
 export const PLATES: readonly PlateSpec[] = [
-  { component: 'Button', group: 'Primitives', height: 150, layout: 'side', states: fromStories(ButtonStories, ['Default', 'Bracketed', 'Disabled', 'Pending']) },
-  { component: 'Badge', group: 'Primitives', height: 70, layout: 'side', states: fromStories(BadgeStories, ['Default', 'Emphasis', 'Intent']) },
+  { component: 'Button', split: true, group: 'Primitives', height: 135, layout: 'side', states: buttonStates() },
+  { component: 'Badge', split: true, group: 'Primitives', height: 90, layout: 'side', states: badgeStates() },
   { component: 'Card', group: 'Primitives', height: 120, layout: 'side', states: fromStories(CardStories, ['FullCard']) },
 
   { component: 'StatCard', group: 'Data display', height: 100, layout: 'side', states: fromStories(StatCardStories, ['SystemHealth', 'ComputeLatency']) },
@@ -292,8 +287,8 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'DataTable', group: 'Data display', height: 135, layout: 'stack', states: fromStories(DataTableStories, ['Default']) },
   { component: 'Sparkline', group: 'Data display', height: 55, layout: 'side', states: fromStories(SparklineStories, ['PrimaryTrend', 'DangerLatencySpike']) },
 
-  { component: 'Input', group: 'Forms', height: 115, layout: 'side', states: fromStories(InputStories, ['DefaultInput', 'InputWithError', 'TextAreaStory']) },
-  { component: 'Checkbox', group: 'Forms', height: 70, layout: 'side', states: fromStories(CheckboxStories, ['Checked', 'Indeterminate', 'WithError']) },
+  { component: 'Input', split: true, group: 'Forms', height: 145, layout: 'side', states: [...inputStates(), ...fromStories(InputStories, ['TextAreaStory'])] },
+  { component: 'Checkbox', split: true, group: 'Forms', height: 90, layout: 'side', states: checkboxStates() },
 
   { component: 'FlowDiagram', group: 'Figures', height: 120, layout: 'side', states: [...fromStories(FlowDiagramStories, ['OptimisticUi']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><FlowDiagram><Path>write → review → ship</Path><Path>hotfix → ship</Path></FlowDiagram></FigureFrame>))] },
   { component: 'Timeline', group: 'Figures', height: 140, layout: 'side', states: [...fromStories(TimelineStories, ['Shipped']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><Timeline><Event date="Mar 12" state="done">CLI copies the files</Event><Event date="Mar 18" state="now">Launch</Event></Timeline></FigureFrame>))] },
@@ -325,9 +320,9 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'DocsSidebar', group: 'Navigation', height: 85, layout: 'side', states: fromStories(DocsSidebarStories, ['Default']) },
   { component: 'TableOfContents', group: 'Navigation', height: 60, layout: 'side', states: fromStories(TableOfContentsStories, ['Default']) },
   { component: 'DocPager', group: 'Navigation', height: 130, layout: 'stack', states: fromStories(DocPagerStories, ['Both']) },
-  { component: 'Switch', group: 'Forms', height: 30, layout: 'side', states: fromStories(SwitchStories, ['On']) },
-  { component: 'RadioGroup', group: 'Forms', height: 50, layout: 'side', states: fromStories(RadioGroupStories, ['Default']) },
-  { component: 'Select', group: 'Forms', height: 45, layout: 'side', states: fromStories(SelectStories, ['Default']) },
+  { component: 'Switch', split: true, group: 'Forms', height: 70, layout: 'side', states: switchStates() },
+  { component: 'RadioGroup', split: true, group: 'Forms', height: 110, layout: 'side', states: radioGroupStates() },
+  { component: 'Select', split: true, group: 'Forms', height: 95, layout: 'side', states: selectStates() },
   { component: 'Fieldset', group: 'Forms', height: 55, layout: 'side', states: fromStories(FieldsetStories, ['CheckboxSet']) },
   { component: 'ErrorSummary', group: 'Forms', height: 120, layout: 'side', states: fromStories(ErrorSummaryStories, ['Default']) },
   { component: 'Progress', clips: 'the fill is clipped by its track', group: 'Feedback', height: 30, layout: 'side', states: fromStories(ProgressStories, ['Determinate']) },
