@@ -16,9 +16,13 @@
     // fails there while `tsc --noEmit` is happy. See AGENTS.md.
     "ignoreDeprecations": "6.0",
     "types": ["node"],
+    // The repo-local reports import the design system's own src, which spells a .ts extension in
+    // one place (theme/ansi). Only reports do; src/ never does. tsup's dts build is told below.
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "typeRoots": ["../../node_modules/@types", "./node_modules/@types"]
   },
-  "include": ["src/**/*", "reports/*.tsx"],
+  "include": ["src/**/*", "reports/*.tsx", "reports/*.ts"],
   // A fixture that is *meant* not to typecheck — it is what the report
   // typechecker is pointed at to prove it reports something.
   "exclude": ["src/__fixtures__/broken-types.tsx"]
