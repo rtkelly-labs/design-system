@@ -95,7 +95,7 @@ function PlateBody({ block }: { block: Block }) {
         <h2 className={`m-0 font-display font-bold leading-none tracking-tight ${plate.height >= FULL ? 'text-[2.5rem]' : 'text-[1.5rem]'}`}>{plate.component}</h2>
         <Kicker>
           {plate.group} · {plate.states.length} state{plate.states.length === 1 ? '' : 's'}
-          {block.rungs.length === 1 ? ` · ${block.rungs[0]} only` : ''}
+          {plate.split ? ` · ${block.rungs[0]}` : block.rungs.length === 1 ? ` · ${block.rungs[0]} only` : ''}
         </Kicker>
       </div>
       {block.rungs.length === 1 && plate.layout === 'side' ? (
