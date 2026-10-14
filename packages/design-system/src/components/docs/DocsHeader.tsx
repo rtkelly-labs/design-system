@@ -117,7 +117,7 @@ export function DocsHeader({
 
         <DocsLink href={titleHref} className="docs-header-brand">
           {Icon && <Icon className="docs-header-brand-icon" />}
-          <span>[ {title.toUpperCase()} ]</span>
+          <span>[&nbsp;{title.toUpperCase()}&nbsp;]</span>
         </DocsLink>
       </div>
 

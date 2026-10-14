@@ -349,9 +349,9 @@ function Explorer({ active, onOpen }: { active: string; onOpen: (id: string) => 
   const toggle = useCallback((id: string) => setOpen((o) => ({ ...o, [id]: !o[id] })), []);
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-auto">
-      <h2 className="m-0 px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest text-content-muted">[ Explorer ]</h2>
+      <h2 className="m-0 px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest text-content-muted">[&nbsp;Explorer&nbsp;]</h2>
       <TreeRows entries={FILE_TREE} depth={0} open={open} toggle={toggle} active={active} onOpen={onOpen} />
-      <h2 className="m-0 mt-4 px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest text-content-muted">[ Outline ]</h2>
+      <h2 className="m-0 mt-4 px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest text-content-muted">[&nbsp;Outline&nbsp;]</h2>
       <div className="px-2 pb-4 text-xs">
         <TreeDiagram
           label="paginate.ts outline"
@@ -580,7 +580,7 @@ export default function EditorWorkbench() {
         >
           <NerdIcon name="folder" size="sm" />
         </button>
-        <span className="font-display text-base font-bold uppercase tracking-wider text-accent-primary">[ rtk.edit ]</span>
+        <span className="font-display text-base font-bold uppercase tracking-wider text-accent-primary">[&nbsp;rtk.edit&nbsp;]</span>
         <span className="hidden truncate text-content-muted sm:inline">pagination-kit</span>
         <button
           ref={paletteTrigger}
@@ -598,14 +598,14 @@ export default function EditorWorkbench() {
           aria-pressed={wrap}
           className="hidden border-2 border-edge-strong px-2 py-1 text-xs font-bold uppercase tracking-widest aria-pressed:bg-accent-primary aria-pressed:text-content-inverse sm:block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
         >
-          [ wrap ]
+          [&nbsp;wrap&nbsp;]
         </button>
         <button
           type="button"
           onClick={() => theme?.cycleLevel()}
           className="border-2 border-edge-strong px-2 py-1 text-xs font-bold uppercase tracking-widest shadow-[3px_3px_0_0_var(--ds-shadow-color)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
         >
-          [ {theme?.level ?? 'theme'} ]
+          [&nbsp;{theme?.level ?? 'theme'}&nbsp;]
         </button>
       </header>
 
@@ -686,7 +686,7 @@ export default function EditorWorkbench() {
               </TabsPanel>
             ))}
             {files.length === 0 ? (
-              <div className="flex flex-1 items-center justify-center text-content-muted">[ no editors open — Ctrl K ]</div>
+              <div className="flex flex-1 items-center justify-center text-content-muted">[&nbsp;no editors open — Ctrl K&nbsp;]</div>
             ) : null}
           </Tabs>
 

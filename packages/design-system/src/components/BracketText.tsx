@@ -3,6 +3,13 @@ import type { AccentToken } from '../lib/theme';
 import { cn } from '../lib/recipe';
 import { accentTextClass } from '../lib/accentClasses';
 
+/**
+ * A no-break space. The brackets are glued to their label with this rather
+ * than a plain space, so a line break can fall inside the label but never
+ * between a bracket and the word beside it.
+ */
+const NBSP = '\u00a0';
+
 export interface BracketTextProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
   /**
@@ -27,13 +34,11 @@ export function BracketText({
 
   return (
     <span data-slot="bracket-text" className={cn(accentClass, className)} {...props}>
-      <span aria-hidden="true">
-        [
-      </span>{' '}
-      {children}{' '}
-      <span aria-hidden="true">
-        ]
-      </span>
+      <span aria-hidden="true">[</span>
+      {NBSP}
+      {children}
+      {NBSP}
+      <span aria-hidden="true">]</span>
     </span>
   );
 }

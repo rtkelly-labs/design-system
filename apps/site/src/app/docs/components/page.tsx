@@ -17,7 +17,7 @@ function Tile({ entry }: { entry: CatalogueEntry }) {
       <span className="flex items-baseline justify-between gap-3">
         <span className="font-display text-base font-extrabold uppercase tracking-wide text-content-primary">{entry.name}</span>
         <span className={'shrink-0 font-mono text-[0.65rem] font-bold uppercase tracking-wider ' + (page ? 'text-accent-primary' : 'text-content-muted')}>
-          {page ? '[ PAGE ]' : '[ STORYBOOK ↗ ]'}
+          {page ? '[\u00a0PAGE\u00a0]' : '[\u00a0STORYBOOK ↗\u00a0]'}
         </span>
       </span>
       {entry.description ? (

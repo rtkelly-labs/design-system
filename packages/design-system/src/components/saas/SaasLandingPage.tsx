@@ -208,7 +208,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
 
       <AsciiDivider style={DIVIDER_STYLE} />
 
-      <FeatureGrid title="[ BUILT FOR EXTREME PERFORMANCE & CONTROL ]">
+      <FeatureGrid title={'[\u00a0BUILT FOR EXTREME PERFORMANCE & CONTROL\u00a0]'}>
         {FEATURES.map((feature) => (
           <Feature key={feature.title} title={feature.title} accent={feature.accent} icon={feature.icon}>
             {feature.desc}
@@ -218,7 +218,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
 
       <AsciiDivider style={DIVIDER_STYLE} />
 
-      <PricingGrid title="[ TRANSPARENT PRICING ]">
+      <PricingGrid title={'[\u00a0TRANSPARENT PRICING\u00a0]'}>
         {pricingTiers.map((tier) => (
           <PricingTier
             key={tier.name}
