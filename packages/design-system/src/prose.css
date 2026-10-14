@@ -162,6 +162,18 @@ html {
   --tw-prose-pre-bg: var(--ds-surface-sunken);
   --tw-prose-th-borders: var(--ds-border-strong);
   --tw-prose-td-borders: var(--ds-border-default);
+
+  /* @tailwindcss/typography hard-codes a 6px radius on `pre`; this system has
+   * none (AGENTS.md rule: radius is a token). Bare element selector, so
+   * `check:css` does not count it. Higher specificity than `:where(pre)`. */
+  & pre {
+    border-radius: var(--ds-radius-none);
+  }
+
+  /* Display headings balance their lines so a short last word is not stranded. */
+  & :is(h1, h2, h3) {
+    text-wrap: balance;
+  }
 }
 
 /* ==========================================================================
