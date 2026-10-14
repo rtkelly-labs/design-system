@@ -7,9 +7,12 @@
  * maintainable: every level times every role pair is a matrix nobody eyeballs
  * reliably twice.
  *
- * The maths is WCAG 2.1 relative luminance. APCA is the better predictor of
+ * The gate is WCAG 2.1 relative luminance. APCA is the better predictor of
  * perceived contrast, but it is not yet normative and its thresholds are not
- * stable; WCAG ratios are what an audit will be run against.
+ * stable; WCAG ratios are what an audit will be run against. So APCA is
+ * computed alongside and reported, never gated. It is reported because WCAG 2
+ * overrates light text on a dark ground: midnight's `text.muted` passed at
+ * 5.90:1 while scoring Lc -41, the weakest text pair in the system (#372).
  */
 
 import type { Emphasis, Hue, HueRef, Intent, TextTone } from '../lib/theme';
@@ -105,6 +108,35 @@ export function contrastRatio(foreground: string, background: string): number {
   const lighter = Math.max(relativeLuminance(fg), relativeLuminance(bg));
   const darker = Math.min(relativeLuminance(fg), relativeLuminance(bg));
   return (lighter + 0.05) / (darker + 0.05);
+}
+
+/**
+ * APCA lightness contrast (Lc), per APCA-W3 0.0.98G — roughly -108 to 106.
+ *
+ * Signed by polarity: positive is dark text on a light ground, negative is
+ * light on dark, and the magnitude is what compares across the two. Unlike a
+ * WCAG ratio it is not symmetric, which is the point: the same pair of colours
+ * reads differently depending on which one is the text.
+ *
+ * Constants are the published 0.0.98G set; the luminance is APCA's own simple
+ * 2.4 power curve, not WCAG's piecewise one. Reported, not gated — see the
+ * module comment.
+ */
+export function apcaContrast(foreground: string, background: string): number {
+  const bg = parseColor(background);
+  const fg = composite(parseColor(foreground), bg);
+  const y = (c: Rgb) =>
+    0.2126729 * (c.r / 255) ** 2.4 + 0.7151522 * (c.g / 255) ** 2.4 + 0.072175 * (c.b / 255) ** 2.4;
+  const clamp = (lum: number) => (lum > 0.022 ? lum : lum + (0.022 - lum) ** 1.414);
+  const text = clamp(y(fg));
+  const ground = clamp(y(bg));
+  if (Math.abs(ground - text) < 0.0005) return 0;
+  if (ground > text) {
+    const sapc = (ground ** 0.56 - text ** 0.57) * 1.14;
+    return sapc < 0.1 ? 0 : (sapc - 0.027) * 100;
+  }
+  const sapc = (ground ** 0.65 - text ** 0.62) * 1.14;
+  return sapc > -0.1 ? 0 : (sapc + 0.027) * 100;
 }
 
 /**
@@ -219,6 +251,8 @@ export interface ContrastCheck {
   foreground: string;
   background: string;
   ratio: number;
+  /** APCA Lc for the same pair, reported alongside the ratio and never gated. Null where the pair is a separation rather than a foreground on a ground. */
+  apca: number | null;
   minimum: number;
   passes: boolean;
 }
@@ -342,6 +376,7 @@ export function auditContrast(
         foreground,
         background,
         ratio,
+        apca: apcaContrast(foreground, background),
         minimum,
         passes: ratio >= minimum,
       });
@@ -441,12 +476,45 @@ export function auditContrast(
       foreground: `${def.surface.raised} / ${def.border.strong}`,
       background: scrim,
       ratio: separation,
+      apca: null,
       minimum: MINIMUM_RATIO.overlaySeparation,
       passes: separation >= MINIMUM_RATIO.overlaySeparation,
     });
   }
 
   return results;
+}
+
+/**
+ * How far apart the text tones sit, in APCA Lc, on each ground.
+ *
+ * Reported, not gated. It is the other half of tuning `text.muted`: darkening it
+ * for legibility is free until it lands so close to `text.secondary` that the
+ * two stop reading as two tones. #372 measured `#4f4a3d` on sketch at 7 Lc from
+ * secondary, which is why `#5c5546` was chosen instead.
+ */
+export interface TextHierarchyStep {
+  level: ThemeLevel;
+  ground: string;
+  /** Lc magnitude of primary, secondary and muted on this ground. */
+  lc: Readonly<Record<'primary' | 'secondary' | 'muted', number>>;
+  /** secondary minus muted, in Lc magnitude. */
+  mutedStep: number;
+}
+
+export function auditTextHierarchy(
+  ladder: Readonly<Record<ThemeLevel, LevelDefinition>>,
+): TextHierarchyStep[] {
+  const steps: TextHierarchyStep[] = [];
+  for (const [level, def] of Object.entries(ladder) as [ThemeLevel, LevelDefinition][]) {
+    for (const ground of ['base', 'raised', 'sunken'] as const) {
+      const lc = (tone: 'primary' | 'secondary' | 'muted') =>
+        Math.abs(apcaContrast(def.text[tone], def.surface[ground]));
+      const tones = { primary: lc('primary'), secondary: lc('secondary'), muted: lc('muted') };
+      steps.push({ level, ground: `surface.${ground}`, lc: tones, mutedStep: tones.secondary - tones.muted });
+    }
+  }
+  return steps;
 }
 
 /** How a component may mark a selected item. */

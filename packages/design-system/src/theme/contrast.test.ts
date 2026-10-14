@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { auditSelectionDevices, contrastRatio, MINIMUM_RATIO } from './contrast';
+import {
+  apcaContrast,
+  auditContrast,
+  auditSelectionDevices,
+  auditTextHierarchy,
+  contrastRatio,
+  MINIMUM_RATIO,
+} from './contrast';
 import { LEVELS, THEME_LEVELS } from './levels';
 
 /**
@@ -42,5 +49,45 @@ describe('selection devices', () => {
     // why the offset shadow and the 2px border do the work; see DESIGN.md § 5.
     const ratio = contrastRatio(LEVELS.sketch.surface.raised, LEVELS.sketch.surface.base);
     expect(ratio).toBeLessThan(1.3);
+  });
+});
+
+/**
+ * APCA is reported, not gated, but a reported number that is wrong is worse
+ * than none. Pinned to the reference values the APCA-W3 0.0.98G README
+ * publishes for its own implementation.
+ */
+describe('apcaContrast', () => {
+  it('matches the published reference values', () => {
+    expect(apcaContrast('#888888', '#ffffff')).toBeCloseTo(63.056, 2);
+    expect(apcaContrast('#ffffff', '#888888')).toBeCloseTo(-68.541, 2);
+    expect(apcaContrast('#000000', '#aaaaaa')).toBeCloseTo(58.146, 2);
+    expect(apcaContrast('#aaaaaa', '#000000')).toBeCloseTo(-56.241, 2);
+  });
+
+  it('is signed by polarity and not symmetric, unlike a WCAG ratio', () => {
+    expect(contrastRatio('#888888', '#ffffff')).toBeCloseTo(contrastRatio('#ffffff', '#888888'), 6);
+    expect(Math.abs(apcaContrast('#888888', '#ffffff'))).not.toBeCloseTo(
+      Math.abs(apcaContrast('#ffffff', '#888888')),
+      0,
+    );
+  });
+
+  it('rides along on every text pair the gate audits', () => {
+    const text = auditContrast(LEVELS).filter((r) => r.pair.startsWith('text.'));
+    expect(text.length).toBeGreaterThan(0);
+    expect(text.every((r) => typeof r.apca === 'number' && r.apca !== 0)).toBe(true);
+  });
+});
+
+describe('text hierarchy', () => {
+  it('keeps muted clearly below secondary on every ground', () => {
+    // The trade #372 made: muted was darkened for legibility, but not so far that
+    // it reads as a second secondary. 10 Lc is a floor for the regression, not a
+    // standard; the shipped values sit at 12 or more.
+    const tight = auditTextHierarchy(LEVELS)
+      .filter((s) => s.mutedStep < 10)
+      .map((s) => `${s.level} ${s.ground}: ${s.mutedStep.toFixed(1)}`);
+    expect(tight).toEqual([]);
   });
 });
