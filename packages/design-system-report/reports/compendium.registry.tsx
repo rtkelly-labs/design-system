@@ -14,6 +14,7 @@
  */
 
 import type { ReactNode } from 'react';
+
 import * as ButtonStories from '../../design-system/src/stories/Button.stories';
 import * as BadgeStories from '../../design-system/src/stories/Badge.stories';
 import * as CardStories from '../../design-system/src/stories/Card.stories';
@@ -56,6 +57,8 @@ export interface PlateSpec {
   /** Public export name. Goes on `data-component`. */
   component: string;
   group: Group;
+  /** Declared height ceiling in mm (see compendium.layout.ts). The print test fails a plate that outgrows it, or one declared much taller than it measures. */
+  height: number;
   /** `side`: the two rungs next to each other. `stack`: one under the other, for wide components. */
   layout: 'side' | 'stack';
   states: PlateState[];
@@ -119,16 +122,17 @@ function mdxState(id: string, render: () => ReactNode): PlateState {
 }
 
 export const PLATES: readonly PlateSpec[] = [
-  { component: 'Button', group: 'Primitives', layout: 'side', states: fromStories(ButtonStories, ['Default', 'Bracketed', 'Disabled', 'Pending']) },
-  { component: 'Badge', group: 'Primitives', layout: 'side', states: fromStories(BadgeStories, ['Default', 'Emphasis', 'Intent']) },
-  { component: 'Card', group: 'Primitives', layout: 'side', states: fromStories(CardStories, ['FullCard']) },
+  { component: 'Button', group: 'Primitives', height: 230, layout: 'side', states: fromStories(ButtonStories, ['Default', 'Bracketed', 'Disabled', 'Pending']) },
+  { component: 'Badge', group: 'Primitives', height: 110, layout: 'side', states: fromStories(BadgeStories, ['Default', 'Emphasis', 'Intent']) },
+  { component: 'Card', group: 'Primitives', height: 180, layout: 'side', states: fromStories(CardStories, ['FullCard']) },
 
-  { component: 'StatCard', group: 'Data display', layout: 'side', states: fromStories(StatCardStories, ['SystemHealth', 'ComputeLatency']) },
+  { component: 'StatCard', group: 'Data display', height: 125, layout: 'side', states: fromStories(StatCardStories, ['SystemHealth', 'ComputeLatency']) },
   {
     // No story exists for Table (DataTable's stories cover it), so this one is written by hand, and
     // it is the proof that a part is exercised: the coverage test fails if any Table* is dropped.
     component: 'Table',
     group: 'Data display',
+    height: 160,
     layout: 'stack',
     states: [
       {
@@ -168,16 +172,16 @@ export const PLATES: readonly PlateSpec[] = [
       },
     ],
   },
-  { component: 'DataTable', group: 'Data display', layout: 'stack', states: fromStories(DataTableStories, ['Default']) },
-  { component: 'Sparkline', group: 'Data display', layout: 'side', states: fromStories(SparklineStories, ['PrimaryTrend', 'DangerLatencySpike']) },
+  { component: 'DataTable', group: 'Data display', height: 170, layout: 'stack', states: fromStories(DataTableStories, ['Default']) },
+  { component: 'Sparkline', group: 'Data display', height: 65, layout: 'side', states: fromStories(SparklineStories, ['PrimaryTrend', 'DangerLatencySpike']) },
 
-  { component: 'Input', group: 'Forms', layout: 'side', states: fromStories(InputStories, ['DefaultInput', 'InputWithError', 'TextAreaStory']) },
-  { component: 'Checkbox', group: 'Forms', layout: 'side', states: fromStories(CheckboxStories, ['Checked', 'Indeterminate', 'WithError']) },
+  { component: 'Input', group: 'Forms', height: 150, layout: 'side', states: fromStories(InputStories, ['DefaultInput', 'InputWithError', 'TextAreaStory']) },
+  { component: 'Checkbox', group: 'Forms', height: 90, layout: 'side', states: fromStories(CheckboxStories, ['Checked', 'Indeterminate', 'WithError']) },
 
-  { component: 'FlowDiagram', group: 'Figures', layout: 'side', states: [...fromStories(FlowDiagramStories, ['OptimisticUi']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><FlowDiagram><Path>write → review → ship</Path><Path>hotfix → ship</Path></FlowDiagram></FigureFrame>))] },
-  { component: 'Timeline', group: 'Figures', layout: 'side', states: [...fromStories(TimelineStories, ['Shipped']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><Timeline><Event date="Mar 12" state="done">CLI copies the files</Event><Event date="Mar 18" state="now">Launch</Event></Timeline></FigureFrame>))] },
+  { component: 'FlowDiagram', group: 'Figures', height: 150, layout: 'side', states: [...fromStories(FlowDiagramStories, ['OptimisticUi']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><FlowDiagram><Path>write → review → ship</Path><Path>hotfix → ship</Path></FlowDiagram></FigureFrame>))] },
+  { component: 'Timeline', group: 'Figures', height: 200, layout: 'side', states: [...fromStories(TimelineStories, ['Shipped']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><Timeline><Event date="Mar 12" state="done">CLI copies the files</Event><Event date="Mar 18" state="now">Launch</Event></Timeline></FigureFrame>))] },
 
-  { component: 'Tabs', group: 'Composite', layout: 'stack', states: fromStories(TabsStories, ['Default', 'Underline']) },
+  { component: 'Tabs', group: 'Composite', height: 195, layout: 'stack', states: fromStories(TabsStories, ['Default', 'Underline']) },
 ];
 
 /** Plates in the document's order: by group, then as listed. Stable, so the index is deterministic. */

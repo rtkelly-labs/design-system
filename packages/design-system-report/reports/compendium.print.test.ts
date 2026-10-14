@@ -28,6 +28,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { describeOverflow, htmlToPdf } from '../src/pdf';
 import { renderReport } from '../src/render';
 import { orderedPlates } from './compendium.registry';
+import { SLACK_MM, paginate } from './compendium.layout';
 
 const scratch = path.resolve('.compendium-print-tmp');
 const PAPER_W = 794; // A4 at 96dpi, rounded
@@ -61,7 +62,7 @@ interface CellFacts {
 }
 
 /** Runs in the page. Plain function so it serialises. */
-function measure(): { cells: CellFacts[]; sheets: { page: number; height: number }[] } {
+function measure(): { cells: CellFacts[]; sheets: { page: number; height: number }[]; plates: { name: string; height: number; mm: number }[] } {
   const sheets = [...document.querySelectorAll<HTMLElement>('[data-page]')];
   const cells = [...document.querySelectorAll<HTMLElement>('[data-component][data-state][data-rung]')].map((el) => {
     const sheet = el.closest<HTMLElement>('[data-page]');
@@ -98,7 +99,12 @@ function measure(): { cells: CellFacts[]; sheets: { page: number; height: number
       inSheet: !!sr && r.top >= sr.top - 1 && r.bottom <= sr.bottom + 1 && r.left >= sr.left - 1 && r.right <= sr.right + 1,
     };
   });
-  return { cells, sheets: sheets.map((s) => ({ page: Number(s.dataset.page), height: s.getBoundingClientRect().height })) };
+  const plates = [...document.querySelectorAll<HTMLElement>('[data-plate]')].map((p) => ({
+    name: p.dataset.plate ?? '',
+    height: Number(p.dataset.height),
+    mm: (p.getBoundingClientRect().height * 25.4) / 96,
+  }));
+  return { cells, plates, sheets: sheets.map((s) => ({ page: Number(s.dataset.page), height: s.getBoundingClientRect().height })) };
 }
 
 describe.skipIf(!chromiumAvailable())('compendium: rendered and printed (needs a local Chromium)', () => {
@@ -116,8 +122,9 @@ describe.skipIf(!chromiumAvailable())('compendium: rendered and printed (needs a
       strict: true,
     });
     const plates = orderedPlates();
+    const paging = paginate(plates);
     const expected = new Map<string, number>();
-    plates.forEach((p, i) => p.states.forEach((s) => ['sketch', 'midnight'].forEach((r) => expected.set(`${p.component}/${s.id}/${r}`, i + 2))));
+    plates.forEach((p) => p.states.forEach((s) => ['sketch', 'midnight'].forEach((r) => expected.set(`${p.component}/${s.id}/${r}`, paging.pageOf.get(p.component) ?? 0))));
 
     const browser = await playwright().chromium.launch();
     try {
@@ -125,7 +132,7 @@ describe.skipIf(!chromiumAvailable())('compendium: rendered and printed (needs a
       await page.goto(new URL(`file://${result.output}`).href);
       await page.emulateMedia({ media: 'print' });
       await page.evaluate('document.fonts.ready');
-      const { cells, sheets } = await page.evaluate(measure);
+      const { cells, sheets, plates: heights } = await page.evaluate(measure);
 
       const keys = cells.map((c) => c.key);
       expect(keys.filter((k, i) => keys.indexOf(k) !== i), 'duplicate cells').toEqual([]);
@@ -137,13 +144,19 @@ describe.skipIf(!chromiumAvailable())('compendium: rendered and printed (needs a
       expect(cells.filter((c) => !c.inSheet).map((c) => c.key), 'spills out of its sheet').toEqual([]);
       // Per-page manifest: the DOM's page n carries exactly the registry's page n.
       for (const c of cells) expect(c.page, c.key).toBe(expected.get(c.key));
-      expect(sheets.length).toBe(plates.length + 1);
+      expect(sheets.length).toBe(paging.total);
+      // Declared heights must be honest, or the paginator packs more than a sheet holds (too small)
+      // or wastes paper (too large).
+      // eslint-disable-next-line no-console
+      console.log(heights.map((h) => `${h.name} ${h.mm.toFixed(0)}/${h.height}`).join(', '));
+      expect(heights.filter((h) => h.mm > h.height).map((h) => `${h.name}: measures ${h.mm.toFixed(0)}mm, declared ${h.height}`), 'plate outgrew its declared height').toEqual([]);
+      expect(heights.filter((h) => h.height - h.mm > SLACK_MM).map((h) => `${h.name}: measures ${h.mm.toFixed(0)}mm, declared ${h.height}`), 'declared height is wasteful; lower it').toEqual([]);
     } finally {
       await browser.close();
     }
 
     const pdf = await htmlToPdf(result.output);
     expect(describeOverflow(pdf, 'A4')).toBeNull();
-    expect(pdf.pages).toBe(plates.length + 1);
+    expect(pdf.pages).toBe(paging.total);
   }, 180_000);
 });
