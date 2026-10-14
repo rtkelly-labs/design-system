@@ -519,11 +519,12 @@ ${TAILWIND_ALIASES}
  * and an unreadable date picker while every styled element looks correct. */
 `);
 
-  sections.push(`/* Running text is drawn heavier on a light level than on a dark one — see
- * \`INK_WEIGHT\` in src/theme/levels.ts. Applied on every themed root, not only
- * the document, so a nested panel of the other polarity takes its own weight.
- * In the base layer because the level blocks above are unlayered: written there,
- * the weight would beat \`font-bold\` on the element that carries data-theme. */
+  // Applied on every themed root, not only the document, so a nested panel of the
+  // other polarity takes its own weight. In the base layer because the level
+  // blocks above are unlayered: written there, the weight would beat `font-bold`
+  // on the element that carries data-theme. The comment emitted below stays one
+  // line, because theme.css is inside a gzip budget.
+  sections.push(`/* Running-text weight by polarity — INK_WEIGHT in src/theme/levels.ts. */
 @layer base {
   :root, [data-theme] {
     font-weight: var(--ds-ink-weight);
