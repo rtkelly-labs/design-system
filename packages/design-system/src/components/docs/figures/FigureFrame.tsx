@@ -84,16 +84,16 @@ export const FigureFrame = React.forwardRef<HTMLElement, FigureFrameProps>(funct
       )}
       {...rest}
     >
-      <span aria-hidden="true" className="pointer-events-none absolute -left-2 -top-2 z-10 bg-surface-base px-1 text-content-muted">
+      <span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-10 flex size-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center bg-surface-base font-mono text-xs leading-none text-content-muted">
         {corner}
       </span>
-      <span aria-hidden="true" className="pointer-events-none absolute -right-2 -top-2 z-10 bg-surface-base px-1 text-content-muted">
+      <span aria-hidden="true" className="pointer-events-none absolute right-0 top-0 z-10 flex size-4 translate-x-1/2 -translate-y-1/2 items-center justify-center bg-surface-base font-mono text-xs leading-none text-content-muted">
         {corner}
       </span>
-      <span aria-hidden="true" className="pointer-events-none absolute -bottom-2 -left-2 z-10 bg-surface-base px-1 text-content-muted">
+      <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 z-10 flex size-4 -translate-x-1/2 translate-y-1/2 items-center justify-center bg-surface-base font-mono text-xs leading-none text-content-muted">
         {corner}
       </span>
-      <span aria-hidden="true" className="pointer-events-none absolute -bottom-2 -right-2 z-10 bg-surface-base px-1 text-content-muted">
+      <span aria-hidden="true" className="pointer-events-none absolute bottom-0 right-0 z-10 flex size-4 translate-x-1/2 translate-y-1/2 items-center justify-center bg-surface-base font-mono text-xs leading-none text-content-muted">
         {corner}
       </span>
       {title ? <figcaption className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap bg-surface-base px-3 uppercase tracking-wide text-accent-primary">[ {title} ]</figcaption> : null}
