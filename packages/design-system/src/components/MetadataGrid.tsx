@@ -68,12 +68,10 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
       <div
         ref={ref}
         data-slot="metadata-grid"
-        className={cn(
-          'grid grid-cols-2 md:grid-cols-4 border-2 border-edge-strong bg-surface-base font-mono text-xs text-content-primary divide-y-2 md:divide-y-0 md:divide-x-2 divide-edge-strong shadow-hard-sm',
-          className,
-        )}
+        className={cn('@container', className)}
         {...props}
       >
+        <div className="grid grid-cols-2 @md:grid-cols-4 border-2 border-edge-strong bg-surface-base font-mono text-xs text-content-primary divide-y-2 @md:divide-y-0 @md:divide-x-2 divide-edge-strong [&>*:nth-child(even)]:border-l-2 [&>*:nth-child(even)]:border-edge-strong @md:[&>*:nth-child(even)]:border-l-0 shadow-hard-sm">
         {items ? (
           items.map((item, idx) => (
             <div
@@ -83,9 +81,9 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
             >
               <span
                 data-slot="metadata-grid-label"
-                className="text-[10px] font-black uppercase text-content-muted tracking-wider mb-1"
+                className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                [ {item.label} ]
+                [&nbsp;{item.label}&nbsp;]
               </span>
               {item.href ? (
                 <a
@@ -110,9 +108,9 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
             >
               <span
                 data-slot="metadata-grid-label"
-                className="text-[10px] font-black uppercase text-content-muted tracking-wider mb-1"
+                className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                [ PUBLISHED ]
+                [&nbsp;PUBLISHED&nbsp;]
               </span>
               <span
                 data-slot="metadata-grid-value"
@@ -129,9 +127,9 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
             >
               <span
                 data-slot="metadata-grid-label"
-                className="text-[10px] font-black uppercase text-content-muted tracking-wider mb-1"
+                className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                [ READ TIME ]
+                [&nbsp;READ TIME&nbsp;]
               </span>
               <span
                 data-slot="metadata-grid-value"
@@ -148,15 +146,15 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
             >
               <span
                 data-slot="metadata-grid-label"
-                className="text-[10px] font-black uppercase text-content-muted tracking-wider mb-1"
+                className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                [ SERIES TRACK ]
+                [&nbsp;SERIES TRACK&nbsp;]
               </span>
               {series ? (
                 series.href ? (
                   <a
                     href={series.href}
-                    className="text-xs font-bold text-accent-secondary hover:underline truncate"
+                    className="text-xs font-bold text-accent-secondary hover:underline break-words"
                     title={series.name}
                   >
                     {series.name}
@@ -165,7 +163,7 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
                   </a>
                 ) : (
                   <span
-                    className="text-xs font-bold text-accent-secondary truncate"
+                    className="text-xs font-bold text-accent-secondary break-words"
                     title={series.name}
                   >
                     {series.name}
@@ -187,9 +185,9 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
             >
               <span
                 data-slot="metadata-grid-label"
-                className="text-[10px] font-black uppercase text-content-muted tracking-wider mb-1"
+                className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                [ TOPICS ]
+                [&nbsp;TOPICS&nbsp;]
               </span>
               {tags && tags.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5 mt-0.5">
@@ -213,6 +211,7 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
             </div>
           </>
         )}
+        </div>
       </div>
     );
   },

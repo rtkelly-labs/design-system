@@ -7,7 +7,14 @@ describe('GanttChart', () => {
     render(<GanttChart columns={20} items={[{ label: 'Draft', start: '2026-03-01', end: '2026-03-10', complete: 0.5 }, { label: 'Publish', start: '2026-03-11', end: '2026-03-20' }]} />);
     expect(screen.getByRole('listitem', { name: 'Draft, 2026-03-01 through 2026-03-10, 50% complete' })).toBeTruthy();
     expect(screen.getByText('Schedule date range: 2026-03-01 through 2026-03-20.')).toBeTruthy();
-    expect(screen.getByText('Mar')).toBeTruthy();
+    expect(screen.getByText('Mar 1')).toBeTruthy();
+  });
+
+  it('does not tick a month start beside the weekly dated ticks', () => {
+    render(<GanttChart columns={56} items={[{ label: 'Migration', start: '2026-04-14', end: '2026-05-05' }]} range={{ start: '2026-04-01', end: '2026-05-10' }} />);
+    expect(screen.queryByText('May')).toBeNull();
+    expect(screen.queryByText('May 1')).toBeNull();
+    expect(screen.getByText('May 4')).toBeTruthy();
   });
 
   it('supports explicit range, clamps columns, and handles invalid or empty schedules', () => {

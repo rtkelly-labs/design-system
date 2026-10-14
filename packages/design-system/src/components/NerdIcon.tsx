@@ -27,11 +27,11 @@ export const NERD_GLYPHS = {
   // Git & DevOps
   'git-branch': '\uf126',      // 
   'git-commit': '\uf417',      // 
-  'git-merge': '\uf408',       // 
+  'git-merge': '\uf419',       // 
   'git-pull-request': '\uf407',// 
   'docker': '\uf308',          // 
-  'kubernetes': '\udb84\udc39',
-  'aws': '\udb80\udf5d',
+  'kubernetes': '\udb84\udcfe',
+  'aws': '\udb83\ude0f',
   'linux': '\uf17c',           // 
   'apple': '\uf179',           // 
   'windows': '\uf17a',         // 
@@ -40,8 +40,8 @@ export const NERD_GLYPHS = {
   'terminal': '\uf120',        // 
   'code': '\uf121',            // 
   'bug': '\uf188',             // 
-  'cpu': '\udb80\udf22',
-  'ram': '\udb80\udf23',
+  'cpu': '\uf4bc',
+  'ram': '\uefc5',
 
   // System & Chrome Actions
   'search': '\uf002',          // 
