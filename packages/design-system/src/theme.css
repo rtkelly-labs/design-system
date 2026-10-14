@@ -237,25 +237,42 @@
   --radius-2xl: var(--ds-radius-none);
   --radius-3xl: var(--ds-radius-none);
   --radius-4xl: var(--ds-radius-none);
-  --duration-instant: var(--ds-duration-instant);
-  --duration-quick: var(--ds-duration-quick);
-  --duration-considered: var(--ds-duration-considered);
+  --transition-duration-instant: var(--ds-duration-instant);
+  --transition-duration-quick: var(--ds-duration-quick);
+  --transition-duration-considered: var(--ds-duration-considered);
   --z-index-base: var(--ds-layer-base);
   --z-index-raised: var(--ds-layer-raised);
   --z-index-overlay: var(--ds-layer-overlay);
   --z-index-top: var(--ds-layer-top);
   --ease-brutalist: var(--ds-ease);
+  --default-transition-duration: var(--ds-duration-quick);
+  --default-transition-timing-function: var(--ds-ease);
+}
+
+/* Reduced motion, answered once. Every transition reads `--ds-duration-*`, so
+ * collapsing them here stops all of them at the source. Loops read
+ * `--ds-loop-unit` instead, which is not collapsed: a stopped spinner says
+ * "hung", so Spinner keeps a slow rotation (see `LOOPS` in media.ts). */
+:root {
+  --ds-loop-unit: 300ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ds-duration-quick: 0ms;
+    --ds-duration-considered: 0ms;
+  }
 }
 
 /* Looping animations — `animate-ds-spin`, `-spin-slow`, `-pulse`, `-track`.
  * Declared in `src/theme/media.ts` (`LOOPS`); the period is a multiple of
- * the Medium's `considered` duration and the keyframes are invariant.
- * `prefers-reduced-motion` is answered at the call site with `motion-reduce:`. */
+ * `--ds-loop-unit` (the Medium's `considered` duration) and the keyframes
+ * are invariant. Components still answer the preference with `motion-reduce:`. */
 @theme {
-  --animate-ds-spin: ds-spin calc(var(--ds-duration-considered) * 3) linear infinite;
-  --animate-ds-spin-slow: ds-spin calc(var(--ds-duration-considered) * 9) linear infinite;
-  --animate-ds-pulse: ds-pulse calc(var(--ds-duration-considered) * 4) var(--ds-ease) infinite;
-  --animate-ds-track: ds-track calc(var(--ds-duration-considered) * 5) var(--ds-ease) infinite;
+  --animate-ds-spin: ds-spin calc(var(--ds-loop-unit) * 3) linear infinite;
+  --animate-ds-spin-slow: ds-spin calc(var(--ds-loop-unit) * 9) linear infinite;
+  --animate-ds-pulse: ds-pulse calc(var(--ds-loop-unit) * 4) var(--ds-ease) infinite;
+  --animate-ds-track: ds-track calc(var(--ds-loop-unit) * 5) var(--ds-ease) infinite;
 
   @keyframes ds-spin {
     to {

@@ -147,7 +147,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
     backgroundColor: semanticTokens.surface.base,
     color: semanticTokens.text.primary,
     border: `2px solid ${semanticTokens.border.strong}`,
-    transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
+    transition: 'transform var(--ds-duration-quick) var(--ds-ease), box-shadow var(--ds-duration-quick) var(--ds-ease), border-color var(--ds-duration-quick) var(--ds-ease)',
     ...(accentColor ? { borderLeftWidth: '4px', borderLeftColor: accentColor } : {}),
     ...style,
   };
@@ -305,7 +305,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
                 textDecoration: 'none',
                 textTransform: 'uppercase',
                 display: 'inline-block',
-                transition: 'transform 0.15s ease',
+                transition: 'transform var(--ds-duration-quick) var(--ds-ease)',
               }}
               aria-label={`Link to ${title || 'details'}`}
             >

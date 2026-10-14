@@ -45,7 +45,7 @@ export function StatCard({
   return (
     <div data-slot="stat-card"
       className={cn(
-        'bg-surface-raised border-2 border-edge-strong p-6 transition-all duration-200',
+        'bg-surface-raised border-2 border-edge-strong p-6 transition-all duration-quick ease-brutalist',
         accentHoverEdgeClass(accent),
         className,
       )}

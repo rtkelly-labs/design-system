@@ -170,7 +170,7 @@ const TERTIARY = `bg-accent-tertiary text-content-inverse border-edge-strong ${P
 const INVERSE = `bg-content-primary text-content-inverse border-content-primary ${PRESS}`;
 
 const button = recipe({
-  base: `font-mono font-bold uppercase border-2 transition-all duration-200 ${DISABLED}`,
+  base: `font-mono font-bold uppercase border-2 transition-all duration-quick ease-brutalist ${DISABLED}`,
   variants: {
     size: {
       sm: 'px-4 py-2 text-sm',

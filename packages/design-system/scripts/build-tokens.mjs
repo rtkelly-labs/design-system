@@ -300,7 +300,7 @@ function mediumTheme(medium) {
   // these are for — a component naming a duration rather than a number is what
   // lets the `video` Medium give it frames instead of milliseconds.
   for (const name of ['instant', 'quick', 'considered']) {
-    lines.push(`  --duration-${name}: var(--ds-duration-${name});`);
+    lines.push(`  --transition-duration-${name}: var(--ds-duration-${name});`);
   }
 
   // Stacking, so `z-overlay` is a name rather than a magic number.
@@ -308,6 +308,10 @@ function mediumTheme(medium) {
     lines.push(`  --z-index-${name}: var(--ds-layer-${name});`);
   }
   lines.push('  --ease-brutalist: var(--ds-ease);');
+  // A bare `transition` / `transition-colors` utility reads these, so it too
+  // runs on the Medium's time base and collapses under reduced motion.
+  lines.push('  --default-transition-duration: var(--ds-duration-quick);');
+  lines.push('  --default-transition-timing-function: var(--ds-ease);');
   return lines.join('\n');
 }
 
@@ -328,7 +332,7 @@ function loopTheme() {
   for (const [name, loop] of Object.entries(LOOPS)) {
     const easing = loop.easing === 'linear' ? 'linear' : 'var(--ds-ease)';
     lines.push(
-      `  --animate-ds-${name}: ds-${loop.keyframes} calc(var(--ds-duration-considered) * ${loop.periods}) ${easing} infinite;`,
+      `  --animate-ds-${name}: ds-${loop.keyframes} calc(var(--ds-loop-unit) * ${loop.periods}) ${easing} infinite;`,
     );
   }
   for (const [name, frames] of Object.entries(LOOP_KEYFRAMES)) {
@@ -457,10 +461,25 @@ ${mediumVariables(CSS_MEDIUM)}
 ${mediumTheme(CSS_MEDIUM)}
 }
 
+/* Reduced motion, answered once. Every transition reads \`--ds-duration-*\`, so
+ * collapsing them here stops all of them at the source. Loops read
+ * \`--ds-loop-unit\` instead, which is not collapsed: a stopped spinner says
+ * "hung", so Spinner keeps a slow rotation (see \`LOOPS\` in media.ts). */
+:root {
+  --ds-loop-unit: ${MEDIA_DEFINITIONS[CSS_MEDIUM].motion.considered}ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ds-duration-quick: 0ms;
+    --ds-duration-considered: 0ms;
+  }
+}
+
 /* Looping animations — \`animate-ds-spin\`, \`-spin-slow\`, \`-pulse\`, \`-track\`.
  * Declared in \`src/theme/media.ts\` (\`LOOPS\`); the period is a multiple of
- * the Medium's \`considered\` duration and the keyframes are invariant.
- * \`prefers-reduced-motion\` is answered at the call site with \`motion-reduce:\`. */
+ * \`--ds-loop-unit\` (the Medium's \`considered\` duration) and the keyframes
+ * are invariant. Components still answer the preference with \`motion-reduce:\`. */
 @theme {
 ${loopTheme()}
 }`);

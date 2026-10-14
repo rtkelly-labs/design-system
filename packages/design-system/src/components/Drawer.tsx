@@ -96,7 +96,7 @@ export interface DrawerProps
  * The position and the transition, both from the recipe. The panel is full
  * height against one edge, bordered on its inner side only, and enters by
  * translating in from off-screen via `data-starting-style` /
- * `data-ending-style` over `--duration-quick` and `--ease-brutalist`.
+ * `data-ending-style` over `--transition-duration-quick` and `--ease-brutalist`.
  * `motion-reduce:transition-none` drops the movement entirely: a panel flying
  * across the viewport is precisely the motion `prefers-reduced-motion` asks
  * not to see, and the drawer still opens and closes without it.
