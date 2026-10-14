@@ -25,6 +25,7 @@ import * as ds from '../../design-system/src/index';
 import { EXEMPT, analyse, type Analysis } from './compendium.coverage';
 import { BACKLOG } from './compendium.backlog';
 import { PLATES } from './compendium.registry';
+import { MATRICES } from './compendium.states';
 
 const seen = vi.hoisted(() => new Set<unknown>());
 vi.mock('react/jsx-runtime', async (importOriginal) => {
@@ -133,6 +134,15 @@ describe('compendium coverage', () => {
         const html = renderToStaticMarkup(state.render() as never);
         expect(html.trim().length, `${plate.component}/${state.id} rendered empty`).toBeGreaterThan(0);
       }
+    }
+  });
+
+  it('every forced state changes the markup, so none is invented', () => {
+    const html = (n: unknown) => renderToStaticMarkup(n as never);
+    for (const m of MATRICES) {
+      const [resting, ...rest] = m.ids;
+      const base = html(m.render(resting!));
+      for (const id of rest) expect(html(m.render(id)), `${m.component} forced state "${id}" renders the same as "${resting}"`).not.toBe(base);
     }
   });
 });
