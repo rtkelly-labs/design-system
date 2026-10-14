@@ -210,9 +210,9 @@ whole frames because a fractional frame lands a render mid-transition. See
 **The contrast floor is Medium-keyed too**, which is the part most easily got wrong: colour
 values do not vary by Medium, but the floors they must clear do. `pnpm check:contrast` defaults
 to the web floors; `--medium=video` and `--medium=graphic` enforce the stricter 7:1 frame floors
-and report **50 of 260 pairs below minimum**. That is deliberate, not a regression — no video or
+and report **45 of 260 pairs below minimum**. That is deliberate, not a regression — no video or
 graphic artifact is emitted yet, and only the `web` run gates CI. If palette values ever move,
-those 50 are the number that moves first.
+those 45 are the number that moves first.
 
 ## 8. Voice
 
