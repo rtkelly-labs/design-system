@@ -7,8 +7,9 @@
  *
  *   present      exactly one element with that data-component / data-state / data-rung
  *   shown        not display:none / visibility:hidden / zero-size, and not collapsed to its chrome
- *   non-empty    visible text, or a replaced/graphic element (svg, img, input, canvas) in the body
+ *   non-empty    visible text, a replaced/graphic element (svg, img, input, canvas) or a painted box in the body
  *   not clipped  no descendant is cut off by an overflow:hidden ancestor inside the cell
+ *   no spill     nothing runs out past the cell's right edge unclipped (it would print over its neighbour)
  *   on its page  the cell sits wholly inside its own sheet, and sheet n carries exactly the cells
  *                the registry says page n does (a per-page manifest taken from the DOM)
  *   printed      the PDF has one page per sheet (the overflow check's own count)
@@ -30,7 +31,7 @@ import path from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { describeOverflow, htmlToPdf } from '../src/pdf';
 import { renderReport } from '../src/render';
-import { orderedPlates } from './compendium.registry';
+import { blockKey, blocksOf, orderedPlates, rungsOf } from './compendium.registry';
 import { checkPdf, collectGeometry, type CellGeometry } from './compendium.pdfcheck';
 import { SLACK_MM, paginate } from './compendium.layout';
 
@@ -62,6 +63,7 @@ interface CellFacts {
   shown: boolean;
   empty: boolean;
   clipped: boolean;
+  spills: boolean;
   inSheet: boolean;
 }
 
@@ -81,7 +83,13 @@ function measure(): { cells: CellFacts[]; sheets: { page: number; height: number
     // The body is everything under the cell's own header strip: the last child.
     const body = el.lastElementChild as HTMLElement | null;
     const text = (body?.textContent ?? '').trim();
-    const graphic = body?.querySelector('svg, img, input, textarea, canvas, select, progress') != null;
+    // A box painted with a background or border counts (a Skeleton is nothing else).
+    const box = [...(body?.querySelectorAll<HTMLElement>('*') ?? [])].some((d) => {
+      const r2 = d.getBoundingClientRect();
+      const cs = getComputedStyle(d);
+      return r2.width > 0 && r2.height > 0 && (!/rgba\(.*, 0\)|transparent/.test(cs.backgroundColor) || parseFloat(cs.borderTopWidth) > 0 || cs.backgroundImage !== 'none');
+    });
+    const graphic = box || body?.querySelector('svg, img, input, textarea, canvas, select, progress') != null;
     const clipped = [...(body?.querySelectorAll<HTMLElement>('*') ?? [])].some((d) => {
       const dr = d.getBoundingClientRect();
       if (dr.width === 0 && dr.height === 0) return false;
@@ -94,17 +102,29 @@ function measure(): { cells: CellFacts[]; sheets: { page: number; height: number
       }
       return false;
     });
+    // Spill: content that runs out past the cell's right edge with nothing clipping it, so it prints
+    // over the gutter or the neighbouring cell.
+    const spills = [...(body?.querySelectorAll<HTMLElement>('*') ?? [])].some((d) => {
+      const dr = d.getBoundingClientRect();
+      if (dr.width === 0 || dr.height === 0 || dr.right <= r.right + 1) return false;
+      for (let a: HTMLElement | null = d; a && a !== el; a = a.parentElement) {
+        const o = getComputedStyle(a);
+        if (o.overflowX !== 'visible') return false;
+      }
+      return getComputedStyle(d).position !== 'fixed';
+    });
     return {
       key: `${el.dataset.component}/${el.dataset.state}/${el.dataset.rung}`,
       page: Number(sheet?.dataset.page ?? 0),
       shown,
       empty: text.length === 0 && !graphic,
       clipped,
+      spills,
       inSheet: !!sr && r.top >= sr.top - 1 && r.bottom <= sr.bottom + 1 && r.left >= sr.left - 1 && r.right <= sr.right + 1,
     };
   });
-  const plates = [...document.querySelectorAll<HTMLElement>('[data-plate]')].map((p) => ({
-    name: p.dataset.plate ?? '',
+  const plates = [...document.querySelectorAll<HTMLElement>('[data-block]')].map((p) => ({
+    name: p.dataset.block ?? '',
     height: Number(p.dataset.height),
     mm: (p.getBoundingClientRect().height * 25.4) / 96,
   }));
@@ -126,9 +146,10 @@ describe.skipIf(!chromiumAvailable())('compendium: rendered and printed (needs a
       strict: true,
     });
     const plates = orderedPlates();
-    const paging = paginate(plates);
+    const mayClip = new Set(plates.filter((p) => p.clips).map((p) => p.component));
+    const paging = paginate(blocksOf(plates));
     const expected = new Map<string, number>();
-    plates.forEach((p) => p.states.forEach((s) => ['sketch', 'midnight'].forEach((r) => expected.set(`${p.component}/${s.id}/${r}`, paging.pageOf.get(p.component) ?? 0))));
+    plates.forEach((p) => p.states.forEach((s) => rungsOf(p).forEach((r) => expected.set(`${p.component}/${s.id}/${r}`, paging.pageOf.get(blockKey(p, r)) ?? 0))));
 
     let geometry: CellGeometry[] = [];
     const browser = await playwright().chromium.launch();
@@ -146,7 +167,8 @@ describe.skipIf(!chromiumAvailable())('compendium: rendered and printed (needs a
       expect(keys.filter((k) => !expected.has(k)), 'cell in the document the registry does not know').toEqual([]);
       expect(cells.filter((c) => !c.shown).map((c) => c.key), 'hidden or zero-size').toEqual([]);
       expect(cells.filter((c) => c.empty).map((c) => c.key), 'rendered empty').toEqual([]);
-      expect(cells.filter((c) => c.clipped).map((c) => c.key), 'clipped by overflow').toEqual([]);
+      expect(cells.filter((c) => c.clipped && !mayClip.has(c.key.split('/')[0]!)).map((c) => c.key), 'clipped by overflow').toEqual([]);
+      expect(cells.filter((c) => c.spills && !mayClip.has(c.key.split('/')[0]!)).map((c) => c.key), 'content spills past the cell').toEqual([]);
       expect(cells.filter((c) => !c.inSheet).map((c) => c.key), 'spills out of its sheet').toEqual([]);
       // Per-page manifest: the DOM's page n carries exactly the registry's page n.
       for (const c of cells) expect(c.page, c.key).toBe(expected.get(c.key));

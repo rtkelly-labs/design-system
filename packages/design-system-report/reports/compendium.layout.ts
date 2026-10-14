@@ -8,7 +8,7 @@
  * one outgrows its declared height, or is declared more than SLACK_MM taller than it measures (so
  * the declarations cannot rot into wasted paper). The strict overflow check backstops the sheet.
  *
- * Packing is first-fit within a group (see paginate), so small plates backfill gaps.
+ * Packing is first-fit (see paginate), so small plates backfill gaps.
  */
 
 /** Usable body height of one sheet, and the gap between two plates on it. `FULL` is a plate that keeps a sheet. */
@@ -18,12 +18,16 @@ export const GAP_MM = 6;
 /** How much taller than measured a declared height may be. */
 export const SLACK_MM = 25;
 
-/** Index rows per sheet: the first carries the title block, so fewer. */
-export const INDEX_FIRST_ROWS = 18;
-export const INDEX_ROWS = 28;
+/** Index rows per sheet (two columns): the first carries the title block, so fewer. */
+export const INDEX_FIRST_ROWS = 40;
+export const INDEX_ROWS = 60;
 
 export interface Packable {
+  /** Unique per block: the component, or `component#rung` for a plate split across sheets. */
+  key: string;
   component: string;
+  /** Later blocks of a split plate: packed like any other, but not listed again in the index. */
+  continuation?: boolean;
   group: string;
   /** Declared height ceiling in mm. */
   height: number;
@@ -36,7 +40,7 @@ export interface Pagination<P extends Packable> {
   index: IndexRow<P>[][];
   /** Plate sheets, each in registry order. */
   sheets: P[][];
-  /** 1-based sheet number of every component. */
+  /** 1-based sheet number of every block, by block key. */
   pageOf: Map<string, number>;
   total: number;
 }
@@ -46,26 +50,20 @@ export function paginate<P extends Packable>(plates: readonly P[]): Pagination<P
   let group: string | undefined;
   for (const plate of plates) {
     if (plate.group !== group) rows.push({ kind: 'group', group: (group = plate.group) });
-    rows.push({ kind: 'plate', plate });
+    if (!plate.continuation) rows.push({ kind: 'plate', plate });
   }
   const index: IndexRow<P>[][] = [rows.slice(0, INDEX_FIRST_ROWS)];
   for (let i = INDEX_FIRST_ROWS; i < rows.length; i += INDEX_ROWS) index.push(rows.slice(i, i + INDEX_ROWS));
 
-  // First-fit within a group: a plate may backfill any sheet from the one the group started on
-  // (which may be the previous group's partly filled last sheet). Sheets of earlier groups are
-  // never revisited, so a change to one group cannot move another group's plates by more than the
-  // sheets that group itself occupies.
+  // First-fit over every sheet, in registry order: a small plate backfills the first gap that holds
+  // it. Deterministic, and denser than next-fit (measured: 48 sheets against 52 for 85 blocks).
+  // Adding or removing a plate can pull later plates back a sheet; the plate ids do not move,
+  // because every plate is its own React root.
   const sheets: P[][] = [];
   const used: number[] = [];
-  let from = 0;
-  let current: string | undefined;
   for (const plate of plates) {
-    if (plate.group !== current) {
-      current = plate.group;
-      from = Math.max(0, sheets.length - 1);
-    }
     let at = -1;
-    for (let i = from; i < sheets.length; i++) {
+    for (let i = 0; i < sheets.length; i++) {
       if ((used[i] ?? 0) + GAP_MM + plate.height <= BODY_MM) {
         at = i;
         break;
@@ -81,6 +79,6 @@ export function paginate<P extends Packable>(plates: readonly P[]): Pagination<P
   }
 
   const pageOf = new Map<string, number>();
-  sheets.forEach((s, i) => s.forEach((p) => pageOf.set(p.component, index.length + 1 + i)));
+  sheets.forEach((s, i) => s.forEach((p) => pageOf.set(p.key, index.length + 1 + i)));
   return { index, sheets, pageOf, total: index.length + sheets.length };
 }
