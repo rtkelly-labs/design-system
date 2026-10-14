@@ -241,7 +241,7 @@ export const MEDIA_DEFINITIONS: Readonly<Record<Medium, MediumDefinition>> = {
  *   duration rather than a literal. A spinner is not a 300ms interaction, but
  *   its period should still move when the Medium's time base does; `900ms`
  *   would throw that away. The generator writes it as
- *   `calc(var(--ds-duration-considered) * N)`, so it follows `theme.css`'s one
+ *   `calc(var(--ds-loop-unit) * N)`, so it follows `theme.css`'s one
  *   Medium without a second number being authored.
  * - its **keyframe** is a shape, and is the same on every Level and in every
  *   Medium — invariant, declared once, the way `FIXED_COLOURS` is for colour.

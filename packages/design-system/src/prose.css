@@ -89,7 +89,7 @@ html {
   vertical-align: middle;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  transition: opacity var(--ds-duration-quick) var(--ds-ease), box-shadow var(--ds-duration-quick) var(--ds-ease), transform var(--ds-duration-quick) var(--ds-ease);
 }
 
 /* Revealed on hover, but never hidden from keyboard users. */
@@ -254,7 +254,7 @@ html {
   color: var(--ds-text-primary);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  transition: opacity var(--ds-duration-quick) var(--ds-ease), background-color var(--ds-duration-quick) var(--ds-ease), color var(--ds-duration-quick) var(--ds-ease);
 }
 
 .docs-codeblock:hover .docs-codeblock-copy,
@@ -349,7 +349,7 @@ html {
     max-height: none;
     background-color: var(--ds-surface-base);
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    transition: transform var(--ds-duration-quick) var(--ds-ease);
   }
 
   .docs-layout-sidebar[data-open='true'] {
@@ -477,7 +477,7 @@ html {
   background-color: var(--ds-surface-base);
   color: var(--ds-text-primary);
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color var(--ds-duration-quick) var(--ds-ease), color var(--ds-duration-quick) var(--ds-ease);
 }
 
 .docs-header-icon-btn:hover {
@@ -597,7 +597,7 @@ html {
   color: var(--ds-text-primary);
   opacity: 0.72;
   cursor: pointer;
-  transition: opacity 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  transition: opacity var(--ds-duration-quick) var(--ds-ease), color var(--ds-duration-quick) var(--ds-ease), border-color var(--ds-duration-quick) var(--ds-ease);
 }
 
 .docs-sidebar-link:hover {
@@ -651,7 +651,7 @@ html {
   text-decoration: none;
   color: var(--ds-text-primary);
   opacity: 0.65;
-  transition: opacity 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  transition: opacity var(--ds-duration-quick) var(--ds-ease), color var(--ds-duration-quick) var(--ds-ease), border-color var(--ds-duration-quick) var(--ds-ease);
   /* Heading text is arbitrary and often long — `tvs metadata --readonly-only`
    * has no break opportunity the rail can use on its own. */
   overflow-wrap: anywhere;
@@ -728,7 +728,7 @@ html {
   border: 2px solid var(--ds-border-strong);
   text-decoration: none;
   color: var(--ds-text-primary);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: transform var(--ds-duration-quick) var(--ds-ease), box-shadow var(--ds-duration-quick) var(--ds-ease), border-color var(--ds-duration-quick) var(--ds-ease);
 }
 
 .docs-pager-link:hover {
