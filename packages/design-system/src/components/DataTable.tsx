@@ -493,7 +493,7 @@ export function DataTable<T>({
       tabIndex={0}
       role="region"
       aria-label={regionLabel ?? 'Table contents'}
-      className="relative w-full overflow-y-auto"
+      className="relative w-full overflow-y-auto print:h-auto! print:max-h-none print:overflow-visible"
       style={scrollBoxStyle(height)}
     >
       {table}
