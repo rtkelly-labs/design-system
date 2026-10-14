@@ -26,8 +26,8 @@ import { FULL, paginate } from './compendium.layout';
 /** Display only: `data-state` keeps the story export name verbatim. */
 const words = (id: string) => id.replace(/([a-z])([A-Z])/g, '$1 $2');
 const REV = 'REV 2026.10';
-/** Plates print at this fraction of their natural size: a component sheet is a reference, not a proof of the real size, and the scale is what keeps ~100 components near 30 sheets. */
-const PLATE_ZOOM = 0.8;
+/** Plates print at this fraction of their natural size: a component sheet is a reference, not a proof of the real size, and the scale is what keeps ~100 components near 30 sheets. Cells are wider in CSS pixels at a lower zoom, so fewer components wrap or clip. */
+const PLATE_ZOOM = 0.65;
 
 function Kicker({ children, className = '' }: { children: ReactNode; className?: string }) {
   return <span className={`font-mono text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-content-muted ${className}`}>{children}</span>;
@@ -41,8 +41,17 @@ function Kicker({ children, className = '' }: { children: ReactNode; className?:
  */
 const STATIC_CSS =
   // `print:hidden` is how navigation chrome (DocsSidebar, SiteFooter) opts out of paper; a plate shows the screen rendering, so it is undone in a cell.
-  '@media print { @page { size: A4; margin: 0; } [data-component] .print\\:hidden { display: revert !important; } }' +
-  '[data-component] :is(.min-h-screen,.min-h-dvh,.h-screen,[class*="vh]"]){min-height:0!important;height:auto!important}';
+  '@media print { @page { size: A4; margin: 0; } [data-component] .print\\:hidden { display: revert !important; } [data-component] .docs-header.print\\:hidden { display: flex !important; } [data-component] .docs-pager.print\\:hidden { display: grid !important; } }' +
+  '[data-component] :is(.min-h-screen,.min-h-dvh,.h-screen,[class*="vh]"]){min-height:0!important;height:auto!important}' +
+  // A scrollable code region cannot scroll on paper, so it wraps instead of cutting the line off at the cell edge.
+  '[data-component] pre[role="region"]{white-space:pre-wrap!important;overflow:visible!important;overflow-wrap:anywhere}' +
+  // `truncate` and `line-clamp-*` cut a string off with an ellipsis, which a reference sheet reads as lost text (and the PDF drops the cut words): a plate shows the whole string, wrapped.
+  '[data-component] .truncate{overflow:visible!important;text-overflow:clip!important;white-space:normal!important;overflow-wrap:anywhere}' +
+  '[data-component] [class*="line-clamp-"]{display:block!important;overflow:visible!important;-webkit-line-clamp:unset!important}' +
+  // The blog-grid card is `md:w-1/2` of its container, and `md` is always true at paper width: in a cell it fills the cell instead of squeezing to 40% of it.
+  '[data-component="Card"] [data-slot="card"]{width:100%!important}' +
+  // A page-scale template (whole-page padding, `py-24`) shows its content, not its margins.
+  '[data-fit]>*{padding-block:1.5rem!important}';
 function PageBox() {
   return <style>{STATIC_CSS}</style>;
 }
@@ -71,24 +80,36 @@ function Sheet({ n, head, children }: { n: number; head: string; children: React
   );
 }
 
+/**
+ * Controls and small marks whose cells are short and narrow: more cells per row, so a plate of nine
+ * states is a few rows rather than nine half-empty ones. Cells run state-major, sketch then midnight,
+ * so four columns is two states a row.
+ */
+const COLUMNS: Readonly<Record<string, number>> = { Button: 4, Badge: 4, Switch: 4, Checkbox: 4, Select: 4, RadioGroup: 4, Input: 4 };
+/** Whole-page templates: their own page padding is trimmed, so the plate sizes to the content shown. */
+const FIT = new Set(['NotFoundPage', 'ServerErrorPage', 'StatusPage']);
+
 /** One state of one component on one rung. This is the unit a diff localises to. */
 function Cell({ plate, state, rung, node }: { plate: PlateSpec; state: string; rung: ThemeLevel; node: ReactNode }) {
   return (
     <div data-component={plate.component} data-state={state} data-rung={rung} className="flex min-w-0 flex-col border-2 border-edge-strong">
-      <div className="flex items-center justify-between border-b border-edge-default bg-surface-raised px-2.5 py-1 text-content-primary">
+      <div className="flex items-center justify-between gap-2 border-b border-edge-default bg-surface-raised px-2.5 py-1 text-content-primary">
         <Kicker>{words(state)}</Kicker>
         <Kicker>{rung}</Kicker>
       </div>
       <ThemeProvider scoped defaultLevel={rung} className="min-w-0 flex-1 bg-surface-base p-3 text-content-primary">
-        {node}
+        {FIT.has(plate.component) ? <div data-fit>{node}</div> : node}
       </ThemeProvider>
     </div>
   );
 }
 
-/** The plate's cells: header, then each state on each rung. */
+/** The plate's cells: header, then each state on each rung, in a grid of `columns` cells. */
 function PlateBody({ block }: { block: Block }) {
   const { plate } = block;
+  // Two rungs next to each other for a `side` plate; one cell a row for a `stack` plate. A block
+  // with a single rung has no twin to sit beside, so a `side` plate's states take the columns.
+  const columns = COLUMNS[plate.component] ?? (plate.layout === 'side' ? 2 : 1);
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-end justify-between gap-4 border-b border-edge-default pb-2">
@@ -98,22 +119,9 @@ function PlateBody({ block }: { block: Block }) {
           {plate.split ? ` · ${block.rungs[0]}` : block.rungs.length === 1 ? ` · ${block.rungs[0]} only` : ''}
         </Kicker>
       </div>
-      {block.rungs.length === 1 && plate.layout === 'side' ? (
-        // A split block of a `side` plate has one rung, so its states take the two columns instead.
-        <div className="grid grid-cols-2 gap-3">
-          {plate.states.map((s) => (
-            <Cell key={s.id} plate={plate} state={s.id} rung={block.rungs[0]!} node={s.render()} />
-          ))}
-        </div>
-      ) : (
-        plate.states.map((s) => (
-          <div key={s.id} className={plate.layout === 'side' ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3'}>
-            {block.rungs.map((rung) => (
-              <Cell key={rung} plate={plate} state={s.id} rung={rung} node={s.render()} />
-            ))}
-          </div>
-        ))
-      )}
+      <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
+        {plate.states.flatMap((s) => block.rungs.map((rung) => <Cell key={`${s.id}/${rung}`} plate={plate} state={s.id} rung={rung} node={s.render()} />))}
+      </div>
     </div>
   );
 }
@@ -140,25 +148,23 @@ export default function Compendium() {
           {i === 0 && (
             <div className="flex flex-col gap-3">
               <Kicker className="text-accent-primary">[ @rtkelly13/design-system · every plate, both rungs ]</Kicker>
-              <h1 className="m-0 font-display text-[4rem] font-bold uppercase leading-[0.9] tracking-[-0.02em]">Compendium</h1>
-              <p className="m-0 max-w-[34rem] font-sans text-base leading-snug text-content-secondary">
+              <h1 className="m-0 font-display text-[3rem] font-bold uppercase leading-[0.9] tracking-[-0.02em]">Compendium</h1>
+              <p className="m-0 max-w-[44rem] font-sans text-sm leading-snug text-content-secondary">
                 Each component as its own stories render it, on the sketch and midnight rungs. The HTML is the golden artifact: every cell carries data-component, data-state and data-rung.
               </p>
             </div>
           )}
-          <nav aria-label="Index" className="columns-2 gap-10">
+          <nav aria-label="Index" className="columns-3 gap-6">
             {rows.map((row) =>
               row.kind === 'group' ? (
-                <div key={`g-${row.group}`} className="mt-3 break-after-avoid break-inside-avoid border-t-2 border-edge-strong pb-1 pt-1.5 first:mt-0">
+                <div key={`g-${row.group}`} className="mt-2 break-after-avoid break-inside-avoid border-t-2 border-edge-strong pb-0.5 pt-1 first:mt-0">
                   <Kicker>{row.group}</Kicker>
                 </div>
               ) : (
-                <a key={row.plate.key} href={`#plate-${row.plate.component}`} className="grid break-inside-avoid grid-cols-[1fr_auto_3.5rem] items-baseline gap-3 border-t border-edge-default py-1">
-                  <span className="font-display text-base font-bold leading-tight">{row.plate.component}</span>
-                  <Kicker>
-                    {row.plate.plate.states.length} state{row.plate.plate.states.length === 1 ? '' : 's'}
-                  </Kicker>
-                  <Kicker className="text-right">p. {[...new Set(RUNGS.map((r) => PAGING.pageOf.get(blockKey(row.plate.plate, r))))].map((n) => String(n).padStart(2, '0')).join('–')}</Kicker>
+                // The page column is `auto` and nowrap: a range like "p. 19–20" must stay on one line, whatever the width.
+                <a key={row.plate.key} href={`#plate-${row.plate.component}`} className="grid break-inside-avoid grid-cols-[1fr_auto] items-baseline gap-2 border-t border-edge-default py-0.5">
+                  <span className="truncate font-display text-[0.8125rem] font-bold leading-tight">{row.plate.component}</span>
+                  <Kicker className="whitespace-nowrap text-right">p. {[...new Set(RUNGS.map((r) => PAGING.pageOf.get(blockKey(row.plate.plate, r))))].map((n) => String(n).padStart(2, '0')).join('–')}</Kicker>
                 </a>
               ),
             )}

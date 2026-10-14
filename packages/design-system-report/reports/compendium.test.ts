@@ -25,7 +25,7 @@ import * as ds from '../../design-system/src/index';
 import { EXEMPT, analyse, type Analysis } from './compendium.coverage';
 import { BACKLOG } from './compendium.backlog';
 import { PLATES } from './compendium.registry';
-import { MATRICES } from './compendium.states';
+import { MATRICES, stripStateOnlyAttrs } from './compendium.states';
 import { showsComponent, slotLabel } from './compendium.slots';
 
 const seen = vi.hoisted(() => new Set<unknown>());
@@ -144,6 +144,19 @@ describe('compendium coverage', () => {
       const [resting, ...rest] = m.ids;
       const base = html(m.render(resting!));
       for (const id of rest) expect(html(m.render(id)), `${m.component} forced state "${id}" renders the same as "${resting}"`).not.toBe(base);
+    }
+  });
+
+  it('every plated forced state also looks different; markup-only states differ in state attributes alone', () => {
+    const html = (n: unknown) => renderToStaticMarkup(n as never);
+    for (const m of MATRICES) {
+      const [resting, ...rest] = m.ids;
+      const base = stripStateOnlyAttrs(html(m.render(resting!)));
+      for (const id of rest) {
+        const looks = stripStateOnlyAttrs(html(m.render(id)));
+        if (m.markupOnly.includes(id)) expect(looks, `${m.component} "${id}" is listed markupOnly but changes more than state attributes; plate it`).toBe(base);
+        else expect(looks, `${m.component} "${id}" differs from "${resting}" only in required/read-only attributes, which no stylesheet draws; list it in markupOnly`).not.toBe(base);
+      }
     }
   });
 
