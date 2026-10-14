@@ -76,7 +76,7 @@ describe('EmptyState', () => {
   it('renders the title as a heading at the level it is given', () => {
     render(<EmptyState title="Page not found" headingLevel={1} />);
 
-    expect(screen.getByRole('heading', { level: 1, name: '[ Page not found ]' })).toBeDefined();
+    expect(screen.getByRole('heading', { level: 1, name: '[\u00a0Page not found\u00a0]' })).toBeDefined();
   });
 
   it('forwards its ref and spreads unrecognised props onto the box', () => {

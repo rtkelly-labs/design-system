@@ -346,7 +346,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
               marginBottom: '0.5rem',
             }}
           >
-            [ Speaker notes ]
+            [&nbsp;Speaker notes&nbsp;]
           </div>
           {currentNotes ?? 'No notes on this slide.'}
         </div>

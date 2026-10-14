@@ -7,7 +7,7 @@ import { Feature, FeatureGrid } from '@rtkelly13/design-system';
 export function Principles() {
   return (
     <FeatureGrid
-      title="[ WHAT HOLDS IT TOGETHER ]"
+      title={'[\u00a0WHAT HOLDS IT TOGETHER\u00a0]'}
       description="Rules the package checks in CI. None of them is a matter of taste."
       columns={3}
       align="start"

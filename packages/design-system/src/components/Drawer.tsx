@@ -181,7 +181,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
               <Dialog.Title
                 data-slot="drawer-title"
                 className={slots.title()}
-                render={<h3>[ {title} ]</h3>}
+                render={<h3>[&nbsp;{title}&nbsp;]</h3>}
               />
               <Dialog.Close
                 data-slot="drawer-close"

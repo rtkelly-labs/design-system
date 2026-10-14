@@ -70,7 +70,7 @@ export const NoteBlock: React.FC<NoteBlockProps> = ({
             color: config.color,
           }}
         >
-          [ {title || config.defaultTitle} ]
+          [&nbsp;{title || config.defaultTitle}&nbsp;]
         </span>
       </div>
       <div style={{ fontFamily: semanticTokens.font.mono, fontSize: '0.875rem', color: semanticTokens.text.primary, lineHeight: 1.6 }}>

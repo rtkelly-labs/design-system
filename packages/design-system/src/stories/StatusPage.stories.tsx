@@ -72,7 +72,7 @@ export const Offline: Story = {
   args: {
     standalone: true,
     id: 'main-content',
-    code: <span aria-hidden="true">[ ~ ]</span>,
+    code: <span aria-hidden="true">[&nbsp;~&nbsp;]</span>,
     title: 'You are offline',
     description: 'This page needs a connection and there is none. Pages you have already opened are still available.',
     action: (

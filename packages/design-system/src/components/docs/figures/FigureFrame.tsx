@@ -96,7 +96,7 @@ export const FigureFrame = React.forwardRef<HTMLElement, FigureFrameProps>(funct
       <span aria-hidden="true" className="pointer-events-none absolute bottom-0 right-0 z-10 flex size-4 translate-x-1/2 translate-y-1/2 items-center justify-center bg-surface-base font-mono text-xs leading-none text-content-muted">
         {corner}
       </span>
-      {title ? <figcaption className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap bg-surface-base px-3 uppercase tracking-wide text-accent-primary">[ {title} ]</figcaption> : null}
+      {title ? <figcaption className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap bg-surface-base px-3 uppercase tracking-wide text-accent-primary">[&nbsp;{title}&nbsp;]</figcaption> : null}
       <div className="flex min-w-0 flex-col gap-6 px-5 py-7 sm:px-8 sm:py-8">{children}</div>
     </figure>
   );

@@ -108,7 +108,7 @@ export const AlertDialog = forwardRef<HTMLDivElement, AlertDialogProps>(function
               <BaseAlertDialog.Title
                 data-slot="alert-dialog-title"
                 className={slots.title()}
-                render={<h3>[ {title} ]</h3>}
+                render={<h3>[&nbsp;{title}&nbsp;]</h3>}
               />
             </div>
 
