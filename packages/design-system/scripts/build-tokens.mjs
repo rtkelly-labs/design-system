@@ -19,7 +19,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { LEVELS, THEME_LEVELS, FIXED_COLOURS } from '../src/theme/levels.ts';
+import { LEVELS, THEME_LEVELS, FIXED_COLOURS, INK_WEIGHT } from '../src/theme/levels.ts';
 import { CSS_MEDIUM, LOOPS, LOOP_KEYFRAMES, MEDIA_DEFINITIONS } from '../src/theme/media.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -504,6 +504,7 @@ ${loopTheme()}
     sections.push(`/* ${definition.label} — ${definition.description} */
 ${selector} {
   color-scheme: ${definition.polarity};
+  --ds-ink-weight: ${INK_WEIGHT[definition.polarity]};
 
 ${levelVariables(definition)}
 
@@ -516,6 +517,19 @@ ${TAILWIND_ALIASES}
   sections.push(`/* Native form controls, scrollbars and the caret follow \`color-scheme\`, which
  * each level declares above. Without it a light level renders dark scrollbars
  * and an unreadable date picker while every styled element looks correct. */
+`);
+
+  // Applied on every themed root, not only the document, so a nested panel of the
+  // other polarity takes its own weight. In the base layer because the level
+  // blocks above are unlayered: written there, the weight would beat `font-bold`
+  // on the element that carries data-theme. The comment emitted below stays one
+  // line, because theme.css is inside a gzip budget.
+  sections.push(`/* Running-text weight by polarity — INK_WEIGHT in src/theme/levels.ts. */
+@layer base {
+  :root, [data-theme] {
+    font-weight: var(--ds-ink-weight);
+  }
+}
 `);
 
   return `${sections.join('\n')}`.replace(/\n{3,}/g, '\n\n').trimStart() + '\n';

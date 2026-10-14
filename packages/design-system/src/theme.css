@@ -310,6 +310,7 @@
 /* Midnight — Neon on blue-black. The maximal end of the ladder. */
 :root, [data-theme="midnight"] {
   color-scheme: dark;
+  --ds-ink-weight: 400;
 
   --ds-surface-base: #0a0a1a;
   --ds-surface-raised: #14142a;
@@ -317,7 +318,7 @@
   --ds-surface-overlay: rgba(5, 5, 16, 0.82);
   --ds-text-primary: #ffffff;
   --ds-text-secondary: #c3c3d4;
-  --ds-text-muted: #8b8ba3;
+  --ds-text-muted: #9d9db4;
   --ds-text-inverse: #0a0a1a;
   --ds-border-strong: #ffffff;
   --ds-border-default: #9d9db4;
@@ -418,6 +419,7 @@
 /* Sketch — Warm paper and pen ink. The light half of the pair. */
 [data-theme="sketch"] {
   color-scheme: light;
+  --ds-ink-weight: 450;
 
   --ds-surface-base: #f5f3ec;
   --ds-surface-raised: #ffffff;
@@ -425,7 +427,7 @@
   --ds-surface-overlay: rgba(35, 38, 46, 0.72);
   --ds-text-primary: #23262e;
   --ds-text-secondary: #33373f;
-  --ds-text-muted: #6a6252;
+  --ds-text-muted: #5c5546;
   --ds-text-inverse: #f5f3ec;
   --ds-border-strong: #23262e;
   --ds-border-default: #8f8672;
@@ -526,4 +528,11 @@
 /* Native form controls, scrollbars and the caret follow `color-scheme`, which
  * each level declares above. Without it a light level renders dark scrollbars
  * and an unreadable date picker while every styled element looks correct. */
+
+/* Running-text weight by polarity — INK_WEIGHT in src/theme/levels.ts. */
+@layer base {
+  :root, [data-theme] {
+    font-weight: var(--ds-ink-weight);
+  }
+}
 

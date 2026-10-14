@@ -12,7 +12,7 @@
  *   node scripts/check-contrast.mjs --report   print the full matrix, always exit 0
  */
 
-import { auditContrast, auditHueAgreement, auditSelectionDevices } from '../src/theme/contrast.ts';
+import { auditContrast, auditHueAgreement, auditSelectionDevices, auditTextHierarchy } from '../src/theme/contrast.ts';
 import { LEVELS, THEME_LEVELS } from '../src/theme/levels.ts';
 import { CSS_MEDIUM, MEDIA_DEFINITIONS, isMedium } from '../src/theme/media.ts';
 
@@ -43,8 +43,16 @@ const deviceFailures = devices.filter((r) => r.device !== 'surface pair' && !r.p
 const surfacePairs = devices.filter((r) => r.device === 'surface pair');
 const surfacePairPasses = surfacePairs.filter((r) => r.passes);
 
+// APCA alongside the WCAG ratio, reported and never gated: WCAG 2 overrates light
+// text on dark, so a pair can pass here and still be the weakest on the page (#372).
+// Selection devices and the scrim are not text, and carry no Lc.
+const lc = (r) => (r.apca == null ? '       ' : `Lc ${r.apca.toFixed(0).padStart(4)}`);
 const fmt = (r) =>
-  `${r.ratio.toFixed(2).padStart(5)}:1  (min ${r.minimum})  ${r.pair}  ${r.foreground} on ${r.background}`;
+  `${r.ratio.toFixed(2).padStart(5)}:1  ${lc(r)}  (min ${r.minimum})  ${r.pair}  ${r.foreground} on ${r.background}`;
+
+const hierarchy = auditTextHierarchy(LEVELS);
+const textPairs = results.filter((r) => r.apca != null && r.pair.startsWith('text.'));
+const weakestText = textPairs.reduce((a, b) => (Math.abs(b.apca) < Math.abs(a.apca) ? b : a));
 
 if (report) {
   for (const level of THEME_LEVELS) {
@@ -65,6 +73,14 @@ if (report) {
   for (const r of agreement) {
     const shown = r.expected === null ? r.detail : `${r.value} vs ${r.expected}`;
     console.log(`  ${r.passes ? ' ' : '!'} ${r.level.padEnd(9)} ${r.role.padEnd(18)} -> ${String(r.declared).padEnd(8)} ${shown}`);
+  }
+  console.log('\ntext hierarchy — APCA Lc of each tone, and the step from secondary down to muted (reported)');
+  for (const s of hierarchy) {
+    const { primary, secondary, muted } = s.lc;
+    console.log(
+      `    ${s.level.padEnd(9)} ${s.ground.padEnd(15)} primary ${primary.toFixed(0).padStart(3)}  ` +
+        `secondary ${secondary.toFixed(0).padStart(3)}  muted ${muted.toFixed(0).padStart(3)}  step ${s.mutedStep.toFixed(0).padStart(3)}`,
+    );
   }
   console.log('\nsurface pairs — NOT a selection device (shown so nobody has to rediscover why)');
   for (const r of surfacePairs) {
@@ -132,4 +148,8 @@ console.log(
   `Contrast OK (${medium}) — ${results.length} pairs across ${THEME_LEVELS.length} levels, all at or above minimum; ` +
     `${devices.length - surfacePairs.length} selection devices clear ${devices[0].minimum}:1; ` +
     `${agreement.length} Roles agree with their declared Hue.`,
+);
+console.log(
+  `APCA (reported, not gated) — weakest text pair Lc ${weakestText.apca.toFixed(0)}: ` +
+    `${weakestText.level} ${weakestText.pair}. \`--report\` for the full matrix and the text hierarchy.`,
 );

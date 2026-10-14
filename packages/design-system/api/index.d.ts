@@ -96,6 +96,8 @@ declare const DEFAULT_LEVEL: ThemeLevel;
 
 declare const SYSTEM_LEVEL: Readonly<Record<Polarity, ThemeLevel>>;
 
+declare const INK_WEIGHT: Readonly<Record<Polarity, number>>;
+
 declare function isThemeLevel(value: unknown): value is ThemeLevel;
 
 declare function nextLevel(level: ThemeLevel): ThemeLevel;
@@ -170,6 +172,8 @@ declare function relativeLuminance(color: Rgb): number;
 
 declare function contrastRatio(foreground: string, background: string): number;
 
+declare function apcaContrast(foreground: string, background: string): number;
+
 declare const MAXIMUM_NEUTRAL_CHROMA = 0.045;
 interface HueAgreementCheck {
     readonly level: ThemeLevel;
@@ -206,6 +210,8 @@ interface ContrastCheck {
     foreground: string;
     background: string;
     ratio: number;
+
+    apca: number | null;
     minimum: number;
     passes: boolean;
 }
@@ -222,6 +228,16 @@ declare const WEB_FLOOR: ContrastFloor;
 declare function auditContrast(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>,
 
 floor?: ContrastFloor): ContrastCheck[];
+
+interface TextHierarchyStep {
+    level: ThemeLevel;
+    ground: string;
+
+    lc: Readonly<Record<'primary' | 'secondary' | 'muted', number>>;
+
+    mutedStep: number;
+}
+declare function auditTextHierarchy(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): TextHierarchyStep[];
 
 type SelectionDevice = 'fill' | 'edge' | 'surface pair';
 interface SelectionDeviceCheck {
@@ -1706,11 +1722,11 @@ declare const NERD_GLYPHS: {
     readonly compress: "";
     readonly 'git-branch': "";
     readonly 'git-commit': "";
-    readonly 'git-merge': "";
+    readonly 'git-merge': "";
     readonly 'git-pull-request': "";
     readonly docker: "";
-    readonly kubernetes: "󱀹";
-    readonly aws: "󰍝";
+    readonly kubernetes: "󱃾";
+    readonly aws: "󰸏";
     readonly linux: "";
     readonly apple: "";
     readonly windows: "";
@@ -1719,8 +1735,8 @@ declare const NERD_GLYPHS: {
     readonly terminal: "";
     readonly code: "";
     readonly bug: "";
-    readonly cpu: "󰌢";
-    readonly ram: "󰌣";
+    readonly cpu: "";
+    readonly ram: "";
     readonly search: "";
     readonly settings: "";
     readonly check: "";
@@ -3003,6 +3019,7 @@ export {
   type Hue,
   type HueAgreementCheck,
   type HueRef,
+  INK_WEIGHT,
   IndexedSection,
   type IndexedSectionProps,
   Input,
@@ -3201,6 +3218,7 @@ export {
   type TerminalProps,
   TextArea,
   type TextAreaProps,
+  type TextHierarchyStep,
   type TextTone,
   type ThemeContextValue,
   type ThemeLevel,
@@ -3240,10 +3258,12 @@ export {
   XIcon,
   accentVar,
   ansiScheme,
+  apcaContrast,
   assertNever,
   auditContrast,
   auditHueAgreement,
   auditSelectionDevices,
+  auditTextHierarchy,
   borderVar,
   childrenToText,
   cn,
