@@ -122,7 +122,9 @@ const CASES = [
   {
     name: 'tokens',
     imports: ['LEVELS', 'isThemeLevel'],
-    maxBytes: 2_200,
+    // Applied refinements: per-level tints, selection, contrast ladder and the
+    // series group join LEVELS (2,848 B).
+    maxBytes: 2_950,
     forbid: [...HEAVY, 'tailwind-variants', 'lucide-react'],
   },
   {
@@ -130,7 +132,9 @@ const CASES = [
     imports: ['Button'],
     // #320 adds pending activation guards and Spinner. Measured at 44,394 B
     // minified with the per-module build; retain about 2% headroom.
-    maxBytes: 45_300,
+    // Applied refinements: quiet/danger variants, xs and icon sizes, ButtonGroup
+    // hue check (46,103 B).
+    maxBytes: 47_100,
     forbid: [...HEAVY, 'lucide-react'],
   },
   {
@@ -161,7 +165,8 @@ const CASES = [
       'LEVELS',
       'isThemeLevel',
     ],
-    maxBytes: 63_000,
+    // Applied refinements: the Button and LEVELS growth above (65,978 B).
+    maxBytes: 67_300,
     forbid: HEAVY,
   },
 ];

@@ -277,8 +277,10 @@ const BUDGETS = {
     // Then: Table overflow cue (ResizeObserver), the Tabs close layer, the
     // SlideDeck/TickerTape responsive paths and the tint helpers:
     // 461,751 B raw, 106,562 B gzip.
-    maxRaw: 471_000,
-    maxGzip: 108_700,
+    // D9 accessibility preferences: provider, init script, A11yMenu, SeriesMark
+    // and the series data: 481,009 B raw, 111,893 B gzip.
+    maxRaw: 491_000,
+    maxGzip: 114_100,
     desc: 'ESM output, every module',
   },
   'src/theme.css': {
@@ -290,8 +292,10 @@ const BUDGETS = {
     // paper level (D5-B). 29,589 B raw, 5,479 B gzip locally; ~2% headroom kept.
     // Phase 2 adds per-level opaque role tints and the multi-select device
     // (D6, D8): 32,199 B raw, 5,703 B gzip locally; ~2% headroom kept.
-    maxRaw: 32_900,
-    maxGzip: 5_850,
+    // D9: the contrast-more delta per level, the series group, the motion and
+    // link preference rules: 36,444 B raw, 6,525 B gzip; ~2% headroom.
+    maxRaw: 37_200,
+    maxGzip: 6_660,
     desc: 'Design token CSS',
   },
 };
