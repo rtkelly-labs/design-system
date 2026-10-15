@@ -92,7 +92,9 @@ const tabs_ = recipe({
     orientation: {
       horizontal: {},
       vertical: {
-        root: 'flex items-start',
+        // `stretch`: the panel runs to the strip's height, so the two boxes
+        // share a bottom edge instead of the panel ending above the list.
+        root: 'flex items-stretch',
         strip: 'flex-col items-stretch self-stretch overflow-x-visible',
         list: 'flex-col items-stretch',
         tab: 'w-full text-left',
@@ -659,7 +661,7 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
         tabIndex={selected ? 0 : -1}
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => close(selected)}
-        className="absolute right-1.5 top-1/2 -mt-0.5 flex size-5 -translate-y-1/2 items-center justify-center font-mono text-sm leading-none text-content-muted hover:bg-surface-raised hover:text-content-primary"
+        className="absolute right-1.5 top-1/2 -mt-0.5 flex size-6 -translate-y-1/2 items-center justify-center font-mono text-sm leading-none text-content-muted hover:bg-surface-raised hover:text-content-primary"
       >
         &times;
       </button>
