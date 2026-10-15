@@ -335,8 +335,8 @@ jobs:
       - name: Build Package
         run: pnpm build
 
-      # Reads dist/ and src/theme.css, so it belongs in this job, after the build.
-      # Fails if output size exceeds the raw or gzip byte budgets.
+      # Gates src/theme.css, which every consumer ships whole, and reports the
+      # dist/ total without gating it (#379). Reads dist/, so it runs after the build.
       - name: Bundle Size Budget
         run: pnpm check:bundle-size
 

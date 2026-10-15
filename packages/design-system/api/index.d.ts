@@ -2761,6 +2761,143 @@ declare const Step: ((props: StepProps & {
 
 declare const Steps: react.ForwardRefExoticComponent<StepsProps & react.RefAttributes<HTMLDivElement>>;
 
+type VerdictTone = 'neutral' | 'success' | 'warning' | 'info';
+interface SwatchColumn {
+
+    name: string;
+
+    verdict?: string;
+
+    tone?: VerdictTone;
+}
+interface SwatchRow {
+
+    label: string;
+
+    values: readonly (string | null)[];
+}
+interface SwatchCompareProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    level?: ThemeLevel;
+
+    columns: readonly SwatchColumn[];
+
+    rows: readonly SwatchRow[];
+
+    className?: string;
+}
+
+declare const SwatchCompare: react.ForwardRefExoticComponent<SwatchCompareProps & react.RefAttributes<HTMLDivElement>>;
+
+type MetricTone = 'neutral' | 'success' | 'warning' | 'danger';
+interface Metric {
+
+    value: string;
+
+    label: string;
+
+    tone?: MetricTone;
+}
+interface MetricStripProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    items: readonly Metric[];
+
+    className?: string;
+}
+
+declare const MetricStrip: react.ForwardRefExoticComponent<MetricStripProps & react.RefAttributes<HTMLDivElement>>;
+
+interface TokenRow {
+
+    token: string;
+
+    before?: string | null;
+
+    after: string;
+
+    values?: readonly string[];
+
+    note?: string;
+}
+interface TokenTableProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    measures?: readonly string[];
+
+    rows: readonly TokenRow[];
+
+    className?: string;
+}
+
+declare const TokenTable: react.ForwardRefExoticComponent<TokenTableProps & react.RefAttributes<HTMLDivElement>>;
+
+interface DecisionOption {
+
+    title: string;
+
+    cost?: string;
+
+    picked?: boolean;
+
+    children?: react.ReactNode;
+}
+
+declare const Option: ((props: DecisionOption & {
+    children?: react.ReactNode;
+}) => null) & {
+    graphItem: string;
+    displayName?: string;
+};
+interface DecisionProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    question: string;
+
+    context?: string;
+
+    options?: readonly DecisionOption[];
+
+    recommendation?: react.ReactNode;
+
+    children?: react.ReactNode;
+
+    className?: string;
+}
+
+declare const Decision: react.ForwardRefExoticComponent<DecisionProps & react.RefAttributes<HTMLDivElement>>;
+
+interface TermItem {
+
+    term: string;
+
+    scale?: string;
+
+    children?: react.ReactNode;
+}
+
+declare const Term: ((props: TermItem & {
+    children?: react.ReactNode;
+}) => null) & {
+    graphItem: string;
+    displayName?: string;
+};
+interface TermGridProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+
+    terms?: readonly TermItem[];
+
+    children?: react.ReactNode;
+
+    className?: string;
+}
+
+declare const TermGrid: react.ForwardRefExoticComponent<TermGridProps & react.RefAttributes<HTMLDivElement>>;
+
 declare function MdxPre({ children, ...rest }: HTMLAttributes<HTMLPreElement>): react.JSX.Element;
 declare function MdxAnchor({ href, children, ...rest }: AnchorHTMLAttributes<HTMLAnchorElement>): react.JSX.Element;
 
@@ -2846,6 +2983,23 @@ declare const mdxComponents: {
         displayName?: string;
     };
     Step: ((props: StepProps & {
+        children?: ReactNode;
+    }) => null) & {
+        graphItem: string;
+        displayName?: string;
+    };
+    SwatchCompare: react.ForwardRefExoticComponent<SwatchCompareProps & react.RefAttributes<HTMLDivElement>>;
+    MetricStrip: react.ForwardRefExoticComponent<MetricStripProps & react.RefAttributes<HTMLDivElement>>;
+    TokenTable: react.ForwardRefExoticComponent<TokenTableProps & react.RefAttributes<HTMLDivElement>>;
+    Decision: react.ForwardRefExoticComponent<DecisionProps & react.RefAttributes<HTMLDivElement>>;
+    Option: ((props: DecisionOption & {
+        children?: ReactNode;
+    }) => null) & {
+        graphItem: string;
+        displayName?: string;
+    };
+    TermGrid: react.ForwardRefExoticComponent<TermGridProps & react.RefAttributes<HTMLDivElement>>;
+    Term: ((props: TermItem & {
         children?: ReactNode;
     }) => null) & {
         graphItem: string;
@@ -2947,6 +3101,9 @@ export {
   DataTable,
   type DataTableProps,
   type DataTableVirtualization,
+  Decision,
+  type DecisionOption,
+  type DecisionProps,
   DesignSandbox,
   type DiffLineProps,
   type DiffRow,
@@ -3057,6 +3214,10 @@ export {
   type MetadataGridCustomItem,
   type MetadataGridProps,
   type MetadataGridSeries,
+  type Metric,
+  MetricStrip,
+  type MetricStripProps,
+  type MetricTone,
   MobileNav,
   type MobileNavProps,
   Modal,
@@ -3073,6 +3234,7 @@ export {
   type NotFoundPageProps,
   NoteBlock,
   type NoteBlockProps,
+  Option,
   type OverlayAlign,
   type OverlaySide,
   PALETTE_HUES,
@@ -3176,9 +3338,13 @@ export {
   type StepsProps,
   type Surface,
   Swatch,
+  type SwatchColumn,
+  SwatchCompare,
+  type SwatchCompareProps,
   SwatchGroup,
   type SwatchGroupProps,
   type SwatchProps,
+  type SwatchRow,
   Switch,
   type SwitchProps,
   THEME_ATTRIBUTE,
@@ -3214,6 +3380,10 @@ export {
   TelemetryGauge,
   type TelemetryGaugeProps,
   type TelemetryMachineState,
+  Term,
+  TermGrid,
+  type TermGridProps,
+  type TermItem,
   Terminal,
   type TerminalProps,
   TextArea,
@@ -3237,7 +3407,10 @@ export {
   ToastProvider,
   type ToastProviderProps,
   type TocEntry,
+  type TokenRow,
   type TokenRule,
+  TokenTable,
+  type TokenTableProps,
   Tooltip,
   type TooltipProps,
   TrackCard,
@@ -3254,6 +3427,7 @@ export {
   type UptimeStripProps,
   type UseActiveHeadingOptions,
   type UseCopyToClipboardResult,
+  type VerdictTone,
   WEB_FLOOR,
   XIcon,
   accentVar,

@@ -65,7 +65,9 @@ import { FigureFrame, Timeline, UptimeStrip } from '@rtkelly13/design-system';
 Use `ActivityGrid` for dated counts such as commits or blog posts, and
 `GanttChart` for work with start and end dates. `FlowDiagram`, `TreeDiagram`,
 `ChangeSummary`, and `BeforeAfter` cover relationships and comparisons.
-`Steps` and `Terminal` remain documentation blocks. See
+`SwatchCompare`, `TokenTable`, and `MetricStrip` are measured comparisons, and
+`TermGrid` is a glossary. `Decision` is a standalone documentation block, not a
+figure renderer. `Steps` and `Terminal` remain documentation blocks. See
 [ADR 0006](./docs/adr/0006-document-visual-taxonomy.md) for the naming rules.
 
 These components are adapted from [mdxcn](https://github.com/keshav-exe/mdxcn)

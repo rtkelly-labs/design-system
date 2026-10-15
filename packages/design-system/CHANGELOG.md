@@ -9,6 +9,10 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## 0.16.0
+
+Five MDX figures: `SwatchCompare`, `MetricStrip`, `TokenTable`, `Decision` with `Option`, `TermGrid` with `Term`. Registered in `mdxComponents`.
+
 ## 0.15.0
 
 Text on `sketch` is darker and heavier, and `text.muted` is lighter on `midnight`

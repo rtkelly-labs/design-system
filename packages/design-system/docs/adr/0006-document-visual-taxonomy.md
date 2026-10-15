@@ -32,7 +32,9 @@ Name a renderer for its data and meaning. Make the frame optional and separate.
 | Dated visual | `ActivityGrid`, `UptimeStrip`, `GanttChart` | Activity counts, service status, or dated work intervals |
 | Relationship visual | `FlowDiagram`, `Timeline`, `TreeDiagram` | Paths, ordered events, or hierarchy |
 | Comparison visual | `ChangeSummary`, `BeforeAfter` | Signed changes or paired measurements |
-| Documentation block | `Steps`, `Terminal` | A procedure or command transcript |
+| Measured comparison | `SwatchCompare`, `TokenTable`, `MetricStrip` | Colours, token values, or headline figures read side by side |
+| Glossary | `TermGrid` | Terms with plain-language scales |
+| Documentation block | `Steps`, `Terminal`, `Decision` | A procedure, a command transcript, or a decision with options. `Decision` is a standalone block with its own frame, not a renderer |
 | Application chart | `BarChart`, `Sparkline`, `BulletChart` | Responsive chart geometry and application interaction |
 
 Reserve `Ascii*` for a component whose public contract requires character-cell

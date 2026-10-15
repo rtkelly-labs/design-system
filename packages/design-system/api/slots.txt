@@ -51,6 +51,8 @@ cta-section	CTASection
 cta-section-actions	CTASection
 cta-section-body	CTASection
 datatable-paginated	(shared)
+decision	Decision
+decision-option	Decision
 design-sandbox	DesignSandbox
 divider	Divider
 doc-pager	DocPager
@@ -121,6 +123,7 @@ metadata-grid	MetadataGrid
 metadata-grid-cell	MetadataGrid
 metadata-grid-label	MetadataGrid
 metadata-grid-value	MetadataGrid
+metric-strip	MetricStrip
 mobile-nav-trigger	MobileNav
 nerd-icon	NerdIcon
 note-block	NoteBlock
@@ -194,6 +197,7 @@ status-page	StatusPage
 status-page-code	StatusPage
 steps	Steps
 swatch	Swatch
+swatch-compare	SwatchCompare
 swatch-group	SwatchGroup
 swatch-group-items	SwatchGroup
 swatch-group-title	SwatchGroup
@@ -221,6 +225,7 @@ tag	Tag
 telemetry-gauge	TelemetryGauge
 telemetry-gauge-metric	TelemetryGauge
 telemetry-gauge-pill	TelemetryGauge
+term-grid	TermGrid
 terminal	Terminal
 theme-provider	(shared)
 ticker-tape	TickerTape
@@ -229,6 +234,7 @@ ticker-tape-title	TickerTape
 ticker-tape-track	TickerTape
 timeline	Timeline
 tldr	TLDR
+token-table	TokenTable
 track-card	TrackCard
 track-card-badge	TrackCard
 track-card-description	TrackCard
