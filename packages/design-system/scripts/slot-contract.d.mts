@@ -9,3 +9,4 @@ export declare const ALIASES: Record<string, Alias>;
 export declare function kebab(name: string): string;
 export declare function expectedSlot(name: string): string;
 export declare const KEBAB: RegExp;
+export declare const ACRONYM_COMPONENTS: ReadonlySet<string>;

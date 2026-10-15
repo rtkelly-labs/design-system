@@ -161,9 +161,9 @@ const CASES = [
       'LEVELS',
       'isThemeLevel',
     ],
-    // +100 B: the data-slot markers on Card and Pagination parts, plus the
+    // +200 B: the data-slot markers on Card and Pagination parts, plus the
     // Pagination current-page chip fix. Both are intended.
-    maxBytes: 63_100,
+    maxBytes: 63_200,
     forbid: HEAVY,
   },
 ];

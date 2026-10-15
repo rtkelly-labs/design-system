@@ -31,6 +31,12 @@
  * `${family}` or equal to it; neither means no DOM is expected (data-carrier).
  */
 
+/**
+ * All-capital components. A constant such as LEVELS has no lowercase letter either, so a
+ * component named in capitals is listed here rather than inferred.
+ */
+export const ACRONYM_COMPONENTS = new Set(['TLDR']);
+
 /** @typedef {'shared-frame'|'delegate'|'no-dom-root'|'legacy-name'|'data-carrier'} AliasKind */
 /** @type {Record<string, {kind: AliasKind, reason: string, slot?: string, family?: string}>} */
 export const ALIASES = {

@@ -17,6 +17,7 @@
  */
 
 import * as ds from '../index';
+import { ACRONYM_COMPONENTS } from '../../scripts/slot-contract.mjs';
 
 // Vite's `import.meta.glob`, typed locally: `vite/client` is not in this package's tsconfig, and
 // vitest (the only thing that runs this file) provides the real one.
@@ -49,7 +50,7 @@ const isExotic = (v: unknown) => typeof v === 'object' && v !== null && '$$typeo
 
 /** A component is a PascalCase, non-constant export that is a function component or a forwardRef/memo. */
 export function isComponentExport(name: string, value: unknown): boolean {
-  if (!/^[A-Z][A-Za-z0-9]*$/.test(name) || !/[a-z]/.test(name)) return false;
+  if (!/^[A-Z][A-Za-z0-9]*$/.test(name) || !(/[a-z]/.test(name) || ACRONYM_COMPONENTS.has(name))) return false;
   return (typeof value === 'function' && !isClass(value)) || isExotic(value);
 }
 

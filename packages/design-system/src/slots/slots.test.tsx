@@ -119,9 +119,9 @@ describe('data-slot contract (runtime)', () => {
 
   it('api/slots.txt is the current slot inventory', () => {
     const families = subjects().map((e) => [e.name, ALIASES[e.name]?.family ?? ALIASES[e.name]?.slot ?? kebab(e.name)] as const);
-    /** The component whose slot family this slot belongs to; `(shared)` for frame internals no component owns (`field-label`, `ascii-frame-rule`). */
+    /** The component whose slot family this slot belongs to, the real component before a delegate alias of it; `(shared)` for frame internals no component owns (`field-label`, `ascii-frame-rule`). */
     const ownerOf = (slot: string) => {
-      const hit = families.filter(([, f]) => slot === f || slot.startsWith(`${f}-`)).sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))[0];
+      const hit = families.filter(([, f]) => slot === f || slot.startsWith(`${f}-`)).sort((a, b) => b[1].length - a[1].length || Number(a[0] in ALIASES) - Number(b[0] in ALIASES) || a[0].localeCompare(b[0]))[0];
       return hit ? hit[0] : '(shared)';
     };
     const lines = new Set<string>();

@@ -19,7 +19,7 @@ import ts from 'typescript';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ALIASES, KEBAB, kebab } from './slot-contract.mjs';
+import { ACRONYM_COMPONENTS, ALIASES, KEBAB, kebab } from './slot-contract.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/components');
 const files = [];
@@ -89,7 +89,7 @@ export function scan(file) {
     if (ts.isFunctionDeclaration(st) && st.name && exported(st) && /^[A-Z]/.test(st.name.text)) comps.push({ name: st.name.text, fn: st });
     if (ts.isVariableStatement(st) && exported(st)) {
       for (const d of st.declarationList.declarations) {
-        if (ts.isIdentifier(d.name) && /^[A-Z][A-Za-z0-9]*$/.test(d.name.text) && /[a-z]/.test(d.name.text)) {
+        if (ts.isIdentifier(d.name) && /^[A-Z][A-Za-z0-9]*$/.test(d.name.text) && (/[a-z]/.test(d.name.text) || ACRONYM_COMPONENTS.has(d.name.text))) {
           const fn = unwrap(d.initializer);
           if (fn) comps.push({ name: d.name.text, fn });
         }
