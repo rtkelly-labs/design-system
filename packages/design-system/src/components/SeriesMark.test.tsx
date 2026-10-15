@@ -12,7 +12,7 @@ describe('SeriesMark', () => {
     const mark = container.querySelector('[data-slot="series-mark"]')!;
     expect(mark.getAttribute('aria-hidden')).toBe('true');
     const chip = mark.querySelector('span > span') as HTMLElement;
-    expect(chip.style.background).toBe('var(--ds-series-3)');
+    expect(chip.className).toContain('bg-series-3');
     const glyph = mark.querySelector('[data-slot="series-glyph"]')!;
     expect(glyph.textContent).toBe(SERIES_LETTERS[2]);
     expect(glyph.querySelector('svg')).not.toBeNull();
@@ -26,7 +26,7 @@ describe('SeriesMark', () => {
   it('takes a letter override and can drop the chip', () => {
     const { container } = render(<SeriesMark series={1} letter="W" swatch={false} />);
     expect(container.querySelector('[data-slot="series-glyph"]')!.textContent).toBe('W');
-    expect(container.querySelector('[data-slot="series-mark"] > span[style]')).toBeNull();
+    expect(container.querySelector('[data-slot="series-mark"] > span.bg-series-1')).toBeNull();
   });
 });
 
