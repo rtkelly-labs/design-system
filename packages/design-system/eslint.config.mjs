@@ -4,6 +4,8 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 import { authoredClasses } from './scripts/authored-classes.mjs';
+import { fileURLToPath } from 'node:url';
+
 import { noHandBrackets } from './scripts/eslint-bracket-rule.mjs';
 import { noColourLiterals } from './scripts/eslint-token-rule.mjs';
 
@@ -69,8 +71,27 @@ export default tseslint.config(
       parser: tseslint.parser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    plugins: { 'design-system': { rules: { 'no-colour-literals': noColourLiterals, 'no-hand-brackets': noHandBrackets } } },
-    rules: { 'design-system/no-colour-literals': 'error', 'design-system/no-hand-brackets': 'error' },
+    plugins: { 'design-system': { rules: { 'no-colour-literals': noColourLiterals } } },
+    rules: { 'design-system/no-colour-literals': 'error' },
+  },
+  {
+    /**
+     * A bracketed label is `<BracketText>`, never typed by hand — any
+     * whitespace, any spelling of it. `pnpm lint --fix` converts what it finds;
+     * see `scripts/eslint-bracket-rule.mjs`. All of `src/`, not only
+     * components and stories: a label in a test fixture ships to nobody, but it
+     * is copied into code that does.
+     */
+    name: 'design-system/brackets',
+    files: ['src/**/*.tsx'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: { ecmaFeatures: { jsx: true } },
+    },
+    plugins: { brackets: { rules: { 'no-hand-brackets': noHandBrackets } } },
+    rules: {
+      'brackets/no-hand-brackets': ['error', { module: fileURLToPath(new URL('./src/components/BracketText.tsx', import.meta.url)) }],
+    },
   },
   {
     /**
