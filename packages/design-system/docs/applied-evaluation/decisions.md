@@ -30,3 +30,7 @@ rests on. Roll-up rows refer to `../applied-evaluation.md` §2.
 | D9 | Categorical colour and accessibility | **Pending.** Glyphs should not be permanent; they become a user accessibility preference, set like the theme. Research is in `a11y-preferences-research.md` | WCAG 1.4.1: opt-in glyphs only conform via the "conforming alternate version" route, so a non-colour cue (label or legend text) must always be present |
 | D10 | Syntax and editor | **D10-C as the base** (today's 4 hues plus non-colour channels). A and B were judged off-theme. The owner allows "specific differentiation"; scope pending | ED-F01/F06 |
 | P3 tab close | Closable tab × | **Expose it as a button**: "Close <file>", beside the tab rather than nested in it, in the accessibility tree and Tab order | APG deletable tabs; voice-control users need a nameable target |
+
+### P3 tab close — as built
+
+- The × is a real button named `Close <label>` (or `closeLabel`), a sibling of the `role="tab"` inside the `role="presentation"` frame. It is in the accessibility tree for every tab. Only the selected tab's control is a Tab stop, right after the roving tab, so a strip costs one extra stop. `Delete` on a focused tab is unchanged.
