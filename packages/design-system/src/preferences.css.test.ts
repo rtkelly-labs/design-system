@@ -168,8 +168,12 @@ describe('contrast: more — overrides equal the levels.ts derivation', () => {
       for (const [key, value] of Object.entries(more.tint.intent)) {
         expect(declared.get(`--ds-tint-intent-${key}`)).toBe(value);
       }
+      // The code Groups follow the text and border Roles they read by name.
+      expect(declared.get('--ds-syntax-comment')).toBe(more.syntax.comment);
+      expect(declared.get('--ds-editor-line')).toBe(more.editor.line);
+      expect(declared.get('--ds-editor-line-number')).toBe(more.editor.lineNumber);
       // Only what the delta changes is emitted: nothing is repeated, nothing is authored.
-      expect(declared.size).toBe(3 + 8);
+      expect(declared.size).toBe(3 + 8 + 3);
     });
   }
 

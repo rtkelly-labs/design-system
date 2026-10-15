@@ -15,8 +15,8 @@
  * 5.90:1 while scoring Lc -41, the weakest text pair in the system (#372).
  */
 
-import type { Emphasis, Hue, HueRef, Intent, TextTone } from '../lib/theme';
-import type { LevelDefinition, ThemeLevel } from './levels';
+import type { Emphasis, Hue, HueRef, Intent, RoleRef, TextTone } from '../lib/theme';
+import type { EditorRole, LevelDefinition, SyntaxRole, ThemeLevel } from './levels';
 
 export interface Rgb {
   r: number;
@@ -764,7 +764,7 @@ export function auditSeriesSeparation(
  */
 export function applyContrastDelta(def: LevelDefinition): LevelDefinition {
   const base = def.surface.base;
-  return {
+  const next: LevelDefinition = {
     ...def,
     text: { ...def.text, muted: def.text.secondary },
     border: { ...def.border, subtle: def.border.default, default: def.border.strong },
@@ -773,6 +773,10 @@ export function applyContrastDelta(def: LevelDefinition): LevelDefinition {
       intent: { info: base, success: base, warning: base, danger: base },
     },
   };
+  // The code Groups read text and border Roles by name, so they follow the delta:
+  // a comment stops being a step below the code, and the current-line hairline
+  // takes the default border. Re-derived from their declared sources, not patched.
+  return { ...next, syntax: deriveSyntax(next), editor: deriveEditor(next) };
 }
 
 /** The ladder with {@link applyContrastDelta} applied to every Level. */
@@ -781,5 +785,230 @@ export function contrastMoreLadder(
 ): Record<ThemeLevel, LevelDefinition> {
   const out = {} as Record<ThemeLevel, LevelDefinition>;
   for (const level of Object.keys(ladder) as ThemeLevel[]) out[level] = applyContrastDelta(ladder[level]);
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// #148 / #80: the syntax and editor Groups (Round 6)
+// ---------------------------------------------------------------------------
+
+/** The editor roles that carry alpha, and which `editorAlpha` entry sets each. */
+export const EDITOR_TRANSLUCENT = {
+  selection: 'selection',
+  bracketWash: 'bracket',
+  diffAddedWash: 'diff',
+  diffRemovedWash: 'diff',
+} as const satisfies Partial<Record<EditorRole, 'selection' | 'bracket' | 'diff'>>;
+
+/** The target each `editorAlpha` entry is fitted down from, in percent. */
+export const EDITOR_ALPHA_TARGET = { selection: 30, bracket: 10, diff: 12 } as const;
+
+/** The lowest each is allowed to fall before the fit gives up and the audit fails. */
+const EDITOR_ALPHA_FLOOR = { selection: 5, bracket: 2, diff: 4 } as const;
+
+type Sources = Pick<LevelDefinition, 'accent' | 'intent' | 'text' | 'border' | 'palette'>;
+
+/** What a {@link RoleRef} resolves to on a level. */
+export function resolveRef(def: Sources, ref: RoleRef): string {
+  const [group, key] = ref.split('.') as ['accent' | 'intent' | 'text' | 'border' | 'palette', string];
+  return (def[group] as Readonly<Record<string, string>>)[key]!;
+}
+
+const channel2 = (n: number) => Math.round(n).toString(16).padStart(2, '0');
+
+/** `#rrggbb` for an opaque {@link Rgb}. */
+export function toHex(c: Rgb): string {
+  return `#${channel2(c.r)}${channel2(c.g)}${channel2(c.b)}`;
+}
+
+/** `hex` at `percent` alpha as the literal `#rrggbbaa` the ladder carries. */
+export function alphaHex(hex: string, percent: number): string {
+  return `${hex.toLowerCase()}${channel2((percent / 100) * 255)}`;
+}
+
+/** A colour (possibly `#rrggbbaa`) laid over an opaque ground, as `#rrggbb`. */
+export function flattenOnto(over: string, ground: string): string {
+  return toHex(composite(parseColor(over), parseColor(ground)));
+}
+
+/** The `syntax` literals a level's `syntaxSource` resolves to. */
+export function deriveSyntax(def: Sources & Pick<LevelDefinition, 'syntaxSource'>): Record<SyntaxRole, string> {
+  const out = {} as Record<SyntaxRole, string>;
+  for (const role of Object.keys(def.syntaxSource) as SyntaxRole[]) out[role] = resolveRef(def, def.syntaxSource[role]).toLowerCase();
+  return out;
+}
+
+/** The `editor` literals a level's `editorSource` and `editorAlpha` resolve to. */
+export function deriveEditor(
+  def: Sources & Pick<LevelDefinition, 'editorSource' | 'editorAlpha'>,
+  alpha: LevelDefinition['editorAlpha'] = def.editorAlpha,
+): Record<EditorRole, string> {
+  const out = {} as Record<EditorRole, string>;
+  for (const role of Object.keys(def.editorSource) as EditorRole[]) {
+    const base = resolveRef(def, def.editorSource[role]).toLowerCase();
+    const key = (EDITOR_TRANSLUCENT as Partial<Record<EditorRole, 'selection' | 'bracket' | 'diff'>>)[role];
+    out[role] = key ? alphaHex(base, alpha[key]) : base;
+  }
+  return out;
+}
+
+/** Largest whole percent at or below `target` for which `ok` holds. */
+function fitPercent(target: number, floor: number, ok: (percent: number) => boolean): number {
+  for (let p = target; p >= floor; p -= 1) if (ok(p)) return p;
+  return floor;
+}
+
+/** Every text colour an editor draws behind a wash: the syntax tokens and the two line-number inks. */
+function codeInks(def: LevelDefinition): string[] {
+  return [...Object.values(def.syntax), def.editor.lineNumber, def.editor.lineNumberActive];
+}
+
+/**
+ * Does `percent` hold for one translucent role: its text reads at 4.5:1 on
+ * every surface the wash can sit on, composited. `diff` is the strength the
+ * diff bands are drawn at, because a selection or a bracket can land on a
+ * changed line.
+ */
+export function holdsEditorAlpha(
+  def: LevelDefinition,
+  key: 'selection' | 'bracket' | 'diff',
+  percent: number,
+  diff: number = def.editorAlpha.diff,
+): boolean {
+  const grounds = [def.surface.base, def.surface.raised, def.surface.sunken];
+  const min = MINIMUM_RATIO.text;
+  const add = resolveRef(def, def.editorSource.diffAdded);
+  const del = resolveRef(def, def.editorSource.diffRemoved);
+  if (key === 'diff') {
+    const inks = codeInks(def);
+    return grounds.every((g) =>
+      [add, del].every((hue) => {
+        const wash = flattenOnto(alphaHex(hue, percent), g);
+        return inks.every((ink) => contrastRatio(ink, wash) >= min);
+      }),
+    );
+  }
+  // Every surface a wash can sit on: a ground, or a ground under a diff band.
+  const under = grounds.flatMap((g) => [g, flattenOnto(alphaHex(add, diff), g), flattenOnto(alphaHex(del, diff), g)]);
+  const hue = resolveRef(def, key === 'selection' ? def.editorSource.selection : def.editorSource.bracketWash);
+  const ink = key === 'selection' ? resolveRef(def, def.editorSource.selectionInk) : def.text.primary;
+  return under.every((u) => contrastRatio(ink, flattenOnto(alphaHex(hue, percent), u)) >= min);
+}
+
+/**
+ * The strengths `editorAlpha` must hold: the largest at or below each target
+ * for which its text still reads at 4.5:1 composited on every ground.
+ *
+ * Fitted in dependency order, diff first. Every ground, not just `base`: the
+ * editor sits on `sunken`.
+ */
+export function fitEditorAlpha(def: LevelDefinition): LevelDefinition['editorAlpha'] {
+  const diff = fitPercent(EDITOR_ALPHA_TARGET.diff, EDITOR_ALPHA_FLOOR.diff, (p) => holdsEditorAlpha(def, 'diff', p));
+  const selection = fitPercent(EDITOR_ALPHA_TARGET.selection, EDITOR_ALPHA_FLOOR.selection, (p) => holdsEditorAlpha(def, 'selection', p, diff));
+  const bracket = fitPercent(EDITOR_ALPHA_TARGET.bracket, EDITOR_ALPHA_FLOOR.bracket, (p) => holdsEditorAlpha(def, 'bracket', p, diff));
+  return { selection, bracket, diff };
+}
+
+export interface EditorCheck {
+  level: ThemeLevel;
+  /** e.g. `syntax.keyword on diff added over surface.sunken`. */
+  pair: string;
+  foreground: string;
+  /** The flattened background the pair was measured on. */
+  background: string;
+  ratio: number;
+  minimum: number;
+  passes: boolean;
+}
+
+/** Text floor: a syntax token, a line number, the selection ink. */
+export const EDITOR_TEXT_FLOOR = 4.5;
+/** Edge floor: a find, bracket, squiggle or diff edge (WCAG 1.4.11). */
+export const EDITOR_EDGE_FLOOR = 3;
+
+/**
+ * The syntax and editor gates, as arithmetic.
+ *
+ *  1. Every syntax token at 4.5:1 on `base`, `raised` and `sunken`.
+ *  2. Every syntax token, and the selection ink, at 4.5:1 composited on every
+ *     editor band it can sit on: the two diff washes over each ground for a
+ *     token; the selection over each ground and over each diff band for the ink
+ *     (a selection can cover a changed line), and the bracket wash for the
+ *     glyph it matches.
+ *  3. The find, bracket, error, warning, info and diff edges at 3:1 on each
+ *     ground, and the bracket edge on its own wash.
+ *
+ * Kept apart from {@link auditContrast} so the 147-pair figure that the docs
+ * quote does not move.
+ */
+export function auditEditor(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): EditorCheck[] {
+  const results: EditorCheck[] = [];
+  for (const [level, def] of Object.entries(ladder) as [ThemeLevel, LevelDefinition][]) {
+    const grounds = [
+      ['surface.base', def.surface.base],
+      ['surface.raised', def.surface.raised],
+      ['surface.sunken', def.surface.sunken],
+    ] as const;
+    const check = (pair: string, fg: string, bg: string, minimum: number) => {
+      const ratio = contrastRatio(fg, bg);
+      results.push({ level, pair, foreground: fg, background: bg, ratio, minimum, passes: ratio >= minimum });
+    };
+
+    for (const [gName, ground] of grounds) {
+      for (const [role, value] of Object.entries(def.syntax)) {
+        check(`syntax.${role} on ${gName}`, value, ground, EDITOR_TEXT_FLOOR);
+      }
+      check(`editor.lineNumber on ${gName}`, def.editor.lineNumber, ground, EDITOR_TEXT_FLOOR);
+      check(`editor.lineNumberActive on ${gName}`, def.editor.lineNumberActive, ground, EDITOR_TEXT_FLOOR);
+
+      const diffBands = [
+        ['diff added', flattenOnto(def.editor.diffAddedWash, ground)],
+        ['diff removed', flattenOnto(def.editor.diffRemovedWash, ground)],
+      ] as const;
+      for (const [bName, band] of diffBands) {
+        for (const [role, value] of Object.entries(def.syntax)) {
+          check(`syntax.${role} on ${bName} over ${gName}`, value, band, EDITOR_TEXT_FLOOR);
+        }
+        check(`editor.lineNumber on ${bName} over ${gName}`, def.editor.lineNumber, band, EDITOR_TEXT_FLOOR);
+        check(`editor.lineNumberActive on ${bName} over ${gName}`, def.editor.lineNumberActive, band, EDITOR_TEXT_FLOOR);
+      }
+
+      const surfaces: (readonly [string, string])[] = [[gName, ground], ...diffBands.map(([n, b]) => [`${n} over ${gName}`, b] as const)];
+      for (const [sName, surface] of surfaces) {
+        check(`editor.selectionInk on selection over ${sName}`, def.editor.selectionInk, flattenOnto(def.editor.selection, surface), EDITOR_TEXT_FLOOR);
+        check(`text.primary on bracketWash over ${sName}`, def.text.primary, flattenOnto(def.editor.bracketWash, surface), EDITOR_TEXT_FLOOR);
+      }
+
+      for (const role of ['find', 'findCurrent', 'bracket', 'error', 'warning', 'info', 'diffAdded', 'diffRemoved'] as const) {
+        check(`editor.${role} on ${gName}`, def.editor[role], ground, EDITOR_EDGE_FLOOR);
+      }
+      check(`editor.bracket on bracketWash over ${gName}`, def.editor.bracket, flattenOnto(def.editor.bracketWash, ground), EDITOR_EDGE_FLOOR);
+    }
+  }
+  return results;
+}
+
+export interface EditorAgreement {
+  level: ThemeLevel;
+  role: string;
+  value: string;
+  expected: string;
+  source: string;
+  passes: boolean;
+}
+
+/** Does every `syntax` and `editor` literal equal what its declared source resolves to, at its declared alpha? */
+export function auditEditorAgreement(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): EditorAgreement[] {
+  const out: EditorAgreement[] = [];
+  for (const [level, def] of Object.entries(ladder) as [ThemeLevel, LevelDefinition][]) {
+    const syntax = deriveSyntax(def);
+    for (const role of Object.keys(def.syntaxSource) as SyntaxRole[]) {
+      out.push({ level, role: `syntax.${role}`, value: def.syntax[role], expected: syntax[role], source: def.syntaxSource[role], passes: def.syntax[role].toLowerCase() === syntax[role] });
+    }
+    const editor = deriveEditor(def);
+    for (const role of Object.keys(def.editorSource) as EditorRole[]) {
+      out.push({ level, role: `editor.${role}`, value: def.editor[role], expected: editor[role], source: def.editorSource[role], passes: def.editor[role].toLowerCase() === editor[role] });
+    }
+  }
   return out;
 }

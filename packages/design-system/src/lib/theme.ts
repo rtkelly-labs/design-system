@@ -88,6 +88,19 @@ export type AnsiHue = Extract<Hue, 'red' | 'green' | 'yellow' | 'blue' | 'magent
  */
 export type HueRef = Hue | 'neutral';
 
+/**
+ * A Role or Hue named as a source: `accent.tertiary`, `text.muted`,
+ * `palette.violet`. What a `syntax` or `editor` token is derived from, declared
+ * by name in `levels.ts` the way `accentHue` declares a Role's Hue, so the
+ * derivation is readable and `check:contrast` can assert the literal agrees.
+ */
+export type RoleRef =
+  | `accent.${Emphasis}`
+  | `intent.${Intent}`
+  | `text.${TextTone}`
+  | `border.${BorderTone}`
+  | `palette.${Hue}`;
+
 
 /** Anything a component's `accent`-style prop will take. */
 export type AccentToken = Emphasis | Intent;
