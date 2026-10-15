@@ -8,7 +8,8 @@ import { scaleBand, scaleLinear } from '@visx/scale';
 import { Bar } from '@visx/shape';
 import { type ForwardedRef, forwardRef, type SVGProps } from 'react';
 import { cn } from '../lib/recipe';
-import { type AccentToken, accentVar } from '../lib/theme';
+import { type AccentToken, type SeriesIndex, accentVar, seriesVar } from '../lib/theme';
+import { SERIES_LETTERS, SERIES_SHAPES, SeriesShape } from './seriesShape';
 
 export { ParentSize as ResponsiveChartContainer };
 
@@ -16,6 +17,14 @@ export interface BarChartDatum {
   label: string;
   value: number;
   accent?: AccentToken;
+  /**
+   * A categorical series member (1 to 6). Colours the bar from the series group
+   * and, under the `patterns` preference, adds the series' shape and letter above
+   * it. Takes precedence over `accent`. The bar's category label on the axis is
+   * always drawn, so colour is never the only thing that says which bar is which;
+   * pair a series chart with a `SeriesLegend` when the series repeat across bars.
+   */
+  series?: SeriesIndex;
 }
 
 export interface BarChartProps extends Omit<SVGProps<SVGSVGElement>, 'data'> {
@@ -45,6 +54,36 @@ export interface BarChartProps extends Omit<SVGProps<SVGSVGElement>, 'data'> {
   onBarClick?: (datum: BarChartDatum, index: number) => void;
 }
 
+/**
+ * The series shape and letter, drawn in SVG. Always in the markup and hidden by
+ * the stylesheet until `data-a11y-cvd="patterns"` is on the document, so a chart
+ * holds no state for it. Sized to sit in the top margin above a value label.
+ */
+function BarGlyph({ series, x, y }: { series: SeriesIndex; x: number; y: number }) {
+  return (
+    <g
+      data-slot="series-glyph"
+      transform={`translate(${x}, ${y})`}
+      aria-hidden="true"
+      style={{ color: 'var(--ds-text-primary)' }}
+    >
+      <g transform="scale(1.1)" fill="currentColor">
+        <SeriesShape shape={SERIES_SHAPES[series - 1]!} />
+      </g>
+      <text
+        x={14}
+        y={10}
+        fill="currentColor"
+        fontFamily="var(--ds-font-mono)"
+        fontSize={11}
+        fontWeight="bold"
+      >
+        {SERIES_LETTERS[series - 1]}
+      </text>
+    </g>
+  );
+}
+
 const DEFAULT_VERTICAL_MARGIN = { top: 28, right: 24, bottom: 44, left: 48 };
 const DEFAULT_HORIZONTAL_MARGIN = { top: 20, right: 48, bottom: 36, left: 80 };
 
@@ -69,8 +108,14 @@ function BarChartCanvas({
   ...props
 }: InternalCanvasProps) {
   const isHorizontal = orientation === 'horizontal';
+  // A series glyph needs room beside or above the value label, so a chart that
+  // has one opens its margin by that much. A caller's own margin is left alone.
+  const hasSeries = (data ?? []).some((d) => d.series);
   const margin =
-    customMargin ?? (isHorizontal ? DEFAULT_HORIZONTAL_MARGIN : DEFAULT_VERTICAL_MARGIN);
+    customMargin ??
+    (isHorizontal
+      ? { ...DEFAULT_HORIZONTAL_MARGIN, right: DEFAULT_HORIZONTAL_MARGIN.right + (hasSeries ? 48 : 0) }
+      : { ...DEFAULT_VERTICAL_MARGIN, top: DEFAULT_VERTICAL_MARGIN.top + (hasSeries ? 16 : 0) });
 
   const xMax = Math.max(0, width - margin.left - margin.right);
   const yMax = Math.max(0, height - margin.top - margin.bottom);
@@ -157,7 +202,7 @@ function BarChartCanvas({
 
         {data.map((d, index) => {
           const barAccent = d.accent ?? accent;
-          const fillColor = accentVar(barAccent);
+          const fillColor = d.series ? seriesVar(d.series) : accentVar(barAccent);
 
           if (isHorizontal) {
             const barY = categoryScale(d.label) ?? 0;
@@ -189,6 +234,13 @@ function BarChartCanvas({
                   >
                     {d.value}
                   </text>
+                )}
+                {d.series && (
+                  <BarGlyph
+                    series={d.series}
+                    x={barWidth + 6 + (showValues ? 28 : 0)}
+                    y={barY + barHeight / 2 - 6}
+                  />
                 )}
               </Group>
             );
@@ -224,6 +276,13 @@ function BarChartCanvas({
                 >
                   {d.value}
                 </text>
+              )}
+              {d.series && (
+                <BarGlyph
+                  series={d.series}
+                  x={barX + barWidth / 2 - 11}
+                  y={barY - (showValues ? 31 : 19)}
+                />
               )}
             </Group>
           );

@@ -94,6 +94,12 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-overlays-tooltip--on-an-icon-button', snapshot: 'tooltip-on-an-icon-button.png' },
   { id: 'components-overlays-popover--open', snapshot: 'popover-open.png' },
   { id: 'components-overlays-menu--actions', snapshot: 'menu-actions.png' },
+  // D9, the Preference axis. The menu open on load; the series marks with the
+  // `patterns` preference off and on; the bar chart under it. Baselines come with
+  // `/update-snapshots`.
+  { id: 'components-overlays-a11ymenu--open', snapshot: 'a11ymenu-open.png' },
+  { id: 'components-content-seriesmark--both-modes', snapshot: 'seriesmark-both-modes.png' },
+  { id: 'components-data-barchart--series-with-patterns', snapshot: 'barchart-series-with-patterns.png' },
   // `fullPage`: the report frame is a page, and the part most likely to drift
   // — the header strip against the body rhythm — is only visible whole.
   {
