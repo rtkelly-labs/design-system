@@ -33,4 +33,5 @@ rests on. Roll-up rows refer to `../applied-evaluation.md` §2.
 
 ### P3 tab close — as built
 
-- The × is a real button named `Close <label>` (or `closeLabel`), a sibling of the `role="tab"` inside the `role="presentation"` frame. It is in the accessibility tree for every tab. Only the selected tab's control is a Tab stop, right after the roving tab, so a strip costs one extra stop. `Delete` on a focused tab is unchanged.
+- The × is a real button named `Close <label>` (or `closeLabel`), beside the `role="tab"` and not inside the `role="tablist"`. A first attempt put it in a `role="presentation"` frame next to the tab; axe still failed `aria-required-children` on the tablist ("children which are not allowed: button"), because a presentational wrapper is transparent and a focusable named button beneath a tablist is not a tab. So `TabsList` renders a `tabs-close-layer` beside the tablist, and each closable tab portals its button into it, laid over the tab's trailing edge (measured, and kept current by a `ResizeObserver`). Consequence: the button mounts after hydration, so server HTML carries the tab without it.
+- It is in the accessibility tree for every tab. Only the selected tab's control is a Tab stop, right after the roving tab, so a strip costs one extra stop. `Delete` on a focused tab is unchanged. The target is 24px (WCAG 2.5.8).
