@@ -534,12 +534,14 @@ export interface TabsTabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
    * caller's job, because only the caller knows whether to confirm an unsaved
    * one first.
    *
-   * The close control is a sibling of the tab, never a child of it: a button
-   * inside a `role="tab"` button is an interactive child of an element whose
-   * children are presentational. It is a pointer affordance only — hidden from
-   * the accessibility tree and out of the tab order — because the keyboard and
-   * assistive-technology route is `Delete`, announced through
-   * `aria-keyshortcuts`. A screen reader user never meets a second stop per tab.
+   * The close control is a real button named `Close <label>`, a sibling of the
+   * tab and never a child of it: a button inside a `role="tab"` button is an
+   * interactive child of an element whose children are presentational. It is in
+   * the accessibility tree for every tab, so voice control and a screen reader
+   * can name and reach it. In the Tab order only the selected tab's control is
+   * a stop, straight after the tablist's roving tab, so `Tab` costs one extra
+   * stop per strip rather than one per tab. `Delete` on a focused tab stays the
+   * keyboard shortcut, announced through `aria-keyshortcuts`.
    */
   onClose?: () => void;
   /**
@@ -676,10 +678,10 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
         type="button"
         data-slot="tabs-tab-close"
         aria-label={label}
-        aria-hidden="true"
-        tabIndex={-1}
-        // Not focusable and not announced: see `onClose`. A click that does
-        // not take focus also leaves the roving focus where it was.
+        // A real, named button: see `onClose`. Only the selected tab's is a Tab
+        // stop; the others stay reachable by pointer and by name. A pointer
+        // press does not take focus, which leaves the roving focus where it was.
+        tabIndex={selected ? 0 : -1}
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => close(selected)}
         className="absolute right-1.5 top-1/2 -mt-0.5 flex size-5 -translate-y-1/2 items-center justify-center font-mono text-sm leading-none text-content-muted hover:bg-surface-raised hover:text-content-primary"
