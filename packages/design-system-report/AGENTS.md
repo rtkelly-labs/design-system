@@ -54,6 +54,7 @@ components render inert in a static document — is
 ```bash
 ds-report audit.tsx --theme white               # → audit.html, self-contained
 ds-report audit.tsx --theme midnight,white      # both rungs, one render
+ds-report audit.tsx --pdf                       # → audit.html + audit.pdf: the same markup on paper
 ds-report a.tsx b.tsx c.tsx --strict            # a batch, lint warnings fatal
 pnpm report src/templates/sample.tsx            # the same thing from a checkout
 ```
@@ -257,17 +258,19 @@ against a generator that emitted all of Tailwind.
 | Async | `renderToStaticMarkup` is synchronous. Do the fetching before the render and pass the data in as props. |
 | Resolution | Imports resolve from the report file's own directory, so a report can import the author's modules — but it has to sit inside a project where `react` resolves. |
 | Version skew | `@rtkelly13/design-system` is aliased to the copy of the package that owns the renderer, so the markup and the CSS can never come from two versions. |
+| PDF | `--pdf` prints the finished HTML through headless Chromium with print media emulated — it is not a second renderer, so the `@page` rule in `styles.css` owns the margin (`preferCSSPageSize`) and every `print:` utility applies. Chromium comes from the report's own project as an optional `playwright` peer; a missing one is an install instruction. The HTML stays byte-deterministic; the PDF carries a `CreationDate`, so byte equality is never asserted on it. |
 
-### Where it lives, and the two optional peers
+### Where it lives, and the optional peers
 
 This is a **separate package** for that reason: it needs `esbuild`, Tailwind's
 compiler and a TypeScript compiler to do its job, and none of that belongs in the
 dependency graph of an app that installs the design system for its components.
 
 Both are **optional peer dependencies**, the same shape `@tailwindcss/typography`
-already has. The trade is only defensible because the CLI turns a missing one into
-an install instruction rather than a stack trace — see `explain()` in
-`src/cli.ts`, and keep that true.
+already has — `playwright`, needed only by `--pdf`, is the third. The trade is only
+defensible because the CLI turns a missing one into an install instruction rather
+than a stack trace — see `explain()` in `src/cli.ts` and `resolvePlaywright()` in
+`src/pdf.ts`, and keep that true.
 
 `ReportDocument`, `ReportSection` and `ReportDetails` ship from
 **`@rtkelly13/design-system`**, not from here: they are ordinary components with
