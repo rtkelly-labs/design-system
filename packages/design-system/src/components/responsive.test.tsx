@@ -173,6 +173,7 @@ describe('SlideDeck at narrow widths (G12)', () => {
     render(
       <SlideDeck>
         <Slide title="ONE">body</Slide>
+        <Slide title="TWO">body</Slide>
       </SlideDeck>,
     );
 
