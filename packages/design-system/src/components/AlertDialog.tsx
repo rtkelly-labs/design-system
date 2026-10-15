@@ -7,6 +7,7 @@ import { cn } from '../lib/recipe';
 import { usePortalThemeAttribute } from './portalTheme';
 import { dialogSurface } from './dialogSurface';
 import { Button } from './Button';
+import type { ButtonVariant } from './Button';
 import { ButtonGroup } from './ButtonGroup';
 
 export interface AlertDialogProps
@@ -25,6 +26,29 @@ export interface AlertDialogProps
   children: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
+  /**
+   * Withhold the confirm until something is true — the type-to-confirm
+   * pattern, where the action stays disabled until the reader has typed the
+   * name of what they are about to destroy. Cancel is never disabled. Put the
+   * field in `children`; it is inside the dialog's described region.
+   */
+  confirmDisabled?: boolean;
+  /**
+   * The confirm's request is in flight. Uses `Button`'s `pending`, so the
+   * button keeps focus and its place, shows a spinner over its label and
+   * ignores a second activation — rather than `disabled`, which would drop
+   * focus to the page behind the dialog. `disabled` wins over `pending`.
+   */
+  confirmPending?: boolean;
+  /** What a screen reader hears while `confirmPending` — "Deleting", not "Loading". Defaults to `Working`. */
+  confirmPendingLabel?: string;
+  /**
+   * The confirm button's look. `danger` by default, because this component's
+   * job is the destructive confirmation; pass `primary` for a consequential
+   * but harmless one. A `tertiary` confirm shares `danger`'s hue on both
+   * Levels, so `ButtonGroup` warns if it sits beside one.
+   */
+  confirmVariant?: ButtonVariant;
   /**
    * Replaces the cancel/confirm pair outright, for the rare confirmation with
    * a third option. Supplying it means owning dismissal — nothing else in the
@@ -71,6 +95,10 @@ export const AlertDialog = forwardRef<HTMLDivElement, AlertDialogProps>(function
     children,
     confirmLabel = 'CONFIRM',
     cancelLabel = 'CANCEL',
+    confirmDisabled,
+    confirmPending,
+    confirmPendingLabel,
+    confirmVariant = 'danger',
     footer,
     className,
     ...props
@@ -141,7 +169,15 @@ export const AlertDialog = forwardRef<HTMLDivElement, AlertDialogProps>(function
                       </Button>
                     }
                   />
-                  <Button onClick={onConfirm} variant="danger" bracketed size="sm">
+                  <Button
+                    onClick={onConfirm}
+                    variant={confirmVariant}
+                    bracketed
+                    size="sm"
+                    disabled={confirmDisabled}
+                    pending={confirmPending}
+                    pendingLabel={confirmPendingLabel}
+                  >
                     {confirmLabel}
                   </Button>
                 </>

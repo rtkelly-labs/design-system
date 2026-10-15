@@ -8,6 +8,7 @@ import { usePortalThemeAttribute } from './portalTheme';
 import { dialogSurface } from './dialogSurface';
 import { usePopupRef } from './dialogPopupRef';
 import { Button } from './Button';
+import type { DialogInitialFocus } from './Modal';
 
 /**
  * Which edge the drawer is anchored to.
@@ -47,8 +48,25 @@ export interface DrawerProps
    * control that opened it. Site navigation names `left` explicitly.
    */
   placement?: DrawerPlacement;
-  /** Replaces the default close button in the footer. */
-  footer?: ReactNode;
+  /**
+   * Replaces the default close button in the footer. Pass `false` to render no
+   * footer, for a panel whose own content ends the way a panel should — the
+   * header's close control is still there.
+   */
+  footer?: ReactNode | false;
+  /**
+   * Where focus goes on open. Defaults to the panel itself, so the title is
+   * announced. See `Modal`'s `initialFocus`.
+   */
+  initialFocus?: DialogInitialFocus;
+  /**
+   * Drop the header bar, for a panel whose content already opens with its own
+   * heading — a detail view titled by what it shows. Without this, the title
+   * is rendered twice: once in the header, once in the content. `title` stays
+   * the accessible name and is visually hidden; the close control moves to the
+   * panel's corner so there is always a visible way out.
+   */
+  headerless?: boolean;
   /**
    * Close when the backdrop is clicked. On for the usual case; turn it off
    * for a drawer holding unsaved input, where a stray click should not
@@ -128,6 +146,8 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
     children,
     placement = 'right',
     footer,
+    initialFocus,
+    headerless = false,
     closeOnBackdropClick = true,
     className,
     ...props
@@ -159,7 +179,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
             // early enough that the popup is sometimes still `null`, and then
             // silently falls back to the first tabbable element. Reading
             // `.current` at focus time is the same intent without the race.
-            initialFocus={() => popup.current}
+            initialFocus={initialFocus ?? (() => popup.current)}
             data-slot="drawer"
             // The placement is on the element as well as in the classes.
             // Classes are a rendering detail that a caller's `className` may
@@ -169,40 +189,59 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
             // `class`, not an appended string: a caller's `max-w-md` would
             // otherwise emit alongside `max-w-sm` and leave CSS source order
             // to pick one.
-            className={cn(slots.popup(), className)}
+            className={cn(slots.popup(), headerless && 'relative', className)}
             {...props}
           >
-            <div data-slot="drawer-header" className={slots.header()}>
-              {/*
-                * The heading text lives on the render element rather than on
-                * `Title`: Base UI keeps the element's own children, and the
-                * a11y lint rule can only see content it can read literally.
-                */}
-              <Dialog.Title
-                data-slot="drawer-title"
-                className={slots.title()}
-                render={<h3>[&nbsp;{title}&nbsp;]</h3>}
-              />
-              <Dialog.Close
-                data-slot="drawer-close"
-                className={slots.close()}
-                aria-label="Close drawer"
-              >
-                &times;
-              </Dialog.Close>
-            </div>
+            {headerless ? (
+              <>
+                <Dialog.Title
+                  data-slot="drawer-title"
+                  className="sr-only"
+                  render={<h3>{title}</h3>}
+                />
+                <Dialog.Close
+                  data-slot="drawer-close"
+                  className={slots.floatingClose()}
+                  aria-label="Close drawer"
+                >
+                  &times;
+                </Dialog.Close>
+              </>
+            ) : (
+              <div data-slot="drawer-header" className={slots.header()}>
+                {/*
+                  * The heading text lives on the render element rather than on
+                  * `Title`: Base UI keeps the element's own children, and the
+                  * a11y lint rule can only see content it can read literally.
+                  */}
+                <Dialog.Title
+                  data-slot="drawer-title"
+                  className={slots.title()}
+                  render={<h3>[&nbsp;{title}&nbsp;]</h3>}
+                />
+                <Dialog.Close
+                  data-slot="drawer-close"
+                  className={slots.close()}
+                  aria-label="Close drawer"
+                >
+                  &times;
+                </Dialog.Close>
+              </div>
+            )}
 
-            <div data-slot="drawer-body" className={slots.body()}>
+            <div data-slot="drawer-body" className={cn(slots.body(), headerless && 'pt-12')}>
               {children}
             </div>
 
-            <div data-slot="drawer-footer" className={slots.footer()}>
-              {footer || (
-                <Button onClick={onClose} bracketed size="sm">
-                  CLOSE
-                </Button>
-              )}
-            </div>
+            {footer === false ? null : (
+              <div data-slot="drawer-footer" className={slots.footer()}>
+                {footer || (
+                  <Button onClick={onClose} bracketed size="sm">
+                    CLOSE
+                  </Button>
+                )}
+              </div>
+            )}
           </Dialog.Popup>
         </Dialog.Viewport>
       </Dialog.Portal>
