@@ -4,6 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 
 import { authoredClasses } from './scripts/authored-classes.mjs';
+import { noHandBrackets } from './scripts/eslint-bracket-rule.mjs';
 import { noColourLiterals } from './scripts/eslint-token-rule.mjs';
 
 /**
@@ -68,8 +69,8 @@ export default tseslint.config(
       parser: tseslint.parser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    plugins: { 'design-system': { rules: { 'no-colour-literals': noColourLiterals } } },
-    rules: { 'design-system/no-colour-literals': 'error' },
+    plugins: { 'design-system': { rules: { 'no-colour-literals': noColourLiterals, 'no-hand-brackets': noHandBrackets } } },
+    rules: { 'design-system/no-colour-literals': 'error', 'design-system/no-hand-brackets': 'error' },
   },
   {
     /**

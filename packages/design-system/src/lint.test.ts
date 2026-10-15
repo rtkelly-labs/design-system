@@ -100,6 +100,29 @@ describe('no-colour-literals', () => {
   });
 }, 30_000);
 
+describe('no-hand-brackets', () => {
+  const RULE = 'design-system/no-hand-brackets';
+
+  it.each([
+    ['JSX text', `<p>[ PAGE ]</p>`],
+    ['JSX text with no-break spaces', `<p>[&nbsp;PAGE&nbsp;]</p>`],
+    ['a label around an expression', `<p>[ {title} ]</p>`],
+    ['an attribute value', `<div title="[ PAGE ]" />`],
+    ['a conditional string child', `<p>{x ? '[\\u00a0A\\u00a0]' : 'b'}</p>`],
+    ['a template split by an interpolation', `<p>{\`[ \${n} RESULTS ]\`}</p>`],
+  ])('rejects %s', async (_name, body) => {
+    const messages = await lintComponent(`const x = 1, n = 2, title = '';\n${wrap(body)}`);
+    expect(messages.join('\n')).toContain(RULE);
+  });
+
+  it('accepts BracketText, and brackets in code that is not a label', async () => {
+    const messages = await lintComponent(
+      `const BracketText = (p: { children: string }) => <span>{p.children}</span>;\nexport const XS = '[ 1, 2 ]';\n${wrap(`<p><BracketText>PAGE</BracketText> [x]<svg><text>[ NO DATA ]</text></svg></p>`)}`,
+    );
+    expect(messages.filter((m) => m.startsWith(RULE))).toEqual([]);
+  });
+}, 30_000);
+
 describe('no-custom-classname', () => {
   it('rejects a utility that exists in no namespace', async () => {
     const messages = await lintComponent(wrap(`<div className="bg-totallyfake-500" />`));
