@@ -41,10 +41,12 @@ const BUDGETS = {
     // D5-B: one @media print rule re-points every role to the paper level: 32,199 B raw.
     // D9: the contrast-more delta per level, the series group, and the motion and
     // link preference rules: 36,444 B raw, 6,525 B gzip; ~2% headroom.
-    maxRaw: 37_200,
+    // #148/#80: --ds-syntax-* and --ds-editor-* per level, in the print block and
+    // the contrast-more delta: 44,010 B raw, 7,162 B gzip.
+    maxRaw: 44_900,
     // The reduced-motion block that collapses the duration tokens, and the
     // --transition-duration-* names Tailwind reads: 5,636 B gzip.
-    maxGzip: 6_660,
+    maxGzip: 7_310,
     desc: 'Design token CSS',
   },
 };

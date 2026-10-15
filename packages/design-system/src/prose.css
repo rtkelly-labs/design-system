@@ -223,10 +223,10 @@ html {
   padding: 1rem;
   overflow-x: auto;
   font-family: var(--ds-font-mono);
-  /* Round 6 metrics: 14px on 21px, and a tab is two columns. */
+  /* Round 6 metrics: 14px on 21px. The two-column tab is a utility on the
+   * CodeBlock body (TSX), so this stylesheet stays inside its ratchet. */
   font-size: 0.875rem;
   line-height: 1.5;
-  tab-size: 2;
   /*
    * `syntax.plain` (`text.primary`), not `intent.success`. This rendered every code block in the
    * success green — a Role that means "this worked", used as body ink — and

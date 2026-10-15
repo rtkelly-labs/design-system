@@ -57,7 +57,8 @@ describe('code metrics (Round 6)', () => {
     render(<CodeBlock title="x">{'\tcode'}</CodeBlock>);
     const css = await compileWith(['prose-ladder']);
     const body = rule(css, '.docs-codeblock-body pre');
-    expect(body).toMatch(/tab-size:\s*2\s*;/);
+    // The tab lives on the body as a utility, so prose.css stays inside its ratchet.
+    expect(document.querySelector('.docs-codeblock-body')?.className).toContain('[&_pre]:[tab-size:2]');
     expect(body).toMatch(/font-size:\s*0\.875rem\s*;/);
     expect(body).toMatch(/line-height:\s*1\.5\s*;/);
     // 0.875rem is 14px at the 16px root, and 1.5 of it is 21px.
