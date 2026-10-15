@@ -219,7 +219,33 @@ export const PHASE2: P2Decision[] = [
   },
 ];
 
+/** The Phase 2 picks, from docs/applied-evaluation/decisions.md. */
+const P2_PICKS: Record<string, string> = {
+  D6: 'D6-B (multi-select) + D6-C (single current)',
+  D7: 'D7-B',
+  D8: 'D8-B midnight, D8-A sketch',
+  D9: 'preference axis',
+  D10: 'D10-C base; round 2 below',
+};
+
 function Section({ d }: { d: P2Decision }) {
+  return (
+    <details className="border-2 border-edge-default">
+      <summary className="flex cursor-pointer flex-wrap items-baseline gap-x-3 gap-y-1 bg-surface-raised p-3 font-mono text-sm">
+        <span className="font-bold text-accent-primary">{d.id}</span>
+        <span className="text-content-primary">{d.title}</span>
+        <span className="border-2 border-edge-default px-1.5 text-[11px] font-bold uppercase text-content-secondary">
+          decided: {P2_PICKS[d.id]}
+        </span>
+      </summary>
+      <div className="p-3 sm:p-4">
+        <SectionBody d={d} />
+      </div>
+    </details>
+  );
+}
+
+function SectionBody({ d }: { d: P2Decision }) {
   return (
     <section id={d.id} aria-labelledby={`${d.id}-h`} className="flex scroll-mt-20 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8">
       <header className="flex flex-col gap-2">
@@ -248,9 +274,9 @@ export function Phase2() {
           Phase 2
         </h2>
         <p className="m-0 max-w-3xl text-lg text-content-secondary">
-          Selection and hover states, skeletons, tints, the series palette and the syntax roles. Every option is shown in
-          context on both levels, with measured numbers beside it. Colours the package has no role for are computed here
-          from its exported level data and set as custom properties on the panel.
+          Selection and hover states, skeletons, tints, the series palette and the syntax roles. Decided and collapsed by
+          default; open a section to see the options as they were shown, with measured numbers beside each. Colours the
+          package has no role for are computed here from its exported level data and set as custom properties on the panel.
         </p>
         <nav aria-label="Phase 2 decisions" className="border-2 border-edge-strong bg-surface-raised p-3 shadow-hard-md">
           <ul className="m-0 flex list-none flex-col gap-2 p-0 font-mono text-sm">
