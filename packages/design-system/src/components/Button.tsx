@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef } from 'react';
+import { forwardRef, useContext, useEffect, useId } from 'react';
 import type { Ref } from 'react';
 import type {
   AnchorHTMLAttributes,
@@ -11,8 +11,10 @@ import type {
 } from 'react';
 import { recipe } from '../lib/recipe';
 import { Spinner } from './Spinner';
+import { ButtonGroupContext } from './ButtonGroup';
+import { BUTTON_COLOUR_ROLE } from './buttonHues';
 
-interface ButtonOwnProps {
+interface ButtonBaseProps {
   /**
    * The label. Written in caps at the call site rather than upper-cased in
    * CSS, so a screen reader is given the words rather than the shouting, and
@@ -20,19 +22,27 @@ interface ButtonOwnProps {
    */
   children: ReactNode;
   /**
-   * `primary`, `secondary` and `tertiary` use the corresponding accent role,
-   * which changes with the theme level. `inverse` uses the primary content
-   * role as its background for maximum contrast. `default` is identical to
-   * `primary`. Omitted, the variant is `tertiary`.
+   * What the button is for, which decides how loud it is.
+   *
+   * - `quiet` — the default. A 2px neutral outline on a transparent fill; the
+   *   hard shadow and an accent border appear on hover. Cancel, dismiss, a
+   *   toolbar trigger: most buttons on a page.
+   * - `secondary` — an `edge-strong` outline with a hard shadow at rest. The
+   *   second action beside a primary one.
+   * - `primary` — filled `accent.primary`. The page's one main action.
+   *   `default` is identical.
+   * - `tertiary` — filled `accent.tertiary`, a third accent fill. On both
+   *   Levels this is the same hue as `danger`, so never put it beside one.
+   * - `inverse` — the primary content role as the fill, for maximum contrast;
+   *   a solid neutral where `secondary` is an outline.
+   * - `danger` — an `intent.danger` outline and text, filled on hover and on
+   *   keyboard focus. A destructive action. A variant rather than an `intent`
+   *   prop because it is one look, not a hue that composes with the others.
+   *
+   * Inside a `ButtonGroup` a `danger` button is checked against its neighbours
+   * for sharing a hue; see `ButtonGroup`.
    */
   variant?: ButtonVariant;
-  /**
-   * Padding and type scale, not a semantic weight. `md` is the default and the
-   * one to reach for; `sm` is for dense rows such as a table's row actions,
-   * and `lg` for a page's single primary action. Hit area is the constraint
-   * that decides — `sm` is still 44px tall at the `web` Medium.
-   */
-  size?: 'sm' | 'md' | 'lg';
   /**
    * Wraps the label in `[ ]`. The brutalist cue for "this one does something"
    * — worth it for a form's submit or a destructive confirm, noise on every
@@ -47,19 +57,49 @@ interface ButtonOwnProps {
   className?: string;
 }
 
+/** The sizes that carry a label. */
+interface ButtonLabelledSize {
+  /**
+   * Padding and type scale, not a semantic weight. `md` is the default and the
+   * one to reach for; `lg` is a page's single primary action.
+   *
+   * Heights at the `web` Medium, border included: `xs` 28px (a dense toolbar
+   * or a row action; clears WCAG 2.5.8's 24px), `sm` 40px, `md` 52px, `lg`
+   * 64px. None reaches the 44px of WCAG 2.5.5 (AAA) except `md` and `lg`, so
+   * a touch surface takes `md`, or the `icon-touch` size.
+   */
+  size?: 'xs' | 'sm' | 'md' | 'lg';
+}
+
 /**
- * The accents a filled Button may take.
- *
- * Narrower than `AccentToken` on purpose: `quiet` is missing because
- * `check:contrast` gates `text.inverse` against `accent.primary`, `secondary`
- * and `tertiary` only. A quiet fill with inverse text on it is not measured, so
- * it is not offered.
+ * The sizes that draw a glyph in a fixed square. Each requires `aria-label`,
+ * because the button has no text for a screen reader to read.
+ */
+interface ButtonIconSize {
+  /**
+   * `icon` is 32x32px; `icon-touch` is 40x40px, for a surface a finger uses.
+   * Pass a `NerdIcon` (or any glyph) as the child, with `aria-hidden`.
+   */
+  size: 'icon' | 'icon-touch';
+  /** The accessible name. Required: an icon-only button has no other. */
+  'aria-label': string;
+}
+
+type ButtonOwnProps = ButtonBaseProps & (ButtonLabelledSize | ButtonIconSize);
+
+/**
+ * The looks a Button may take. `quiet` is neutral ink on a transparent fill,
+ * so it needs no inverse-text gate; `danger` is gated through
+ * `text.inverse on intent.danger` in `check:contrast`, which measures the
+ * hover fill.
  */
 export type ButtonVariant =
+    | 'quiet'
     | 'primary'
     | 'secondary'
     | 'tertiary'
     | 'inverse'
+    | 'danger'
     | 'default';
 
 /**
@@ -141,11 +181,13 @@ export type ButtonProps = ButtonElementProps | ButtonLinkProps;
  * in full rather than built from a constant: Tailwind reads the source text,
  * and a template literal emits no CSS.
  */
-const PRESS =
-  'shadow-hard-md not-disabled:not-aria-disabled:hover:shadow-hard-lg ' +
+const SINK =
   'not-disabled:not-aria-disabled:active:translate-x-1 ' +
   'not-disabled:not-aria-disabled:active:translate-y-1 ' +
   'not-disabled:not-aria-disabled:active:shadow-none';
+
+const PRESS =
+  'shadow-hard-md not-disabled:not-aria-disabled:hover:shadow-hard-lg ' + SINK;
 
 /**
  * The disabled treatment, the one `Select`'s trigger and the text fields wear:
@@ -163,25 +205,53 @@ const DISABLED =
  * One constant per rendered form, aliased by every name that resolves to it.
  *
  * `default` and `primary` share the same constant and render identically.
+ *
+ * D1-A: the quiet button has no shadow at rest; the accent border and the hard
+ * shadow arrive on hover, and it sinks on press like the others.
+ * D2-B: secondary is an `edge-strong` outline with the hard shadow at rest.
+ * D3-B: danger is an outline in `intent.danger`, filled on hover or keyboard
+ * focus, and carries no shadow — the fill is the whole signal.
  */
 const PRIMARY = `bg-accent-primary text-content-inverse border-edge-strong ${PRESS}`;
-const SECONDARY = `bg-accent-secondary text-content-inverse border-edge-strong ${PRESS}`;
+const SECONDARY = `bg-transparent text-content-primary border-edge-strong ${PRESS}`;
 const TERTIARY = `bg-accent-tertiary text-content-inverse border-edge-strong ${PRESS}`;
 const INVERSE = `bg-content-primary text-content-inverse border-content-primary ${PRESS}`;
+const QUIET =
+  'bg-transparent text-content-primary border-edge-default ' +
+  'not-disabled:not-aria-disabled:hover:border-accent-primary ' +
+  'not-disabled:not-aria-disabled:hover:shadow-hard-md ' +
+  SINK;
+const DANGER =
+  'bg-transparent text-intent-danger border-intent-danger ' +
+  'not-disabled:not-aria-disabled:hover:bg-intent-danger ' +
+  'not-disabled:not-aria-disabled:hover:text-content-inverse ' +
+  'focus-visible:bg-intent-danger focus-visible:text-content-inverse';
+
+/**
+ * Heights are spacing-scale values (`h-7` 28px, `h-8` 32px, `h-10` 40px), not
+ * arbitrary ones; with `border-box` the border is inside them. Padding is
+ * cleared on the icon sizes so the glyph is centred in the square.
+ */
+const SQUARE = 'inline-flex items-center justify-center p-0';
 
 const button = recipe({
   base: `font-mono font-bold uppercase border-2 transition-all duration-quick ease-brutalist ${DISABLED}`,
   variants: {
     size: {
+      xs: 'h-7 px-2 text-xs',
       sm: 'px-4 py-2 text-sm',
       md: 'px-6 py-3 text-base',
       lg: 'px-8 py-4 text-lg',
+      icon: `${SQUARE} h-8 w-8 text-sm`,
+      'icon-touch': `${SQUARE} h-10 w-10 text-base`,
     },
     variant: {
+      quiet: QUIET,
       primary: PRIMARY,
       secondary: SECONDARY,
       tertiary: TERTIARY,
       inverse: INVERSE,
+      danger: DANGER,
       default: PRIMARY,
     },
     /**
@@ -203,8 +273,18 @@ const button = recipe({
       true: 'relative cursor-progress translate-x-1 translate-y-1 shadow-none',
     },
   },
+  compoundVariants: [
+    // A 28px control cannot carry a 4px lift; the small shadow keeps hover
+    // legible without the shadow outweighing the button.
+    {
+      size: ['xs', 'icon', 'icon-touch'],
+      variant: ['quiet', 'secondary'],
+      class:
+        'not-disabled:not-aria-disabled:hover:shadow-hard-sm',
+    },
+  ],
   defaultVariants: {
-    variant: 'tertiary',
+    variant: 'quiet',
     size: 'md',
   },
 });
@@ -227,7 +307,9 @@ const button = recipe({
  *
  * ```tsx
  * <Button onClick={save}>SAVE</Button>
- * <Button href="/pricing" variant="tertiary" bracketed size="lg">SEE PRICING</Button>
+ * <Button href="/pricing" variant="primary" bracketed size="lg">SEE PRICING</Button>
+ * <Button variant="danger" onClick={remove}>DELETE</Button>
+ * <Button size="icon" aria-label="Close"><NerdIcon name="close" aria-hidden /></Button>
  * ```
  */
 /**
@@ -247,12 +329,21 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
   function Button(props, ref) {
   const {
     children,
-    variant = 'tertiary',
+    variant = 'quiet',
     size = 'md',
     bracketed = false,
     className,
     ...rest
   } = props;
+
+  // Tells an enclosing ButtonGroup what colour this button paints with, so it
+  // can apply D3's rule. A no-op outside a group and in production.
+  const group = useContext(ButtonGroupContext);
+  const id = useId();
+  useEffect(() => {
+    if (!group || process.env.NODE_ENV === 'production') return;
+    return group.register(id, BUTTON_COLOUR_ROLE[variant]);
+  }, [group, id, variant]);
 
   const label = bracketed ? (
     <span className="inline-flex items-center justify-center gap-2">
@@ -321,9 +412,9 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
           {/* Transparent, not removed: it holds the width and the name. */}
           <span className="inline-flex opacity-0">{label}</span>
           <Spinner
-            // Sized to the label's line box: `sm` in a small button, `md` —
+            // Sized to the label's line box: `sm` in a small or icon button, `md` —
             // about a capital's height and a half — in the others.
-            size={size === 'sm' ? 'sm' : 'md'}
+            size={size === 'md' || size === 'lg' ? 'md' : 'sm'}
             accent="current"
             // The status region beside the button announces the wait. This is
             // the drawing only; a second live region inside a button, whose

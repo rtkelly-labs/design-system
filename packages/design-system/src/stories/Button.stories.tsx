@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '../components/Button';
+import { NerdIcon } from '../components/NerdIcon';
 
 const meta: Meta<typeof Button> = {
   title: 'Components/Actions & Forms/Button',
@@ -12,15 +13,15 @@ export default meta;
 type Story = StoryObj<typeof Button>;
 
 /**
- * The unadorned button: default accent, no brackets. This is the one to reach
- * for, and the reason the other two need a justification rather than a
- * preference.
+ * The unadorned button, and the one to reach for: `quiet`, the default — a 2px
+ * neutral outline on a transparent fill, no shadow at rest. The hard shadow and
+ * an accent border arrive on hover. Most buttons on a page are this one; the
+ * louder variants need a reason.
  */
 export const Default: Story = {
   args: {
-    children: 'EXECUTE ACTION',
+    children: 'CANCEL',
     bracketed: false,
-    variant: 'default',
   },
 };
 
@@ -33,22 +34,61 @@ export const Bracketed: Story = {
   args: {
     children: 'SUBMIT FORM',
     bracketed: true,
-    variant: 'default',
   },
 };
 
 /**
- * `tertiary` is pink on `midnight` and remaps with the level, which is why the
- * prop is named for the role and not the colour. Paired with `bracketed` here
- * because that is the combination a destructive action earns: the accent says
- * which one it is, the brackets say it will do something.
+ * The loudness ladder, left to right: `quiet` (outline, shadow on hover),
+ * `secondary` (an `edge-strong` outline with its shadow at rest), `primary`
+ * (the accent fill) and `inverse` (a solid ink fill). One `primary` per view;
+ * the rest step down from it.
  */
-export const PinkAccent: Story = {
+export const Variants: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      <Button variant="quiet">QUIET</Button>
+      <Button variant="secondary">SECONDARY</Button>
+      <Button variant="primary">PRIMARY</Button>
+      <Button variant="inverse">INVERSE</Button>
+    </div>
+  ),
+};
+
+/**
+ * `danger`: an `intent.danger` outline and text that fills on hover and on
+ * keyboard focus, so the destructive action reads as unfinished until it is
+ * aimed at. It carries no shadow at rest, which keeps it quieter than
+ * `primary`: a delete is never the page's main action. Pair it with a quiet or
+ * secondary neighbour — the `ButtonGroup` stories show why.
+ */
+export const Danger: Story = {
   args: {
     children: 'DELETE RECORD',
     bracketed: true,
-    variant: 'tertiary',
+    variant: 'danger',
   },
+};
+
+/**
+ * The small sizes. `xs` is 28px, for dense toolbars and row actions; `icon` is
+ * a 32px square and `icon-touch` a 40px one for surfaces a finger uses. An
+ * icon-only button has no text, so `aria-label` is required by the types.
+ * `sm` and `md` sit beside them for scale.
+ */
+export const Sizes: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-4">
+      <Button size="xs">XS</Button>
+      <Button size="sm">SM</Button>
+      <Button size="md">MD</Button>
+      <Button size="icon" aria-label="Close">
+        <NerdIcon name="close" aria-hidden="true" />
+      </Button>
+      <Button size="icon-touch" aria-label="Close">
+        <NerdIcon name="close" aria-hidden="true" />
+      </Button>
+    </div>
+  ),
 };
 
 /**
