@@ -12,7 +12,14 @@
  *   node scripts/check-contrast.mjs --report   print the full matrix, always exit 0
  */
 
-import { auditContrast, auditHueAgreement, auditSelectionDevices, auditTextHierarchy } from '../src/theme/contrast.ts';
+import {
+  auditContrast,
+  auditHueAgreement,
+  auditSelectionDevices,
+  auditSeriesSeparation,
+  auditTextHierarchy,
+  contrastMoreLadder,
+} from '../src/theme/contrast.ts';
 import { LEVELS, THEME_LEVELS } from '../src/theme/levels.ts';
 import { CSS_MEDIUM, MEDIA_DEFINITIONS, isMedium } from '../src/theme/media.ts';
 
@@ -26,6 +33,19 @@ const floor = MEDIA_DEFINITIONS[medium].contrastFloor;
 
 const results = auditContrast(LEVELS, floor);
 const failures = results.filter((r) => !r.passes);
+
+// D9: the `contrast: more` preference is a delta over each Level, so it is held
+// to the same arithmetic as the Level it modifies: every pair, every floor.
+const moreLadder = contrastMoreLadder(LEVELS);
+const moreResults = auditContrast(moreLadder, floor);
+const moreFailures = moreResults.filter((r) => !r.passes);
+const moreDevices = auditSelectionDevices(moreLadder).filter((r) => r.device !== 'surface pair');
+const moreDeviceFailures = moreDevices.filter((r) => !r.passes);
+
+// D9: the categorical series group. Normal vision is gated; the colour-vision
+// simulations are reported, because they are the case the glyphs cover.
+const separation = auditSeriesSeparation(LEVELS);
+const separationFailures = separation.filter((r) => !r.passes);
 
 // The state rule: a selected tab is marked with an accent fill or edge, never
 // with one surface against another. The devices must clear 3:1 on every level;
@@ -68,6 +88,18 @@ if (report) {
     const forLevel = devices.filter((r) => r.level === level && r.device !== 'surface pair');
     const worst = Math.min(...forLevel.map((r) => r.ratio));
     console.log(`  ${level}  worst ${worst.toFixed(2)}:1`);
+  }
+  console.log('\ncontrast: more — every pair of the delta ladder, same floors');
+  for (const level of THEME_LEVELS) {
+    const forLevel = moreResults.filter((r) => r.level === level);
+    const worst = Math.min(...forLevel.map((r) => r.ratio));
+    console.log(`  ${level}  ${forLevel.length} pairs, worst ${worst.toFixed(2)}:1`);
+  }
+  console.log('\nseries separation — closest pair, OKLab deltaE (normal vision gated at 0.04; simulations reported)');
+  for (const r of separation) {
+    console.log(
+      `  ${r.passes ? ' ' : '!'} ${r.level.padEnd(9)} ${r.vision.padEnd(13)} ${r.min.toFixed(4)}  series ${r.pair[0]}/${r.pair[1]}${r.gated ? '' : '  (reported)'}`,
+    );
   }
   console.log('\nRole -> Hue agreement — a Role must hold its declared Hue\'s value');
   for (const r of agreement) {
@@ -130,6 +162,26 @@ if (agreementFailures.length > 0) {
   process.exit(1);
 }
 
+if (separationFailures.length > 0) {
+  console.error(`Series separation failed — ${separationFailures.length} level(s) with a pair under 0.04 deltaE:\n`);
+  for (const r of separationFailures) {
+    console.error(`  ${r.level.padEnd(9)} ${r.min.toFixed(4)}  series ${r.pair[0]}/${r.pair[1]}`);
+  }
+  console.error('\nTwo series members a reader cannot tell apart are one member. Change a seriesHue in src/theme/levels.ts.');
+  process.exit(1);
+}
+
+if (moreFailures.length > 0 || moreDeviceFailures.length > 0) {
+  console.error(
+    `contrast: more failed — ${moreFailures.length} pairs and ${moreDeviceFailures.length} devices below minimum on the delta ladder:\n`,
+  );
+  for (const r of [...moreFailures, ...moreDeviceFailures].sort((a, b) => a.ratio - b.ratio)) {
+    console.error(`  ${r.level.padEnd(9)} ${fmt(r)}`);
+  }
+  console.error('\nThe preference is a delta over each Level (applyContrastDelta in src/theme/contrast.ts); it may not weaken any pair.');
+  process.exit(1);
+}
+
 if (failures.length > 0) {
   console.error(`Contrast check failed — ${failures.length} of ${results.length} pairs below minimum:\n`);
   for (const level of THEME_LEVELS) {
@@ -148,6 +200,11 @@ console.log(
   `Contrast OK (${medium}) — ${results.length} pairs across ${THEME_LEVELS.length} levels, all at or above minimum; ` +
     `${devices.length - surfacePairs.length} selection devices clear ${devices[0].minimum}:1; ` +
     `${agreement.length} Roles agree with their declared Hue.`,
+);
+const normalSep = separation.filter((r) => r.gated).map((r) => `${r.level} ${r.min.toFixed(3)}`).join(', ');
+console.log(
+  `contrast: more — ${moreResults.length} pairs and ${moreDevices.length} devices clear the same floors on the delta ladder. ` +
+    `Series (${LEVELS[THEME_LEVELS[0]].series.length}) closest pair under normal vision: ${normalSep} (floor 0.04).`,
 );
 console.log(
   `APCA (reported, not gated) — weakest text pair Lc ${weakestText.apca.toFixed(0)}: ` +

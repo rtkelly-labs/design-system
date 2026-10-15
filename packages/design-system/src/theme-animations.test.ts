@@ -97,8 +97,13 @@ describe('theme.css alone generates the animations the components use', () => {
 
   it('keeps the reduced-motion partners behind the media query', async () => {
     const css = await compileConsumer(['motion-reduce:animate-ds-spin-slow']);
+    // D9: the variant answers the OS query unless the user chose "full", and
+    // the attribute when the user chose "reduce", so it follows both.
     expect(css).toMatch(
-      /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.motion-reduce\\:animate-ds-spin-slow\s*\{\s*animation: var\(--animate-ds-spin-slow\)/,
+      /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.motion-reduce\\:animate-ds-spin-slow:where\(:root:not\(\[data-a11y-motion="full"\]\) \*\)\s*\{\s*animation: var\(--animate-ds-spin-slow\)/,
+    );
+    expect(css).toMatch(
+      /\.motion-reduce\\:animate-ds-spin-slow:where\(:root\[data-a11y-motion="reduce"\] \*\)\s*\{\s*animation: var\(--animate-ds-spin-slow\)/,
     );
   });
 });
@@ -108,8 +113,21 @@ describe('reduced motion collapses every transition at the token', () => {
 
   it('zeroes the quick and considered durations under the preference', () => {
     expect(theme).toMatch(
-      /@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root\s*\{\s*--ds-duration-quick:\s*0ms;\s*--ds-duration-considered:\s*0ms;/,
+      /@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root:not\(\[data-a11y-motion="full"\]\)\s*\{\s*--ds-duration-quick:\s*0ms;\s*--ds-duration-considered:\s*0ms;/,
     );
+  });
+
+  it('zeroes them under data-a11y-motion="reduce" with the OS silent (D9)', () => {
+    expect(theme).toMatch(
+      /\n:root\[data-a11y-motion="reduce"\]\s*\{\s*--ds-duration-quick:\s*0ms;\s*--ds-duration-considered:\s*0ms;/,
+    );
+  });
+
+  it('lets data-a11y-motion="full" beat the OS query, by exclusion (D9)', () => {
+    // The only rule that zeroes under the media query names `:not(full)`, so an
+    // attribute of "full" matches no collapsing rule and the :root values stand.
+    const media = theme.slice(theme.indexOf('@media (prefers-reduced-motion: reduce)'));
+    expect(media.slice(0, media.indexOf('}\n}'))).toContain(':not([data-a11y-motion="full"])');
   });
 
   it('keeps loops on a separate unit so a spinner is not stopped by it', () => {
