@@ -16,6 +16,8 @@ import {
   TabsList,
   TabsPanel,
   TabsTab,
+  Toolbar,
+  ToolbarButton,
   Tooltip,
   TreeDiagram,
   useOptionalTheme,
@@ -497,15 +499,15 @@ const ACTIVITY: { id: string; icon: NerdIconName; label: string }[] = [
 function IconButton({ label, pressed, onClick, icon, className = '' }: { label: string; pressed?: boolean; onClick?: () => void; icon: NerdIconName; className?: string }) {
   return (
     <Tooltip content={label} side="right">
-      <button
-        type="button"
+      <ToolbarButton
+        bare
         aria-label={label}
         aria-pressed={pressed}
         onClick={onClick}
         className={`flex h-11 w-12 items-center justify-center border-l-4 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-primary ${pressed ? 'border-accent-primary bg-surface-raised text-content-primary' : 'border-transparent text-content-muted hover:text-content-primary'} ${className}`}
       >
         <NerdIcon name={icon} size="md" />
-      </button>
+      </ToolbarButton>
     </Tooltip>
   );
 }
@@ -612,14 +614,20 @@ export default function EditorWorkbench() {
 
       <div className="flex min-h-0 flex-1 print:block">
         {/* activity bar */}
-        <nav aria-label="Activity bar" className="hidden shrink-0 flex-col justify-between border-r-2 border-edge-strong bg-surface-raised md:flex print:hidden">
+        {/* A vertical toolbar: one tab stop, Up/Down between the icons (ED-F13). */}
+        <Toolbar
+          label="Activity bar"
+          orientation="vertical"
+          framed={false}
+          className="hidden shrink-0 justify-between gap-0 border-r-2 border-edge-strong bg-surface-raised md:flex print:hidden"
+        >
           <div className="flex flex-col">
             {ACTIVITY.map((a) => (
               <IconButton key={a.id} label={a.label} icon={a.icon} pressed={activity === a.id} onClick={() => setActivity(a.id)} />
             ))}
           </div>
           <IconButton label="Settings" icon="settings" />
-        </nav>
+        </Toolbar>
 
         {/* sidebar */}
         <aside aria-label="Side bar" className="hidden w-60 shrink-0 flex-col border-r-2 border-edge-default bg-surface-base md:flex print:hidden">
