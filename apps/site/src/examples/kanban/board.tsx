@@ -82,14 +82,14 @@ function CardFace({ task, overdueLabel = true }: { task: Task; overdueLabel?: bo
         <ul className="m-0 mt-2 flex list-none flex-wrap gap-1 p-0" aria-label="Labels">
           {task.labels.map((l) => (
             <li key={l}>
-              <Tag text={LABELS[l].text} accent={LABELS[l].accent} className="px-1.5 py-0.5 text-[0.65rem]" />
+              <Tag text={LABELS[l].text} accent={LABELS[l].accent} size="sm" />
             </li>
           ))}
         </ul>
       )}
       <div className="mt-2 flex items-center justify-between gap-2 font-mono text-xs">
         <span className="flex items-center gap-2">
-          <Badge accent={PRIORITY_ACCENT[task.priority]} className="px-1.5 py-0 text-[0.65rem]">
+          <Badge accent={PRIORITY_ACCENT[task.priority]} size="sm">
             {task.priority}
           </Badge>
           {task.due && (

@@ -465,7 +465,8 @@ export default function InboxApp() {
                             <Badge
                               key={l}
                               accent="quiet"
-                              className="hidden shrink-0 border px-1.5 py-0 text-[0.65rem] 2xl:inline-flex"
+                              size="sm"
+                              className="hidden shrink-0 2xl:inline-flex"
                             >
                               {l}
                             </Badge>
@@ -473,7 +474,7 @@ export default function InboxApp() {
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
-                        <Badge accent={STATUS_ACCENT[r.status]} className="border px-1.5 py-0 text-[0.65rem]">
+                        <Badge accent={STATUS_ACCENT[r.status]} size="sm">
                           {r.status}
                         </Badge>
                       </TableCell>

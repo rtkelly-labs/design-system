@@ -65,6 +65,9 @@ const CASES: readonly VisualCase[] = [
   { id: 'foundations-swatch--group', snapshot: 'swatch-group.png' },
   { id: 'components-content-badge--intent', snapshot: 'badge-intent.png' },
   { id: 'components-content-tag--row', snapshot: 'tag-row.png' },
+  // Row 16: size="sm". Baselines come with `/update-snapshots`.
+  { id: 'components-content-badge--small', snapshot: 'badge-small.png' },
+  { id: 'components-content-tag--small-and-plain', snapshot: 'tag-small-and-plain.png' },
   { id: 'components-content-brackettext--emphasis', snapshot: 'brackettext-emphasis.png' },
   { id: 'components-layout-divider--patterns', snapshot: 'divider-patterns.png' },
   { id: 'components-layout-pagetitle--with-subtitle', snapshot: 'pagetitle-with-subtitle.png' },
