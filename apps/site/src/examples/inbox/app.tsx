@@ -427,21 +427,14 @@ export default function InboxApp() {
                       aria-rowindex={idx + 2}
                       aria-current={isCur ? 'true' : undefined}
                       data-state={isSel ? 'selected' : undefined}
-                      data-cursor={isCur ? 'true' : undefined}
+                      // D6-B: `Table` draws selected (tint), cursor (2px outline) and
+                      // hover (inset edge) from these two attributes.
+                      data-current={isCur ? 'true' : undefined}
                       onClick={() => {
                         setCursor(r.id);
                         setOpenId(r.id);
                       }}
-                      className={[
-                        'cursor-pointer',
-                        // Selection is the 4px leading edge, per docs/theming.md: the
-                        // surface step `Table` ships for `data-state=selected` is
-                        // under 1.1:1 against the page. The cursor is an inset
-                        // outline, so the two read apart.
-                        isSel ? 'shadow-[inset_4px_0_0_0_var(--ds-accent-primary)]' : '',
-                        isCur ? 'outline-2 -outline-offset-2 outline-accent-secondary' : '',
-                        isOpen ? 'bg-surface-sunken' : '',
-                      ].join(' ')}
+                      className={['cursor-pointer', isOpen && !isSel ? 'bg-surface-sunken' : ''].join(' ')}
                     >
                       <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
                         <Checkbox
@@ -456,7 +449,7 @@ export default function InboxApp() {
                       <TableCell className={`max-w-0 ${r.unread ? 'font-bold' : 'text-content-secondary'}`}>
                         <div className="flex items-center gap-2">
                           {r.unread ? (
-                            <span aria-label="unread" className="shrink-0 font-bold text-accent-primary">
+                            <span aria-label="unread" className={`shrink-0 font-bold ${isSel ? 'text-content-primary' : 'text-accent-primary'}`}>
                               ●
                             </span>
                           ) : null}
@@ -518,20 +511,13 @@ export default function InboxApp() {
 }
 
 function ListSkeleton({ density }: { density: TableDensity }) {
-  const h = density === 'compact' ? 'h-5' : 'h-6';
+  // D7-B / INB-04: the table-row preset, one hatched band per row at the density's height.
+  // A gap between bands, so each reads as a row: butted together the hatch is one slab.
+  const h = density === 'compact' ? 'h-7' : 'h-9';
   return (
-    <div role="status" aria-label="Loading issues" className="flex flex-col gap-0 border-2 border-edge-strong">
+    <div role="status" aria-label="Loading issues" className="flex flex-col gap-2 border-2 border-edge-strong p-2">
       {Array.from({ length: 12 }, (_, i) => (
-        <div
-          key={i}
-          className={`flex items-center gap-3 border-b border-edge-subtle px-3 ${density === 'compact' ? 'py-2' : 'py-3'}`}
-        >
-          <Skeleton className="h-4 w-4 shrink-0" />
-          <Skeleton className={`${h} w-8 shrink-0`} />
-          <Skeleton className={`${h} hidden w-16 shrink-0 md:block`} />
-          <Skeleton className={`${h} flex-1`} />
-          <Skeleton className={`${h} w-24 shrink-0`} />
-        </div>
+        <Skeleton key={i} shape="row" className={h} />
       ))}
     </div>
   );

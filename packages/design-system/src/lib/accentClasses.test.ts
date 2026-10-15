@@ -3,6 +3,7 @@ import {
   ACCENT_CLASS_MAPS,
   accentFocusClass,
   accentHoverEdgeClass,
+  accentSurfaceClass,
   accentTextClass,
   canonicalAccent,
   type CanonicalAccent,
@@ -67,6 +68,24 @@ describe('canonicalAccent', () => {
 describe('class maps agree with accentVar', () => {
   it.each(TOKENS)('%s resolves to the same role in both encodings', (token) => {
     expect(accentVar(token)).toBe(`var(--ds-${canonicalAccent(token)})`);
+  });
+});
+
+describe('accentSurfaceClass (D8)', () => {
+  it.each(TOKENS)('%s: tint fills with its own role tint, tentative has no fill', (token) => {
+    const role = canonicalAccent(token);
+    expect(accentSurfaceClass(token)).toContain(`bg-tint-${role}`);
+    expect(accentSurfaceClass(token, 'tint')).toContain(`border-l-${role}`);
+    expect(accentSurfaceClass(token, 'tentative')).toContain(`border-l-${role}`);
+    expect(accentSurfaceClass(token, 'tentative')).toContain('bg-surface-raised');
+    expect(accentSurfaceClass(token, 'tentative')).not.toContain('bg-tint');
+  });
+
+  it('references tint tokens that theme.css declares', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const css = readFileSync(resolve(process.cwd(), 'src/theme.css'), 'utf8');
+    for (const role of ROLES) expect(css).toContain(`--color-tint-${role}:`);
   });
 });
 

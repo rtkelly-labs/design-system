@@ -29,6 +29,8 @@ export * from './theme/recommended';
 // it, so exporting it would put that library back into the published .d.ts and
 // make replacing it a breaking change. Components import it directly.
 export { cn } from './lib/recipe';
+export { accentSurfaceClass } from './lib/accentClasses';
+export type { AccentEmphasis } from './lib/accentClasses';
 export type { ClassInput } from './lib/recipe';
 export * from './lib/slug';
 

@@ -155,6 +155,44 @@ export interface LevelDefinition {
   readonly accentHue: Readonly<Record<Emphasis, HueRef>>;
   /** As `accentHue`, for the meaning Roles. */
   readonly intentHue: Readonly<Record<Intent, HueRef>>;
+  /**
+   * How much of a role is mixed into `surface.base` to make its tint, in
+   * percent. **Declared per level, not shared** (D8): levels are independently
+   * authored (ADR 0003), and the strength that holds the lowest role at 4.5:1
+   * on one ground is not the strength that does on the other. Midnight is 20,
+   * Sketch 12. `levels.test.ts` re-derives every `tint` literal from this.
+   */
+  readonly tintStrength: number;
+  /**
+   * An opaque tint per accent and intent role: the role mixed into
+   * `surface.base` at {@link LevelDefinition.tintStrength}. A fill for an
+   * event, a chip or a banner that must carry the role's hue without a
+   * translucent layer — a literal, because the `/15` alpha and `color-mix()`
+   * it replaces resolve differently on each ground. The role itself, as text or
+   * as a 4px edge, reads on it at 4.5:1; so does `text.primary`.
+   */
+  readonly tint: Readonly<{
+    accent: Readonly<Record<Emphasis, string>>;
+    intent: Readonly<Record<Intent, string>>;
+  }>;
+  /**
+   * Percent of `accent.primary` mixed into `surface.base` for a selected row
+   * in a multi-select collection (D6-B). Declared per level: the smallest
+   * strength at which the tint is 3:1 against both `surface.base` and
+   * `surface.raised` (WCAG 1.4.11), found by search — 53 on Midnight, 67 on
+   * Sketch. Far stronger than `tintStrength`, because a selected row is state
+   * and must be seen, where a tint is decoration with its own text.
+   * `tint.test.ts` re-derives `selection.multi` from it.
+   */
+  readonly selectionStrength: number;
+  /**
+   * The selected-row fill. `multi` is for collections where several rows are
+   * chosen at once (inbox, table, kanban); a single "current" item (nav,
+   * SegmentedControl) takes a solid `accent.primary` fill with `text.inverse`
+   * instead. Text on it is `text.primary`, never `secondary`: `secondary` is
+   * 3.45:1 on Midnight's and 3.58:1 on Sketch's.
+   */
+  readonly selection: Readonly<{ multi: string }>;
   /** Colour of the hard offset shadows. Normally tracks `border.strong`. */
   readonly shadow: string;
 }
@@ -248,6 +286,13 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       magenta: '#ff88fd',
       pink: '#ff8ebe',
     },
+    tintStrength: 20,
+    tint: {
+      accent: { primary: '#172c3e', secondary: '#302c28', tertiary: '#331a33', quiet: '#202032' },
+      intent: { info: '#172c3e', success: '#173429', warning: '#302c28', danger: '#331a33' },
+    },
+    selectionStrength: 53,
+    selection: { multi: '#236b82' },
     shadow: '#ffffff',
   },
 
@@ -324,6 +369,13 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       magenta: '#7f0080',
       pink: '#8a0052',
     },
+    tintStrength: 12,
+    tint: {
+      accent: { primary: '#d9e1ec', secondary: '#dae2d4', tertiary: '#f3dbd2', quiet: '#e3e0d8' },
+      intent: { info: '#d9e1ec', success: '#dae2d4', warning: '#ebded1', danger: '#f3dbd2' },
+    },
+    selectionStrength: 67,
+    selection: { multi: '#5f8be3' },
     shadow: '#23262e',
   },
 };

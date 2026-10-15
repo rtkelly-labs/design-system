@@ -66,6 +66,11 @@ function levelVariables(definition) {
   for (const [key, value] of Object.entries(definition.border)) push(`border-${key}`, value);
   for (const [key, value] of Object.entries(definition.accent)) push(`accent-${key}`, value);
   for (const [key, value] of Object.entries(definition.intent)) push(`intent-${key}`, value);
+  // Opaque role tints (D8), literal per level; see `LevelDefinition.tint`.
+  for (const [key, value] of Object.entries(definition.tint.accent)) push(`tint-accent-${key}`, value);
+  for (const [key, value] of Object.entries(definition.tint.intent)) push(`tint-intent-${key}`, value);
+  // The selected-row fill for multi-select collections (D6-B).
+  push('selection-multi', definition.selection.multi);
   // The Hue vocabulary, declared below the Roles above. A component may not
   // read these — see `docs/adr/0001-hues-declared-below-roles.md`. They exist
   // for Targets with no notion of jobs: ANSI's sixteen slots, a diagram
@@ -149,6 +154,15 @@ const TAILWIND_ALIASES = `  --color-surface-base: var(--ds-surface-base);
   --color-intent-success: var(--ds-intent-success);
   --color-intent-warning: var(--ds-intent-warning);
   --color-intent-danger: var(--ds-intent-danger);
+  --color-selection-multi: var(--ds-selection-multi);
+  --color-tint-accent-primary: var(--ds-tint-accent-primary);
+  --color-tint-accent-secondary: var(--ds-tint-accent-secondary);
+  --color-tint-accent-tertiary: var(--ds-tint-accent-tertiary);
+  --color-tint-accent-quiet: var(--ds-tint-accent-quiet);
+  --color-tint-intent-info: var(--ds-tint-intent-info);
+  --color-tint-intent-success: var(--ds-tint-intent-success);
+  --color-tint-intent-warning: var(--ds-tint-intent-warning);
+  --color-tint-intent-danger: var(--ds-tint-intent-danger);
   --color-palette-red: var(--ds-palette-red);
   --color-palette-orange: var(--ds-palette-orange);
   --color-palette-yellow: var(--ds-palette-yellow);

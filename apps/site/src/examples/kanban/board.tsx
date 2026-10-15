@@ -786,10 +786,14 @@ function CardItem({ task, column, lifted, helpId, onPointerDown, onKeyDown, onOp
     >
       <div
         className={[
-          'border-2 bg-surface-raised p-3 transition-shadow motion-reduce:transition-none print:break-inside-avoid',
+          'border-2 p-3 transition-shadow motion-reduce:transition-none print:break-inside-avoid',
+          // D6-B: a selected (lifted) card is the opaque selection tint, and the
+          // text on it steps up to primary ink: secondary and muted do not clear 4.5:1 there.
           lifted
-            ? 'border-accent-primary shadow-hard-lg'
-            : 'border-edge-strong shadow-hard-sm hover:shadow-hard-md',
+            ? 'border-accent-primary bg-selection-multi text-content-primary shadow-hard-lg '
+              + '[&_.text-content-muted]:text-content-primary [&_.text-content-secondary]:text-content-primary '
+              + '[&_.text-intent-danger]:text-content-primary'
+            : 'border-edge-strong bg-surface-raised shadow-hard-sm hover:shadow-hard-md',
         ].join(' ')}
       >
         <div className="mb-1 flex items-center justify-between gap-2">
