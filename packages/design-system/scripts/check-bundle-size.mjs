@@ -39,7 +39,9 @@ const BUDGETS = {
     // D6/D8: per-level opaque role tints and the multi-select selection device:
     // 29,788 B raw, 5,440 B gzip locally. ~2% headroom kept.
     maxRaw: 30_400,
-    maxGzip: 5_560,
+    // The reduced-motion block that collapses the duration tokens, and the
+    // --transition-duration-* names Tailwind reads: 5,636 B gzip.
+    maxGzip: 5_760,
     desc: 'Design token CSS',
   },
 };
