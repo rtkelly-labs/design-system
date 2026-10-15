@@ -935,8 +935,9 @@ export const EDITOR_EDGE_FLOOR = 3;
  *     token; the selection over each ground and over each diff band for the ink
  *     (a selection can cover a changed line), and the bracket wash for the
  *     glyph it matches.
- *  3. The find, bracket, error, warning, info and diff edges at 3:1 on each
- *     ground, and the bracket edge on its own wash.
+ *  3. The find, bracket, info and diff edges at 3:1 on each ground, and the
+ *     bracket edge on its own wash; error and warning at 4.5:1, since the
+ *     Terminal figure draws them as text.
  *
  * Kept apart from {@link auditContrast} so the 147-pair figure that the docs
  * quote does not move.
@@ -979,8 +980,12 @@ export function auditEditor(ladder: Readonly<Record<ThemeLevel, LevelDefinition>
         check(`text.primary on bracketWash over ${sName}`, def.text.primary, flattenOnto(def.editor.bracketWash, surface), EDITOR_TEXT_FLOOR);
       }
 
-      for (const role of ['find', 'findCurrent', 'bracket', 'error', 'warning', 'info', 'diffAdded', 'diffRemoved'] as const) {
+      for (const role of ['find', 'findCurrent', 'bracket', 'info', 'diffAdded', 'diffRemoved'] as const) {
         check(`editor.${role} on ${gName}`, def.editor[role], ground, EDITOR_EDGE_FLOOR);
+      }
+      // Error and warning are also drawn as text (the Terminal figure's line kinds), so they hold 4.5.
+      for (const role of ['error', 'warning'] as const) {
+        check(`editor.${role} on ${gName}`, def.editor[role], ground, EDITOR_TEXT_FLOOR);
       }
       check(`editor.bracket on bracketWash over ${gName}`, def.editor.bracket, flattenOnto(def.editor.bracketWash, ground), EDITOR_EDGE_FLOOR);
     }
