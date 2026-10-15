@@ -63,6 +63,9 @@ function sources() {
   const walk = (dir) => {
     for (const entry of readdirSync(path.join(ROOT, dir))) {
       const rel = path.join(dir, entry);
+      // Dated evaluation reports record what was measured at the time; they are
+      // evidence, not live prose, so their figures are not held to today's source.
+      if (rel === path.join('docs', 'applied-evaluation')) continue;
       if (statSync(path.join(ROOT, rel)).isDirectory()) walk(rel);
       else if (/\.(md|ts)$/.test(entry)) files.push(rel);
     }
