@@ -21,6 +21,7 @@ Full reports are in `applied-evaluation/`. Each is the agent's own final report,
 | `print-touch.md` | Gap fill: real PDFs rasterised, emulated touch | PT-01–10 |
 | `references-archetypes.md` | Evidence: 81 archetype findings and roll-up rows 1–27 | verdict per ID |
 | `references-audit-oss.md` | Evidence: AUD-F01–F42, and the OSS facts checked against npm and GitHub | verdict per ID |
+| `reference-themes.md` | Evidence: the pre-existing themes read, and the requirements they yield | — |
 
 The five apps are mounted as full-page samples at `/site/examples/<slug>` (edits to `apps/site/src/content/samples.ts`
 and `apps/site/src/samples/index.tsx`). They are not registered in `src/examples/index.ts`; see SITE-10.

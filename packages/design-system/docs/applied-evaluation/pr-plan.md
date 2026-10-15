@@ -8,7 +8,7 @@ and is opened as a draft for the owner to merge.
 
 | # | PR | Contents | Depends on |
 |---|---|---|---|
-| 1 | docs: applied evaluation | This folder: roll-up, reports, references, decisions, accessibility research, Pink Ink (MIT). Also keeps dated reports out of `check:docs` | — |
+| 1 | docs: applied evaluation | This folder: roll-up, reports, references, decisions, accessibility research, the reference-themes reading. Also keeps dated reports out of `check:docs` | — |
 | 2 | feat(site): applied samples | Kanban, inbox, settings, calendar and editor as full-page samples; `fullHeight` | — |
 | 3 | fix(motion): reduced motion at the token | Duration tokens collapse under reduce; the `--transition-duration-*` name fix | — |
 | 4 | fix: brackets, `pre` radius, NoteBlock intents | NBSP brackets, `text-wrap: balance`, zero radius on code `pre`, NoteBlock names match intents (breaking) | — |
