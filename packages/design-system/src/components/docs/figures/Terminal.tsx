@@ -15,13 +15,29 @@ export interface TerminalProps extends React.HTMLAttributes<HTMLDivElement> {
   label?: string;
   /** Prompt glyph marking a command line. Defaults to `$`. */
   prompt?: string;
-  /** Plain lines or a fenced code block. `$ cmd` is a command and `# …` a comment. */
+  /** Plain lines or a fenced code block. `$ cmd` is a command, `# …` a comment, `✓` a success, `✗` or `Error:` an error and `⚠` or `warn:` a warning. */
   children?: ReactNode;
   /** Additional classes for this terminal. */
   className?: string;
 }
 
-type TerminalLine = { kind: 'command' | 'comment' | 'ok' | 'output'; text: string };
+type TerminalLineKind = 'command' | 'comment' | 'ok' | 'error' | 'warn' | 'output';
+type TerminalLine = { kind: TerminalLineKind; text: string };
+
+/** A failure marker, or a line that opens with the word: `✗ x`, `Error: x`, `FAIL src/a.test.ts`. `errors: 0` is not one. */
+const ERROR_LINE = /^(?:[✗✘✖×]|(?:error|fail(?:ed|ure)?|err!)(?![\p{L}\p{N}_]))/iu;
+/** `⚠ x`, `warn: x`, `Warning: x`. */
+const WARN_LINE = /^(?:⚠|warn(?:ing)?(?![\p{L}\p{N}_]))/iu;
+
+/** The colour each line kind is drawn in, by role: errors and warnings use the editor roles, so they do not read as muted output. */
+const KIND_CLASS: Record<TerminalLineKind, string> = {
+  command: 'text-content-primary',
+  comment: 'text-content-muted',
+  ok: 'text-accent-primary',
+  error: 'text-editor-error',
+  warn: 'text-editor-warning',
+  output: 'text-content-muted',
+};
 
 function parse(source: string, prompt: string): TerminalLine[] {
   const lines = source.replace(/\r\n?/g, '\n').split('\n');
@@ -32,17 +48,19 @@ function parse(source: string, prompt: string): TerminalLine[] {
     if (text.startsWith(`${prompt} `) || text === prompt) return { kind: 'command', text: text.slice(prompt.length).trimStart() };
     if (text.startsWith('#')) return { kind: 'comment', text };
     if (/^[✓✔√]/.test(text)) return { kind: 'ok', text };
+    if (ERROR_LINE.test(text)) return { kind: 'error', text };
+    if (WARN_LINE.test(text)) return { kind: 'warn', text };
     return { kind: 'output', text };
   });
 }
 
-/** Renders a shell session with command, comment, success, and output line semantics. */
+/** Renders a shell session with command, comment, success, error, warning, and output line semantics. */
 export const Terminal = React.forwardRef<HTMLDivElement, TerminalProps>(function Terminal({ label = 'Shell', prompt = '$', children, className, ...rest }, ref) {
   const lines = parse(textOf(children), prompt);
   return (
       <AsciiFrameBody data-slot="terminal" ref={ref} {...rest} className={cn('overflow-x-auto', className)}>
         <pre className="m-0 flex min-w-max flex-col gap-0.5 whitespace-pre leading-relaxed" role="region" tabIndex={0} aria-label={`${label} terminal output`}>
-          {lines.map((line, index) => <code className={cn('grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2', line.kind === 'command' ? 'text-content-primary' : line.kind === 'ok' ? 'text-accent-primary' : 'text-content-muted')} key={`${index}-${line.text}`}>
+          {lines.map((line, index) => <code data-kind={line.kind} className={cn('grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-2', KIND_CLASS[line.kind])} key={`${index}-${line.text}`}>
             <span aria-hidden="true" className={cn('select-none text-center', line.kind === 'command' ? 'text-accent-primary' : 'text-transparent')}>{line.kind === 'command' ? prompt : ' '}</span>
             <span>{line.text || ' '}</span>
           </code>)}
