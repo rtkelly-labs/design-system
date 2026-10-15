@@ -190,7 +190,7 @@ export const TickerTape = forwardRef<HTMLDivElement, TickerTapeProps>(
         data-slot="ticker-tape"
         className={cn(
           sticky ? 'fixed top-0 left-0 right-0 z-50 shadow-hard-md' : 'relative',
-          'flex items-stretch border-y-2 border-edge-strong bg-surface-base font-mono text-xs text-content-primary overflow-hidden select-none',
+          'flex items-stretch border-y-2 border-edge-strong bg-surface-base font-mono text-xs text-content-primary overflow-hidden select-none motion-reduce:flex-wrap',
           className,
         )}
         onMouseEnter={handleMouseEnter}
@@ -209,14 +209,21 @@ export const TickerTape = forwardRef<HTMLDivElement, TickerTapeProps>(
         )}
 
         {/* Marquee viewport */}
-        <div className="relative flex-1 overflow-hidden py-2.5 flex items-center">
+        {/*
+          Under `prefers-reduced-motion` the effect above never starts, so the
+          track would sit still with one sentence in view and the rest clipped.
+          The `motion-reduce:` classes turn it into a static list instead: the
+          items stack, the looping duplicate goes away, and nothing is cut off.
+          Done in CSS so there is no first paint of the clipped marquee.
+        */}
+        <div className="relative flex-1 overflow-hidden py-2.5 flex items-center motion-reduce:basis-64 motion-reduce:grow motion-reduce:items-start">
           <div
             ref={trackRef}
             data-slot="ticker-tape-track"
-            className="flex whitespace-nowrap will-change-transform"
+            className="flex whitespace-nowrap will-change-transform motion-reduce:min-w-0 motion-reduce:whitespace-normal"
           >
             {/* Primary Sequence */}
-            <div className="flex items-center gap-8 px-4 shrink-0">
+            <div className="flex items-center gap-8 px-4 shrink-0 motion-reduce:min-w-0 motion-reduce:shrink motion-reduce:flex-col motion-reduce:items-start motion-reduce:gap-y-1.5">
               {items.map((item, idx) => (
                 <span
                   key={`ticker-item-a-${idx}`}
@@ -231,7 +238,7 @@ export const TickerTape = forwardRef<HTMLDivElement, TickerTapeProps>(
             </div>
             {/* Duplicate Sequence for seamless infinite loop */}
             <div
-              className="flex items-center gap-8 px-4 shrink-0"
+              className="flex items-center gap-8 px-4 shrink-0 motion-reduce:hidden"
               aria-hidden="true"
             >
               {items.map((item, idx) => (
