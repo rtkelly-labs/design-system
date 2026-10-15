@@ -369,18 +369,50 @@ describe('Tabs: closable and dirty', () => {
     );
   }
 
-  it('keeps the close control out of the tab: a sibling, hidden, not tabbable', () => {
+  it('exposes the close control as a named button beside the tab, not inside it', () => {
     render(<Files onClose={() => {}} />);
     const tab = screen.getByRole('tab', { name: 'b.ts' });
     expect(tab.querySelector('button')).toBeNull();
-    const close = document.querySelectorAll('[data-slot="tabs-tab-close"]');
+    const close = Array.from(document.querySelectorAll('[data-slot="tabs-tab-close"]'));
     expect(close).toHaveLength(3);
-    for (const c of Array.from(close)) {
-      expect(c.getAttribute('aria-hidden')).toBe('true');
-      expect(c.getAttribute('tabindex')).toBe('-1');
+    for (const c of close) {
+      expect(c.getAttribute('aria-hidden')).toBeNull();
       expect(c.closest('[role="tab"]')).toBeNull();
+      // Not inside the tablist either: a tablist may own only tabs, so axe's
+      // `aria-required-children` fails on a button anywhere beneath it.
+      expect(c.closest('[role="tablist"]')).toBeNull();
+      expect(c.closest('[data-slot="tabs-close-layer"]')).not.toBeNull();
     }
+    expect(screen.getByRole('button', { name: 'Close b.ts' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Close a.ts' })).toBeTruthy();
     expect(tab.getAttribute('aria-keyshortcuts')).toBe('Delete');
+  });
+
+  it("puts only the selected tab's close control in the Tab order, after the roving tab", () => {
+    render(<Files onClose={() => {}} />);
+    expect(screen.getByRole('button', { name: 'Close b.ts' }).getAttribute('tabindex')).toBe('0');
+    expect(screen.getByRole('button', { name: 'Close a.ts' }).getAttribute('tabindex')).toBe('-1');
+    expect(screen.getByRole('button', { name: 'Close c.ts' }).getAttribute('tabindex')).toBe('-1');
+    const tab = screen.getByRole('tab', { name: 'b.ts' });
+    const close = screen.getByRole('button', { name: 'Close b.ts' });
+    expect(tab.compareDocumentPosition(close) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('closing the selected tab from its close button moves focus to the next tab', () => {
+    const onClose = vi.fn();
+    render(<Files onClose={onClose} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Close b.ts' }));
+    expect(onClose).toHaveBeenCalledWith('b.ts');
+    expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'c.ts' }));
+  });
+
+  it('leaves the tablist owning nothing but tabs, so aria-required-children holds', () => {
+    render(<Files onClose={() => {}} />);
+    const tablist = screen.getByRole('tablist');
+    const children = Array.from(tablist.children);
+    expect(children).toHaveLength(3);
+    for (const child of children) expect(child.getAttribute('role')).toBe('tab');
+    expect(tablist.querySelector('button:not([role="tab"])')).toBeNull();
   });
 
   it('puts the unsaved state in the accessible name, not in colour alone', () => {
@@ -411,8 +443,7 @@ describe('Tabs: closable and dirty', () => {
   it('closing an unselected tab with the pointer leaves selection alone', () => {
     const onClose = vi.fn();
     render(<Files onClose={onClose} />);
-    const closeA = document.querySelectorAll('[data-slot="tabs-tab-close"]')[0] as HTMLElement;
-    fireEvent.click(closeA);
+    fireEvent.click(screen.getByRole('button', { name: 'Close a.ts' }));
     expect(onClose).toHaveBeenCalledWith('a.ts');
     expect(screen.getByRole('tab', { name: 'b.ts' }).getAttribute('aria-selected')).toBe('true');
   });

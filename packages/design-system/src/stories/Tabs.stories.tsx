@@ -168,9 +168,11 @@ export const CasePreserved: Story = {
 
 /**
  * An editor's open files: `onClose` makes a tab closable and `dirty` flags
- * unsaved changes. The close control is a pointer affordance beside the tab,
- * not inside it; from the keyboard, `Delete` on a focused tab closes it and
- * focus moves to the next. Try it: focus a tab and press `Delete`.
+ * unsaved changes. The close control is a real button named "Close <file>",
+ * beside the tab rather than inside it. The selected tab's is the next Tab stop
+ * after the strip; the rest are reachable by pointer and by name. `Delete` on a
+ * focused tab also closes it, and focus moves to the next. Try it: focus a tab
+ * and press `Delete`, or Tab to the close button.
  */
 export const ClosableAndDirty: Story = {
   render: function ClosableTabs() {
