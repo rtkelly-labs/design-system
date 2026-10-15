@@ -240,6 +240,9 @@ ticker-tape-track	TickerTape
 timeline	Timeline
 tldr	TLDR
 token-table	TokenTable
+toolbar	Toolbar
+toolbar-button	ToolbarButton
+toolbar-separator	ToolbarSeparator
 track-card	TrackCard
 track-card-badge	TrackCard
 track-card-description	TrackCard
