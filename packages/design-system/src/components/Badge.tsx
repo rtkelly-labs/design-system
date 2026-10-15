@@ -1,19 +1,20 @@
 import { forwardRef } from 'react';
 import type React from 'react';
-import { AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react';
 import { accentVar } from '../lib/theme';
 import type { AccentToken } from '../lib/theme';
 import { cn } from '../lib/recipe';
 
 /**
  * What each intent draws under the `patterns` preference, so danger and success
- * differ by more than hue. A distinct silhouette each: check, cross, triangle, i.
+ * differ by more than hue: a check, a cross, a triangle and a bar, as one path
+ * each in a 12px box. Inline rather than icons from a library, because every
+ * consumer that renders a `Badge` pays for these whether or not it ever sees them.
  */
 const INTENT_GLYPH = {
-  success: CheckCircle2,
-  danger: XCircle,
-  warning: AlertTriangle,
-  info: Info,
+  success: 'M2 6.5l3 3 5-7',
+  danger: 'M2 2l8 8M10 2l-8 8',
+  warning: 'M6 1.5l5 9H1z',
+  info: 'M6 3v7',
 } as const;
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
@@ -57,8 +58,18 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
   { children, accent = 'primary', size = 'md', className = '', style, ...props },
   ref,
 ) {
-  const Glyph = accent in INTENT_GLYPH ? INTENT_GLYPH[accent as keyof typeof INTENT_GLYPH] : undefined;
-  const glyph = Glyph ? <Glyph size={size === 'sm' ? 10 : 12} strokeWidth={3} /> : null;
+  const path = accent in INTENT_GLYPH ? INTENT_GLYPH[accent as keyof typeof INTENT_GLYPH] : undefined;
+  const glyph = path ? (
+    <svg
+      viewBox="0 0 12 12"
+      className={size === 'sm' ? 'size-2.5' : 'size-3'}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+    >
+      <path d={path} />
+    </svg>
+  ) : null;
   return (
     <span data-slot="badge"
       ref={ref}

@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { A11yMenu } from '../components/A11yMenu';
 import { A11yPreferencesProvider } from '../components/A11yPreferencesProvider';
+import { DocsHeader } from '../components/docs/DocsHeader';
+import { ThemeProvider } from '../components/ThemeProvider';
 import { cn } from '../lib/recipe';
 
 const meta: Meta<typeof A11yMenu> = {
@@ -63,5 +65,22 @@ export const Trigger: Story = {
     <Stage className="min-h-24">
       <A11yMenu />
     </Stage>
+  ),
+};
+
+/**
+ * Where it lives: beside the level picker, in the docs header. `DocsHeader`
+ * mounts the menu itself when an `A11yPreferencesProvider` is above it, and
+ * renders without one when there is none, as it does for the level picker. A
+ * marketing `SiteHeader` has no built-in picker, so there the menu goes in its
+ * `actions` next to the site's own.
+ */
+export const BesideThePicker: Story = {
+  render: () => (
+    <ThemeProvider persist={false} followSystem={false}>
+      <A11yPreferencesProvider persist={false}>
+        <DocsHeader title="Design system" />
+      </A11yPreferencesProvider>
+    </ThemeProvider>
   ),
 };
