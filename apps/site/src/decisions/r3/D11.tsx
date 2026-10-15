@@ -376,7 +376,7 @@ export function D11G() {
           <Panel level={level}>
             <div className="grid grid-cols-1 gap-4">
               {G_VARIANTS.map((v) => (
-                <div key={v.id} id={`D11-${v.id}`} className="scroll-mt-20">
+                <div key={v.id} id={`D11-${v.id}`} className="scroll-mt-24">
                   <SceneLabel>{`${v.id}: ${v.title}`}</SceneLabel>
                   <Table label={`${v.id} issues`} appearance="quiet" density="compact" containerClassName="border-2 border-edge-default">
                     <TableHeader>
