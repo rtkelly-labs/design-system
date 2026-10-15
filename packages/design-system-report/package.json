@@ -29,6 +29,7 @@
     "test:watch": "vitest",
     "report": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/report.mjs",
     "manifesto": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/report.mjs reports/manifesto.tsx --strict --pdf --no-typecheck --title \"Design Manifesto\"",
+    "compendium": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/report.mjs reports/compendium.tsx --strict --pdf --no-typecheck --title Compendium",
     "verify:report-cli": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/verify-report-cli.mjs",
     "check:deps": "knip --no-progress --include dependencies,unlisted,unresolved"
   },
@@ -73,16 +74,17 @@
   },
   "devDependencies": {
     "@rtkelly13/design-system": "workspace:*",
+    "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "esbuild": "^0.27.7",
     "knip": "^6.32.2",
+    "pdfjs-dist": "6.3.289",
     "playwright": "^1.62.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "tailwindcss": "^4.3.3",
-    "@tailwindcss/typography": "^0.5.20",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
