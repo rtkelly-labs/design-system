@@ -1,0 +1,155 @@
+name: Reports
+
+# The two repo-local reports, printed: the Design Manifesto and the component
+# Compendium, each as a self-contained HTML file and an A4 PDF.
+#
+# Three jobs of work in one file because they are one thing seen from three
+# places:
+#   - a pull request renders them, so the overflow check, the per-cell PDF
+#     read-back and the layout-invariants ratchet are real gates, and the
+#     reviewer can open the PR's own PDF from the run's artifacts;
+#   - a push to main does the same and keeps the result as the artifact a
+#     baseline can be taken from (the HTML is byte-deterministic; the PDF carries
+#     a CreationDate and is never byte-compared);
+#   - a `v*` tag attaches all four files to the GitHub release, built from the
+#     tagged commit, so a release carries the system's own printed specification.
+#
+# The PDFs are made here and nowhere else. Printing needs Chromium, which the
+# Vercel build does not have; the pinned Playwright image does.
+#
+# Deliberately not part of the `ci` aggregate in ci.yml: it reports its own
+# checks, and the aggregate's roster is a governance contract this does not need
+# to disturb. Add it there if it should block merge.
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    paths:
+      - 'packages/design-system/**'
+      - 'packages/design-system-report/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/reports.yml'
+      - '.github/actions/setup/**'
+  workflow_dispatch:
+
+concurrency:
+  group: reports-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    # The render environment, pinned: the same reference `visual` uses, so the
+    # fonts and the rasteriser that printed a PDF are the ones that checked it.
+    # `check:governance` holds every rendering job's image equal.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --ipc=host --init
+    # Container jobs default to sh; the render scripts use Bash.
+    defaults:
+      run:
+        shell: bash
+    # ~2s to render each report, ~10s for the print and layout checks; the rest
+    # is install and the package build both reports resolve their peer through.
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      # `actions/checkout` trusts the path only for its own git calls. In the
+      # container everyone else's `git rev-parse --show-toplevel` is refused as
+      # dubious ownership, and the lockfile guard in `setup` then falls back to
+      # the package and looks for `pnpm-lock.yaml` where it cannot be.
+      - name: Trust the Workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      # The report package resolves `@rtkelly13/design-system` through its
+      # `exports` map, so `dist/` has to exist first.
+      - name: Build Package
+        run: pnpm --filter @rtkelly13/design-system build
+
+      # Strict, with --pdf: an overflowing sheet or a lint warning fails here.
+      - name: Render Manifesto
+        working-directory: packages/design-system-report
+        run: pnpm manifesto
+
+      - name: Render Compendium
+        working-directory: packages/design-system-report
+        run: pnpm compendium
+
+      # Chromium is present in this image, so the end-to-end checks that skip
+      # on a bare runner run for real: source-to-print cell checks, the PDF text
+      # read-back, the layout invariants and the font allow-list.
+      - name: Report Checks
+        working-directory: packages/design-system-report
+        run: |
+          pnpm typecheck
+          pnpm test
+
+      # Named for the commit, not the run, so a tag build and a main build of the
+      # same commit are the same artifact.
+      - name: Upload Reports
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: reports-${{ github.sha }}
+          path: |
+            packages/design-system-report/reports/manifesto.html
+            packages/design-system-report/reports/manifesto.pdf
+            packages/design-system-report/reports/compendium.html
+            packages/design-system-report/reports/compendium.pdf
+          if-no-files-found: error
+          retention-days: 30
+
+  # Only for a version tag. Runs on a bare runner: `gh` is there, Chromium is
+  # not needed, and the one permission this workflow ever raises is scoped to
+  # this job alone.
+  publish:
+    name: publish
+    needs: build
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download Reports
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: reports-${{ github.sha }}
+          path: reports
+
+      # Versioned names, so several releases' files can sit side by side and a
+      # downloaded file says which release it belongs to. The release is created
+      # if the tag has none yet; `--clobber` makes a re-run replace the assets
+      # rather than fail on them.
+      - name: Attach To Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          find reports -type f | sort
+          cd "$(dirname "$(find reports -name manifesto.pdf | head -n1)")"
+          cp manifesto.html "design-manifesto-${TAG}.html"
+          cp manifesto.pdf "design-manifesto-${TAG}.pdf"
+          cp compendium.html "component-compendium-${TAG}.html"
+          cp compendium.pdf "component-compendium-${TAG}.pdf"
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "$TAG" --generate-notes
+          fi
+          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber \
+            "design-manifesto-${TAG}.html" "design-manifesto-${TAG}.pdf" \
+            "component-compendium-${TAG}.html" "component-compendium-${TAG}.pdf"

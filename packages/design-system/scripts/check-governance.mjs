@@ -717,7 +717,7 @@ for (const file of PROSE) {
  * ------------------------------------------------------------------ */
 
 const RENDER_IMAGE = /^mcr\.microsoft\.com\/playwright:v(\d+\.\d+\.\d+)-noble@sha256:([0-9a-f]{64})$/;
-const RENDERS = /^\s*(?:-\s+)?run:.*(?:pnpm\s+(?:test:visual|test:a11y|walkthrough)\b|playwright\s+test)/;
+const RENDERS = /^\s*(?:-\s+)?run:.*(?:pnpm\s+(?:test:visual|test:a11y|walkthrough|manifesto|compendium)\b|playwright\s+test)/;
 const lockedPlaywright = /^ {2}'@playwright\/test@(\d+\.\d+\.\d+)':/m.exec(
   readFileSync(path.join(GITHUB_ROOT, 'pnpm-lock.yaml'), 'utf8'),
 )?.[1];
