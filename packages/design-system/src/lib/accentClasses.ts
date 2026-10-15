@@ -122,6 +122,56 @@ const HOVER_EDGE: Record<CanonicalAccent, string> = {
   'intent-danger': 'hover:border-intent-danger hover:shadow-hard-intent-danger',
 };
 
+/**
+ * D8-A/B: a 4px role edge on the role's opaque tint, `text.primary` ink. The
+ * tint is per level (`tintStrength`), so this stays one class on both grounds.
+ * Print the role itself as text with {@link accentTextClass}: it holds 4.5:1
+ * on its tint, which `check:contrast` asserts.
+ */
+const TINT: Record<CanonicalAccent, string> = {
+  'accent-primary': 'border-l-4 border-l-accent-primary bg-tint-accent-primary text-content-primary',
+  'accent-secondary': 'border-l-4 border-l-accent-secondary bg-tint-accent-secondary text-content-primary',
+  'accent-tertiary': 'border-l-4 border-l-accent-tertiary bg-tint-accent-tertiary text-content-primary',
+  'accent-quiet': 'border-l-4 border-l-accent-quiet bg-tint-accent-quiet text-content-primary',
+  'intent-info': 'border-l-4 border-l-intent-info bg-tint-intent-info text-content-primary',
+  'intent-success': 'border-l-4 border-l-intent-success bg-tint-intent-success text-content-primary',
+  'intent-warning': 'border-l-4 border-l-intent-warning bg-tint-intent-warning text-content-primary',
+  'intent-danger': 'border-l-4 border-l-intent-danger bg-tint-intent-danger text-content-primary',
+};
+
+/**
+ * D8-C: the same 4px role edge and ink on `surface.raised`, with no fill — for
+ * lower-priority or tentative items (a tentative or declined event, a
+ * background task, a low-priority issue). The role is told by the edge alone.
+ */
+const TENTATIVE: Record<CanonicalAccent, string> = {
+  'accent-primary': 'border-l-4 border-l-accent-primary bg-surface-raised text-content-primary',
+  'accent-secondary': 'border-l-4 border-l-accent-secondary bg-surface-raised text-content-primary',
+  'accent-tertiary': 'border-l-4 border-l-accent-tertiary bg-surface-raised text-content-primary',
+  'accent-quiet': 'border-l-4 border-l-accent-quiet bg-surface-raised text-content-primary',
+  'intent-info': 'border-l-4 border-l-intent-info bg-surface-raised text-content-primary',
+  'intent-success': 'border-l-4 border-l-intent-success bg-surface-raised text-content-primary',
+  'intent-warning': 'border-l-4 border-l-intent-warning bg-surface-raised text-content-primary',
+  'intent-danger': 'border-l-4 border-l-intent-danger bg-surface-raised text-content-primary',
+};
+
+/** How strongly a role marks an item: its tint, or only its edge. */
+export type AccentEmphasis = 'tint' | 'tentative';
+
+/**
+ * A role-edged surface: `tint` for an item that carries its role (an event, a
+ * chip), `tentative` for one that should recede (D8-C). Compose a border with
+ * it; the edge is the left side only.
+ */
+export function accentSurfaceClass(
+  token: AccentToken | undefined,
+  emphasis: AccentEmphasis = 'tint',
+  fallback?: AccentToken,
+): string {
+  const role = canonicalAccent(token, fallback);
+  return emphasis === 'tentative' ? TENTATIVE[role] : TINT[role];
+}
+
 /** Foreground colour for an accent token. */
 export function accentTextClass(token: AccentToken | undefined, fallback?: AccentToken): string {
   return TEXT[canonicalAccent(token, fallback)];
@@ -147,4 +197,4 @@ export function accentFillClass(token: AccentToken | undefined, fallback?: Accen
   return `${FILL[role]} ${FILL_HOVER[role]}`;
 }
 
-export const ACCENT_CLASS_MAPS = { TEXT, FOCUS_RING, HOVER_EDGE, FILL, FILL_HOVER } as const;
+export const ACCENT_CLASS_MAPS = { TEXT, FOCUS_RING, HOVER_EDGE, FILL, FILL_HOVER, TINT, TENTATIVE } as const;

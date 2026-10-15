@@ -138,4 +138,27 @@ Pair either device with a text change (`text-content-muted` →
 `text-content-primary`, or `text-content-inverse` on a fill) so the state reads
 at a glance and not only in colour.
 
+## 🎨 Role Tints
+
+A **tint** is a role mixed into `surface.base`: an opaque fill that carries the
+role's hue under its own text. One per accent and intent role, declared in
+`levels.ts` (`tint`) and reached as `bg-tint-accent-primary`,
+`bg-tint-intent-danger` and so on, or `var(--ds-tint-<role>)`.
+
+**The strength is declared per level (D8).** Levels are independently authored
+(ADR 0003), so Midnight mixes 20% and Sketch 12%: the strength that keeps the
+lowest role at 4.5:1 on a dark ground is more than a light ground needs. Each
+value is an opaque literal, not `color-mix()` or a `/15` alpha, which resolve
+differently on each ground. `src/theme/tint.test.ts` re-derives every literal
+from its role and `tintStrength`, so a palette edit that forgets a tint fails
+there. `check:contrast` gates the role as text on its tint, and `text.primary`
+on every tint, at 4.5:1 on both levels (lowest 4.81 on Midnight, 4.57 on Sketch).
+
+**Tentative or lower-priority items take the edge alone (D8-C).** A tentative or
+declined event, a background task or a low-priority issue keeps the 4px role edge
+and its ink but sits on `surface.raised` with no fill:
+`accentSurfaceClass(role, 'tentative')`, or
+`<Card accent="info" emphasis="tentative">`. `'tint'` is the default for
+everything else. The edge says which role; the missing fill says "not yet".
+
 

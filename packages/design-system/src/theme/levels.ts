@@ -155,6 +155,26 @@ export interface LevelDefinition {
   readonly accentHue: Readonly<Record<Emphasis, HueRef>>;
   /** As `accentHue`, for the meaning Roles. */
   readonly intentHue: Readonly<Record<Intent, HueRef>>;
+  /**
+   * How much of a role is mixed into `surface.base` to make its tint, in
+   * percent. **Declared per level, not shared** (D8): levels are independently
+   * authored (ADR 0003), and the strength that holds the lowest role at 4.5:1
+   * on one ground is not the strength that does on the other. Midnight is 20,
+   * Sketch 12. `levels.test.ts` re-derives every `tint` literal from this.
+   */
+  readonly tintStrength: number;
+  /**
+   * An opaque tint per accent and intent role: the role mixed into
+   * `surface.base` at {@link LevelDefinition.tintStrength}. A fill for an
+   * event, a chip or a banner that must carry the role's hue without a
+   * translucent layer — a literal, because the `/15` alpha and `color-mix()`
+   * it replaces resolve differently on each ground. The role itself, as text or
+   * as a 4px edge, reads on it at 4.5:1; so does `text.primary`.
+   */
+  readonly tint: Readonly<{
+    accent: Readonly<Record<Emphasis, string>>;
+    intent: Readonly<Record<Intent, string>>;
+  }>;
   /** Colour of the hard offset shadows. Normally tracks `border.strong`. */
   readonly shadow: string;
 }
@@ -248,6 +268,11 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       magenta: '#ff88fd',
       pink: '#ff8ebe',
     },
+    tintStrength: 20,
+    tint: {
+      accent: { primary: '#172c3e', secondary: '#302c28', tertiary: '#331a33', quiet: '#202032' },
+      intent: { info: '#172c3e', success: '#173429', warning: '#302c28', danger: '#331a33' },
+    },
     shadow: '#ffffff',
   },
 
@@ -323,6 +348,11 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       violet: '#6000bd',
       magenta: '#7f0080',
       pink: '#8a0052',
+    },
+    tintStrength: 12,
+    tint: {
+      accent: { primary: '#d9e1ec', secondary: '#dae2d4', tertiary: '#f3dbd2', quiet: '#e3e0d8' },
+      intent: { info: '#d9e1ec', success: '#dae2d4', warning: '#ebded1', danger: '#f3dbd2' },
     },
     shadow: '#23262e',
   },

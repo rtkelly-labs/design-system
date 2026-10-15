@@ -199,6 +199,15 @@ function levelDocument(level) {
         }),
       ),
     },
+    tint: {
+      $type: 'color',
+      $description:
+        `Opaque role tints (D8): each Role mixed into surface.base at ${def.tintStrength}%, in OKLab. ` +
+        'Literals, not aliases: a tint is a mix, not a Hue.',
+      $extensions: { 'dev.ryankelly.design-system': { tintStrength: def.tintStrength } },
+      accent: Object.fromEntries(Object.entries(def.tint.accent).map(([key, value]) => [key, colour(value)])),
+      intent: Object.fromEntries(Object.entries(def.tint.intent).map(([key, value]) => [key, colour(value)])),
+    },
     shadow: { $type: 'color', color: colour(def.shadow, 'Colour of the hard offset shadows.') },
   };
 }

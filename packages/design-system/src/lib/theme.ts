@@ -142,6 +142,18 @@ export function accentVar(token: AccentToken | undefined, fallback: AccentToken 
   );
 }
 
+/**
+ * The opaque tint of a role on the current Level (D8): the role mixed into
+ * `surface.base` at the Level's own declared strength. A fill for a surface
+ * that carries the role, with the role itself readable on it at 4.5:1.
+ */
+export function tintVar(token: AccentToken | undefined, fallback: AccentToken = 'primary'): string {
+  const resolved = token ?? fallback;
+  if (resolved in EMPHASIS_VARS) return `var(--ds-tint-accent-${resolved})`;
+  if (resolved in INTENT_VARS) return `var(--ds-tint-intent-${resolved})`;
+  return 'var(--ds-tint-accent-primary)';
+}
+
 export function surfaceVar(token: Surface = 'base'): string {
   return SURFACE_VARS[token] ?? SURFACE_VARS.base;
 }

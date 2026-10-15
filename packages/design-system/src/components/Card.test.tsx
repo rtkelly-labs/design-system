@@ -76,3 +76,14 @@ describe('Card ref', () => {
     expect(card.current?.dataset.testid).toBe('card');
   });
 });
+
+describe('Card emphasis (D8)', () => {
+  it('fills with the role tint, or sits on raised with the stripe alone', () => {
+    const tint = render(<Card variant="panel" accent="info" emphasis="tint" data-testid="t" />);
+    expect(tint.getByTestId('t').style.backgroundColor).toBe('var(--ds-tint-intent-info)');
+    const tentative = render(<Card variant="panel" accent="info" emphasis="tentative" data-testid="n" />);
+    expect(tentative.getByTestId('n').style.backgroundColor).toBe('var(--ds-surface-raised)');
+    const plain = render(<Card variant="panel" accent="info" data-testid="p" />);
+    expect(plain.getByTestId('p').style.backgroundColor).toBe('var(--ds-surface-base)');
+  });
+});
