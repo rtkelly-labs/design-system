@@ -458,7 +458,6 @@ export default function InboxApp() {
                             <Badge
                               key={l}
                               accent="quiet"
-                              size="sm"
                               className="hidden shrink-0 2xl:inline-flex"
                             >
                               {l}
@@ -467,9 +466,7 @@ export default function InboxApp() {
                         </div>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
-                        <Badge accent={STATUS_ACCENT[r.status]} size="sm">
-                          {r.status}
-                        </Badge>
+                        <Badge accent={STATUS_ACCENT[r.status]}>{r.status}</Badge>
                       </TableCell>
                       <TableCell className="hidden text-center text-content-secondary md:table-cell">
                         {r.assignee ?? '--'}
@@ -553,6 +550,8 @@ function IssueDetail({
           <MenuItem intent="danger" onClick={onArchive}>ARCHIVE</MenuItem>
         </Menu>
       </div>
+      {/* D11: the detail pane is outside the table, so these keep the filled look. One issue's
+          status is the thing the pane is about, there is room, and nothing competes with it. */}
       <div className="flex flex-wrap gap-2">
         <Badge accent={STATUS_ACCENT[issue.status]}>{issue.status}</Badge>
         <Badge accent="quiet">{issue.priority}</Badge>
