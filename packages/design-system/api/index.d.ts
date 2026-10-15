@@ -24,6 +24,8 @@ type HueRef = Hue | 'neutral';
 type AccentToken = Emphasis | Intent;
 
 declare function accentVar(token: AccentToken | undefined, fallback?: AccentToken): string;
+
+declare function tintVar(token: AccentToken | undefined, fallback?: AccentToken): string;
 declare function surfaceVar(token?: Surface): string;
 declare function textVar(token?: TextTone): string;
 declare function borderVar(token?: BorderTone): string;
@@ -86,6 +88,13 @@ interface LevelDefinition {
     readonly accentHue: Readonly<Record<Emphasis, HueRef>>;
 
     readonly intentHue: Readonly<Record<Intent, HueRef>>;
+
+    readonly tintStrength: number;
+
+    readonly tint: Readonly<{
+        accent: Readonly<Record<Emphasis, string>>;
+        intent: Readonly<Record<Intent, string>>;
+    }>;
 
     readonly shadow: string;
 }
@@ -355,6 +364,10 @@ type ClassInput = string | number | null | undefined | false | ClassInput[];
 
 declare function cn(...inputs: ClassInput[]): string;
 
+type AccentEmphasis = 'tint' | 'tentative';
+
+declare function accentSurfaceClass(token: AccentToken | undefined, emphasis?: AccentEmphasis, fallback?: AccentToken): string;
+
 declare function slugify(value: string): string;
 
 declare class Slugger {
@@ -540,6 +553,8 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
     className?: string;
 
     accent?: AccentToken;
+
+    emphasis?: AccentEmphasis;
 
     badge?: string;
 
@@ -3223,6 +3238,7 @@ type MdxComponents = typeof mdxComponents;
 
 export {
   ANSI_SLOTS,
+  type AccentEmphasis,
   type AccentToken,
   type ActivityDay,
   ActivityGrid,
@@ -3666,6 +3682,7 @@ export {
   type VerdictTone,
   WEB_FLOOR,
   XIcon,
+  accentSurfaceClass,
   accentVar,
   ansiScheme,
   apcaContrast,
@@ -3701,6 +3718,7 @@ export {
   slugify,
   surfaceVar,
   textVar,
+  tintVar,
   useActiveHeading,
   useCopyToClipboard,
   useDocsLinkComponent,

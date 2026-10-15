@@ -459,6 +459,107 @@
       "$value": "{palette.red}"
     }
   },
+  "tint": {
+    "$type": "color",
+    "$description": "Opaque role tints (D8): each Role mixed into surface.base at 12%, in OKLab. Literals, not aliases: a tint is a mix, not a Hue.",
+    "$extensions": {
+      "dev.ryankelly.design-system": {
+        "tintStrength": 12
+      }
+    },
+    "accent": {
+      "primary": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.9069,
+            0.0173,
+            256.28
+          ],
+          "hex": "#d9e1ec"
+        }
+      },
+      "secondary": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.9028,
+            0.0206,
+            131.47
+          ],
+          "hex": "#dae2d4"
+        }
+      },
+      "tertiary": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.9086,
+            0.0294,
+            41.73
+          ],
+          "hex": "#f3dbd2"
+        }
+      },
+      "quiet": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.9068,
+            0.0112,
+            89.73
+          ],
+          "hex": "#e3e0d8"
+        }
+      }
+    },
+    "intent": {
+      "info": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.9069,
+            0.0173,
+            256.28
+          ],
+          "hex": "#d9e1ec"
+        }
+      },
+      "success": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.9028,
+            0.0206,
+            131.47
+          ],
+          "hex": "#dae2d4"
+        }
+      },
+      "warning": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.9075,
+            0.0226,
+            67.54
+          ],
+          "hex": "#ebded1"
+        }
+      },
+      "danger": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.9086,
+            0.0294,
+            41.73
+          ],
+          "hex": "#f3dbd2"
+        }
+      }
+    }
+  },
   "shadow": {
     "$type": "color",
     "color": {
