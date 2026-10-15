@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ComponentProps, CSSProperties, ReactNode } from 'react';
 import { LevelPair } from './LevelPair';
 import type { Level } from './look';
 import { Label } from './parts';
@@ -9,7 +9,7 @@ export interface Surface {
 }
 
 /** "The same theme on other surfaces": each surface labelled and stacked, once per level. */
-export function SurfacesStrip({ surfaces, scope, columns }: { surfaces: readonly Surface[]; scope?: (level: Level) => CSSProperties; columns?: 'lg' | 'xl' }) {
+export function SurfacesStrip({ surfaces, scope, columns }: { surfaces: readonly Surface[]; scope?: (level: Level) => CSSProperties; columns?: ComponentProps<typeof LevelPair>['columns'] }) {
   return (
     <LevelPair scope={scope} columns={columns}>
       {(lv) => (

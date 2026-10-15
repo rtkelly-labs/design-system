@@ -19,7 +19,7 @@ import {
   anchor,
   seg,
 } from '@/components/specimen';
-import { ANSI_SLOTS, CSS_SEGS, FRAME_STATUS, FRAME_TITLE, LEGEND_FULL, LEGEND_NOTES, TRANSCRIPT, TRANSCRIPT_LABEL, frameRows, plainRows } from '@/data/code-syntax';
+import { ANSI_SLOTS, CSS_SEGS, ROLES, FRAME_STATUS, FRAME_TITLE, LEGEND_FULL, LEGEND_NOTES, TRANSCRIPT, TRANSCRIPT_LABEL, frameRows, plainRows } from '@/data/code-syntax';
 import { LV, ratio } from '../p2/Frame';
 import { today } from '../r5/look';
 import { LEVEL_IDS, bands, theme, themeChecks, worst } from './look';
@@ -136,15 +136,6 @@ function Numbers({ details }: { details: ReturnType<typeof themeChecks>['details
 
 /* ------------------------------------------------------------------- theme */
 
-const STRUCTURE: [string, string][] = [
-  ['Selection', 'accent.primary as a translucent region; every token inside it is forced to text.primary, so it reads as one block.'],
-  ['Find', 'accent.secondary borders only, no fills. Other matches are 1px; the current one is 2px with bold glyphs and a ▸ in the gutter.'],
-  ['Current line', 'a 1px border.subtle hairline and nothing else; the line number turns accent.primary. Nothing competes with the selection.'],
-  ['Tokens', 'one job per colour: keyword the loudest accent, function accent.primary, string green, number, constant and type one quiet accent. Punctuation steps back to text.secondary, comments to text.muted.'],
-  ['Bracket match', 'a 1px border and 10% wash in the keyword hue, so it stays off the find and selection colours.'],
-  ['Diagnostics', 'underline shape first (wavy, dashed, dotted), colour second, with a mark in the gutter. Error uses the red hue because pink is a keyword on midnight.'],
-  ['Diff', 'green and red behind the line at a lowered alpha, plus a 3px bar and a + or − in a column of their own.'],
-];
 
 function ThemeSection() {
   const rows = frameRows();
@@ -168,7 +159,7 @@ function ThemeSection() {
       </LevelPair>
       <SpecimenLegend items={LEGEND_FULL} look={theme} notes={LEGEND_NOTES} idPrefix="r6-legend" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <RoleList roles={STRUCTURE} />
+        <RoleList roles={ROLES} />
         <CheckList checks={checks} />
       </div>
       <Disclosure title="Role to token, per level">

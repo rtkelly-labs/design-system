@@ -7,6 +7,8 @@ export const LEVEL_IDS: Level[] = ['midnight', 'sketch'];
 const COLUMNS = {
   lg: 'grid grid-cols-1 gap-4 lg:grid-cols-2',
   xl: 'grid grid-cols-1 gap-4 xl:grid-cols-2',
+  /** For a narrow column, such as the docs article beside its sidebar and contents rail. */
+  '2xl': 'grid grid-cols-1 gap-4 2xl:grid-cols-2',
 } as const;
 
 /** One level of the package, scoped to a subtree with `data-theme`, in a labelled panel. */

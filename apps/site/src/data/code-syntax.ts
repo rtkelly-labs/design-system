@@ -166,6 +166,19 @@ export const TRANSCRIPT: Run[][] = [
   [[' '], ['hint:', 6], [' '], ['rerun with', 8], [' '], ['--update', 5], [' '], ['to rewrite snapshots', 8]],
 ];
 
+/* ------------------------------------------------------------------- roles */
+
+/** How the theme is structured: each role and the one job it does. */
+export const ROLES: [role: string, job: string][] = [
+  ['Selection', 'accent.primary as a translucent region; every token inside it is forced to text.primary, so it reads as one block.'],
+  ['Find', 'accent.secondary borders only, no fills. Other matches are 1px; the current one is 2px with bold glyphs and a ▸ in the gutter.'],
+  ['Current line', 'a 1px border.subtle hairline and nothing else; the line number turns accent.primary. Nothing competes with the selection.'],
+  ['Tokens', 'one job per colour: keyword the loudest accent, function accent.primary, string green, number, constant and type one quiet accent. Punctuation steps back to text.secondary, comments to text.muted.'],
+  ['Bracket match', 'a 1px border and 10% wash in the keyword hue, so it stays off the find and selection colours.'],
+  ['Diagnostics', 'underline shape first (wavy, dashed, dotted), colour second, with a mark in the gutter. Error uses the red hue because pink is a keyword on midnight.'],
+  ['Diff', 'green and red behind the line at a lowered alpha, plus a 3px bar and a + or − in a column of their own.'],
+];
+
 /* ------------------------------------------------------------------ shiki */
 
 /** A short TypeScript module for the Shiki-highlighted `CodeBlock`. */

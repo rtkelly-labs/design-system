@@ -51,4 +51,25 @@ export const catalogue: ArticleDef = {
   keywords: 'catalogue catalog index list storybook every component',
 };
 
-export const ARTICLES: readonly ArticleDef[] = [overview, installation, catalogue];
+/**
+ * The first foundations page, and the pattern the rest follow: a specimen of
+ * one design decision, drawn on both levels (`components/specimen`).
+ */
+export const codeSyntax: ArticleDef = {
+  href: '/docs/foundations/code',
+  title: 'Code & syntax',
+  group: 'Foundations',
+  lede:
+    'How code reads in the system: one editor theme on both levels, with token roles for syntax and a role each for selection, find, the current line, brackets, diagnostics and diffs.',
+  sections: [
+    { id: 'theme', title: 'The theme on both levels', depth: 2 },
+    { id: 'legend', title: 'Legend', depth: 2 },
+    { id: 'structure', title: "How it's structured", depth: 2 },
+    { id: 'checks', title: 'Checks', depth: 2 },
+    { id: 'surfaces', title: 'On other surfaces', depth: 2 },
+    { id: 'metrics', title: 'Type metrics', depth: 2 },
+  ],
+  keywords: 'code syntax highlighting editor theme selection find bracket diagnostics diff terminal shiki codeblock monospace tokens contrast',
+};
+
+export const ARTICLES: readonly ArticleDef[] = [overview, installation, catalogue, codeSyntax];
