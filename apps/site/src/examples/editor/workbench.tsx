@@ -5,6 +5,8 @@ import type { KeyboardEvent } from 'react';
 import {
   Badge,
   Breadcrumbs,
+  Button,
+  ButtonGroup,
   ChangeSummary,
   Drawer,
   Modal,
@@ -573,15 +575,15 @@ export default function EditorWorkbench() {
     <div className="flex h-full min-h-0 flex-col bg-surface-base font-mono text-sm text-content-primary print:block print:h-auto">
       {/* title bar */}
       <header className="flex shrink-0 items-center gap-3 border-b-2 border-edge-strong bg-surface-raised px-3 py-2 print:hidden">
-        <button
-          type="button"
+        <Button
+          size="icon"
           aria-label="Open file explorer"
           onClick={() => setDrawerOpen(true)}
-          className="flex h-8 w-8 items-center justify-center border-2 border-edge-strong md:hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
+          className="md:hidden"
         >
           <NerdIcon name="folder" size="sm" />
-        </button>
-        <span className="font-display text-base font-bold uppercase tracking-wider text-accent-primary"><BracketText>rtk.edit</BracketText></span>
+        </Button>
+        <span className="font-display text-base font-bold uppercase tracking-wider text-accent-primary">[&nbsp;rtk.edit&nbsp;]</span>
         <span className="hidden truncate text-content-muted sm:inline">pagination-kit</span>
         <button
           ref={paletteTrigger}
@@ -593,21 +595,21 @@ export default function EditorWorkbench() {
           <span className="min-w-0 flex-1 truncate">Search commands</span>
           <kbd className="hidden border border-current px-1 text-xs sm:inline">Ctrl K</kbd>
         </button>
-        <button
-          type="button"
-          onClick={() => setWrap((w) => !w)}
-          aria-pressed={wrap}
-          className="hidden border-2 border-edge-strong px-2 py-1 text-xs font-bold uppercase tracking-widest aria-pressed:bg-accent-primary aria-pressed:text-content-inverse sm:block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-        >
-          <BracketText>wrap</BracketText>
-        </button>
-        <button
-          type="button"
-          onClick={() => theme?.cycleLevel()}
-          className="border-2 border-edge-strong px-2 py-1 text-xs font-bold uppercase tracking-widest shadow-[3px_3px_0_0_var(--ds-shadow-color)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary"
-        >
-          <BracketText>{theme?.level ?? 'theme'}</BracketText>
-        </button>
+        <ButtonGroup aria-label="Editor view" className="flex-nowrap gap-2">
+          <Button
+            size="xs"
+            variant={wrap ? 'primary' : 'quiet'}
+            bracketed
+            onClick={() => setWrap((w) => !w)}
+            aria-pressed={wrap}
+            className="hidden sm:inline-flex"
+          >
+            wrap
+          </Button>
+          <Button size="xs" bracketed onClick={() => theme?.cycleLevel()}>
+            {theme?.level ?? 'theme'}
+          </Button>
+        </ButtonGroup>
       </header>
 
       <div className="flex min-h-0 flex-1 print:block">
@@ -702,14 +704,9 @@ export default function EditorWorkbench() {
                     </TabsTab>
                     <TabsTab value="terminal">Terminal</TabsTab>
                   </TabsList>
-                  <button
-                    type="button"
-                    aria-label="Close panel"
-                    onClick={() => setPanelOpen(false)}
-                    className="px-3 text-content-muted hover:text-content-primary focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-primary"
-                  >
+                  <Button size="icon" aria-label="Close panel" onClick={() => setPanelOpen(false)}>
                     <NerdIcon name="close" size="xs" />
-                  </button>
+                  </Button>
                 </div>
                 <TabsPanel value="problems" className="min-h-0 flex-1 overflow-auto">
                   <ul className="m-0 list-none p-0">

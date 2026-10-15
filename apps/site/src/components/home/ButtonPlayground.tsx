@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { Button, CodeBlock, Radio, RadioGroup, Select, Switch } from '@rtkelly13/design-system';
 import type { ButtonVariant } from '@rtkelly13/design-system';
 
-const VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'tertiary', 'inverse'];
+const VARIANTS: ButtonVariant[] = ['quiet', 'secondary', 'primary', 'tertiary', 'inverse', 'danger'];
 const SIZES = [
+  { value: 'xs', label: 'xs: toolbars, 28px' },
   { value: 'sm', label: 'sm: dense rows' },
   { value: 'md', label: 'md: the default' },
   { value: 'lg', label: 'lg: the page’s one action' },
@@ -13,13 +14,13 @@ const SIZES = [
 
 /** Every prop that changes how a Button looks, and the JSX that produces it. */
 export function ButtonPlayground() {
-  const [variant, setVariant] = useState<ButtonVariant>('primary');
-  const [size, setSize] = useState<'sm' | 'md' | 'lg'>('md');
+  const [variant, setVariant] = useState<ButtonVariant>('quiet');
+  const [size, setSize] = useState<'xs' | 'sm' | 'md' | 'lg'>('md');
   const [bracketed, setBracketed] = useState(true);
   const [label, setLabel] = useState('DEPLOY');
 
   const attrs = [
-    variant !== 'tertiary' ? `variant="${variant}"` : null,
+    variant !== 'quiet' ? `variant="${variant}"` : null,
     size !== 'md' ? `size="${size}"` : null,
     bracketed ? 'bracketed' : null,
   ].filter(Boolean);
@@ -33,7 +34,7 @@ export function ButtonPlayground() {
             <Radio key={v} value={v} label={v} />
           ))}
         </RadioGroup>
-        <Select label="Size" options={SIZES} value={size} onValueChange={(v) => setSize(v as 'sm' | 'md' | 'lg')} />
+        <Select label="Size" options={SIZES} value={size} onValueChange={(v) => setSize(v as 'xs' | 'sm' | 'md' | 'lg')} />
         <Switch label="Bracketed" checked={bracketed} onCheckedChange={setBracketed} />
         <Select
           label="Label"
