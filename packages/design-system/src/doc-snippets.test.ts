@@ -39,7 +39,7 @@ describe('documentation literal prop validation', () => {
       encoding: 'utf8',
     });
     expect(result.status, result.stderr).toBe(status);
-    if (status === 1) expect(result.stderr).toContain('must be one of: primary, secondary, tertiary, inverse, default');
+    if (status === 1) expect(result.stderr).toContain('must be one of: quiet, primary, secondary, tertiary, inverse, danger, default');
     else expect(result.stdout).toContain('Doc snippets OK');
   });
 });

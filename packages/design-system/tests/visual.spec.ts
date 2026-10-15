@@ -187,6 +187,12 @@ const CASES: readonly VisualCase[] = [
   // `pending`, between enabled and disabled: the held press, the spinner over
   // the label's box, and the width it keeps — asserted against both.
   { id: 'components-actions-forms-button--pending', snapshot: 'button-pending.png' },
+  // The weight ladder (D1-D4): quiet, secondary, primary, inverse in one row.
+  // Baseline to be generated with `/update-snapshots` on the PR.
+  { id: 'components-actions-forms-button--variants', snapshot: 'button-variants.png' },
+  // D3: a quiet cancel beside a danger confirm — what a ButtonGroup asks for.
+  // Baseline to be generated with `/update-snapshots` on the PR.
+  { id: 'components-actions-forms-button-group--danger-beside-quiet', snapshot: 'buttongroup-danger-beside-quiet.png' },
   // The account flows (#252), every state a reader meets on the way through:
   // each flow at rest and after a failed submit, the reset flow's middle step,
   // and the settings page in `AppShell`. The a11y suite reads these ids, so
