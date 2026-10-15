@@ -9,18 +9,36 @@ import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
  *
  * Shiki runs where the page is rendered and ships no JavaScript: the output is
  * spans whose colours are CSS custom properties (`--shiki-token-keyword`), and
- * `globals.css` points each one at a design-system role. The package has no
- * syntax Group yet (issue 148), and `CodeBlock` deliberately takes pre-rendered
- * children rather than owning a highlighter (issue 209) — so the role mapping lives
- * in this site, in one place, and never names a hue.
+ * `globals.css` points each one at a `--ds-syntax-*` role of the package (issue 148).
+ * `CodeBlock` deliberately takes pre-rendered children rather than owning a
+ * highlighter (issue 209) — so the scope-to-slot mapping lives in this site, in
+ * one place, and never names a hue.
  */
 
-const theme = createCssVariablesTheme({
+const base = createCssVariablesTheme({
   name: 'ds-roles',
   variablePrefix: '--shiki-',
   variableDefaults: {},
   fontStyle: true,
 });
+
+/**
+ * Shiki's css-variables theme has eight slots and no `type`, `number` or `operator`: it paints
+ * types with the function colour and every operator with the keyword colour. Round 6
+ * gives each its own role, so these scopes read slots the theme does not define.
+ * Appended, and the more specific scope wins in TextMate matching.
+ */
+const v = (slot: string) => `var(--shiki-token-${slot})`;
+const EXTRA = [
+  { scope: ['entity.name.type', 'entity.other.inherited-class', 'support.type', 'support.class', 'storage.type.primitive'], settings: { foreground: v('type') } },
+  { scope: ['constant.numeric'], settings: { foreground: v('number') } },
+  // Symbol operators are not keywords; the word-like ones (new, typeof, in, ...) are.
+  { scope: ['keyword.operator'], settings: { foreground: v('operator') } },
+  { scope: ['keyword.operator.new', 'keyword.operator.expression', 'keyword.operator.delete', 'keyword.operator.wordlike'], settings: { foreground: v('keyword') } },
+  { scope: ['keyword.operator.accessor', 'punctuation.terminator', 'punctuation.definition.block', 'punctuation.definition.parameters', 'punctuation.definition.typeparameters', 'punctuation.section', 'punctuation.accessor', 'meta.brace'], settings: { foreground: v('punctuation') } },
+];
+
+const theme = { ...base, tokenColors: [...(base.tokenColors ?? []), ...EXTRA] };
 
 let highlighter: Promise<HighlighterCore> | undefined;
 
