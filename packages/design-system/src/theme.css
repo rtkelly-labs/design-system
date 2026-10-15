@@ -542,6 +542,56 @@
 
 }
 
+/* Print — always Sketch, whatever level is active on screen. */
+@media print {
+  :root, [data-theme] {
+    color-scheme: light;
+    --ds-ink-weight: 450;
+
+  --ds-surface-base: #f5f3ec;
+  --ds-surface-raised: #ffffff;
+  --ds-surface-sunken: #efeadf;
+  --ds-surface-overlay: rgba(35, 38, 46, 0.72);
+  --ds-text-primary: #23262e;
+  --ds-text-secondary: #33373f;
+  --ds-text-muted: #5c5546;
+  --ds-text-inverse: #f5f3ec;
+  --ds-border-strong: #23262e;
+  --ds-border-default: #8f8672;
+  --ds-border-subtle: #c8c3b4;
+  --ds-accent-primary: #1450d7;
+  --ds-accent-secondary: #006b2e;
+  --ds-accent-tertiary: #bd0010;
+  --ds-accent-quiet: #6a6252;
+  --ds-intent-info: #1450d7;
+  --ds-intent-success: #006b2e;
+  --ds-intent-warning: #974503;
+  --ds-intent-danger: #bd0010;
+  --ds-palette-red: #bd0010;
+  --ds-palette-orange: #974503;
+  --ds-palette-yellow: #705a00;
+  --ds-palette-green: #006b2e;
+  --ds-palette-teal: #006859;
+  --ds-palette-cyan: #006675;
+  --ds-palette-blue: #1450d7;
+  --ds-palette-violet: #7d00f4;
+  --ds-palette-magenta: #a300ad;
+  --ds-palette-pink: #b4006c;
+  --ds-palette-bright-red: #8f002a;
+  --ds-palette-bright-orange: #6c3700;
+  --ds-palette-bright-yellow: #534200;
+  --ds-palette-bright-green: #024f00;
+  --ds-palette-bright-teal: #004d34;
+  --ds-palette-bright-cyan: #004b56;
+  --ds-palette-bright-blue: #004e6d;
+  --ds-palette-bright-violet: #6000bd;
+  --ds-palette-bright-magenta: #7f0080;
+  --ds-palette-bright-pink: #8a0052;
+  --ds-shadow-color: #23262e;
+  --ds-polarity: light;
+  }
+}
+
 /* Native form controls, scrollbars and the caret follow `color-scheme`, which
  * each level declares above. Without it a light level renders dark scrollbars
  * and an unreadable date picker while every styled element looks correct. */

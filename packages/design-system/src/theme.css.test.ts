@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { THEME_LEVELS } from './theme/levels';
+import { INK_WEIGHT, LEVELS, PRINT_LEVEL, THEME_LEVELS } from './theme/levels';
 
 /**
  * Structural tests over the generated `theme.css`.
@@ -177,5 +177,40 @@ describe('semantic aliases resolve through the --ds-* layer', () => {
     for (const [token, value] of semanticAliases) {
       expect(value, `${token} should indirect through --ds-*`).toMatch(/^var\(--ds-[a-z-]+\)$/);
     }
+  });
+});
+
+describe('print always uses the paper level (D5-B)', () => {
+  const printBody = blockBody(css, '@media print');
+  // The media block's body holds the nested rule; `declarations` reads only
+  // custom properties and ignores selectors.
+  const print = declarations(printBody);
+  const paper = levelTokens.get(PRINT_LEVEL)!;
+  const roles = [...paper.keys()].filter((t) => t.startsWith('--ds-'));
+
+  it('re-points the root and every scoped subtree in one rule', () => {
+    expect(printBody).toContain(':root, [data-theme] {');
+  });
+
+  it('is emitted after the level blocks, so source order wins the tie', () => {
+    const last = css.lastIndexOf(`[data-theme="${THEME_LEVELS.at(-1)}"] {`);
+    expect(css.indexOf('@media print {')).toBeGreaterThan(last);
+  });
+
+  it.each(roles)('%s equals the paper level value', (role) => {
+    expect(print.get(role)).toBe(paper.get(role));
+  });
+
+  it('declares every colour role the paper level declares', () => {
+    expect(roles.length).toBeGreaterThan(30);
+    expect(print.get('--ds-surface-base')).toBe(LEVELS[PRINT_LEVEL].surface.base);
+    expect(print.get('--ds-text-primary')).toBe(LEVELS[PRINT_LEVEL].text.primary);
+  });
+
+  it('carries polarity, color-scheme and ink weight from the paper level', () => {
+    const { polarity } = LEVELS[PRINT_LEVEL];
+    expect(print.get('--ds-polarity')).toBe(polarity);
+    expect(printBody).toContain(`color-scheme: ${polarity};`);
+    expect(print.get('--ds-ink-weight')).toBe(String(INK_WEIGHT[polarity]));
   });
 });
