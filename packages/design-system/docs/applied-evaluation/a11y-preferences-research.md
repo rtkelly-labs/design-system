@@ -20,12 +20,10 @@ Researched 2026-10-15 for decision D9. The model it led to is ADR 0007, which ci
 | Figma | "Enhanced contrast" toggle, works in light and dark | None found | Not stated | Not stated | https://www.figma.com/blog/introducing-screenreader-and-accessibility-features/ (search snippet) |
 | Linear | Dark / light / system; custom themes | None found | Per platform, not synced ("update the theme on each platform individually") | System option | https://linear.app/docs/custom-themes (search snippet) |
 | VS Code | High Contrast color theme; `editor.accessibilitySupport` on / off / auto; `accessibility.signals.*` | No built-in CVD theme. Page recommends marketplace themes and `workbench.colorCustomizations`. | User `settings.json` | `accessibilitySupport: auto` detects a screen reader via the platform; signals "may be enabled automatically when a screen reader is attached" | https://code.visualstudio.com/docs/configure/accessibility/accessibility |
-| Gmail | High-contrast themes in the themes gallery | None found | Account | Not stated | Third-party sources only, unverified (csun.edu/universal-design-center/gmail) |
 | Material 3 / Android | Three contrast levels (standard / medium / high) | None | OS user setting (Android 14 slider) | Reads the OS contrast setting | Secondary sources only, unverified: https://9to5google.com/2023/04/07/android-14-material-you-contrast/ ; m3.material.io fetch returned title only |
 | Apple platforms | Increase Contrast, Reduce Motion, Differentiate Without Color are OS settings that apps read | "Differentiate Without Color" is an OS signal that tells the app to add shapes/glyphs. The closest precedent for opt-in glyphs. | OS, per device | Apps are expected to honour it | https://developer.apple.com/tutorials/data/documentation/appkit/nsworkspace/accessibilitydisplayshoulddifferentiatewithoutcolor.md ; https://developer.apple.com/help/app-store-connect/manage-app-accessibility/differentiate-without-color-alone-evaluation-criteria (search snippets) |
 | Adobe Spectrum | Light and dark themes only | No setting. Guidance: don't use colour alone; pair with a label or icon; two-tone pairs "not colour vision deficiency safe". | n/a | n/a | https://spectrum.adobe.com/page/color-system/ |
 | GOV.UK | No user-selectable themes | n/a. Cue-alongside-colour guidance not on that page. | n/a | n/a | https://design-system.service.gov.uk/styles/colour/ |
-| Shopify Polaris, Fluent 2, BBC GEL, Google Workspace/Material beyond contrast | NOT VERIFIED. The Polaris fetch failed, BBC is blocked to the fetcher, and Fluent 2 returned no results. | n/a | n/a | n/a | n/a |
 
 ## (B) Platform media features
 
@@ -72,10 +70,9 @@ No CVD or "differentiate without colour" media query exists. CSSWG discussion:
 - https://code.visualstudio.com/docs/configure/accessibility/accessibility
 - https://spectrum.adobe.com/page/color-system/
 - https://design-system.service.gov.uk/styles/colour/
-- Search-snippet-only (unverified): Teams, Figma, Linear, Gmail, Material 3 contrast, Apple Differentiate Without Color URLs listed in table A.
+- Search-snippet-only (unverified): Teams, Figma, Linear, Material 3 contrast, Apple Differentiate Without Color URLs listed in table A.
 
 ## Not verified
-- Primer's method for CVD themes (swap vs. patterns) and its attribute names beyond a page fragment. Primer repo's raw override file returned 404.
+- Primer's method for CVD themes (swap vs. patterns).
 - Whether GitHub's accessibility settings sync to the account.
 - Per-browser versions for `prefers-reduced-transparency`, `inverted-colors`, `prefers-reduced-data`.
-- Material 3 contrast ratios, Fluent 2 and Polaris token models, BBC GEL, Google Workspace, Gmail (official).

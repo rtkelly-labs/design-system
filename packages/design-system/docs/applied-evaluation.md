@@ -39,7 +39,7 @@ Filed:
 - #398 Midnight `intent.danger` is the same pink as `accent.tertiary`.
 - #399 Temporal components, CodeView and DiffView.
 - #158 Command palette.
-- #77–#86 The editor theme itself, its emitters (VS Code, terminals, Zed, JetBrains) and the gates it needs.
+- #77, #80–#86 The editor theme itself, its emitters (VS Code, terminals, Zed, JetBrains) and the gates it needs.
 
 Not filed:
 
@@ -69,7 +69,7 @@ Rule 4 applies: Base UI is the only interaction library.
 | Tree, split pane | Hand-rolled to the APG patterns | `headless-tree`, `react-resizable-panels` |
 | Live terminal | Static `<pre>` with ANSI variables | `@xterm/xterm` |
 
-Ruled out because they bring their own focus model or a heavy runtime: `cmdk`, `kbar`, `react-aria`,
+Ruled out: `cmdk`, `kbar`, `react-aria`,
 `@hello-pangea/dnd`, FullCalendar, Monaco, AG Grid.
 
 ## Not tested
