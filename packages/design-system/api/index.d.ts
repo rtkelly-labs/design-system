@@ -1722,11 +1722,11 @@ declare const NERD_GLYPHS: {
     readonly compress: "";
     readonly 'git-branch': "";
     readonly 'git-commit': "";
-    readonly 'git-merge': "";
+    readonly 'git-merge': "";
     readonly 'git-pull-request': "";
     readonly docker: "";
-    readonly kubernetes: "󱀹";
-    readonly aws: "󰍝";
+    readonly kubernetes: "󱃾";
+    readonly aws: "󰸏";
     readonly linux: "";
     readonly apple: "";
     readonly windows: "";
@@ -1735,8 +1735,8 @@ declare const NERD_GLYPHS: {
     readonly terminal: "";
     readonly code: "";
     readonly bug: "";
-    readonly cpu: "󰌢";
-    readonly ram: "󰌣";
+    readonly cpu: "";
+    readonly ram: "";
     readonly search: "";
     readonly settings: "";
     readonly check: "";
