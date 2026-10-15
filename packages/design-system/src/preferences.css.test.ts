@@ -244,7 +244,7 @@ describe('series — the categorical group', () => {
 });
 
 describe('links: underline', () => {
-  it('is an unlayered rule scoped to prose and the site and docs links', () => {
+  it('is an unlayered rule scoped to prose and the site link', () => {
     const rule = rulesContaining('data-a11y-links="underline"')[0]!;
     expect(rule).toContain('.prose a');
     expect(rule).toContain('a[data-slot="site-link"]');
