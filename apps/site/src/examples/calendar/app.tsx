@@ -3,7 +3,7 @@
 /**
  * Calendar: week, day, month and agenda views over seeded events.
  *
- * Built only from `@rtkelly13/design-system`: Tabs for the view switch,
+ * Built only from `@rtkelly13/design-system`: SegmentedControl for the view switch,
  * Popover for event detail, Modal for create, Menu for options and actions,
  * Checkbox for calendar visibility. Everything temporal (the time grid, overlap
  * columns, the now marker, all-day lanes, the month grid, the mini navigator)
@@ -27,10 +27,8 @@ import {
   Modal,
   Popover,
   Select,
-  Tabs,
-  TabsList,
-  TabsTab,
-  BracketText,
+  SegmentedControl,
+  SegmentedControlItem,
 } from '@rtkelly13/design-system';
 import {
   CALENDARS,
@@ -781,14 +779,12 @@ export default function CalendarApp() {
           <Button size="icon" aria-label="Next" onClick={() => step(1)}>&gt;</Button>
         </ButtonGroup>
         <h2 className="m-0 min-w-0 flex-1 max-sm:order-last max-sm:basis-full font-display text-xl font-bold uppercase tracking-tight sm:text-2xl" aria-live="polite">{title}</h2>
-        <Tabs value={view} onValueChange={(v) => setView(v as View)} accent="primary">
-          <TabsList label="Calendar view">
-            <TabsTab value="week">WEEK</TabsTab>
-            <TabsTab value="day">DAY</TabsTab>
-            <TabsTab value="month">MONTH</TabsTab>
-            <TabsTab value="agenda">AGENDA</TabsTab>
-          </TabsList>
-        </Tabs>
+        <SegmentedControl label="Calendar view" value={view} onValueChange={(v) => setView(v as View)}>
+          <SegmentedControlItem value="week">WEEK</SegmentedControlItem>
+          <SegmentedControlItem value="day">DAY</SegmentedControlItem>
+          <SegmentedControlItem value="month">MONTH</SegmentedControlItem>
+          <SegmentedControlItem value="agenda">AGENDA</SegmentedControlItem>
+        </SegmentedControl>
         <Menu trigger={<Button size="xs">OPTIONS</Button>} align="end">
           <MenuRadioGroup label="DENSITY" value={density} onValueChange={(v) => setDensity(v as Density)}>
             <MenuRadioItem value="compact">Compact (36px / hour)</MenuRadioItem>

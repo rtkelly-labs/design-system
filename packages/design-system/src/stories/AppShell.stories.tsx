@@ -130,6 +130,24 @@ export const SidebarOpen: Story = {
 };
 
 /**
+ * A host that owns the page's `<main>`. A document has exactly one landmark of
+ * that kind, so a site that already wraps its routes in
+ * `<main id="main-content">` passes `mainAs="div"` and `AppMain` keeps its
+ * layout but renders a plain `div`. Left at the default, the shell owns the
+ * landmark and the host must not render one.
+ */
+export const HostOwnsMain: Story = {
+  args: { mainAs: 'div' },
+  render: (args) => (
+    <main id="main-content">
+      <AppShell {...args} sidebar={<Sidebar activeId="active" />} topbar={<Topbar />}>
+        <Page />
+      </AppShell>
+    </main>
+  ),
+};
+
+/**
  * Interactive: the entries are buttons reporting through `onNavigate`, the
  * way a client-side router takes over, and the page follows the choice.
  * Narrow the viewport and choose from the drawer — it closes, and focus
