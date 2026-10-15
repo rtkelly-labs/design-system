@@ -132,6 +132,7 @@ export default function RepositorySettings() {
   return (
     <div className="min-h-[640px] w-full overflow-hidden border-2 border-edge-strong">
       <AppShell
+        mainAs="div"
         sidebar={
           <AppSidebar label="Repository" header={<Badge accent="secondary">{saved.visibility.toUpperCase()}</Badge>}>
             <AppSidebarNav label="Settings sections" items={NAV} activeId={section} onNavigate={setSection} heading="Settings" />
