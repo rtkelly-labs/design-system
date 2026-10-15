@@ -214,7 +214,7 @@ export async function renderReports({
   for (const input of absolute) {
     const body = await renderMarkup({ input, designSystemEntry: entry, props });
     const candidates = extractCandidates(body);
-    const css = compiler.build(candidates);
+    const css = compiler.build(candidates, body);
 
     for (const theme of themes) {
       const html = documentShell({
