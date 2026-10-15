@@ -512,11 +512,12 @@ export default function InboxApp() {
 
 function ListSkeleton({ density }: { density: TableDensity }) {
   // D7-B / INB-04: the table-row preset, one hatched band per row at the density's height.
-  const h = density === 'compact' ? 'h-9' : 'h-12';
+  // A gap between bands, so each reads as a row: butted together the hatch is one slab.
+  const h = density === 'compact' ? 'h-7' : 'h-9';
   return (
-    <div role="status" aria-label="Loading issues" className="flex flex-col gap-0 border-2 border-edge-strong">
+    <div role="status" aria-label="Loading issues" className="flex flex-col gap-2 border-2 border-edge-strong p-2">
       {Array.from({ length: 12 }, (_, i) => (
-        <Skeleton key={i} shape="row" className={`${h} border-x-0 border-t-0 last:border-b-0`} />
+        <Skeleton key={i} shape="row" className={h} />
       ))}
     </div>
   );
