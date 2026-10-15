@@ -9,6 +9,17 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## 0.15.0
+
+Text on `sketch` is darker and heavier, and `text.muted` is lighter on `midnight`
+(#372). `text.muted` is `#9d9db4` on midnight and `#5c5546` on sketch; `accent.quiet`
+keeps the old values. Running text on a light level is drawn at weight 450, through a
+new `--ds-ink-weight` property that any weight utility overrides. Nothing to change in
+code. Re-baseline visual snapshots that show sketch text or muted text.
+
+`check:contrast` reports APCA Lc beside each ratio. It is reported only and never fails
+the gate.
+
 ## 0.13.0
 
 This batch adds the focus-preserving Button pending state, shipped symbol coverage and
