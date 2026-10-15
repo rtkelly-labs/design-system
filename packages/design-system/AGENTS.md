@@ -124,6 +124,7 @@ Load these when the task is in them, not before.
 | Hosted Storybook, its domains, and the release train | [`docs/hosting.md`](./docs/hosting.md) |
 | Workflow conventions, with the incidents behind them | [`docs/workflow.md`](./docs/workflow.md) |
 | Outside reading, and what each idea changed here | [`docs/research.md`](./docs/research.md) |
+| The applied evaluation: owner decisions D1–D11 and R6, and what is still open | [`docs/applied-evaluation.md`](./docs/applied-evaluation.md) |
 | **Third-party reference material — licensing** | [`docs/reference-material.md`](./docs/reference-material.md) |
 
 Standing analysis, written once and still true:
