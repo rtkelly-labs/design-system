@@ -3,6 +3,7 @@ import { Button, NerdIcon } from '@rtkelly13/design-system';
 import { DECISIONS } from './data';
 import type { Decision, DecisionOption } from './data';
 import { DebugToggle } from './DebugToggle';
+import { Phase2 } from './p2/Phase2';
 import { Scenes } from './Scenes';
 import { Sheet } from './Sheet';
 import type { SheetMode } from './Sheet';
@@ -201,18 +202,22 @@ function DecisionSection({ d }: { d: Decision }) {
   );
 }
 
+/** The Phase 1 picks, from docs/applied-evaluation/decisions.md. */
+const PICKS: Record<string, string> = { D1: 'D1-A', D2: 'D2-B', D3: 'D3-B', D4: 'D4-A + touch', D5: 'D5-B' };
+
 /** Index of every decision and option ID, then one section per decision. */
 export function Board() {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 pt-10 pb-20 md:px-6">
       <header className="flex flex-col gap-4">
-        <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">[ PHASE 1 · SCAFFOLDING ]</p>
+        <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">[ SCAFFOLDING ]</p>
         <h1 className="m-0 font-display text-4xl font-extrabold uppercase text-content-primary sm:text-5xl">Decision board</h1>
         <p className="m-0 max-w-3xl text-lg text-content-secondary">
           Pick one option per decision. Each is shown in context on both levels, next to a control row of what ships
-          today. Site-local styles only; delete this route once the choices are made.
+          today. Site-local styles only; delete this route once the choices are made. Phase 1 is decided and collapsed;{' '}
+          <a href="#phase-2" className="font-bold text-accent-primary">Phase 2</a> is open.
         </p>
-        <nav aria-label="Decisions" className="border-2 border-edge-strong bg-surface-raised p-3 shadow-hard-md">
+        <nav aria-label="Phase 1 decisions" className="border-2 border-edge-strong bg-surface-raised p-3 shadow-hard-md">
           <ul className="m-0 flex list-none flex-col gap-2 p-0 font-mono text-sm">
             {DECISIONS.map((d) => (
               <li key={d.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -228,9 +233,29 @@ export function Board() {
           </ul>
         </nav>
       </header>
-      {DECISIONS.map((d) => (
-        <DecisionSection key={d.id} d={d} />
-      ))}
+      <section id="phase-1" aria-labelledby="phase-1-h" className="flex scroll-mt-20 flex-col gap-4">
+        <h2 id="phase-1-h" className="m-0 font-display text-2xl font-extrabold uppercase text-content-primary">
+          Phase 1 <span className="font-mono text-sm text-content-muted">· decided</span>
+        </h2>
+        <p className="m-0 max-w-3xl font-mono text-xs text-content-secondary">
+          Collapsed by default. Open a section to see the options as they were shown.
+        </p>
+        {DECISIONS.map((d) => (
+          <details key={d.id} className="border-2 border-edge-default">
+            <summary className="flex cursor-pointer flex-wrap items-baseline gap-x-3 gap-y-1 bg-surface-raised p-3 font-mono text-sm">
+              <span className="font-bold text-accent-primary">{d.id}</span>
+              <span className="text-content-primary">{d.title}</span>
+              <span className="border-2 border-edge-default px-1.5 text-[11px] font-bold uppercase text-content-secondary">
+                decided: {PICKS[d.id]}
+              </span>
+            </summary>
+            <div className="p-3 sm:p-4">
+              <DecisionSection d={d} />
+            </div>
+          </details>
+        ))}
+      </section>
+      <Phase2 />
     </div>
   );
 }
