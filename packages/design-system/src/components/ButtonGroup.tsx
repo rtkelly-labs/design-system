@@ -17,6 +17,14 @@ export interface ButtonGroupContextValue {
 /** Read by `Button`. Not part of the public vocabulary: a caller wraps, never reads. */
 export const ButtonGroupContext = createContext<ButtonGroupContextValue | null>(null);
 
+/**
+ * The one use of `process.env.NODE_ENV` in the package, written as the bare
+ * expression so a consumer's bundler replaces it and strips the check from a
+ * production build. Declared here, module-scoped, because the declaration build
+ * reads no `@types/node`.
+ */
+declare const process: { env: { NODE_ENV?: string } };
+
 const group = recipe({
   base: 'flex flex-wrap items-center gap-3',
 });

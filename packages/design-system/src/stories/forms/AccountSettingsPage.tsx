@@ -105,11 +105,11 @@ export function AccountSettingsPage({
           */}
           <div>
             {scheduled ? (
-              <Button type="button" variant="inverse" onClick={cancelDelete}>
+              <Button type="button" onClick={cancelDelete}>
                 CANCEL DELETION
               </Button>
             ) : (
-              <Button type="button" variant="tertiary" bracketed onClick={() => setConfirming(true)}>
+              <Button type="button" variant="danger" bracketed onClick={() => setConfirming(true)}>
                 DELETE ACCOUNT
               </Button>
             )}
