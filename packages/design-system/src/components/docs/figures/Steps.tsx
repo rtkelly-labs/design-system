@@ -72,7 +72,7 @@ export const Steps = React.forwardRef<HTMLDivElement, StepsProps>(function Steps
             const titleClass = state === 'now' ? 'text-accent-primary' : state === 'next' ? 'text-content-muted' : 'text-content-primary';
             return <li className="flex flex-col" key={`${index}-${step.title ?? ''}`}>
               <div className="grid grid-cols-[2.5rem_minmax(0,1fr)] items-baseline gap-x-3">
-                <span aria-hidden="true" className={cn('select-none tabular-nums', titleClass)}>{number}</span>
+                <span aria-hidden="true" className={cn('select-none text-center tabular-nums', titleClass)}>{number}</span>
                 <div className="flex min-w-0 flex-col gap-2">
                   {step.title ? <p className={cn('text-pretty', titleClass)}>{step.title}</p> : null}
                   {step.children ? <AsciiFrameProse className={state === 'next' ? 'text-content-muted' : 'text-content-secondary'}>{step.children}</AsciiFrameProse> : null}

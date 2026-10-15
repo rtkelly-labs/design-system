@@ -4,6 +4,18 @@ import { Glyph } from './Glyph';
 import { NERD_GLYPHS, NerdIcon } from './NerdIcon';
 
 describe('NerdIcon', () => {
+  it('maps names to the codepoints the bundled font draws them with', () => {
+    // Read from the font's cmap (oct-git_merge, md-kubernetes, md-aws, oct-cpu, fa-memory).
+    // `\uf408` is oct-mark_github, not a merge glyph; the supplementary-plane
+    // entries were once hand-typed surrogate pairs that landed on unrelated icons.
+    const cp = (name: keyof typeof NERD_GLYPHS) => NERD_GLYPHS[name].codePointAt(0);
+    expect(cp('git-merge')).toBe(0xf419);
+    expect(cp('kubernetes')).toBe(0xf10fe);
+    expect(cp('aws')).toBe(0xf0e0f);
+    expect(cp('cpu')).toBe(0xf4bc);
+    expect(cp('ram')).toBe(0xefc5);
+  });
+
   it('renders named developer icon glyphs', () => {
     render(<NerdIcon name="git-branch" data-testid="branch-icon" />);
 
