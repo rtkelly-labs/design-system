@@ -10,6 +10,11 @@ describe('SiteFooter', () => {
     expect(screen.getByRole('contentinfo').tagName).toBe('FOOTER');
   });
 
+  it('drops the footer on paper', () => {
+    render(<SiteFooter meta="© Site" />);
+    expect(screen.getByRole('contentinfo').className).toContain('print:hidden');
+  });
+
   it('renders nothing of its own: no copy, no links, when given no slots', () => {
     render(<SiteFooter data-testid="f" />);
     const footer = screen.getByTestId('f');
