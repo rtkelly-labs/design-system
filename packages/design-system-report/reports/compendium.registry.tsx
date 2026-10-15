@@ -28,6 +28,7 @@ import * as AppShellStories from '../../design-system/src/stories/AppShell.stori
 import * as AvatarStories from '../../design-system/src/stories/Avatar.stories';
 import * as BracketTextStories from '../../design-system/src/stories/BracketText.stories';
 import * as NoteBlockStories from '../../design-system/src/stories/NoteBlock.stories';
+import * as TLDRStories from '../../design-system/src/stories/TLDR.stories';
 import * as TagStories from '../../design-system/src/stories/Tag.stories';
 import * as ProseStories from '../../design-system/src/stories/Prose.stories';
 import * as CodeBlockStories from '../../design-system/src/stories/CodeBlock.stories';
@@ -300,6 +301,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'Avatar', group: 'Content', height: 26, layout: 'side', states: fromStories(AvatarStories, ['Default']) },
   { component: 'BracketText', group: 'Content', height: 39, layout: 'side', states: fromStories(BracketTextStories, ['Emphasis']) },
   { component: 'NoteBlock', group: 'Content', height: 126, layout: 'side', states: fromStories(NoteBlockStories, ['AllTypes']) },
+  { component: 'TLDR', group: 'Content', height: 60, layout: 'side', states: fromStories(TLDRStories, ['Default']) },
   { component: 'Tag', group: 'Content', height: 23, layout: 'side', states: fromStories(TagStories, ['Row']) },
   { component: 'Prose', group: 'Content', height: 145, layout: 'stack', states: fromStories(ProseStories, ['Default']) },
   { component: 'CodeBlock', group: 'Content', height: 117, layout: 'side', states: [...fromStories(CodeBlockStories, ['Default', 'NotCopyable']), custom('attached', () => (<CodeBlockAttachment value={true}><CodeBlock title="app.ts" language="ts">{'export const answer = 42;'}</CodeBlock></CodeBlockAttachment>))] },
@@ -369,10 +371,10 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'Hero', rungs: ['sketch'], group: 'Marketing', height: 101, layout: 'stack', states: fromStories(HeroStories, ['WithMedia']) },
   { component: 'PricingGrid', rungs: ['sketch'], group: 'Marketing', height: 123, layout: 'stack', states: fromStories(PricingGridStories, ['TwoTiers']) },
   { component: 'BlogPost', rungs: ['sketch'], group: 'Blog', height: 125, layout: 'stack', states: fromStories(BlogPostStories, ['Default']) },
-  { component: 'ColophonCard', clips: 'a decorative watermark glyph bleeds off the card', group: 'Blog', height: 61, layout: 'side', states: fromStories(ColophonCardStories, ['Default']) },
+  { component: 'ColophonCard', clips: 'a decorative watermark glyph bleeds off the card', group: 'Blog', height: 68, layout: 'side', states: fromStories(ColophonCardStories, ['Default']) },
   { component: 'MetadataGrid', group: 'Blog', height: 42, layout: 'side', states: fromStories(MetadataGridStories, ['Default']) },
   { component: 'TrackCard', group: 'Blog', height: 117, layout: 'side', states: fromStories(TrackCardStories, ['Default']) },
-  { component: 'Slide', group: 'Presentation', height: 84, layout: 'side', states: fromStories(SlideStories, ['Default']) },
+  { component: 'Slide', group: 'Presentation', height: 88, layout: 'side', states: fromStories(SlideStories, ['Default']) },
   { component: 'SlideDeck', clips: 'chrome badges straddle the slide frame', rungs: ['sketch'], group: 'Presentation', height: 129, layout: 'stack', states: fromStories(SlideDeckStories, ['DefaultDeck']) },
   { component: 'ReportDocument', rungs: ['sketch'], group: 'Content', height: 105, layout: 'side', states: [...fromStories(ReportDocumentStories, ['Minimal', 'Disclosure']), custom('section', () => (<ReportDocument title="Link Audit"><ReportSection title="Findings"><p>None.</p></ReportSection></ReportDocument>))] },
 
