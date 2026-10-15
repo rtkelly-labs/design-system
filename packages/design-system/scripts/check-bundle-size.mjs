@@ -272,8 +272,10 @@ const BUDGETS = {
     // Applied refinements, phase 1: ButtonGroup and the D3 hue-collision check
     // (findHueCollisions over every Level's role→hue map), plus the new Button
     // variants and sizes. 101,635 B gzip locally; ~2% headroom kept.
-    maxRaw: 450_000,
-    maxGzip: 103_700,
+    // Phase 3 adds SegmentedControl, Toolbar, closable Tabs and the dialog
+    // shells' initialFocus/headerless modes: 451,056 B raw, 103,766 B gzip.
+    maxRaw: 460_000,
+    maxGzip: 105_800,
     desc: 'ESM output, every module',
   },
   'src/theme.css': {
