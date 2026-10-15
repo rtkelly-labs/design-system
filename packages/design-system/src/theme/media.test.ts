@@ -28,6 +28,9 @@ describe('the Medium axis', () => {
   });
 });
 
+/** Numbers a Level may carry because they are derivation inputs to a colour. */
+const COLOUR_PARAMETERS = new Set(['tintStrength']);
+
 describe('the two axes do not overlap', () => {
   // The load-bearing claim of ADR 0004. A Level varies colour; a Medium varies
   // geometry and time; neither varies on the other's axis. Asserted structurally
@@ -48,7 +51,12 @@ describe('the two axes do not overlap', () => {
       const def = LEVELS[level as keyof typeof LEVELS];
       // Every leaf on a Level is a colour string or a label. A number would be
       // a spacing, a weight or a duration that had drifted onto this axis.
-      const numbers = JSON.stringify(def).match(/:\s*-?\d+(\.\d+)?[,}]/g) ?? [];
+      // The exceptions are mixing ratios, which parameterise a colour and are
+      // not a spacing, weight or duration: how much of a role makes its tint.
+      const numbers =
+        JSON.stringify(def, (key, value: unknown) => (COLOUR_PARAMETERS.has(key) ? undefined : value)).match(
+          /:\s*-?\d+(\.\d+)?[,}]/g,
+        ) ?? [];
       expect(numbers, `${level} declares a bare number`).toEqual([]);
     }
   });

@@ -432,6 +432,21 @@ export function auditContrast(
         floor.role,
       );
     }
+    // D8 tints: a role tints a surface that prints the role as text (the time on
+    // an event) and `text.primary` as ink (its title). Both must hold on the
+    // tint, at this level's own declared strength. The edge-only alternative
+    // (D8-C) prints on `surface.raised`, which the grounds loop above covers.
+    for (const [name, role, tint] of [
+      ...(['primary', 'secondary', 'tertiary', 'quiet'] as const satisfies readonly Emphasis[]).map(
+        (tone) => [`accent.${tone}`, def.accent[tone], def.tint.accent[tone]] as const,
+      ),
+      ...(['info', 'success', 'warning', 'danger'] as const satisfies readonly Intent[]).map(
+        (tone) => [`intent.${tone}`, def.intent[tone], def.tint.intent[tone]] as const,
+      ),
+    ]) {
+      check(`tint.${name}: ${name} on tint`, role, tint, floor.role);
+      check(`tint.${name}: text.primary on tint`, def.text.primary, tint, floor.role);
+    }
     // `Select`'s open list (#164), named for the component because it used to
     // be the one surface the palette did not reach: the operating system
     // painted it. The rows are `text.primary` on `surface.raised`; a disabled
