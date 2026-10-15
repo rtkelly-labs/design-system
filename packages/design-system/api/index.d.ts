@@ -610,6 +610,8 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
 declare const Card: react.ForwardRefExoticComponent<CardProps & react.RefAttributes<HTMLDivElement>>;
 
+type LabelAppearance = 'default' | 'hairline';
+
 interface BadgeProps extends react__default.HTMLAttributes<HTMLSpanElement> {
 
     children: react__default.ReactNode;
@@ -617,6 +619,8 @@ interface BadgeProps extends react__default.HTMLAttributes<HTMLSpanElement> {
     accent?: AccentToken;
 
     size?: 'sm' | 'md';
+
+    appearance?: LabelAppearance;
 }
 
 declare const Badge: react__default.ForwardRefExoticComponent<BadgeProps & react__default.RefAttributes<HTMLSpanElement>>;
@@ -743,6 +747,8 @@ interface TagProps {
     uppercase?: boolean;
 
     size?: 'sm' | 'md';
+
+    appearance?: LabelAppearance;
     children?: ReactNode;
 }
 declare const Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLSpanElement | HTMLAnchorElement>>;
@@ -1330,7 +1336,7 @@ declare function StatCard({ title, value, change, changeType, subtitle, icon: Ic
 type TableAppearance = 'grid' | 'quiet' | 'index';
 
 type TableDensity = 'comfortable' | 'compact';
-declare function Table({ className, containerClassName, label, appearance, density, ...props }: TableHTMLAttributes<HTMLTableElement> & {
+declare function Table({ className, containerClassName, label, appearance, density, labelAppearance, ...props }: TableHTMLAttributes<HTMLTableElement> & {
     containerClassName?: string;
 
     label?: string;
@@ -1338,6 +1344,8 @@ declare function Table({ className, containerClassName, label, appearance, densi
     appearance?: TableAppearance;
 
     density?: TableDensity;
+
+    labelAppearance?: LabelAppearance;
 }): react.JSX.Element;
 declare function TableHeader({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
 declare function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
@@ -3604,6 +3612,7 @@ export {
   type InputProps,
   type Intent,
   LEVELS,
+  type LabelAppearance,
   Legend,
   type LegendProps,
   type LevelDefinition,
