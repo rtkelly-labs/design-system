@@ -46,23 +46,29 @@ export function StatCard({
   return (
     <div data-slot="stat-card"
       className={cn(
-        'bg-surface-raised border-2 border-edge-strong p-6 transition-all duration-200',
+        'min-w-0 bg-surface-raised border-2 border-edge-strong p-6 transition-all duration-200',
         accentHoverEdgeClass(accent),
         className,
       )}
     >
       <div data-slot="statcard-header" className="flex justify-between items-start mb-2">
-        <span data-slot="statcard-label" className="font-mono text-xs font-bold uppercase tracking-wider text-content-muted">
-          <BracketText>{title}</BracketText>
+        <span data-slot="statcard-label" className="min-w-0 font-mono text-xs font-bold uppercase tracking-wider text-content-muted">
+          [&nbsp;{title}&nbsp;]
         </span>
         {Icon && <Icon className={cn('h-6 w-6', accentTextClass(accent))} />}
       </div>
-      <div data-slot="statcard-value-row" className="flex items-baseline gap-3 my-1">
-        <span data-slot="statcard-value" className="font-display text-4xl font-extrabold text-content-primary tracking-tight">
+      {/*
+        The row wraps: a long value pushes the change onto its own line rather
+        than past the card's edge. The value steps down with the viewport
+        (24px to the authored 36px) and may break inside a word as a last
+        resort, so a 20-character figure cannot widen a grid column.
+      */}
+      <div data-slot="statcard-value-row" className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1 my-1">
+        <span data-slot="statcard-value" className="min-w-0 font-display text-[length:clamp(1.5rem,1.1rem+1.6vw,2.25rem)] leading-[1.11] font-extrabold text-content-primary tracking-tight [overflow-wrap:anywhere]">
           {value}
         </span>
         {change && (
-          <span data-slot="statcard-change" className={cn('font-mono text-xs font-bold', CHANGE_CLASS[changeType])}>
+          <span data-slot="statcard-change" className={cn('shrink-0 font-mono text-xs font-bold', CHANGE_CLASS[changeType])}>
             {change}
           </span>
         )}
