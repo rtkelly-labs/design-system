@@ -11,7 +11,7 @@ describe('ChartTooltip', () => {
       </ChartTooltip>,
     );
 
-    expect(screen.getByText('[ METRICS ]')).toBeDefined();
+    expect(screen.getByText('METRICS')).toBeDefined();
     expect(screen.getByText('42 events')).toBeDefined();
   });
 

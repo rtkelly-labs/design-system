@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 import { cn } from '../lib/recipe';
+import { BracketText } from './BracketText';
 
 /**
  * Draws a colour and names it.
@@ -82,7 +83,7 @@ export const SwatchGroup = forwardRef<HTMLElement, SwatchGroupProps>(function Sw
         data-slot="swatch-group-title"
         className="mb-3 font-display text-xs font-extrabold uppercase tracking-widest text-accent-secondary"
       >
-        [&nbsp;{title}&nbsp;]
+        <BracketText>{title}</BracketText>
       </h3>
       <div data-slot="swatch-group-items" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {Object.entries(entries).map(([name, value]) => (
