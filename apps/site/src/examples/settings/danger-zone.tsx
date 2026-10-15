@@ -17,8 +17,7 @@ const ROWS: { id: Exclude<Action, null>; title: string; body: string; label: str
 /**
  * A danger zone. Archive and transfer are one click to confirm; delete asks for
  * the repository name first, and the confirm button stays disabled until it is
- * typed. `AlertDialog` has no way to disable its own confirm button, so the
- * dialog's `footer` slot is used to supply a button that can be.
+ * typed, through `AlertDialog`'s `confirmDisabled`; the default footer is kept.
  */
 export function DangerZone() {
   const [action, setAction] = useState<Action>(null);
@@ -73,16 +72,9 @@ export function DangerZone() {
         onClose={close}
         onConfirm={confirm}
         title={row ? `${row.title}?` : ''}
-        footer={
-          <>
-            <Button type="button" onClick={close}>
-              KEEP IT
-            </Button>
-            <Button type="button" variant="danger" bracketed disabled={!ready} onClick={confirm}>
-              {row?.label ?? ''} {REPO.split('/')[1]}
-            </Button>
-          </>
-        }
+        cancelLabel="KEEP IT"
+        confirmLabel={`${row?.label ?? ''} ${REPO.split('/')[1]}`}
+        confirmDisabled={!ready}
       >
         <div className="flex flex-col gap-4">
           <p className="m-0">{row?.body}</p>

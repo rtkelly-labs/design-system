@@ -74,6 +74,12 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-overlays-modal--with-footer', snapshot: 'modal-with-footer.png' },
   { id: 'components-overlays-alertdialog--destructive', snapshot: 'alertdialog-destructive.png' },
   { id: 'components-overlays-drawer--from-the-right', snapshot: 'drawer-from-the-right.png' },
+  // Row 10 shells: headerless modal and drawer, type-to-confirm and pending
+  // alerts. Baselines come with `/update-snapshots`.
+  { id: 'components-overlays-modal--headerless-palette', snapshot: 'modal-headerless-palette.png' },
+  { id: 'components-overlays-drawer--headerless', snapshot: 'drawer-headerless.png' },
+  { id: 'components-overlays-alertdialog--type-to-confirm', snapshot: 'alertdialog-type-to-confirm.png' },
+  { id: 'components-overlays-alertdialog--pending', snapshot: 'alertdialog-pending.png' },
   { id: 'components-feedback-toast--all-intents', snapshot: 'toast-all-intents.png' },
   // The application shell (issue 247), asked to open its sidebar and at a
   // width where it must not: the persistent column, no drawer. The same story

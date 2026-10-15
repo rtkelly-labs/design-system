@@ -225,7 +225,7 @@ const sidebarStyles = recipe({
     header: 'border-b-2 border-edge-strong px-6 py-5',
     body: 'flex-1 overflow-y-auto px-4 py-5',
     footer: 'border-t-2 border-edge-strong px-4 py-4',
-    drawerHeader: 'mb-5 border-b-2 border-edge-strong pb-4',
+    drawerHeader: '-mt-6 mb-5 border-b-2 border-edge-strong pb-4 pr-10',
   },
 });
 
@@ -287,6 +287,11 @@ export const AppSidebar = forwardRef<HTMLElement, AppSidebarProps>(function AppS
           onClose={() => context.setSidebarOpen(false)}
           placement="left"
           title={label}
+          // The application's own header is the drawer's heading: rendering the
+          // label above it as well said the same thing twice. `label` stays the
+          // accessible name, visually hidden, and the close control is pinned
+          // to the corner.
+          headerless={header != null}
           footer={footer ?? undefined}
         >
           {header != null && <div className={styles.drawerHeader()}>{header}</div>}

@@ -417,6 +417,7 @@ function CommandPalette({ isOpen, onClose, onRun }: { isOpen: boolean; onClose: 
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState(0);
   const listId = useId();
+  const field = useRef<HTMLInputElement>(null);
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     return COMMANDS.filter((c) => c.label.toLowerCase().includes(q) || c.group.toLowerCase().includes(q));
@@ -438,10 +439,9 @@ function CommandPalette({ isOpen, onClose, onRun }: { isOpen: boolean; onClose: 
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Command palette">
+    <Modal isOpen={isOpen} onClose={onClose} title="Command palette" headerless footer={false} initialFocus={field}>
       <input
-        // eslint-disable-next-line jsx-a11y/no-autofocus -- Modal has no initialFocus prop (gap); without this, focus lands on the dialog and typing goes nowhere
-        autoFocus
+        ref={field}
         role="combobox"
         aria-expanded="true"
         aria-controls={listId}
