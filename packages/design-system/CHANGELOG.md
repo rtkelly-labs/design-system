@@ -9,6 +9,10 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## 0.17.0
+
+`NoteBlock` types match their intents: `warning` is now amber (`intent.warning`), a new `danger` is red, and `important` is gone. Use `warning` where you had `important`, and `danger` where a `warning` meant "this will break". Bracketed labels hold their brackets on the line (no-break spaces), display headings balance, and code `pre` blocks lose the typography plugin's 6px radius.
+
 ## 0.16.0
 
 Five MDX figures: `SwatchCompare`, `MetricStrip`, `TokenTable`, `Decision` with `Option`, `TermGrid` with `Term`. Registered in `mdxComponents`.
