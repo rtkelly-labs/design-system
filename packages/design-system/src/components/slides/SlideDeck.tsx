@@ -220,6 +220,10 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
   return (
     <div data-slot="slide-deck"
       ref={containerRef}
+      // A size container, so the stage and the control bar answer the width the
+      // deck was given rather than the page's: a deck in a narrow column stacks
+      // exactly as a deck on a narrow phone does.
+      className="@container"
       style={{
         width: '100%',
         maxWidth: isFullscreen ? '100vw' : '1000px',
@@ -233,13 +237,26 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
     >
       {/* Slide viewport */}
       <div
-        style={{
-          width: '100%',
-          aspectRatio: isFullscreen ? 'auto' : (aspectRatio === '16:9' ? '16 / 9' : '4 / 3'),
-          flex: isFullscreen ? 1 : 'none',
-          overflow: 'hidden',
-          position: 'relative',
-        }}
+        // Wide: the fixed aspect ratio. Narrow (under 42rem of deck): the ratio
+        // is only a floor, a `min-height` of the same shape, so the stage tracks
+        // the width and then grows with its content instead of clipping it. A
+        // 16:9 box 337px wide is 190px tall, which is not room for a title and
+        // a paragraph.
+        className={
+          isFullscreen
+            ? undefined
+            : 'flex min-h-[calc(100cqw*var(--deck-inverse))] flex-col @2xl:block @2xl:min-h-0 @2xl:[aspect-ratio:var(--deck-ratio)]'
+        }
+        style={
+          {
+            width: '100%',
+            '--deck-ratio': aspectRatio === '16:9' ? '16 / 9' : '4 / 3',
+            '--deck-inverse': aspectRatio === '16:9' ? 0.5625 : 0.75,
+            flex: isFullscreen ? 1 : 'none',
+            overflow: 'hidden',
+            position: 'relative',
+          } as React.CSSProperties
+        }
       >
         {slideList[currentSlide]}
       </div>
@@ -247,13 +264,13 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
       {/* Control bar — the presenter affordances, off when `chrome` is false. */}
       {chrome && (
         <div
+        // Stacked under 32rem of deck, the counter above the controls; a row
+        // from there up. The controls wrap rather than hang off the edge.
+        className="flex flex-col items-stretch gap-3 @lg:flex-row @lg:items-center @lg:justify-between"
         style={{
           padding: '1rem 1.5rem',
           borderTop: '2px solid var(--ds-border-strong)',
           backgroundColor: 'var(--ds-surface-base)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
           fontFamily: 'var(--ds-font-mono)',
         }}
       >
@@ -263,7 +280,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
         </div>
 
         {/* Action Controls */}
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <div className="flex flex-wrap items-center gap-3">
           <Button onClick={prevSlide} style={{ padding: '0.4rem 0.8rem' }}>
             <ChevronLeft size={16} /> PREV
           </Button>
