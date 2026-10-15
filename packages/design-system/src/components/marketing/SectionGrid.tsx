@@ -18,6 +18,12 @@ export interface SectionGridProps
   columns?: SectionColumns;
   /** Where the heading and description sit. Centred by default. */
   align?: SectionAlign;
+  /**
+   * Where a three-column grid gives up its columns. `md` (768px) by default;
+   * `wide` holds the single column until 900px, for cells with a call to action
+   * that needs about 270px to keep its label on one line.
+   */
+  stackBelow?: 'md' | 'wide';
   /** The grid's cells. */
   children?: ReactNode;
   /** Merged into the `<section>`'s classes. */
@@ -44,11 +50,16 @@ const sectionGrid = recipe({
     },
     columns: {
       2: { grid: 'md:grid-cols-2' },
-      3: { grid: 'md:grid-cols-3' },
+      3: {},
       4: { grid: 'md:grid-cols-2 lg:grid-cols-4' },
     },
+    stackBelow: { md: {}, wide: {} },
   },
-  defaultVariants: { align: 'center', columns: 3 },
+  compoundVariants: [
+    { columns: 3, stackBelow: 'md', class: { grid: 'md:grid-cols-3' } },
+    { columns: 3, stackBelow: 'wide', class: { grid: 'min-[900px]:grid-cols-3' } },
+  ],
+  defaultVariants: { align: 'center', columns: 3, stackBelow: 'md' },
 });
 
 /**
@@ -57,10 +68,10 @@ const sectionGrid = recipe({
  * what they put in the cells, so they are one implementation with two names.
  */
 export const SectionGrid = forwardRef<HTMLElement, SectionGridProps>(function SectionGrid(
-  { title, description, columns = 3, align = 'center', children, className, slot, ...props },
+  { title, description, columns = 3, align = 'center', stackBelow = 'md', children, className, slot, ...props },
   ref,
 ) {
-  const styles = sectionGrid({ align, columns });
+  const styles = sectionGrid({ align, columns, stackBelow });
   const headingId = useId();
   const hasHeader = Boolean(title) || Boolean(description);
 
