@@ -19,7 +19,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { LEVELS, THEME_LEVELS, FIXED_COLOURS, INK_WEIGHT } from '../src/theme/levels.ts';
+import { LEVELS, THEME_LEVELS, FIXED_COLOURS, INK_WEIGHT, PRINT_LEVEL } from '../src/theme/levels.ts';
 import { CSS_MEDIUM, LOOPS, LOOP_KEYFRAMES, MEDIA_DEFINITIONS } from '../src/theme/media.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -546,6 +546,23 @@ ${TAILWIND_ALIASES}
 }
 `);
   }
+
+  // Paper is one Level, whatever is on screen (D5-B). One rule for the root and
+  // every scoped subtree rather than one per level: later source order wins the
+  // (0,1,0) tie against the level blocks above. The Tailwind aliases are not
+  // repeated: they read var(--ds-*) on the element that declares them, so they
+  // resolve to these values there.
+  const paper = LEVELS[PRINT_LEVEL];
+  sections.push(`/* Print — always ${paper.label}, whatever level is active on screen. */
+@media print {
+  :root, [data-theme] {
+    color-scheme: ${paper.polarity};
+    --ds-ink-weight: ${INK_WEIGHT[paper.polarity]};
+
+${levelVariables(paper)}
+  }
+}
+`);
 
   sections.push(`/* Native form controls, scrollbars and the caret follow \`color-scheme\`, which
  * each level declares above. Without it a light level renders dark scrollbars
