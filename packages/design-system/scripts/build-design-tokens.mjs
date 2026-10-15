@@ -199,6 +199,13 @@ function levelDocument(level) {
         }),
       ),
     },
+    series: {
+      $type: 'color',
+      $description:
+        'Categorical series (D9-A): six colours told apart, not ranked, aliased onto Hues by the declared `seriesHue` list. ' +
+        'Colour never carries a series alone: pair each with a label, and a glyph under the `patterns` preference.',
+      ...Object.fromEntries(def.seriesHue.map((hue, i) => [String(i + 1), alias(hue)])),
+    },
     tint: {
       $type: 'color',
       $description:
