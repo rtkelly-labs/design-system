@@ -16,12 +16,12 @@ export default tseslint.config(
   {
     files: ['src/**/*.{ts,tsx}', 'scripts/**/*.{mts,mjs}'],
     extends: [tseslint.configs.recommended],
-    plugins: { 'react-hooks': reactHooks, 'jsx-a11y': jsxA11y, 'design-system': { rules: { 'no-hand-brackets': noHandBrackets } } },
+    plugins: { 'react-hooks': reactHooks, 'jsx-a11y': jsxA11y, brackets: { rules: { 'no-hand-brackets': noHandBrackets } } },
     languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
     rules: {
       ...reactHooks.configs.recommended.rules,
       ...jsxA11y.flatConfigs.recommended.rules,
-      'design-system/no-hand-brackets': 'error',
+      'brackets/no-hand-brackets': 'error',
     },
   },
 );
