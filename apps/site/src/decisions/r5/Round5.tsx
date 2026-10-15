@@ -1,79 +1,10 @@
-import type { ReactNode } from 'react';
 import { LV, ratio } from '../p2/Frame';
-import { LEGEND, CURRENT_LINE, CURRENT_MATCH, Frame, GEO, MATCHES, frameRows, pickRows, plainRows } from './Frame';
+import { ANCHOR, CheckList, CodeFrame as Frame, Disclosure, Eyebrow, GEO, Label, LevelPair as Pair, LevelPanel as Panel, Swatch, anchor } from '@/components/specimen';
+import { CURRENT_LINE, CURRENT_MATCH, LEGEND, MATCHES, frameRows, pickRows, plainRows } from '@/data/code-syntax';
 import { LEVEL_IDS, bands, build, checksFor, diagnosticsMeasure, mapRows, pinkInkColours, reference, today, worst } from './look';
 import type { Check, Dir, Level, Look } from './look';
 import { deltaE } from '../p2/colour';
 
-/** The sticky header measures 72px at 1280 and 84px at 375 (Playwright, getBoundingClientRect). 96px clears both. */
-export const ANCHOR = 'scroll-mt-24';
-
-/** An in-page link target, written as a call so a literal hash never reads as a hex colour to check:tokens. */
-const anchor = (id: string) => `#${id}`;
-
-export const Eyebrow = ({ children }: { children: ReactNode }) => (
-  <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">{children}</p>
-);
-export const Label = ({ children }: { children: ReactNode }) => (
-  <p className="m-0 font-mono text-[11px] font-bold uppercase tracking-wider text-content-muted">{children}</p>
-);
-
-export function Panel({ level, label, children }: { level: Level; label?: string; children: ReactNode }) {
-  return (
-    <div data-theme={level} className="min-w-0 border-2 border-edge-strong bg-surface-base p-3 text-content-primary sm:p-4">
-      <p className="m-0 mb-3 font-mono text-xs font-bold uppercase tracking-wider text-accent-primary">{`[ ${label ?? level} ]`}</p>
-      {children}
-    </div>
-  );
-}
-
-export function Pair({ children }: { children: (level: Level) => ReactNode }) {
-  return (
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-      {LEVEL_IDS.map((l) => (
-        <Panel key={l} level={l}>
-          {children(l)}
-        </Panel>
-      ))}
-    </div>
-  );
-}
-
-export const Swatch = ({ colour }: { colour: string }) => (
-  <span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 border border-edge-default align-middle" style={{ background: colour }} />
-);
-
-export const Disclosure = ({ title, children }: { title: string; children: ReactNode }) => (
-  <details className="border-2 border-edge-default">
-    <summary className="cursor-pointer bg-surface-raised p-2 font-mono text-xs font-bold uppercase text-content-primary">{title}</summary>
-    <div className="p-3">{children}</div>
-  </details>
-);
-
-/* ------------------------------------------------------------------ checks */
-
-export function CheckList({ checks, title = 'Checks' }: { checks: Check[]; title?: string }) {
-  const fails = checks.filter((c) => !c.ok).length;
-  return (
-    <div className="flex flex-col gap-2">
-      <Label>{`[ ${title} · ${checks.length - fails} pass, ${fails} fail ]`}</Label>
-      <ul className="m-0 flex list-none flex-col gap-2 p-0">
-        {checks.map((c) => (
-          <li key={c.title} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-2 text-sm">
-            <span aria-hidden="true" className={`font-mono text-base font-bold leading-5 ${c.ok ? 'text-intent-success' : 'text-intent-danger'}`}>
-              {c.ok ? '✓' : '✕'}
-            </span>
-            <span className="min-w-0">
-              <span className="sr-only">{c.ok ? 'Pass: ' : 'Fail: '}</span>
-              <span className="font-bold text-content-primary">{c.title}</span>
-              <span className="block text-xs text-content-secondary">{c.reason}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 function Numbers({ dir }: { dir: Dir }) {
   return (
@@ -583,10 +514,10 @@ function Diagnostics() {
 
 function MetricsStrip() {
   const rows = plainRows(11, 20);
-  const items: { id: string; label: string; look: Look; geo: typeof GEO.r5; note: string }[] = [
+  const items: { id: string; label: string; look: Look; geo: typeof GEO.spec; note: string }[] = [
     { id: 'today', label: 'Today (editor sample)', look: today('midnight'), geo: GEO.today, note: '13px / 20px · its own classes: keyword accent.tertiary, string success, number warning, comment muted italic' },
-    { id: 'P', label: 'P', look: build('P', 'midnight'), geo: GEO.r5, note: '14px / 21px' },
-    { id: 'Q', label: 'Q', look: build('Q', 'midnight'), geo: GEO.r5, note: '14px / 21px' },
+    { id: 'P', label: 'P', look: build('P', 'midnight'), geo: GEO.spec, note: '14px / 21px' },
+    { id: 'Q', label: 'Q', look: build('Q', 'midnight'), geo: GEO.spec, note: '14px / 21px' },
   ];
   return (
     <section id="R5-METRICS" aria-labelledby="R5-METRICS-h" className={`flex ${ANCHOR} flex-col gap-4 border-t-4 border-double border-edge-strong pt-8`}>

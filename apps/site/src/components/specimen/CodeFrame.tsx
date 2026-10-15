@@ -1,12 +1,15 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { DIFF_LINES, PAGINATE_SOURCE, findAll, tokenizeLine } from '@/examples/editor/data';
-import type { Look, Cls } from './look';
+import { tokenizeLine } from '@/examples/editor/data';
+import type { Cls, CodeLook } from './look';
 
 /**
- * One editor frame, drawn from a `Look`. Text is ordinary inline spans; every
+ * One editor frame, drawn from a `CodeLook`. Text is ordinary inline spans; every
  * fill, border, guide and wash is an absolutely positioned layer placed by
  * column in `ch`, so a border can sit 2px clear of the glyphs and never moves
  * the text or changes the row height.
+ *
+ * Colours are written straight into `style`, so a look may hold literals or
+ * `var(--ds-*)` references. The frame does no colour arithmetic.
  */
 
 export interface Geo {
@@ -18,10 +21,13 @@ export interface Geo {
   diff: number;
   pad: number;
 }
-export const GEO: Record<'r5' | 'today', Geo> = {
-  r5: { fs: 14, lh: 21, mark: 2, num: 3, diff: 2, pad: 1 },
+export const GEO: Record<'spec' | 'today', Geo> = {
+  /** The shipped metrics: 14px on 21px, a 2ch mark column, 3ch numbers, a 2ch diff bar and sign. */
+  spec: { fs: 14, lh: 21, mark: 2, num: 3, diff: 2, pad: 1 },
   today: { fs: 13, lh: 20, mark: 0, num: 4, diff: 0, pad: 1 },
 };
+/** The same type with no gutter: what a `CodeBlock` prints. */
+export const NO_GUTTER: Geo = { fs: 14, lh: 21, mark: 0, num: 3, diff: 0, pad: 1 };
 /** Space between a border and the glyphs it surrounds, and between a border and the row edge. */
 const PAD_X = 2;
 const PAD_Y = 2;
@@ -65,21 +71,7 @@ export function classify(text: string, depth0 = 0): { toks: CTok[]; depth: numbe
   return { toks, depth };
 }
 
-/* ---------------------------------------------------------------- the file */
-
-const SOURCE = PAGINATE_SOURCE.replace(/\n$/, '').split('\n');
-const FILE_TOKS: CTok[][] = (() => {
-  let depth = 0;
-  return SOURCE.map((l) => {
-    const r = classify(l, depth);
-    depth = r.depth;
-    return r.toks;
-  });
-})();
-
-export const MATCHES = findAll(PAGINATE_SOURCE, 'items');
-export const CURRENT_MATCH = 3;
-export const CURRENT_LINE = 14;
+/* ------------------------------------------------------------------- rows */
 
 export interface RowSpec {
   key: string;
@@ -102,69 +94,25 @@ export interface RowSpec {
 
 export const spec = (key: string, text: string, extra: Partial<RowSpec> = {}): RowSpec => ({ key, text, toks: classify(text).toks, ...extra });
 
-const at = (line: number, needle: string, nth = 0) => {
-  const t = SOURCE[line - 1]!;
-  let from = -1;
-  for (let i = 0; i <= nth; i++) from = t.indexOf(needle, from + 1);
-  return from;
-};
+/** One run of text and the class it is coloured as. */
+export type Seg = [text: string, cls: Cls];
 
-function lineSpec(no: number): RowSpec {
-  const text = SOURCE[no - 1]!;
-  const finds = MATCHES.map((m, i) => ({ m, i }))
-    .filter(({ m }) => m.line === no)
-    .map(({ m, i }) => ({ from: m.from, to: m.to, current: i === CURRENT_MATCH }));
-  const s: RowSpec = { key: `l${no}`, no, text, toks: FILE_TOKS[no - 1]!, finds };
-  if (finds.some((f) => f.current)) s.mark = '▸';
-  if (no === CURRENT_LINE) s.cur = true;
-  if (no === 17) s.sel = { from: at(17, 'return'), to: text.length + 1 };
-  if (no === 18) s.sel = { from: 0, to: at(18, 'slice') + 'slice'.length };
-  if (no === 13) {
-    s.err = [at(13, 'lenght'), at(13, 'lenght') + 'lenght'.length];
-    s.warn = [at(13, 'total'), at(13, 'total') + 'total'.length];
-    s.mark = '×';
-    s.diff = 'add';
-  }
-  if (no === 15) s.diff = 'add';
-  if (no === 14) s.brackets = [text.lastIndexOf('{')];
-  if (no === 16) s.brackets = [text.lastIndexOf('}')];
-  if (no === 15) s.activeGuide = 1;
-  return s;
-}
-
-/** The frame's rows: lines 1 and 9, then 11 to 22, with gaps between, with the diff's removed lines spliced in above the lines that replace them. */
-export function frameRows(): RowSpec[] {
-  const removedBefore = new Map<number, string>();
-  DIFF_LINES.forEach((l, i) => {
-    const next = DIFF_LINES[i + 1];
-    if (l.sign === 'remove' && next?.sign === 'add' && next.newNo) removedBefore.set(next.newNo, l.text);
+/** A row built from coloured segments, for languages the editor sample's tokenizer does not know. */
+export function seg(no: number, ...segs: Seg[]): RowSpec {
+  let col = 0;
+  const toks = segs.map(([text, cls]) => {
+    const t = { text, cls, col };
+    col += text.length;
+    return t;
   });
-  const out: RowSpec[] = [];
-  const push = (no: number) => {
-    const old = removedBefore.get(no);
-    if (old !== undefined) {
-      const oldNo = DIFF_LINES.find((x) => x.sign === 'remove' && x.text === old)?.oldNo;
-      out.push(spec(`r${no}`, old, { no: oldNo, diff: 'del' }));
-    }
-    out.push(lineSpec(no));
-  };
-  push(1);
-  out.push({ key: 'gap1', text: '', toks: [], gap: 'lines 2 to 8 not shown' });
-  push(9);
-  out.push({ key: 'gap2', text: '', toks: [], gap: 'line 10 not shown' });
-  for (let n = 11; n <= 22; n++) push(n);
-  return out;
-}
-
-export function plainRows(from: number, to: number): RowSpec[] {
-  return SOURCE.slice(from - 1, to).map((text, i) => ({ key: `p${from + i}`, no: from + i, text, toks: FILE_TOKS[from - 1 + i]! }));
+  return { key: `s${no}`, no, text: segs.map((s) => s[0]).join(''), toks };
 }
 
 /* --------------------------------------------------------------- one row */
 
 const layer = (extra: CSSProperties): CSSProperties => ({ position: 'absolute', pointerEvents: 'none', ...extra });
 
-function Row({ look: l, geo, row }: { look: Look; geo: Geo; row: RowSpec }) {
+function Row({ look: l, geo, row }: { look: CodeLook; geo: Geo; row: RowSpec }) {
   const text = row.text;
   const len = text.length;
   const rowStyle: CSSProperties = { position: 'relative', display: 'flex', height: geo.lh, minWidth: '100%' };
@@ -313,26 +261,28 @@ function Row({ look: l, geo, row }: { look: Look; geo: Geo; row: RowSpec }) {
 
 /* ---------------------------------------------------------------- a frame */
 
-export function Frame({
+export function CodeFrame({
   look,
   rows,
-  geo = GEO.r5,
+  geo = GEO.spec,
   title,
   status,
   grey,
   frameId,
 }: {
-  look: Look;
+  look: CodeLook;
   rows: RowSpec[];
   geo?: Geo;
+  /** A title bar above the code: file name and range on the left, `status` on the right. */
   title?: string;
   status?: ReactNode;
+  /** Draw in greyscale, to show what a paper print keeps. */
   grey?: boolean;
   frameId?: string;
 }) {
   return (
     <div
-      data-r5-frame={frameId}
+      data-code-frame={frameId}
       className="overflow-x-auto border-2 border-edge-strong"
       style={{ background: look.ground, color: look.ink, filter: grey ? 'grayscale(1)' : undefined }}
     >
@@ -351,23 +301,3 @@ export function Frame({
   );
 }
 
-/* ------------------------------------------------------------------ legend */
-
-export interface LegendItem {
-  label: string;
-  rows: RowSpec[];
-}
-
-/** A subset of the frame's rows, by key, for the small comparisons. */
-export const pickRows = (keys: string[]) => frameRows().filter((r) => keys.includes(r.key));
-
-export const LEGEND: LegendItem[] = [
-  { label: 'selection', rows: [spec('s', '  return total;', { no: 7, sel: { from: 2, to: 14 } })] },
-  { label: 'other match', rows: [spec('o', '  items.slice()', { no: 7, finds: [{ from: 2, to: 7, current: false }] })] },
-  { label: 'current match 4/8', rows: [spec('c', '  items.slice()', { no: 7, mark: '▸', finds: [{ from: 2, to: 7, current: true }] })] },
-  { label: 'current line', rows: [spec('l', '  const total = 0;', { no: 7, cur: true })] },
-  { label: 'bracket pair', rows: [spec('b', '  clamp(start, 0)', { no: 7, brackets: [7, 16] })] },
-  { label: 'error', rows: [spec('e', '  items.lenght;', { no: 7, mark: '×', err: [8, 14] })] },
-  { label: 'warning', rows: [spec('w', '  total: number;', { no: 7, mark: '!', warn: [2, 7] })] },
-  { label: 'diff', rows: [spec('d1', '  total = 1;', { no: 7, diff: 'del' }), spec('d2', '  total = 2;', { no: 7, diff: 'add' })] },
-];

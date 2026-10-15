@@ -12,53 +12,21 @@ import darkTheme from '../../../../../packages/design-system/docs/applied-evalua
 import lightTheme from '../../../../../packages/design-system/docs/applied-evaluation/pink-ink/pink-ink-light-color-theme.json';
 import { deltaE, flatten, mixOklab, simulate as simulateHex, withAlpha } from '../p2/colour';
 import { LV, ratio } from '../p2/Frame';
-import type { Level } from '../p2/Frame';
+import type { Check, Cls, CodeLook, Level } from '@/components/specimen/look';
 
 export type { Level };
 export const LEVEL_IDS: Level[] = ['midnight', 'sketch'];
 export type Dir = 'P' | 'Q';
 export type LookId = Dir | 'ref' | 'today';
 
-/** Token classes. `control` is Pink Ink's keyword.control (violet); `keyword` its storage.type (brand pink). The candidates paint both the same. */
-export type Cls = 'keyword' | 'control' | 'string' | 'number' | 'type' | 'function' | 'comment' | 'op' | 'sep' | 'bracket' | 'plain';
+export type { Check, Cls };
 export const CLASSES: Cls[] = ['keyword', 'control', 'string', 'number', 'type', 'function', 'comment', 'op', 'sep', 'bracket', 'plain'];
 
-export interface Look {
+/** A frame's colours (`CodeLook`) plus what the board's tables need: which role each class reads, and the alpha each layer settled at. */
+export interface Look extends CodeLook {
   id: LookId;
   level: Level;
-  ground: string;
-  ink: string;
-  tok: Record<Cls, string>;
   from: Record<Cls, string>;
-  bold: Partial<Record<Cls, boolean>>;
-  italic: Partial<Record<Cls, boolean>>;
-  /** Bracket-pair colours by depth, repeating. */
-  rot: string[];
-  sel: { fill: string; fg: string };
-  find: {
-    otherBorder: string;
-    otherFill?: string;
-    otherFg: string;
-    curBorder: string;
-    curFill: string;
-    curFg?: string;
-    /** Bold glyphs inside the current match. */
-    curBold?: boolean;
-    otherW: number;
-    curW: number;
-  };
-  line: { fill: string; border: string; num: string; numActive: string };
-  bracket: { border: string; fill: string; fg: string; bold: boolean };
-  err: { fg: string; wash: string };
-  warn: { fg: string; wash: string };
-  /** Round 6: an info diagnostic, and the underline style each severity uses (default wavy). */
-  info?: { fg: string };
-  diagStyle?: { err: 'wavy' | 'dashed' | 'dotted'; warn: 'wavy' | 'dashed' | 'dotted'; info: 'wavy' | 'dashed' | 'dotted' };
-  add: { bar: string; wash: string };
-  del: { bar: string; wash: string };
-  guide: { rot: string[]; active: string[] };
-  /** Diagnostic and current-match glyph colours in the gutter. */
-  marker: { cur: string };
   /** The alpha each translucent layer ended up at, for the numbers disclosure. */
   alphas: Record<string, string>;
 }
@@ -332,12 +300,6 @@ export function worst(l: Look) {
 }
 
 /* ------------------------------------------------------------------ checks */
-
-export interface Check {
-  ok: boolean;
-  title: string;
-  reason: string;
-}
 
 const GREY_CLASSES: Cls[] = ['keyword', 'string', 'number', 'type', 'function', 'op', 'comment', 'plain'];
 
