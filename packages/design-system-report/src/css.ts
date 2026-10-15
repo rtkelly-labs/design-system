@@ -96,9 +96,11 @@ function inlineFonts(css: string, base: string): string {
  * `unicode-range`; a report with no icons carries no icon font, and a report
  * with a stray one is not silently drawn in tofu.
  */
-function inlineOwnFonts(css: string, base: string, text: string): string {
-  const points = new Set([...text].map((c) => c.codePointAt(0) as number));
+function inlineOwnFonts(css: string, base: string, text: string | undefined): string {
+  const points = new Set([...(text ?? '')].map((c) => c.codePointAt(0) as number));
+  // No document given, so nothing can be ruled out: keep every face rather than silently drop them.
   const used = (range: string) =>
+    text === undefined ||
     range.split(',').some((part) => {
       const [lo, hi = lo] = part.trim().replace(/^U\+/i, '').split('-').map((h) => parseInt(h, 16));
       for (const point of points) if (point >= (lo as number) && point <= (hi as number)) return true;
@@ -143,7 +145,7 @@ export interface ReportCssOptions {
  * cost once, and `renderReports` is what does.
  */
 export interface ReportCssCompiler {
-  /** `text` is the finished document: the design system's own faces are inlined only if it uses them. */
+  /** `text` is the finished document: the design system's own faces are inlined only if it uses them. Omitted, every face is kept. */
   build(candidates: readonly string[], text?: string): string;
   /** Degradations the caller should pass on — a dropped optional plugin. */
   notes: string[];
@@ -178,7 +180,7 @@ export async function createReportCssCompiler({
 
   const compiler = await compile(source, { base, loadStylesheet: resolve, loadModule });
   return {
-    build: (candidates, text = '') => inlineOwnFonts(compiler.build([...candidates]), base, text),
+    build: (candidates, text) => inlineOwnFonts(compiler.build([...candidates]), base, text),
     notes,
   };
 }
