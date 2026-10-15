@@ -36,6 +36,8 @@ import {
   TabsList,
   TabsPanel,
   TabsTab,
+  Toolbar,
+  ToolbarButton,
   useToast,
   BracketText,
 } from '@rtkelly13/design-system';
@@ -296,37 +298,35 @@ export default function InboxApp() {
 
       {/* Toolbar: filters, or the bulk bar when something is selected */}
       {selectedRows.length > 0 ? (
-        <div
-          role="toolbar"
-          aria-label="Bulk actions"
-          className="flex min-h-14 flex-wrap items-center gap-3 border-2 border-edge-strong bg-surface-raised px-3 py-2 shadow-hard-sm"
-        >
+        // One tab stop, arrow keys between the controls (INB-15). The same
+        // `min-h-14` as the filter row it replaces, so the list does not jump.
+        <Toolbar label="Bulk actions" className="min-h-14">
           <span className="text-sm font-bold uppercase tracking-wider text-accent-primary">
             <BracketText>{selectedRows.length} SELECTED</BracketText>
           </span>
           <ButtonGroup aria-label="Apply to selection">
-          <Menu trigger={<Button size="xs">STATUS</Button>}>
+          <Menu trigger={<ToolbarButton size="xs">STATUS</ToolbarButton>}>
             {STATUSES.map((s) => (
               <MenuItem key={s} onClick={() => patch(selectedRows.map((r) => r.id), { status: s })}>
                 {s}
               </MenuItem>
             ))}
           </Menu>
-          <Menu trigger={<Button size="xs">PRIORITY</Button>}>
+          <Menu trigger={<ToolbarButton size="xs">PRIORITY</ToolbarButton>}>
             {PRIORITIES.map((p) => (
               <MenuItem key={p} onClick={() => patch(selectedRows.map((r) => r.id), { priority: p })}>
                 {p}
               </MenuItem>
             ))}
           </Menu>
-          <Button size="xs" variant="secondary" onClick={() => archive(selectedRows.map((r) => r.id))}>
+          <ToolbarButton size="xs" variant="secondary" onClick={() => archive(selectedRows.map((r) => r.id))}>
             ARCHIVE
-          </Button>
-          <Button size="xs" onClick={() => setSelected(new Set())}>
+          </ToolbarButton>
+          <ToolbarButton size="xs" onClick={() => setSelected(new Set())}>
             CLEAR
-          </Button>
+          </ToolbarButton>
           </ButtonGroup>
-        </div>
+        </Toolbar>
       ) : (
         <div className="grid min-h-14 grid-cols-2 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_12rem_auto_auto]">
           <div className="col-span-2 sm:col-span-1">

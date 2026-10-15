@@ -206,6 +206,9 @@ const CASES: readonly VisualCase[] = [
   // (D6 pending). Baselines to be generated with `/update-snapshots`.
   { id: 'components-actions-forms-segmented-control--default', snapshot: 'segmentedcontrol-default.png' },
   { id: 'components-actions-forms-segmented-control--small', snapshot: 'segmentedcontrol-small.png' },
+  // Toolbar (rows INB-15, ED-F13). Baselines come with `/update-snapshots`.
+  { id: 'components-actions-forms-toolbar--default', snapshot: 'toolbar-default.png' },
+  { id: 'components-actions-forms-toolbar--vertical', snapshot: 'toolbar-vertical.png' },
   // The account flows (#252), every state a reader meets on the way through:
   // each flow at rest and after a failed submit, the reset flow's middle step,
   // and the settings page in `AppShell`. The a11y suite reads these ids, so
