@@ -17,6 +17,12 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
    * resolve to the same values.
    */
   accent?: AccentToken;
+  /**
+   * `md` is the default. `sm` is for a badge inside a dense row — a table
+   * cell, a list item: a 1px border, tighter padding and a smaller type size,
+   * so it stops outweighing the data beside it.
+   */
+  size?: 'sm' | 'md';
 }
 
 /**
@@ -32,14 +38,17 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
  * to, and the badge stays correct because it never names a hue.
  */
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
-  { children, accent = 'primary', className = '', style, ...props },
+  { children, accent = 'primary', size = 'md', className = '', style, ...props },
   ref,
 ) {
   return (
     <span data-slot="badge"
       ref={ref}
       className={cn(
-        'inline-flex items-center gap-[0.4rem] border-2 border-edge-strong bg-surface-base px-[0.6rem] py-[0.2rem] font-mono text-[0.75rem] font-bold',
+        'inline-flex items-center border-edge-strong bg-surface-base font-mono font-bold',
+        size === 'sm'
+          ? 'gap-1 border px-1.5 py-0 text-[0.65rem]'
+          : 'gap-[0.4rem] border-2 px-[0.6rem] py-[0.2rem] text-[0.75rem]',
         className
       )}
       // `text-[0.75rem]` rather than `text-xs`: the named size ships a paired

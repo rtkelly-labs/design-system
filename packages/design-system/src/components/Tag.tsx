@@ -17,19 +17,35 @@ export interface TagProps {
   onClick?: MouseEventHandler<HTMLElement>;
   /** Optional custom CSS classes. */
   className?: string;
-  /** Prefix character, defaults to '#'. */
+  /**
+   * Text put before the label, `#` by default. Pass `""` for none, which also
+   * leaves the label's spaces alone instead of hyphenating them.
+   */
   prefix?: string;
+  /** Upper-case the label. On by default; turn it off for a label whose case carries meaning. */
+  uppercase?: boolean;
+  /**
+   * `md` is the default. `sm` is for a tag inside a dense row: a 1px border,
+   * tighter padding and a smaller type size.
+   *
+   * There is deliberately no `onRemove`. The sources conflict: GOV.UK says
+   * tags are not interactive, while Carbon allows dismissible tags for filters
+   * only. A removable filter chip is a different component, left until there
+   * is a consumer for it.
+   */
+  size?: 'sm' | 'md';
   children?: ReactNode;
 }
 
 export const Tag = forwardRef<HTMLAnchorElement | HTMLSpanElement, TagProps>(function Tag(
-  { text, href, accent = 'secondary', onClick, className = '', prefix = '#' },
+  { text, href, accent = 'secondary', onClick, className = '', prefix = '#', uppercase = true, size = 'md' },
   ref,
 ) {
   const baseClasses =
-    'inline-block font-mono text-xs font-bold uppercase border-2 border-edge-strong px-2 py-1 hover:shadow-hard-sm transition-all focus-visible:ring-2 focus-visible:ring-accent-primary';
+    'inline-block font-mono font-bold border-edge-strong hover:shadow-hard-sm transition-all focus-visible:ring-2 focus-visible:ring-accent-primary';
+  const sizeClasses = size === 'sm' ? 'border px-1.5 py-0 text-[0.65rem]' : 'border-2 px-2 py-1 text-xs';
   const accentClass = accentFillClass(accent, 'secondary');
-  const combinedClasses = cn(baseClasses, accentClass, className);
+  const combinedClasses = cn(baseClasses, sizeClasses, uppercase && 'uppercase', accentClass, className);
   const label = text.startsWith(prefix) ? text : `${prefix}${text.split(' ').join('-')}`;
 
   if (href) {
