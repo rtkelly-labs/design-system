@@ -12,6 +12,7 @@ import {
 import {
   Badge,
   Button,
+  ButtonGroup,
   Checkbox,
   Drawer,
   EmptyState,
@@ -304,26 +305,28 @@ export default function InboxApp() {
           <span className="text-sm font-bold uppercase tracking-wider text-accent-primary">
             [&nbsp;{selectedRows.length} SELECTED&nbsp;]
           </span>
-          <Menu trigger={<Button size="sm" variant="secondary">STATUS</Button>}>
+          <ButtonGroup aria-label="Apply to selection">
+          <Menu trigger={<Button size="xs">STATUS</Button>}>
             {STATUSES.map((s) => (
               <MenuItem key={s} onClick={() => patch(selectedRows.map((r) => r.id), { status: s })}>
                 {s}
               </MenuItem>
             ))}
           </Menu>
-          <Menu trigger={<Button size="sm" variant="secondary">PRIORITY</Button>}>
+          <Menu trigger={<Button size="xs">PRIORITY</Button>}>
             {PRIORITIES.map((p) => (
               <MenuItem key={p} onClick={() => patch(selectedRows.map((r) => r.id), { priority: p })}>
                 {p}
               </MenuItem>
             ))}
           </Menu>
-          <Button size="sm" variant="tertiary" onClick={() => archive(selectedRows.map((r) => r.id))}>
+          <Button size="xs" variant="secondary" onClick={() => archive(selectedRows.map((r) => r.id))}>
             ARCHIVE
           </Button>
-          <Button size="sm" variant="tertiary" onClick={() => setSelected(new Set())}>
+          <Button size="xs" onClick={() => setSelected(new Set())}>
             CLEAR
           </Button>
+          </ButtonGroup>
         </div>
       ) : (
         <div className="grid min-h-14 grid-cols-2 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_12rem_auto_auto]">
@@ -348,7 +351,7 @@ export default function InboxApp() {
             onValueChange={setPriorityFilter}
             options={[{ value: 'any', label: 'PRIORITY: ANY' }, ...PRIORITIES.map((p) => ({ value: p, label: p }))]}
           />
-          <Menu trigger={<Button size="sm" variant="secondary">DENSITY</Button>} align="end">
+          <Menu trigger={<Button size="xs">DENSITY</Button>} align="end">
             <MenuRadioGroup label="Row density" value={density} onValueChange={(v) => setDensity(v as TableDensity)}>
               <MenuRadioItem value="compact" closeOnClick>COMPACT</MenuRadioItem>
               <MenuRadioItem value="comfortable" closeOnClick>COMFORTABLE</MenuRadioItem>
@@ -356,7 +359,7 @@ export default function InboxApp() {
             <MenuSeparator />
             <MenuItem onClick={reload}>RELOAD (SKELETON)</MenuItem>
           </Menu>
-          <Button size="sm" variant="tertiary" onClick={clearFilters} disabled={!filtered}>
+          <Button size="xs" onClick={clearFilters} disabled={!filtered}>
             RESET
           </Button>
         </div>
@@ -383,7 +386,7 @@ export default function InboxApp() {
                     ? 'Nothing matches the current view and filters.'
                     : 'Every issue is archived. Press UNDO on the last toast or reload.'
                 }
-                action={filtered ? <Button size="sm" onClick={clearFilters}>RESET FILTERS</Button> : undefined}
+                action={filtered ? <Button size="xs" onClick={clearFilters}>RESET FILTERS</Button> : undefined}
               />
             </div>
           ) : (
@@ -553,7 +556,7 @@ function IssueDetail({
             {issue.title}
           </h3>
         </div>
-        <Menu trigger={<Button size="sm" variant="secondary" aria-label={`Actions for ${issue.id}`}>...</Button>} align="end">
+        <Menu trigger={<Button size="icon" aria-label={`Actions for ${issue.id}`}>...</Button>} align="end">
           {STATUSES.map((s) => (
             <MenuItem key={s} onClick={() => onPatch({ status: s })}>
               SET {s}

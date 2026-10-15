@@ -23,7 +23,7 @@ export default function ConfirmDeploy() {
         title="Promote billing-api"
         footer={
           <div className="flex flex-wrap justify-end gap-3">
-            <Button size="sm" variant="inverse" onClick={() => setOpen(false)}>
+            <Button size="sm" onClick={() => setOpen(false)}>
               CANCEL
             </Button>
             <Button size="sm" variant="primary" bracketed onClick={promote}>
