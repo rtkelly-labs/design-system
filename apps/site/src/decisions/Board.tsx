@@ -6,6 +6,7 @@ import { DebugToggle } from './DebugToggle';
 import { Phase2 } from './p2/Phase2';
 import { Round3 } from './r3/Round3';
 import { Round4 } from './r4/Round4';
+import { Round5 } from './r5/Round5';
 import { Scenes } from './Scenes';
 import { Sheet } from './Sheet';
 import type { SheetMode } from './Sheet';
@@ -45,7 +46,7 @@ function LevelPair({ children }: { children: (level: 'midnight' | 'sketch') => R
 
 function Article({ id, children }: { id: string; children: ReactNode }) {
   return (
-    <article id={id} className="flex scroll-mt-20 flex-col gap-3 border-t-2 border-edge-subtle pt-5">
+    <article id={id} className="flex scroll-mt-24 flex-col gap-3 border-t-2 border-edge-subtle pt-5">
       {children}
     </article>
   );
@@ -152,7 +153,7 @@ function D5Board() {
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
       {SHEETS.map((o) => (
-        <article key={o.id} id={o.id} className="flex scroll-mt-20 flex-col gap-3 border-t-2 border-edge-subtle pt-5">
+        <article key={o.id} id={o.id} className="flex scroll-mt-24 flex-col gap-3 border-t-2 border-edge-subtle pt-5">
           <OptionHead {...o} />
           <Sheet mode={o.mode} />
         </article>
@@ -173,7 +174,7 @@ function DecisionSection({ d }: { d: Decision }) {
       id={d.id.toLowerCase() === 'd4' ? 'd4-board' : d.id}
       data-debug={d.id === 'D4' ? 'false' : undefined}
       aria-labelledby={`${d.id}-h`}
-      className={`flex scroll-mt-20 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8 ${d.id === 'D4' ? 'group/d4' : ''}`}
+      className={`flex scroll-mt-24 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8 ${d.id === 'D4' ? 'group/d4' : ''}`}
     >
       <header className="flex flex-col gap-2">
         <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">{`[ ${d.id} ]`}</p>
@@ -217,8 +218,8 @@ export function Board() {
         <p className="m-0 max-w-3xl text-lg text-content-secondary">
           Pick one option per decision. Each is shown in context on both levels, next to a control row of what ships
           today. Site-local styles only; delete this route once the choices are made. Phases 1 and 2 and Round 3 are
-          decided and collapsed;{' '}
-          <a href="#round-4" className="font-bold text-accent-primary">Round 4: code renderer</a> is open.
+          decided and collapsed, and round 4 is superseded;{' '}
+          <a href="#round-5" className="font-bold text-accent-primary">Round 5: Pink Ink</a> is open.
         </p>
         <nav aria-label="Phase 1 decisions" className="border-2 border-edge-strong bg-surface-raised p-3 shadow-hard-md">
           <ul className="m-0 flex list-none flex-col gap-2 p-0 font-mono text-sm">
@@ -236,7 +237,7 @@ export function Board() {
           </ul>
         </nav>
       </header>
-      <section id="phase-1" aria-labelledby="phase-1-h" className="flex scroll-mt-20 flex-col gap-4">
+      <section id="phase-1" aria-labelledby="phase-1-h" className="flex scroll-mt-24 flex-col gap-4">
         <h2 id="phase-1-h" className="m-0 font-display text-2xl font-extrabold uppercase text-content-primary">
           Phase 1 <span className="font-mono text-sm text-content-muted">· decided</span>
         </h2>
@@ -280,7 +281,17 @@ export function Board() {
           <Round3 />
         </div>
       </details>
-      <Round4 />
+      <details className="border-2 border-edge-default">
+        <summary className="flex cursor-pointer flex-wrap items-baseline gap-x-3 gap-y-1 bg-surface-raised p-3 font-mono text-sm">
+          <span className="font-bold text-accent-primary">Round 4</span>
+          <span className="text-content-primary">Code renderer: ANSI base16, ANSI plus ink, cool core</span>
+          <span className="border-2 border-edge-default px-1.5 text-[11px] font-bold uppercase text-content-secondary">superseded by round 5</span>
+        </summary>
+        <div className="p-3 sm:p-4">
+          <Round4 />
+        </div>
+      </details>
+      <Round5 />
     </div>
   );
 }

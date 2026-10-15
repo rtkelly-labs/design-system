@@ -8,7 +8,7 @@ const anchor = (id: string) => `#${id}`;
 /** Round 3: D10 round 2 (syntax differentiation and fixes) and D11 (labels in tables). */
 export function Round3() {
   return (
-    <section id="round-3" aria-labelledby="round-3-h" className="flex scroll-mt-20 flex-col gap-10">
+    <section id="round-3" aria-labelledby="round-3-h" className="flex scroll-mt-24 flex-col gap-10">
       <header className="flex flex-col gap-3">
         <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">[ ROUND 3 · SCAFFOLDING ]</p>
         <h2 id="round-3-h" className="m-0 font-display text-4xl font-extrabold uppercase text-content-primary sm:text-5xl">
@@ -46,7 +46,7 @@ export function Round3() {
         </nav>
       </header>
 
-      <section id="D10-R2" aria-labelledby="D10-R2-h" className="flex scroll-mt-20 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8">
+      <section id="D10-R2" aria-labelledby="D10-R2-h" className="flex scroll-mt-24 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8">
         <header className="flex flex-col gap-2">
           <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">[ D10-R2 ]</p>
           <h2 id="D10-R2-h" className="m-0 font-display text-3xl font-extrabold uppercase text-content-primary sm:text-4xl">
@@ -61,7 +61,7 @@ export function Round3() {
         </header>
         <R2Control />
         {R2_GROUPS.map((g) => (
-          <div key={g.id} id={g.id} className="flex scroll-mt-20 flex-col gap-5">
+          <div key={g.id} id={g.id} className="flex scroll-mt-24 flex-col gap-5">
             <header className="flex flex-col gap-1 border-t-2 border-edge-default pt-5">
               <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">{`[ ${g.id} ]`}</p>
               <h3 className="m-0 font-display text-2xl font-extrabold uppercase text-content-primary">{g.title}</h3>
@@ -74,7 +74,7 @@ export function Round3() {
         ))}
       </section>
 
-      <section id="D11" aria-labelledby="D11-h" className="flex scroll-mt-20 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8">
+      <section id="D11" aria-labelledby="D11-h" className="flex scroll-mt-24 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8">
         <header className="flex flex-col gap-2">
           <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">[ D11 ]</p>
           <h2 id="D11-h" className="m-0 font-display text-3xl font-extrabold uppercase text-content-primary sm:text-4xl">

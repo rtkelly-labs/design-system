@@ -247,7 +247,7 @@ function Section({ d }: { d: P2Decision }) {
 
 function SectionBody({ d }: { d: P2Decision }) {
   return (
-    <section id={d.id} aria-labelledby={`${d.id}-h`} className="flex scroll-mt-20 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8">
+    <section id={d.id} aria-labelledby={`${d.id}-h`} className="flex scroll-mt-24 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8">
       <header className="flex flex-col gap-2">
         <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">{`[ ${d.id} ]`}</p>
         <h2 id={`${d.id}-h`} className="m-0 font-display text-3xl font-extrabold uppercase text-content-primary sm:text-4xl">
@@ -266,7 +266,7 @@ function SectionBody({ d }: { d: P2Decision }) {
 /** The Phase 2 sections under the #phase-2 anchor. */
 export function Phase2() {
   return (
-    <section id="phase-2" aria-labelledby="phase-2-h" className="flex scroll-mt-20 flex-col gap-10">
+    <section id="phase-2" aria-labelledby="phase-2-h" className="flex scroll-mt-24 flex-col gap-10">
       <CvdFilters />
       <header className="flex flex-col gap-3">
         <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">[ PHASE 2 · SCAFFOLDING ]</p>

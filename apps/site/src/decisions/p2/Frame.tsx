@@ -41,7 +41,7 @@ export function OptionHead({ id, name, rationale, evidence }: { id: string; name
 
 export function Article({ id, children }: { id: string; children: ReactNode }) {
   return (
-    <article id={id} className="flex scroll-mt-20 flex-col gap-3 border-t-2 border-edge-subtle pt-5">
+    <article id={id} className="flex scroll-mt-24 flex-col gap-3 border-t-2 border-edge-subtle pt-5">
       {children}
     </article>
   );

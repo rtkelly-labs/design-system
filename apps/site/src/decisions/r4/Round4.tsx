@@ -244,7 +244,7 @@ function Spec({ dir }: { dir: Direction }) {
 function DirectionSection({ dir }: { dir: Direction }) {
   const m = METRICS[dir.id];
   return (
-    <section id={dir.anchor} aria-labelledby={`${dir.anchor}-h`} className="flex scroll-mt-20 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8">
+    <section id={dir.anchor} aria-labelledby={`${dir.anchor}-h`} className="flex scroll-mt-24 flex-col gap-5 border-t-4 border-double border-edge-strong pt-8">
       <header className="flex flex-col gap-2">
         <Eyebrow>{`[ ${dir.anchor} ]`}</Eyebrow>
         <h3 id={`${dir.anchor}-h`} className="m-0 font-display text-3xl font-extrabold uppercase text-content-primary">
@@ -297,7 +297,7 @@ function MetricsStrip() {
     { id: 'C', label: 'C. Cool core', m: METRICS.C, tokens: 'C' },
   ];
   return (
-    <section id="R4-METRICS" aria-labelledby="R4-METRICS-h" className="flex scroll-mt-20 flex-col gap-4 border-t-4 border-double border-edge-strong pt-8">
+    <section id="R4-METRICS" aria-labelledby="R4-METRICS-h" className="flex scroll-mt-24 flex-col gap-4 border-t-4 border-double border-edge-strong pt-8">
       <header className="flex flex-col gap-2">
         <Eyebrow>[ R4-METRICS ]</Eyebrow>
         <h3 id="R4-METRICS-h" className="m-0 font-display text-3xl font-extrabold uppercase text-content-primary">Type metrics, same ten lines</h3>
@@ -354,7 +354,7 @@ function MetricsStrip() {
 /** Round 4: the code and text renderer, as three complete directions. */
 export function Round4() {
   return (
-    <section id="round-4" aria-labelledby="round-4-h" className="flex scroll-mt-20 flex-col gap-10">
+    <section id="round-4" aria-labelledby="round-4-h" className="flex scroll-mt-24 flex-col gap-10">
       <header className="flex flex-col gap-3">
         <Eyebrow>[ ROUND 4 · SCAFFOLDING ]</Eyebrow>
         <h2 id="round-4-h" className="m-0 font-display text-4xl font-extrabold uppercase text-content-primary sm:text-5xl">
