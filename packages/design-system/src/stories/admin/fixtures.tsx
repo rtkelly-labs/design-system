@@ -140,7 +140,7 @@ function FinanceOverview() {
           { header: 'COUNT', accessor: (row) => `${row.count} items` },
           {
             header: 'STATUS',
-            accessor: (row) => <Badge accent={INGESTION_ACCENT[row.status]}>{row.status.toUpperCase()}</Badge>,
+            accessor: (row) => <Badge accent={INGESTION_ACCENT[row.status]}>{row.status}</Badge>,
           },
           {
             header: 'ACTION',
@@ -292,7 +292,7 @@ function StudioPosts() {
           { header: 'TITLE', accessor: 'title' },
           { header: 'AUTHOR', accessor: 'author' },
           { header: 'UPDATED', accessor: 'updated' },
-          { header: 'STATE', accessor: (row) => <Badge accent={POST_ACCENT[row.state]}>{row.state.toUpperCase()}</Badge> },
+          { header: 'STATE', accessor: (row) => <Badge accent={POST_ACCENT[row.state]}>{row.state}</Badge> },
         ]}
       />
     </>
