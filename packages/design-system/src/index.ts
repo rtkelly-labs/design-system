@@ -44,6 +44,7 @@ export * from './components/ButtonGroup';
 export * from './components/buttonHues';
 export * from './components/Card';
 export * from './components/Badge';
+export type { LabelAppearance } from './lib/labelAppearance';
 // The report frame — the page a generated report is built in. Separate from
 // the docs components because a report is written by a tool and read once,
 // where a docs page is written by a person and read often: the frame owns the

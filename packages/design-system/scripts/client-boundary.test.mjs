@@ -39,7 +39,9 @@ describe('client boundary', () => {
       'src/lib/recipe.ts',
       'src/components/themeInitScript.ts',
       'src/components/Card.tsx',
-      'src/components/Tag.tsx',
+      // Tag and Badge left this list for D11: they read the label-appearance
+      // context a Table provides, which a server component cannot do. They
+      // still server-render; they are now also hydrated.
     ]) {
       expect(server, rel).toContain(rel);
     }
