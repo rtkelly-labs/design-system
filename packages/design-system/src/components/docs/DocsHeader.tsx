@@ -5,6 +5,8 @@ import type { ElementType, ReactNode } from 'react';
 import { Menu as MenuIcon, Palette, Search, X } from 'lucide-react';
 import { DocsLink } from './DocsLinkProvider';
 import { useOptionalTheme } from '../ThemeProvider';
+import { A11yMenu } from '../A11yMenu';
+import { useOptionalA11yPreferences } from '../A11yPreferencesProvider';
 import { LEVELS, isThemeLevel } from '../../theme/levels';
 import { cn } from '../../lib/recipe';
 import { Menu, MenuRadioGroup, MenuRadioItem } from '../Menu';
@@ -75,6 +77,9 @@ export function DocsHeader({
    * of the header renders.
    */
   const theme = useOptionalTheme();
+  // The same arrangement for the accessibility menu: shown beside the level
+  // picker when a provider is mounted, and simply absent when it is not.
+  const a11y = useOptionalA11yPreferences();
 
   useEffect(() => {
     const el = ref.current;
@@ -162,6 +167,8 @@ export function DocsHeader({
           * The menu names every level, marks the current one, and closes on
           * a choice — the choice is the whole point of opening it.
           */}
+        {a11y && <A11yMenu triggerClassName="docs-header-icon-btn" />}
+
         {theme && (
           <Menu
             align="end"
