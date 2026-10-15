@@ -269,8 +269,11 @@ const BUDGETS = {
     // IndexedSection: 430,262 B raw / 98,604 B gzip locally, and those three
     // modules are the whole increase; the stories ship nowhere. The usual
     // ~2% headroom is kept for CI's zlib.
-    maxRaw: 440_000,
-    maxGzip: 100_500,
+    // Applied refinements, phase 1: ButtonGroup and the D3 hue-collision check
+    // (findHueCollisions over every Level's role→hue map), plus the new Button
+    // variants and sizes. 101,635 B gzip locally; ~2% headroom kept.
+    maxRaw: 450_000,
+    maxGzip: 103_700,
     desc: 'ESM output, every module',
   },
   'src/theme.css': {
