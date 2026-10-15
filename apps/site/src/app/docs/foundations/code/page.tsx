@@ -90,7 +90,6 @@ export default function CodeSyntaxPage() {
       </p>
       <div className={BLOCK}>
         <SurfacesStrip
-         
           columns="2xl"
           surfaces={[
             { label: 'CodeBlock-style, CSS', render: () => <CodeFrame look={contractLook} rows={CSS_ROWS} geo={NO_GUTTER} title={CSS_TITLE} /> },

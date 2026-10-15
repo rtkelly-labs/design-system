@@ -28,7 +28,7 @@ export function SpecimenLegend({
   notes?: Record<string, string>;
   title?: string;
   idPrefix?: string;
-  /** When the looks read `var()` tokens, the per-level properties and `data-theme` each frame needs. */
+  /** Per-level custom properties for each frame. Every frame carries its level's `data-theme`, so looks that read `var()` tokens resolve per column. */
   scope?: (level: Level) => CSSProperties;
 }) {
   return (
@@ -46,7 +46,7 @@ export function SpecimenLegend({
               {notes[item.label] && <span className="block text-[10px] font-normal text-content-muted">{notes[item.label]}</span>}
             </span>
             {LEVEL_IDS.map((lv) => (
-              <div key={lv} data-theme={scope ? lv : undefined} style={scope?.(lv)} className="min-w-0">
+              <div key={lv} data-theme={lv} style={scope?.(lv)} className="min-w-0">
                 <CodeFrame look={look(lv)} rows={item.rows} frameId={`${idPrefix}-${item.label}-${lv}`} />
               </div>
             ))}
