@@ -33,6 +33,7 @@ on:
       - 'packages/design-system-report/**'
       - 'pnpm-lock.yaml'
       - '.github/workflows/reports.yml'
+      - '.github/actions/setup/**'
   workflow_dispatch:
 
 concurrency:
@@ -52,6 +53,10 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
       options: --ipc=host --init
+    # Container jobs default to sh; the render scripts use Bash.
+    defaults:
+      run:
+        shell: bash
     # ~2s to render each report, ~10s for the print and layout checks; the rest
     # is install and the package build both reports resolve their peer through.
     timeout-minutes: 15
@@ -76,11 +81,13 @@ jobs:
         run: pnpm --filter @rtkelly13/design-system build
 
       # Strict, with --pdf: an overflowing sheet or a lint warning fails here.
-      - name: Render Reports
+      - name: Render Manifesto
         working-directory: packages/design-system-report
-        run: |
-          pnpm manifesto
-          pnpm compendium
+        run: pnpm manifesto
+
+      - name: Render Compendium
+        working-directory: packages/design-system-report
+        run: pnpm compendium
 
       # Chromium is present in this image, so the end-to-end checks that skip
       # on a bare runner run for real: source-to-print cell checks, the PDF text
