@@ -102,6 +102,9 @@ const CASES: readonly VisualCase[] = [
   // the same tablist wearing `CodeTabs`, and the pair is what shows the
   // extraction rendering identically in both places.
   { id: 'components-navigation-tabs--default', snapshot: 'tabs-default.png' },
+  // Row 9 (ED-F08): case preserved, and closable + dirty. Baselines come with `/update-snapshots`.
+  { id: 'components-navigation-tabs--case-preserved', snapshot: 'tabs-case-preserved.png' },
+  { id: 'components-navigation-tabs--closable-and-dirty', snapshot: 'tabs-closable-and-dirty.png' },
   // The site chrome (issue 246), on the four sites the issue says the same
   // four components must build unmodified: each is a whole page — header,
   // main, footer — so a prop that one site needed and another broke shows up

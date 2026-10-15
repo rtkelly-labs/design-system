@@ -545,12 +545,11 @@ export default function EditorWorkbench() {
     setDrawerOpen(false);
   }, []);
 
+  // Tabs moves selection and focus to the neighbouring tab before this runs
+  // its removal; the only case left to handle here is closing the last one.
   const closeFile = (id: string) => {
-    setFiles((f) => {
-      const next = f.filter((x) => x.id !== id);
-      if (active === id) setActive(next[next.length - 1]?.id ?? '');
-      return next;
-    });
+    setFiles((f) => f.filter((x) => x.id !== id));
+    if (files.length === 1) setActive('');
   };
 
   const run = (c: Command) => {
@@ -637,27 +636,15 @@ export default function EditorWorkbench() {
             value={active || undefined}
             onValueChange={setActive}
             variant="underline"
+            transform="none"
             className="flex min-h-0 flex-1 flex-col"
           >
             <div className="flex shrink-0 items-stretch print:hidden">
               <TabsList label="Open editors" className="min-w-0 flex-1">
                 {files.map((f) => (
-                  <span key={f.id} className="inline-flex items-center">
-                    <TabsTab value={f.id} aria-label={f.dirty ? `${f.label}, unsaved changes` : f.label}>
-                      <span className="inline-flex items-center gap-2 normal-case tracking-normal">
-                        {f.dirty ? <span aria-hidden="true" className="text-intent-warning">●</span> : null}
-                        {f.label}
-                      </span>
-                    </TabsTab>
-                    <button
-                      type="button"
-                      aria-label={`Close ${f.label}`}
-                      onClick={() => closeFile(f.id)}
-                      className="-ml-3 mr-1 flex h-6 w-6 items-center justify-center text-content-muted hover:bg-surface-raised hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary"
-                    >
-                      <NerdIcon name="close" size="xs" />
-                    </button>
-                  </span>
+                  <TabsTab key={f.id} value={f.id} dirty={f.dirty} onClose={() => closeFile(f.id)}>
+                    {f.label}
+                  </TabsTab>
                 ))}
               </TabsList>
             </div>
