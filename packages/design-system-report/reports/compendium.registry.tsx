@@ -72,6 +72,11 @@ import * as TickerTapeStories from '../../design-system/src/stories/TickerTape.s
 import * as UptimeStripStories from '../../design-system/src/stories/UptimeStrip.stories';
 import * as BeforeAfterStories from '../../design-system/src/stories/BeforeAfter.stories';
 import * as ChangeSummaryStories from '../../design-system/src/stories/ChangeSummary.stories';
+import * as SwatchCompareStories from '../../design-system/src/stories/SwatchCompare.stories';
+import * as MetricStripStories from '../../design-system/src/stories/MetricStrip.stories';
+import * as TokenTableStories from '../../design-system/src/stories/TokenTable.stories';
+import * as DecisionStories from '../../design-system/src/stories/Decision.stories';
+import * as TermGridStories from '../../design-system/src/stories/TermGrid.stories';
 import * as DrawingSheetStories from '../../design-system/src/stories/DrawingSheet.stories';
 import * as FigureFrameStories from '../../design-system/src/stories/FigureFrame.stories';
 import * as GanttChartStories from '../../design-system/src/stories/GanttChart.stories';
@@ -107,6 +112,11 @@ import { GitHubIcon, LinkedInIcon, BlueskyIcon, XIcon, MailIcon } from '../../de
 import { BarChart } from '../../design-system/src/components/BarChart';
 import { BeforeAfter, Slope } from '../../design-system/src/components/docs/figures/BeforeAfter';
 import { ChangeSummary, Line } from '../../design-system/src/components/docs/figures/ChangeSummary';
+import { SwatchCompare } from '../../design-system/src/components/docs/figures/SwatchCompare';
+import { MetricStrip } from '../../design-system/src/components/docs/figures/MetricStrip';
+import { TokenTable } from '../../design-system/src/components/docs/figures/TokenTable';
+import { Decision, Option } from '../../design-system/src/components/docs/figures/Decision';
+import { TermGrid, Term } from '../../design-system/src/components/docs/figures/TermGrid';
 import { TreeDiagram, Node } from '../../design-system/src/components/docs/figures/TreeDiagram';
 import { badgeStates, buttonStates, checkboxStates, inputStates, radioGroupStates, selectStates, switchStates } from './compendium.states';
 import { ReportDocument, ReportSection } from '../../design-system/src/components/ReportDocument';
@@ -361,6 +371,11 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'UptimeStrip', group: 'Figures', height: 57, layout: 'side', states: fromStories(UptimeStripStories, ['Default']) },
   { component: 'BeforeAfter', group: 'Figures', height: 102, layout: 'side', states: [...fromStories(BeforeAfterStories, ['Default']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><BeforeAfter fromLabel="before" toLabel="after"><Slope from={160} to={142}>p95</Slope><Slope from={420} to={390}>p99</Slope></BeforeAfter></FigureFrame>))] },
   { component: 'ChangeSummary', group: 'Figures', height: 105, layout: 'side', states: [...fromStories(ChangeSummaryStories, ['Default']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><ChangeSummary><Line sign="add" value="+31 kb">app</Line><Line sign="remove" value="-4 kb">vendor</Line></ChangeSummary></FigureFrame>))] },
+  { component: 'SwatchCompare', group: 'Figures', height: 73, layout: 'side', states: fromStories(SwatchCompareStories, ['Default']) },
+  { component: 'MetricStrip', group: 'Figures', height: 54, layout: 'side', states: fromStories(MetricStripStories, ['Default']) },
+  { component: 'TokenTable', group: 'Figures', height: 125, layout: 'stack', states: fromStories(TokenTableStories, ['Default']) },
+  { component: 'Decision', group: 'Figures', height: 100, layout: 'side', states: [...fromStories(DecisionStories, ['Default']), mdxState('mdx-items', () => (<Decision question="Which floor?" recommendation={<p>Take 5.5:1.</p>}><Option title="4.5:1" cost="no headroom">Keeps every colour.</Option><Option title="5.5:1" picked cost="three moves">Buys the editor.</Option></Decision>))] },
+  { component: 'TermGrid', group: 'Figures', height: 138, layout: 'side', states: [...fromStories(TermGridStories, ['Default']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><TermGrid label="Terms"><Term term="Chroma" scale="0 = grey">How colourful.</Term><Term term="Delta E" scale="0 = identical">Distance between colours.</Term></TermGrid></FigureFrame>))] },
   { component: 'DrawingSheet', group: 'Figures', height: 117, layout: 'side', states: [custom('sheet', () => (<DrawingSheet columns={3} rows={2}><IndexedSection index="A" title="What changed"><p>One file.</p></IndexedSection><IndexedSection index="B" title="How it was checked"><p>All tests pass.</p></IndexedSection></DrawingSheet>)), ...fromStories(DrawingSheetStories, ['StandaloneSection'])] },
   { component: 'FigureFrame', group: 'Figures', height: 61, layout: 'side', states: fromStories(FigureFrameStories, ['EditorialFigure']) },
   { component: 'GanttChart', group: 'Figures', height: 127, layout: 'stack', states: fromStories(GanttChartStories, ['ReleasePlan']) },
