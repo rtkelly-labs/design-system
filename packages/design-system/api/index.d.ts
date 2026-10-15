@@ -754,6 +754,40 @@ interface TabsPanelProps extends HTMLAttributes<HTMLDivElement> {
 
 declare const TabsPanel: react.ForwardRefExoticComponent<TabsPanelProps & react.RefAttributes<HTMLDivElement>>;
 
+type SegmentedControlSize = 'xs' | 'sm';
+interface SegmentedControlProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue' | 'className'> {
+
+    label: string;
+
+    value?: string;
+
+    defaultValue?: string;
+
+    onValueChange?: (value: string) => void;
+
+    size?: SegmentedControlSize;
+
+    disabled?: boolean;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const SegmentedControl: react.ForwardRefExoticComponent<SegmentedControlProps & react.RefAttributes<HTMLDivElement>>;
+interface SegmentedControlItemProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'onChange' | 'className'> {
+
+    value: string;
+
+    disabled?: boolean;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const SegmentedControlItem: react.ForwardRefExoticComponent<SegmentedControlItemProps & react.RefAttributes<HTMLSpanElement>>;
+
 interface SectionContainerProps {
     children: ReactNode;
     className?: string;
@@ -1187,6 +1221,7 @@ interface DrawerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'ch
 
 declare const Drawer: react.ForwardRefExoticComponent<DrawerProps & react.RefAttributes<HTMLDivElement>>;
 
+type AppMainElement = 'main' | 'div';
 interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
 
     sidebar?: ReactNode;
@@ -1194,6 +1229,8 @@ interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'
     topbar?: ReactNode;
 
     children: ReactNode;
+
+    mainAs?: AppMainElement;
 
     sidebarOpen?: boolean;
 
@@ -3124,6 +3161,7 @@ export {
   type AnsiScheme,
   type AnsiSlot,
   AppMain,
+  type AppMainElement,
   type AppMainProps,
   type AppNavItem,
   AppShell,
@@ -3395,6 +3433,11 @@ export {
   type SectionColumns,
   SectionContainer,
   type SectionContainerProps,
+  SegmentedControl,
+  SegmentedControlItem,
+  type SegmentedControlItemProps,
+  type SegmentedControlProps,
+  type SegmentedControlSize,
   Select,
   type SelectOption,
   type SelectProps,
