@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { A11yMenu } from '@rtkelly13/design-system';
 import { ThemeMenu } from '@/components/chrome/ThemeMenu';
 import { BracketText } from '@rtkelly13/design-system';
 
 /**
  * The one strip of site on a sample page: a way back, the same composition in
- * Storybook, and the level picker. Everything under it is the sample alone.
+ * Storybook, and the accessibility and level pickers. Everything under it is the sample alone.
  */
 export function SampleBar({ title, story }: { title: string; story: string }) {
   return (
@@ -24,6 +25,7 @@ export function SampleBar({ title, story }: { title: string; story: string }) {
         <a href={story} className="text-accent-primary no-underline hover:underline">
           Storybook ↗
         </a>
+        <A11yMenu />
         <ThemeMenu />
       </div>
     </nav>

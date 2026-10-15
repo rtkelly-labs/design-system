@@ -3,14 +3,14 @@
 import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { LinkProvider, ThemeProvider, ToastProvider } from '@rtkelly13/design-system';
+import { A11yPreferencesProvider, LinkProvider, ThemeProvider, ToastProvider } from '@rtkelly13/design-system';
 import type { SearchEntry } from '@/lib/search';
 import { RouterLink } from './RouterLink';
 import { SearchProvider } from './Search';
 
 /**
- * The providers every page shares: the level, the router, the toast queue and
- * the search dialog. One client boundary at the root; pages under it stay
+ * The providers every page shares: the level, the accessibility preferences, the
+ * router, the toast queue and the search dialog. One client boundary at the root; pages under it stay
  * Server Components and hand their client islands serialisable props.
  */
 export function Providers({ children, search }: { children: ReactNode; search: readonly SearchEntry[] }) {
@@ -21,11 +21,13 @@ export function Providers({ children, search }: { children: ReactNode; search: r
   );
   return (
     <ThemeProvider defaultLevel="midnight">
-      <LinkProvider component={RouterLink} isCurrent={isCurrent}>
-        <ToastProvider>
-          <SearchProvider entries={search}>{children}</SearchProvider>
-        </ToastProvider>
-      </LinkProvider>
+      <A11yPreferencesProvider>
+        <LinkProvider component={RouterLink} isCurrent={isCurrent}>
+          <ToastProvider>
+            <SearchProvider entries={search}>{children}</SearchProvider>
+          </ToastProvider>
+        </LinkProvider>
+      </A11yPreferencesProvider>
     </ThemeProvider>
   );
 }

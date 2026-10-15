@@ -14,6 +14,7 @@ import BarChartHorizontal from './bar-chart/horizontal';
 import BarChartInspect from './bar-chart/inspect';
 import BarChartPerBarAccent from './bar-chart/per-bar-accent';
 import BarChartResponsiveTabs from './bar-chart/responsive-tabs';
+import BarChartSeries from './bar-chart/series';
 import ButtonAsLink from './button/as-link';
 import ButtonBracketed from './button/bracketed';
 import ButtonPending from './button/pending';
@@ -41,6 +42,7 @@ export const EXAMPLES: Record<string, ComponentType> = {
   'bar-chart/inspect.tsx': BarChartInspect,
   'bar-chart/per-bar-accent.tsx': BarChartPerBarAccent,
   'bar-chart/responsive-tabs.tsx': BarChartResponsiveTabs,
+  'bar-chart/series.tsx': BarChartSeries,
   'button/as-link.tsx': ButtonAsLink,
   'button/bracketed.tsx': ButtonBracketed,
   'button/pending.tsx': ButtonPending,
