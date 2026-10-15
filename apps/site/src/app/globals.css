@@ -7,27 +7,33 @@
 /* Code colours, by role.
  *
  * Shiki's css-variables theme emits `var(--shiki-token-*)`; these point each
- * slot at a design-system role. Declared on the code block rather than on
- * `:root` on purpose: a custom property holding `var()` is substituted where it
- * is declared, so a `:root` mapping would freeze every block at the page's
- * level and a block inside a scoped `sketch` panel would keep midnight's ink.
- * Declared here, it resolves against whatever level the block sits in.
+ * slot at a `syntax` role of the package (issue 148, Round 6). Declared on the
+ * code block rather than on `:root` on purpose: a custom property holding
+ * `var()` is substituted where it is declared, so a `:root` mapping would
+ * freeze every block at the page's level and a block inside a scoped `sketch`
+ * panel would keep midnight's ink. Declared here, it resolves against whatever
+ * level the block sits in.
  *
- * A stand-in for a syntax Group the package does not have yet (issue 148). */
+ * `type`, `number` and `operator` are slots Shiki's theme does not define; `highlight.ts`
+ * adds the scopes that read them. Today's `keyword` was accent.secondary and `constant`
+ * accent.tertiary, which on Midnight made constants the danger colour. */
 .docs-codeblock,
 [data-slot='inline-code'] {
-  --shiki-foreground: var(--ds-text-primary);
+  --shiki-foreground: var(--ds-syntax-plain);
   --shiki-background: transparent;
-  --shiki-token-keyword: var(--ds-accent-secondary);
-  --shiki-token-constant: var(--ds-accent-tertiary);
-  --shiki-token-string: var(--ds-intent-success);
-  --shiki-token-string-expression: var(--ds-intent-success);
-  --shiki-token-comment: var(--ds-text-muted);
-  --shiki-token-function: var(--ds-accent-primary);
-  --shiki-token-parameter: var(--ds-text-primary);
-  --shiki-token-punctuation: var(--ds-text-secondary);
-  --shiki-token-link: var(--ds-accent-primary);
-  --shiki-token-inserted: var(--ds-intent-success);
-  --shiki-token-deleted: var(--ds-intent-danger);
-  --shiki-token-changed: var(--ds-intent-warning);
+  --shiki-token-keyword: var(--ds-syntax-keyword);
+  --shiki-token-constant: var(--ds-syntax-constant);
+  --shiki-token-number: var(--ds-syntax-number);
+  --shiki-token-type: var(--ds-syntax-type);
+  --shiki-token-string: var(--ds-syntax-string);
+  --shiki-token-string-expression: var(--ds-syntax-string);
+  --shiki-token-comment: var(--ds-syntax-comment);
+  --shiki-token-function: var(--ds-syntax-function);
+  --shiki-token-parameter: var(--ds-syntax-property);
+  --shiki-token-punctuation: var(--ds-syntax-punctuation);
+  --shiki-token-operator: var(--ds-syntax-operator);
+  --shiki-token-link: var(--ds-syntax-function);
+  --shiki-token-inserted: var(--ds-editor-diff-added);
+  --shiki-token-deleted: var(--ds-editor-diff-removed);
+  --shiki-token-changed: var(--ds-editor-warning);
 }
