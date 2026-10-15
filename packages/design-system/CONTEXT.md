@@ -27,10 +27,20 @@ runtime. Carries geometry and time; never colour.
 _Avoid_: platform (that is a Target), surface, format, output
 
 **Axis**:
-Which of the two orthogonal things a token varies on. A Level varies colour; a Medium varies
-geometry and time; **no token varies on both**, and one that varies on neither is _invariant_.
-The distinction is load-bearing: it is why `--ds-text-primary` (a colour, Level axis) and
-`--ds-type-body` (a size, Medium axis) do not share a prefix.
+Which of the two orthogonal things a token *declared by the system* varies on. A Level varies
+colour; a Medium varies geometry and time; **no token varies on both**, and one that varies on
+neither is _invariant_. The distinction is load-bearing: it is why `--ds-text-primary` (a colour,
+Level axis) and `--ds-type-body` (a size, Medium axis) do not share a prefix. A third thing, a
+Preference, is not a place a token is declared: it is a runtime override of values these two
+already declare.
+
+**Preference**:
+A choice the person reading makes at runtime — motion, contrast, colour-vision patterns, link
+underlines — applied as a `data-a11y-*` attribute on the document, set only when active. A
+delta over whatever Level is active, never a Level of its own and never a product of Levels.
+Each is `system`, `on` or `off`. See
+[`docs/adr/0007`](./docs/adr/0007-preference-axis.md).
+_Avoid_: setting, mode, theme variant
 
 **Polarity**:
 Whether a Level is fundamentally dark or light — a declared property *of* a Level, not the
