@@ -207,8 +207,8 @@ function ThemeSection() {
         <Eyebrow>[ R6-THEME ]</Eyebrow>
         <H3 id="R6-THEME">Our theme, from our roles</H3>
         <p className="m-0 max-w-3xl text-content-secondary">
-          Round 5 showed how a code theme is structured. This is the same structure with the system's own accents: no Pink Ink hue is used. Midnight reads cyan, yellow and pink; sketch reads blue, green and
-          magenta, with violet for constants because the owner reads sketch's yellow and orange as brown.
+          Round 5 showed how a code theme is structured. This is the same structure with the system's own accents: no Pink Ink hue is used. Midnight reads cyan, yellow and pink; sketch reads its own blue, green and
+          red, the primary outputs the owner wants, with violet for constants because sketch's yellow and orange read as brown.
         </p>
         <p className="m-0 font-mono text-xs text-content-muted">
           14px on 21px · tab 2 · gutter: 2ch marks, 3ch numbers, 2ch diff bar and sign · the frame skips lines 2 to 8 and 10, so two of the eight matches are off-screen
@@ -237,7 +237,7 @@ function ThemeSection() {
       <Numbers details={details} />
       <Disclosure title="Greyscale on paper (sketch)">
         <p className="m-0 mb-3 max-w-3xl text-sm text-content-secondary">
-          D5-B: paper prints in sketch's roles. The selection, borders, line and diff bars hold. Token classes mostly do not: sketch's blue, green, magenta and violet sit at one luminance.
+          D5-B: paper prints in sketch's roles. The selection, borders, line and diff bars hold. Token classes mostly do not: sketch's blue, green, red and violet sit at one luminance.
         </p>
         <Panel level="sketch" label="sketch · greyscale">
           <Frame look={theme('sketch')} rows={rows} title="paginate.ts · lines 1, 9, 11 to 22" status="greyscale" grey frameId="r6-grey" />
@@ -286,7 +286,7 @@ const ANSI: Ansi[] = [
   { slot: '2 green', role: 'pass, strings', pick: (l) => l.tok.string },
   { slot: '3 yellow', role: 'numbers (violet on sketch)', pick: (l) => l.tok.number },
   { slot: '4 blue', role: 'prompt, commands', pick: (l) => l.tok.function },
-  { slot: '5 magenta', role: 'keywords', pick: (l) => l.tok.keyword },
+  { slot: '5 magenta', role: 'keywords (pink on midnight, red on sketch)', pick: (l) => l.tok.keyword },
   { slot: '6 cyan', role: 'hints (intent.info)', pick: (l) => l.info!.fg },
   { slot: '7 white', role: 'text.primary', pick: (l) => l.ink },
   { slot: '8 bright black', role: 'text.muted', pick: (l) => l.tok.comment },

@@ -43,3 +43,11 @@ rests on. Roll-up rows refer to `../applied-evaluation.md` §2.
 | D11 | Labels in tables | **D11-C hairline**: a 1px subtle outline, no fill, secondary text, small. The owner's reason: "we have a lot of colour already" | The label word carries identity; the hairline is decoration (1.61 / 1.59:1). Ink 5.5% vs 27.8% today in the DataTable. Kanban cards keep their Tags |
 | D10 round 2 | Syntax and highlights | **Superseded.** Restart the code and text renderer holistically: **terminal-native** (built on the shipped 16-slot ANSI palette) and **research-led**, with 2–3 complete directions compared side by side. The yellow/brown highlight fills are rejected. The editor's type metrics (size, line height, tracking, gutter) are in scope | Owner: "not happy with the direction". Monochrome-first was an option offered, not a requirement |
 | Boards | Presentation | Future boards show pass/fail flags, not walls of numbers. Measurements go behind a disclosure | Owner: "board numbers are hard to read" |
+
+## Round 6 — 2026-10-15
+
+| ID | Decision | Pick | Notes |
+|---|---|---|---|
+| R6 base | Code renderer | **A role-based theme.** Pink Ink taught the structure only. Keywords use accent.tertiary, functions accent.primary, strings green, numbers and types accent.secondary (midnight yellow) or violet (sketch). Operators and punctuation use text.secondary, comments text.muted. Selection is an accent.primary region with one forced ink. Find matches use accent.secondary borders (1px for other matches; 2px, bold and a ▸ for the current one). The current line is a hairline with the active line number in accent.primary. The bracket pair gets an accent.tertiary border and wash. Errors are a red wavy line plus a gutter ×. The diff has a 12% wash and a gutter bar | `apps/site/src/decisions/r6/` |
+| R6 sketch keywords | Sketch keyword hue | **Red** (accent.tertiary), not magenta. Sketch keeps its blue / green / red for the primary outputs. Errors share the red and are identified by shape | Owner: "I always liked the blue / green / red for the primary outputs". GitHub Light pairs red keywords with a red danger colour |
+| R6 selection | Selection strength | **~30%** (target 0.3, fitted per level so the forced ink stays ≥4.5:1) | It was 59–60%, which read as a solid block |
