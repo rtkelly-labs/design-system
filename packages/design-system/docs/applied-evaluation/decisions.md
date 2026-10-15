@@ -13,3 +13,9 @@ rests on. Roll-up rows refer to `../applied-evaluation.md` §2.
 | D3 rule | Enforcing the rule | A ButtonGroup context checks hue collisions through the declared role→hue map (`levels.ts`) and warns in development. A test runs the check over every story and sample. The Button default variant changes from `tertiary` to `quiet` | `accent.tertiary` and `intent.danger` resolve to the same hue on both levels, and `tertiary` was the default, so the collision was the common case |
 | D4 | Small sizes | **D4-A + touch**: `xs` 28px and icon-only 32px, plus a 40px icon-only size for touch surfaces | WCAG 2.5.8 (24px AA), 2.5.5 (44px AAA). Carbon xs row 24px. PT-06/07/10 |
 | D5 | Midnight on paper | **D5-B**: paper prints in Sketch's roles, and #360's `print-color-adjust: exact` keeps fills | MDN `print-color-adjust`. PT-02. ADR 0004: Level is colour, so print selects a Level and adds no new palette |
+
+### Phase 1 — as built
+
+- `Button` variants: `quiet` (default), `secondary` (outline), `primary`, `tertiary`, `inverse`, `danger`, `default`. Sizes: `xs` 28px, `sm` 40px, `md`, `lg`, plus `icon` 32px and `icon-touch` 40px, which require `aria-label` in the types. Danger is a variant, not an `intent` prop: it is one look, not a hue that composes with the others.
+- `ButtonGroup` (`role="group"`) is the D3 rule's home. `findHueCollisions` (pure, exported) compares `accentHue` / `intentHue` on every Level. `Modal` and `AlertDialog` footers render a ButtonGroup. `src/buttonGroupRule.test.tsx` scans every story and the five samples; its limits are stated at the top of the file.
+- `inverse` stays: it is the solid ink fill that `secondary` no longer is.
