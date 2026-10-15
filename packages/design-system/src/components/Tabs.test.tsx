@@ -405,7 +405,10 @@ describe('Tabs: closable and dirty', () => {
     for (const c of close) {
       expect(c.getAttribute('aria-hidden')).toBeNull();
       expect(c.closest('[role="tab"]')).toBeNull();
-      expect(c.closest('[data-slot="tabs-tab-frame"]')?.getAttribute('role')).toBe('presentation');
+      // Not inside the tablist either: a tablist may own only tabs, so axe's
+      // `aria-required-children` fails on a button anywhere beneath it.
+      expect(c.closest('[role="tablist"]')).toBeNull();
+      expect(c.closest('[data-slot="tabs-close-layer"]')).not.toBeNull();
     }
     expect(screen.getByRole('button', { name: 'Close b.ts' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Close a.ts' })).toBeTruthy();
@@ -428,6 +431,15 @@ describe('Tabs: closable and dirty', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close b.ts' }));
     expect(onClose).toHaveBeenCalledWith('b.ts');
     expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'c.ts' }));
+  });
+
+  it('leaves the tablist owning nothing but tabs, so aria-required-children holds', () => {
+    render(<Files onClose={() => {}} />);
+    const tablist = screen.getByRole('tablist');
+    const children = Array.from(tablist.children);
+    expect(children).toHaveLength(3);
+    for (const child of children) expect(child.getAttribute('role')).toBe('tab');
+    expect(tablist.querySelector('button:not([role="tab"])')).toBeNull();
   });
 
   it('puts the unsaved state in the accessible name, not in colour alone', () => {
