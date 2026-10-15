@@ -56,7 +56,10 @@ const PROVIDERS = {
 /** Counts on the day this landed. Lower a line as it is paid down; delete at zero. */
 const BUDGET = {
   untested: 22,
-  inlineStyle: 91,
+  // 91 -> 92, approved by the owner: the closable tab's close button is drawn in a
+  // layer beside the tablist (so the tablist owns only tabs, aria-required-children)
+  // and must be positioned from the measured tab.
+  inlineStyle: 92,
   ref: 31,
   displayName: 0,
   recipe: 10,
