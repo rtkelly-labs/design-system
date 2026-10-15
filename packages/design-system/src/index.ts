@@ -64,6 +64,10 @@ export * from './components/Pagination';
 // it rather than hand-rolling a second keyboard model — see #240, and #163 for
 // why it is first-party rather than a wrapper over Base UI.
 export * from './components/Tabs';
+// A single-select view switcher — a radiogroup, not a tab pattern.
+export * from './components/SegmentedControl';
+// A bar of controls that is one tab stop, on Base UI's toolbar.
+export * from './components/Toolbar';
 export * from './components/SectionContainer';
 export * from './components/Divider';
 export * from './components/AsciiDivider';

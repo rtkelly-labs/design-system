@@ -11,7 +11,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
-import type { ElementType, HTMLAttributes, ReactNode } from 'react';
+import type { ElementType, HTMLAttributes, ReactNode, Ref } from 'react';
 import { Menu as MenuIcon } from 'lucide-react';
 import { recipe } from '../lib/recipe';
 import { Button } from './Button';
@@ -51,7 +51,16 @@ interface AppShellContextValue {
   /** The off-canvas sidebar is open. Always false at desktop width. */
   drawerOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+  /** The element `AppMain` renders: `main`, or a plain `div` when the host owns the landmark. */
+  mainAs: AppMainElement;
 }
+
+/**
+ * What `AppMain` renders as. `main` is the default and makes the shell the
+ * owner of the page's one `<main>` landmark; `div` hands that landmark back to
+ * the host.
+ */
+export type AppMainElement = 'main' | 'div';
 
 const AppShellContext = createContext<AppShellContextValue | null>(null);
 
@@ -73,10 +82,22 @@ export interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'cla
   /** The bar above the content — an `AppTopbar`. */
   topbar?: ReactNode;
   /**
-   * The page — an `AppMain`, which is the one `<main>` landmark. The shell
-   * does not render `<main>` itself, so a page never ends up with two.
+   * The page — an `AppMain`. The shell does not render `<main>` itself;
+   * `AppMain` does, unless `mainAs="div"` hands the landmark back to the host.
    */
   children: ReactNode;
+  /**
+   * Who owns the page's `<main>` landmark. A document has exactly one, and
+   * axe fails both none (`landmark-one-main`) and two (`landmark-no-duplicate-main`).
+   *
+   * - `main` — the default. The shell's `AppMain` is the landmark; use it when
+   *   the shell *is* the page.
+   * - `div` — the host owns it. A site that wraps every route in its own
+   *   `<main id="main-content">`, or an app that embeds a shell inside a page
+   *   that already has one, passes this and `AppMain` renders an unlabelled,
+   *   landmark-free `div` carrying the same layout.
+   */
+  mainAs?: AppMainElement;
   /**
    * Whether the off-canvas sidebar is open, controlled. Only means anything
    * below desktop width, where the sidebar is off-canvas; leave it unset and
@@ -110,6 +131,13 @@ export interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'cla
  *   a leading slot for a title or status, and an `actions` slot.
  * - `AppMain` — the single `<main>`.
  *
+ * **Who owns `<main>`.** A page has exactly one. By default the shell does,
+ * through `AppMain`. A host that already renders its own — a site route that
+ * wraps every sample in `<main id="main-content">` — passes `mainAs="div"` to
+ * the shell, and `AppMain` keeps its layout but stops being a landmark. The
+ * rule is: exactly one of the host and the shell renders `<main>`, never both
+ * and never neither.
+ *
  * The account area is a slot — `AppSidebar`'s `footer` — rather than a user
  * prop with a name and an avatar: what an application shows about who is
  * signed in, if anyone is, is the application's business. The shell makes no
@@ -135,6 +163,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
     sidebar,
     topbar,
     children,
+    mainAs = 'main',
     sidebarOpen,
     defaultSidebarOpen = false,
     onSidebarOpenChange,
@@ -178,8 +207,8 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(function AppSh
   }, [wide, open, setSidebarOpen]);
 
   const context = useMemo(
-    () => ({ hasSidebar, drawerOpen, setSidebarOpen }),
-    [hasSidebar, drawerOpen, setSidebarOpen],
+    () => ({ hasSidebar, drawerOpen, setSidebarOpen, mainAs }),
+    [hasSidebar, drawerOpen, setSidebarOpen, mainAs],
   );
 
   return (
@@ -203,7 +232,7 @@ const sidebarStyles = recipe({
     header: 'border-b-2 border-edge-strong px-6 py-5',
     body: 'flex-1 overflow-y-auto px-4 py-5',
     footer: 'border-t-2 border-edge-strong px-4 py-4',
-    drawerHeader: 'mb-5 border-b-2 border-edge-strong pb-4',
+    drawerHeader: '-mt-6 mb-5 border-b-2 border-edge-strong pb-4 pr-10',
   },
 });
 
@@ -265,6 +294,11 @@ export const AppSidebar = forwardRef<HTMLElement, AppSidebarProps>(function AppS
           onClose={() => context.setSidebarOpen(false)}
           placement="left"
           title={label}
+          // The application's own header is the drawer's heading: rendering the
+          // label above it as well said the same thing twice. `label` stays the
+          // accessible name, visually hidden, and the close control is pinned
+          // to the corner.
+          headerless={header != null}
           footer={footer ?? undefined}
         >
           {header != null && <div className={styles.drawerHeader()}>{header}</div>}
@@ -531,11 +565,28 @@ export interface AppMainProps extends Omit<HTMLAttributes<HTMLElement>, 'classNa
  * The page's one `<main>` landmark, labelled, padded and stacking its
  * children with a consistent gap — so a page of `PageHeader`, `Card` and
  * `DataTable` needs no layout CSS of its own.
+ *
+ * Inside an `AppShell` given `mainAs="div"` it renders the same layout as a
+ * plain `div`, with no landmark and no `label`, because the host owns the
+ * page's `<main>`. Outside a shell it is always `<main>`.
  */
 export const AppMain = forwardRef<HTMLElement, AppMainProps>(function AppMain(
   { label = 'Content', children, className, ...props },
   ref,
 ) {
+  const context = useContext(AppShellContext);
+  if (context?.mainAs === 'div') {
+    return (
+      <div
+        ref={ref as Ref<HTMLDivElement>}
+        data-slot="app-main"
+        className={mainStyles({ class: className })}
+        {...(props as HTMLAttributes<HTMLDivElement>)}
+      >
+        {children}
+      </div>
+    );
+  }
   return (
     <main ref={ref} aria-label={label} data-slot="app-main" className={mainStyles({ class: className })} {...props}>
       {children}

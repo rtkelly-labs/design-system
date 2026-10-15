@@ -65,6 +65,9 @@ const CASES: readonly VisualCase[] = [
   { id: 'foundations-swatch--group', snapshot: 'swatch-group.png' },
   { id: 'components-content-badge--intent', snapshot: 'badge-intent.png' },
   { id: 'components-content-tag--row', snapshot: 'tag-row.png' },
+  // Row 16: size="sm". Baselines come with `/update-snapshots`.
+  { id: 'components-content-badge--small', snapshot: 'badge-small.png' },
+  { id: 'components-content-tag--small-and-plain', snapshot: 'tag-small-and-plain.png' },
   { id: 'components-content-brackettext--emphasis', snapshot: 'brackettext-emphasis.png' },
   { id: 'components-layout-divider--patterns', snapshot: 'divider-patterns.png' },
   { id: 'components-layout-pagetitle--with-subtitle', snapshot: 'pagetitle-with-subtitle.png' },
@@ -74,6 +77,12 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-overlays-modal--with-footer', snapshot: 'modal-with-footer.png' },
   { id: 'components-overlays-alertdialog--destructive', snapshot: 'alertdialog-destructive.png' },
   { id: 'components-overlays-drawer--from-the-right', snapshot: 'drawer-from-the-right.png' },
+  // Row 10 shells: headerless modal and drawer, type-to-confirm and pending
+  // alerts. Baselines come with `/update-snapshots`.
+  { id: 'components-overlays-modal--headerless-palette', snapshot: 'modal-headerless-palette.png' },
+  { id: 'components-overlays-drawer--headerless', snapshot: 'drawer-headerless.png' },
+  { id: 'components-overlays-alertdialog--type-to-confirm', snapshot: 'alertdialog-type-to-confirm.png' },
+  { id: 'components-overlays-alertdialog--pending', snapshot: 'alertdialog-pending.png' },
   { id: 'components-feedback-toast--all-intents', snapshot: 'toast-all-intents.png' },
   // The application shell (issue 247), asked to open its sidebar and at a
   // width where it must not: the persistent column, no drawer. The same story
@@ -102,6 +111,9 @@ const CASES: readonly VisualCase[] = [
   // the same tablist wearing `CodeTabs`, and the pair is what shows the
   // extraction rendering identically in both places.
   { id: 'components-navigation-tabs--default', snapshot: 'tabs-default.png' },
+  // Row 9 (ED-F08): case preserved, and closable + dirty. Baselines come with `/update-snapshots`.
+  { id: 'components-navigation-tabs--case-preserved', snapshot: 'tabs-case-preserved.png' },
+  { id: 'components-navigation-tabs--closable-and-dirty', snapshot: 'tabs-closable-and-dirty.png' },
   // The site chrome (issue 246), on the four sites the issue says the same
   // four components must build unmodified: each is a whole page — header,
   // main, footer — so a prop that one site needed and another broke shows up
@@ -193,6 +205,13 @@ const CASES: readonly VisualCase[] = [
   // D3: a quiet cancel beside a danger confirm — what a ButtonGroup asks for.
   // Baseline to be generated with `/update-snapshots` on the PR.
   { id: 'components-actions-forms-button-group--danger-beside-quiet', snapshot: 'buttongroup-danger-beside-quiet.png' },
+  // SegmentedControl (row 9): both sizes. Selection is a neutral placeholder
+  // (D6 pending). Baselines to be generated with `/update-snapshots`.
+  { id: 'components-actions-forms-segmented-control--default', snapshot: 'segmentedcontrol-default.png' },
+  { id: 'components-actions-forms-segmented-control--small', snapshot: 'segmentedcontrol-small.png' },
+  // Toolbar (rows INB-15, ED-F13). Baselines come with `/update-snapshots`.
+  { id: 'components-actions-forms-toolbar--default', snapshot: 'toolbar-default.png' },
+  { id: 'components-actions-forms-toolbar--vertical', snapshot: 'toolbar-vertical.png' },
   // The account flows (#252), every state a reader meets on the way through:
   // each flow at rest and after a failed submit, the reset flow's middle step,
   // and the settings page in `AppShell`. The a11y suite reads these ids, so

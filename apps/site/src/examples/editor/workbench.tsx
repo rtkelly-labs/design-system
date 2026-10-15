@@ -16,6 +16,8 @@ import {
   TabsList,
   TabsPanel,
   TabsTab,
+  Toolbar,
+  ToolbarButton,
   Tooltip,
   TreeDiagram,
   useOptionalTheme,
@@ -416,6 +418,7 @@ function CommandPalette({ isOpen, onClose, onRun }: { isOpen: boolean; onClose: 
   const [query, setQuery] = useState('');
   const [index, setIndex] = useState(0);
   const listId = useId();
+  const field = useRef<HTMLInputElement>(null);
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     return COMMANDS.filter((c) => c.label.toLowerCase().includes(q) || c.group.toLowerCase().includes(q));
@@ -437,10 +440,9 @@ function CommandPalette({ isOpen, onClose, onRun }: { isOpen: boolean; onClose: 
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Command palette">
+    <Modal isOpen={isOpen} onClose={onClose} title="Command palette" headerless footer={false} initialFocus={field}>
       <input
-        // eslint-disable-next-line jsx-a11y/no-autofocus -- Modal has no initialFocus prop (gap); without this, focus lands on the dialog and typing goes nowhere
-        autoFocus
+        ref={field}
         role="combobox"
         aria-expanded="true"
         aria-controls={listId}
@@ -497,15 +499,15 @@ const ACTIVITY: { id: string; icon: NerdIconName; label: string }[] = [
 function IconButton({ label, pressed, onClick, icon, className = '' }: { label: string; pressed?: boolean; onClick?: () => void; icon: NerdIconName; className?: string }) {
   return (
     <Tooltip content={label} side="right">
-      <button
-        type="button"
+      <ToolbarButton
+        bare
         aria-label={label}
         aria-pressed={pressed}
         onClick={onClick}
         className={`flex h-11 w-12 items-center justify-center border-l-4 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-primary ${pressed ? 'border-accent-primary bg-surface-raised text-content-primary' : 'border-transparent text-content-muted hover:text-content-primary'} ${className}`}
       >
         <NerdIcon name={icon} size="md" />
-      </button>
+      </ToolbarButton>
     </Tooltip>
   );
 }
@@ -544,12 +546,11 @@ export default function EditorWorkbench() {
     setDrawerOpen(false);
   }, []);
 
+  // Tabs moves selection and focus to the neighbouring tab before this runs
+  // its removal; the only case left to handle here is closing the last one.
   const closeFile = (id: string) => {
-    setFiles((f) => {
-      const next = f.filter((x) => x.id !== id);
-      if (active === id) setActive(next[next.length - 1]?.id ?? '');
-      return next;
-    });
+    setFiles((f) => f.filter((x) => x.id !== id));
+    if (files.length === 1) setActive('');
   };
 
   const run = (c: Command) => {
@@ -613,14 +614,20 @@ export default function EditorWorkbench() {
 
       <div className="flex min-h-0 flex-1 print:block">
         {/* activity bar */}
-        <nav aria-label="Activity bar" className="hidden shrink-0 flex-col justify-between border-r-2 border-edge-strong bg-surface-raised md:flex print:hidden">
+        {/* A vertical toolbar: one tab stop, Up/Down between the icons (ED-F13). */}
+        <Toolbar
+          label="Activity bar"
+          orientation="vertical"
+          framed={false}
+          className="hidden shrink-0 justify-between gap-0 border-r-2 border-edge-strong bg-surface-raised md:flex print:hidden"
+        >
           <div className="flex flex-col">
             {ACTIVITY.map((a) => (
               <IconButton key={a.id} label={a.label} icon={a.icon} pressed={activity === a.id} onClick={() => setActivity(a.id)} />
             ))}
           </div>
           <IconButton label="Settings" icon="settings" />
-        </nav>
+        </Toolbar>
 
         {/* sidebar */}
         <aside aria-label="Side bar" className="hidden w-60 shrink-0 flex-col border-r-2 border-edge-default bg-surface-base md:flex print:hidden">
@@ -631,32 +638,20 @@ export default function EditorWorkbench() {
         </Drawer>
 
         {/* editor column */}
-        <main className="flex min-w-0 flex-1 flex-col print:block" aria-label="Editor">
+        <div role="region" className="flex min-w-0 flex-1 flex-col print:block" aria-label="Editor">
           <Tabs
             value={active || undefined}
             onValueChange={setActive}
             variant="underline"
+            transform="none"
             className="flex min-h-0 flex-1 flex-col"
           >
             <div className="flex shrink-0 items-stretch print:hidden">
               <TabsList label="Open editors" className="min-w-0 flex-1">
                 {files.map((f) => (
-                  <span key={f.id} className="inline-flex items-center">
-                    <TabsTab value={f.id} aria-label={f.dirty ? `${f.label}, unsaved changes` : f.label}>
-                      <span className="inline-flex items-center gap-2 normal-case tracking-normal">
-                        {f.dirty ? <span aria-hidden="true" className="text-intent-warning">●</span> : null}
-                        {f.label}
-                      </span>
-                    </TabsTab>
-                    <button
-                      type="button"
-                      aria-label={`Close ${f.label}`}
-                      onClick={() => closeFile(f.id)}
-                      className="-ml-3 mr-1 flex h-6 w-6 items-center justify-center text-content-muted hover:bg-surface-raised hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary"
-                    >
-                      <NerdIcon name="close" size="xs" />
-                    </button>
-                  </span>
+                  <TabsTab key={f.id} value={f.id} dirty={f.dirty} onClose={() => closeFile(f.id)}>
+                    {f.label}
+                  </TabsTab>
                 ))}
               </TabsList>
             </div>
@@ -733,7 +728,7 @@ export default function EditorWorkbench() {
               </Tabs>
             </section>
           ) : null}
-        </main>
+        </div>
       </div>
 
       {/* status bar */}

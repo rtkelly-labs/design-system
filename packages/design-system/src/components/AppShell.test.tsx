@@ -109,6 +109,21 @@ describe('AppShell', () => {
       expect(screen.getByRole('main', { name: 'Deployments' })).toBeDefined();
     });
 
+    it('hands the landmark to the host with mainAs="div": the layout stays, the <main> goes', () => {
+      render(
+        <main id="host-main">
+          <AppShell mainAs="div">
+            <AppMain label="Ignored">y</AppMain>
+          </AppShell>
+        </main>,
+      );
+      expect(document.querySelectorAll('main')).toHaveLength(1);
+      const body = document.querySelector('[data-slot="app-main"]');
+      expect(body?.tagName).toBe('DIV');
+      expect(body?.hasAttribute('aria-label')).toBe(false);
+      expect(body?.className).toContain('flex-1');
+    });
+
     it('keeps one main with the drawer open, since the drawer holds only the sidebar', async () => {
       render(<Shell defaultSidebarOpen />);
       await screen.findByRole('dialog');
@@ -224,7 +239,9 @@ describe('AppShell', () => {
       toggle.focus();
       fireEvent.click(toggle);
 
-      const drawer = await screen.findByRole('dialog', { name: '[\u00a0Workspace\u00a0]' });
+      // Headerless, since the sidebar has a header of its own: the label is the
+      // accessible name, not a second visible heading above the application's.
+      const drawer = await screen.findByRole('dialog', { name: 'Workspace' });
       expect(drawer.getAttribute('data-placement')).toBe('left');
       await waitFor(() => expect(drawer.contains(document.activeElement)).toBe(true));
       expect(toggle.getAttribute('aria-expanded')).toBe('true');

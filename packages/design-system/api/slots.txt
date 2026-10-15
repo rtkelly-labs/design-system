@@ -156,6 +156,8 @@ report-document	ReportDocument
 report-section	ReportSection
 saas-landing-page	SaasLandingPage
 section-container	SectionContainer
+segmented-control	SegmentedControl
+segmented-control-item	SegmentedControlItem
 select-icon	Select
 select-trigger	Select
 select-value	Select
@@ -218,6 +220,9 @@ tabs-caption	CodeTabs
 tabs-list	TabsList
 tabs-panel	TabsPanel
 tabs-tab	TabsTab
+tabs-tab-close	TabsTab
+tabs-tab-dirty	TabsTab
+tabs-tab-frame	TabsTab
 tag	Tag
 telemetry-gauge	TelemetryGauge
 telemetry-gauge-metric	TelemetryGauge
@@ -228,6 +233,9 @@ ticker-tape-addon	TickerTape
 ticker-tape-title	TickerTape
 ticker-tape-track	TickerTape
 timeline	Timeline
+toolbar	Toolbar
+toolbar-button	ToolbarButton
+toolbar-separator	ToolbarSeparator
 track-card	TrackCard
 track-card-badge	TrackCard
 track-card-description	TrackCard

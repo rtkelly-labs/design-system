@@ -52,3 +52,25 @@ export const Toggleable: Story = {
     );
   },
 };
+
+/**
+ * A command palette's shell: `headerless` drops the header bar (the title stays
+ * as the accessible name, visually hidden, and the close control moves to the
+ * corner), `footer={false}` drops the CLOSE button, and `initialFocus` lands
+ * on the search field instead of the dialog.
+ */
+export const HeaderlessPalette: Story = {
+  render: function PaletteExample() {
+    const field = React.useRef<HTMLInputElement>(null);
+    return (
+      <Modal isOpen title="Command palette" headerless footer={false} initialFocus={field} onClose={() => {}}>
+        <input
+          ref={field}
+          aria-label="Type a command"
+          placeholder="> type a command"
+          className="w-full border-2 border-edge-strong bg-surface-sunken px-3 py-2 font-mono text-sm text-content-primary"
+        />
+      </Modal>
+    );
+  },
+};
