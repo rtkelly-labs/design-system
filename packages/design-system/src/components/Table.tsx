@@ -3,7 +3,11 @@
 import {
   createContext,
   useContext,
+  useEffect,
+  useRef,
+  useState,
   type HTMLAttributes,
+  type RefObject,
   type TableHTMLAttributes,
   type TdHTMLAttributes,
   type ThHTMLAttributes,
@@ -34,7 +38,15 @@ function useTablePresentation() {
 
 const tableStyles = recipe({
   slots: {
-    container: 'relative w-full overflow-x-auto border-2 border-edge-strong bg-surface-base print:max-h-none print:overflow-visible',
+    // The `data-more-*` clauses are the overflow cue: a hard 4px edge-strong
+    // rule outside the frame, on whichever side has columns the reader cannot
+    // see. A shadow rather than a fade, and outside rather than inside, because
+    // the header's own fill would cover anything drawn behind the cells.
+    container:
+      'relative w-full overflow-x-auto border-2 border-edge-strong bg-surface-base print:max-h-none print:overflow-visible '
+      + 'data-[more-right]:shadow-[4px_0_0_0_var(--ds-border-strong)] '
+      + 'data-[more-left]:shadow-[-4px_0_0_0_var(--ds-border-strong)] '
+      + 'data-[more-left]:data-[more-right]:shadow-[-4px_0_0_0_var(--ds-border-strong),4px_0_0_0_var(--ds-border-strong)]',
     table: 'w-full caption-bottom text-left font-mono text-sm border-collapse',
     header: 'bg-surface-raised border-b-2 border-edge-strong print:table-header-group',
     head: 'h-11 px-4 py-3 text-left align-middle font-display text-xs font-bold uppercase tracking-wider text-accent-primary border-r-2 border-edge-strong last:border-r-0',
@@ -87,6 +99,39 @@ const tableStyles = recipe({
   },
 });
 
+/**
+ * Which sides of a horizontal scroller have content past the edge, kept current
+ * as it scrolls, resizes and its table changes width. Drives the overflow cue:
+ * a table that clips a header mid-word at 375px says nothing about the columns
+ * it is hiding without it.
+ */
+function useOverflowSides(ref: RefObject<HTMLElement | null>): { left: boolean; right: boolean } {
+  const [sides, setSides] = useState({ left: false, right: false });
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => {
+      // `abs`: a right-to-left scroller reports a negative `scrollLeft`.
+      const offset = Math.abs(el.scrollLeft);
+      const left = offset > 1;
+      const right = el.scrollWidth - el.clientWidth - offset > 1;
+      setSides((prev) => (prev.left === left && prev.right === right ? prev : { left, right }));
+    };
+    measure();
+    el.addEventListener('scroll', measure, { passive: true });
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(el);
+    if (el.firstElementChild) observer?.observe(el.firstElementChild);
+    return () => {
+      el.removeEventListener('scroll', measure);
+      observer?.disconnect();
+    };
+  }, [ref]);
+
+  return sides;
+}
+
 export function Table({
   className,
   containerClassName,
@@ -115,6 +160,8 @@ export function Table({
 }) {
   const presentation = { appearance, density };
   const styles = tableStyles(presentation);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const more = useOverflowSides(containerRef);
   /*
    * `tabIndex={0}` on the container because it is `overflow-x-auto`: any table
    * wider than its column becomes a scrollable region, and a scrollable region
@@ -137,7 +184,10 @@ export function Table({
   return (
     <TablePresentationContext.Provider value={presentation}>
       <div
+        ref={containerRef}
         data-slot="table-container"
+        data-more-left={more.left ? '' : undefined}
+        data-more-right={more.right ? '' : undefined}
         tabIndex={0}
         role="region"
         aria-label={label}
