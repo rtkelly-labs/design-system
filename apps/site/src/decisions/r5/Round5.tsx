@@ -11,14 +11,14 @@ export const ANCHOR = 'scroll-mt-24';
 /** An in-page link target, written as a call so a literal hash never reads as a hex colour to check:tokens. */
 const anchor = (id: string) => `#${id}`;
 
-const Eyebrow = ({ children }: { children: ReactNode }) => (
+export const Eyebrow = ({ children }: { children: ReactNode }) => (
   <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">{children}</p>
 );
-const Label = ({ children }: { children: ReactNode }) => (
+export const Label = ({ children }: { children: ReactNode }) => (
   <p className="m-0 font-mono text-[11px] font-bold uppercase tracking-wider text-content-muted">{children}</p>
 );
 
-function Panel({ level, label, children }: { level: Level; label?: string; children: ReactNode }) {
+export function Panel({ level, label, children }: { level: Level; label?: string; children: ReactNode }) {
   return (
     <div data-theme={level} className="min-w-0 border-2 border-edge-strong bg-surface-base p-3 text-content-primary sm:p-4">
       <p className="m-0 mb-3 font-mono text-xs font-bold uppercase tracking-wider text-accent-primary">{`[ ${label ?? level} ]`}</p>
@@ -27,7 +27,7 @@ function Panel({ level, label, children }: { level: Level; label?: string; child
   );
 }
 
-function Pair({ children }: { children: (level: Level) => ReactNode }) {
+export function Pair({ children }: { children: (level: Level) => ReactNode }) {
   return (
     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
       {LEVEL_IDS.map((l) => (
@@ -39,11 +39,11 @@ function Pair({ children }: { children: (level: Level) => ReactNode }) {
   );
 }
 
-const Swatch = ({ colour }: { colour: string }) => (
+export const Swatch = ({ colour }: { colour: string }) => (
   <span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 border border-edge-default align-middle" style={{ background: colour }} />
 );
 
-const Disclosure = ({ title, children }: { title: string; children: ReactNode }) => (
+export const Disclosure = ({ title, children }: { title: string; children: ReactNode }) => (
   <details className="border-2 border-edge-default">
     <summary className="cursor-pointer bg-surface-raised p-2 font-mono text-xs font-bold uppercase text-content-primary">{title}</summary>
     <div className="p-3">{children}</div>
@@ -52,7 +52,7 @@ const Disclosure = ({ title, children }: { title: string; children: ReactNode })
 
 /* ------------------------------------------------------------------ checks */
 
-function CheckList({ checks, title = 'Checks' }: { checks: Check[]; title?: string }) {
+export function CheckList({ checks, title = 'Checks' }: { checks: Check[]; title?: string }) {
   const fails = checks.filter((c) => !c.ok).length;
   return (
     <div className="flex flex-col gap-2">

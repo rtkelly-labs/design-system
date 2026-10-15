@@ -94,7 +94,8 @@ export interface RowSpec {
   brackets?: number[];
   err?: [number, number];
   warn?: [number, number];
-  mark?: '×' | '!' | '▸';
+  info?: [number, number];
+  mark?: '×' | '!' | 'i' | '▸';
   /** Which indent guide is the active one. */
   activeGuide?: number;
 }
@@ -194,6 +195,7 @@ function Row({ look: l, geo, row }: { look: Look; geo: Geo; row: RowSpec }) {
   row.brackets?.forEach((c) => range(c, c + 1));
   if (row.err) range(...row.err);
   if (row.warn) range(...row.warn);
+  if (row.info) range(...row.info);
   const pts = [...cuts].sort((a, b) => a - b);
 
   const tokAt = (i: number) => row.toks.find((t) => i >= t.col && i < t.col + t.text.length);
@@ -211,16 +213,18 @@ function Row({ look: l, geo, row }: { look: Look; geo: Geo; row: RowSpec }) {
     const f = row.finds?.find((x) => within(a, x.from, x.to));
     if (f && !f.current) colour = l.find.otherFg;
     if (f?.current && l.find.curFg) colour = l.find.curFg;
+    if (f?.current && l.find.curBold) bold = true;
     if (row.brackets?.some((c) => c === a)) {
       colour = l.bracket.fg;
       bold = bold || l.bracket.bold;
     }
     if (row.sel && within(a, row.sel.from, row.sel.to)) colour = l.sel.fg;
     const style: CSSProperties = { color: colour, fontWeight: bold ? 700 : undefined, fontStyle: italic ? 'italic' : undefined };
-    const diag = row.err && within(a, ...row.err) ? l.err.fg : row.warn && within(a, ...row.warn) ? l.warn.fg : undefined;
-    if (diag) {
+    const sev = row.err && within(a, ...row.err) ? 'err' : row.warn && within(a, ...row.warn) ? 'warn' : row.info && within(a, ...row.info) ? 'info' : undefined;
+    const diag = sev === 'err' ? l.err.fg : sev === 'warn' ? l.warn.fg : sev === 'info' ? l.info?.fg : undefined;
+    if (diag && sev) {
       style.textDecorationLine = 'underline';
-      style.textDecorationStyle = 'wavy';
+      style.textDecorationStyle = l.diagStyle?.[sev] ?? 'wavy';
       style.textDecorationColor = diag;
       style.textDecorationThickness = '1.5px';
       style.textUnderlineOffset = 3;
@@ -280,7 +284,7 @@ function Row({ look: l, geo, row }: { look: Look; geo: Geo; row: RowSpec }) {
     codeLayers.push(box(c, c + 1, `br${i}`, { background: l.bracket.fill, boxShadow: `inset 0 0 0 1px ${l.bracket.border}` }));
   });
 
-  const glyphColour = row.mark === '×' ? l.err.fg : row.mark === '!' ? l.warn.fg : l.marker.cur;
+  const glyphColour = row.mark === '×' ? l.err.fg : row.mark === '!' ? l.warn.fg : row.mark === 'i' ? (l.info?.fg ?? l.marker.cur) : l.marker.cur;
   const numColour = row.cur ? l.line.numActive : l.line.num;
   return (
     <div style={rowStyle}>
