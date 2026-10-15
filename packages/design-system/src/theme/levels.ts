@@ -175,6 +175,24 @@ export interface LevelDefinition {
     accent: Readonly<Record<Emphasis, string>>;
     intent: Readonly<Record<Intent, string>>;
   }>;
+  /**
+   * Percent of `accent.primary` mixed into `surface.base` for a selected row
+   * in a multi-select collection (D6-B). Declared per level: the smallest
+   * strength at which the tint is 3:1 against both `surface.base` and
+   * `surface.raised` (WCAG 1.4.11), found by search — 53 on Midnight, 67 on
+   * Sketch. Far stronger than `tintStrength`, because a selected row is state
+   * and must be seen, where a tint is decoration with its own text.
+   * `tint.test.ts` re-derives `selection.multi` from it.
+   */
+  readonly selectionStrength: number;
+  /**
+   * The selected-row fill. `multi` is for collections where several rows are
+   * chosen at once (inbox, table, kanban); a single "current" item (nav,
+   * SegmentedControl) takes a solid `accent.primary` fill with `text.inverse`
+   * instead. Text on it is `text.primary`, never `secondary`: `secondary` is
+   * 3.45:1 on Midnight's and 3.58:1 on Sketch's.
+   */
+  readonly selection: Readonly<{ multi: string }>;
   /** Colour of the hard offset shadows. Normally tracks `border.strong`. */
   readonly shadow: string;
 }
@@ -273,6 +291,8 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       accent: { primary: '#172c3e', secondary: '#302c28', tertiary: '#331a33', quiet: '#202032' },
       intent: { info: '#172c3e', success: '#173429', warning: '#302c28', danger: '#331a33' },
     },
+    selectionStrength: 53,
+    selection: { multi: '#236b82' },
     shadow: '#ffffff',
   },
 
@@ -354,6 +374,8 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       accent: { primary: '#d9e1ec', secondary: '#dae2d4', tertiary: '#f3dbd2', quiet: '#e3e0d8' },
       intent: { info: '#d9e1ec', success: '#dae2d4', warning: '#ebded1', danger: '#f3dbd2' },
     },
+    selectionStrength: 67,
+    selection: { multi: '#5f8be3' },
     shadow: '#23262e',
   },
 };

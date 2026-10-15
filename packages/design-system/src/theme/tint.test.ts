@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { auditContrast } from './contrast';
+import { auditContrast, contrastRatio } from './contrast';
 import { LEVELS, THEME_LEVELS } from './levels';
 import { mixOklab } from './mix';
 
@@ -31,6 +31,21 @@ describe('tint', () => {
       const def = LEVELS[level];
       const all = [...Object.values(def.tint.accent), ...Object.values(def.tint.intent)];
       expect(all.every((v) => /^#[0-9a-f]{6}$/.test(v))).toBe(true);
+    });
+  }
+
+  for (const level of THEME_LEVELS) {
+    it(`${level}: selection.multi is accent.primary at the declared strength, and the smallest that is 3:1`, () => {
+      const def = LEVELS[level];
+      const at = (pct: number) => mixOklab(def.accent.primary, def.surface.base, pct);
+      expect(def.selection.multi).toBe(at(def.selectionStrength));
+      const reads = (pct: number) =>
+        contrastRatio(at(pct), def.surface.base) >= 3 && contrastRatio(at(pct), def.surface.raised) >= 3;
+      expect(reads(def.selectionStrength)).toBe(true);
+      expect(reads(def.selectionStrength - 1)).toBe(false);
+      // Text on a selected row is primary ink: it clears 4.5:1; secondary does not.
+      expect(contrastRatio(def.text.primary, def.selection.multi)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(def.text.secondary, def.selection.multi)).toBeLessThan(4.5);
     });
   }
 

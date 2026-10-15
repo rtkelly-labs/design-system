@@ -82,6 +82,7 @@
   --color-intent-success: var(--ds-intent-success);
   --color-intent-warning: var(--ds-intent-warning);
   --color-intent-danger: var(--ds-intent-danger);
+  --color-selection-multi: var(--ds-selection-multi);
   --color-tint-accent-primary: var(--ds-tint-accent-primary);
   --color-tint-accent-secondary: var(--ds-tint-accent-secondary);
   --color-tint-accent-tertiary: var(--ds-tint-accent-tertiary);
@@ -364,6 +365,7 @@
   --ds-tint-intent-success: #173429;
   --ds-tint-intent-warning: #302c28;
   --ds-tint-intent-danger: #331a33;
+  --ds-selection-multi: #236b82;
   --ds-palette-red: #ff586e;
   --ds-palette-orange: #ff8c00;
   --ds-palette-yellow: #facc15;
@@ -406,6 +408,7 @@
   --color-intent-success: var(--ds-intent-success);
   --color-intent-warning: var(--ds-intent-warning);
   --color-intent-danger: var(--ds-intent-danger);
+  --color-selection-multi: var(--ds-selection-multi);
   --color-tint-accent-primary: var(--ds-tint-accent-primary);
   --color-tint-accent-secondary: var(--ds-tint-accent-secondary);
   --color-tint-accent-tertiary: var(--ds-tint-accent-tertiary);
@@ -489,6 +492,7 @@
   --ds-tint-intent-success: #dae2d4;
   --ds-tint-intent-warning: #ebded1;
   --ds-tint-intent-danger: #f3dbd2;
+  --ds-selection-multi: #5f8be3;
   --ds-palette-red: #bd0010;
   --ds-palette-orange: #974503;
   --ds-palette-yellow: #705a00;
@@ -531,6 +535,7 @@
   --color-intent-success: var(--ds-intent-success);
   --color-intent-warning: var(--ds-intent-warning);
   --color-intent-danger: var(--ds-intent-danger);
+  --color-selection-multi: var(--ds-selection-multi);
   --color-tint-accent-primary: var(--ds-tint-accent-primary);
   --color-tint-accent-secondary: var(--ds-tint-accent-secondary);
   --color-tint-accent-tertiary: var(--ds-tint-accent-tertiary);
@@ -615,6 +620,7 @@
   --ds-tint-intent-success: #dae2d4;
   --ds-tint-intent-warning: #ebded1;
   --ds-tint-intent-danger: #f3dbd2;
+  --ds-selection-multi: #5f8be3;
   --ds-palette-red: #bd0010;
   --ds-palette-orange: #974503;
   --ds-palette-yellow: #705a00;

@@ -86,3 +86,15 @@ describe('Table', () => {
     expect(container.querySelector('[data-slot="table-container"]')?.className).toContain('max-w-md');
   });
 });
+
+describe('TableRow selection (D6-B)', () => {
+  it('draws selected as the tint with primary ink, the cursor as an outline and hover as its own ring', () => {
+    const { container } = render(<Table><TableBody><TableRow data-state="selected" data-current="true"><TableCell>x</TableCell></TableRow></TableBody></Table>);
+    const cls = container.querySelector('[data-slot="table-row"]')?.className ?? '';
+    expect(cls).toContain('data-[state=selected]:bg-selection-multi');
+    expect(cls).toContain('data-[state=selected]:[&_td]:text-content-primary');
+    expect(cls).toContain('data-[current=true]:outline-2');
+    expect(cls).toContain('hover:inset-ring-edge-default');
+    expect(cls).not.toContain('bg-surface-raised');
+  });
+});
