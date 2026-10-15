@@ -131,6 +131,13 @@ export interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'cla
  *   a leading slot for a title or status, and an `actions` slot.
  * - `AppMain` — the single `<main>`.
  *
+ * **Who owns `<main>`.** A page has exactly one. By default the shell does,
+ * through `AppMain`. A host that already renders its own — a site route that
+ * wraps every sample in `<main id="main-content">` — passes `mainAs="div"` to
+ * the shell, and `AppMain` keeps its layout but stops being a landmark. The
+ * rule is: exactly one of the host and the shell renders `<main>`, never both
+ * and never neither.
+ *
  * The account area is a slot — `AppSidebar`'s `footer` — rather than a user
  * prop with a name and an avatar: what an application shows about who is
  * signed in, if anyone is, is the application's business. The shell makes no

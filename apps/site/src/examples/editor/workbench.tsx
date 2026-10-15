@@ -630,7 +630,7 @@ export default function EditorWorkbench() {
         </Drawer>
 
         {/* editor column */}
-        <main className="flex min-w-0 flex-1 flex-col print:block" aria-label="Editor">
+        <div role="region" className="flex min-w-0 flex-1 flex-col print:block" aria-label="Editor">
           <Tabs
             value={active || undefined}
             onValueChange={setActive}
@@ -720,7 +720,7 @@ export default function EditorWorkbench() {
               </Tabs>
             </section>
           ) : null}
-        </main>
+        </div>
       </div>
 
       {/* status bar */}

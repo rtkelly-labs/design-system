@@ -485,7 +485,7 @@ export default function KanbanBoard() {
   );
 
   return (
-    <main className="min-h-screen bg-surface-base p-4 font-mono text-content-primary sm:p-6 print:p-0">
+    <div className="min-h-screen bg-surface-base p-4 font-mono text-content-primary sm:p-6 print:p-0">
       <header className="mb-4 flex flex-col gap-4 print:mb-3">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -759,7 +759,7 @@ export default function KanbanBoard() {
           </form>
         )}
       </Modal>
-    </main>
+    </div>
   );
 }
 
