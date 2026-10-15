@@ -146,7 +146,7 @@ export function Dashboard() {
         title={promoting ? `Promote ${promoting.service}` : 'Promote'}
         footer={
           <div className="flex flex-wrap justify-end gap-3">
-            <Button size="sm" variant="inverse" onClick={() => setPromoting(null)}>
+            <Button size="sm" onClick={() => setPromoting(null)}>
               CANCEL
             </Button>
             <Button
