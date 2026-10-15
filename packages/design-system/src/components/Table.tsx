@@ -41,7 +41,15 @@ const tableStyles = recipe({
     head: 'h-11 px-4 py-3 text-left align-middle font-display text-xs font-bold uppercase tracking-wider text-accent-primary border-r-2 border-edge-strong last:border-r-0',
     rowHead: 'px-4 py-3 text-left align-middle text-sm font-bold text-content-primary border-r-2 border-edge-strong last:border-r-0',
     body: 'divide-y-2 divide-edge-strong [&_tr:last-child]:border-0',
-    row: 'border-b-2 border-edge-strong transition-colors hover:bg-surface-raised data-[state=selected]:bg-surface-raised',
+    // D6-B: selected is the opaque tint with primary ink; the cursor row is a 2px
+    // outline (never a glyph); hover is an edge-default inset ring, a device of its
+    // own, so hover on a selected row still reads as hover.
+    row:
+      'border-b-2 border-edge-strong transition-colors hover:inset-ring-2 hover:inset-ring-edge-default '
+      + 'data-[state=selected]:bg-selection-multi data-[state=selected]:text-content-primary '
+      + 'data-[state=selected]:[&_td]:text-content-primary data-[state=selected]:[&_th]:text-content-primary '
+      + 'data-[current=true]:outline-2 data-[current=true]:-outline-offset-2 data-[current=true]:outline-edge-strong '
+      + 'print:break-inside-avoid',
     cell: 'px-4 py-3 align-middle text-sm text-content-primary border-r-2 border-edge-strong last:border-r-0',
     footer: 'bg-surface-raised border-t-2 border-edge-strong font-mono text-xs font-bold text-content-primary',
     caption: 'mt-3 text-xs font-mono text-content-muted text-center',
@@ -174,6 +182,13 @@ export function TableFooter({
   return <tfoot data-slot="table-footer" className={styles.footer({ class: className })} {...props} />;
 }
 
+/**
+ * A body row. In a multi-select table (D6-B) it carries two states by
+ * attribute: `data-state="selected"` fills it with the opaque selection tint and
+ * keeps its text primary, and `data-current="true"` marks the cursor row with a
+ * 2px outline. Both can hold at once. Hover draws an inset edge, which is a
+ * different device from either.
+ */
 export function TableRow({
   className,
   ...props

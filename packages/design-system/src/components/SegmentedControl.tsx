@@ -18,9 +18,8 @@ const segmented = recipe({
       + '-ml-0.5 first:ml-0 hover:text-content-primary '
       + 'data-[disabled]:cursor-not-allowed data-[disabled]:border-edge-subtle data-[disabled]:text-content-muted '
       + 'motion-reduce:transition-none '
-      // D6: selection device pending. A neutral placeholder: the strong edge
-      // and the primary ink, with no accent fill, until the owner chooses.
-      + 'data-[checked]:z-10 data-[checked]:border-edge-strong data-[checked]:text-content-primary',
+      // D6-C: a single current choice is the solid accent fill with inverse ink.
+      + 'data-[checked]:z-10 data-[checked]:border-accent-primary data-[checked]:bg-accent-primary data-[checked]:text-content-inverse data-[checked]:hover:text-content-inverse',
   },
   variants: {
     size: {

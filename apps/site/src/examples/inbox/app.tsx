@@ -428,21 +428,14 @@ export default function InboxApp() {
                       aria-rowindex={idx + 2}
                       aria-current={isCur ? 'true' : undefined}
                       data-state={isSel ? 'selected' : undefined}
-                      data-cursor={isCur ? 'true' : undefined}
+                      // D6-B: `Table` draws selected (tint), cursor (2px outline) and
+                      // hover (inset edge) from these two attributes.
+                      data-current={isCur ? 'true' : undefined}
                       onClick={() => {
                         setCursor(r.id);
                         setOpenId(r.id);
                       }}
-                      className={[
-                        'cursor-pointer',
-                        // Selection is the 4px leading edge, per docs/theming.md: the
-                        // surface step `Table` ships for `data-state=selected` is
-                        // under 1.1:1 against the page. The cursor is an inset
-                        // outline, so the two read apart.
-                        isSel ? 'shadow-[inset_4px_0_0_0_var(--ds-accent-primary)]' : '',
-                        isCur ? 'outline-2 -outline-offset-2 outline-accent-secondary' : '',
-                        isOpen ? 'bg-surface-sunken' : '',
-                      ].join(' ')}
+                      className={['cursor-pointer', isOpen && !isSel ? 'bg-surface-sunken' : ''].join(' ')}
                     >
                       <TableCell className="px-2" onClick={(e) => e.stopPropagation()}>
                         <Checkbox
@@ -457,7 +450,7 @@ export default function InboxApp() {
                       <TableCell className={`max-w-0 ${r.unread ? 'font-bold' : 'text-content-secondary'}`}>
                         <div className="flex items-center gap-2">
                           {r.unread ? (
-                            <span aria-label="unread" className="shrink-0 font-bold text-accent-primary">
+                            <span aria-label="unread" className={`shrink-0 font-bold ${isSel ? 'text-content-primary' : 'text-accent-primary'}`}>
                               ●
                             </span>
                           ) : null}

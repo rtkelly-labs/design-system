@@ -29,7 +29,7 @@ describe('the Medium axis', () => {
 });
 
 /** Numbers a Level may carry because they are derivation inputs to a colour. */
-const COLOUR_PARAMETERS = new Set(['tintStrength']);
+const COLOUR_PARAMETERS = new Set(['tintStrength', 'selectionStrength']);
 
 describe('the two axes do not overlap', () => {
   // The load-bearing claim of ADR 0004. A Level varies colour; a Medium varies
