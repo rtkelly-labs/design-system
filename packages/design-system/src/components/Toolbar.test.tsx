@@ -50,13 +50,13 @@ describe('Toolbar', () => {
     render(
       <Toolbar label="Tools" framed={false}>
         <ToolbarButton size="xs">GO</ToolbarButton>
-        <ToolbarButton bare aria-label="Search" className="plain">
+        <ToolbarButton bare aria-label="Search" className="flex">
           s
         </ToolbarButton>
       </Toolbar>,
     );
     expect(screen.getByRole('button', { name: 'GO' }).className).toContain('h-7');
-    expect(screen.getByRole('button', { name: 'Search' }).className).toBe('plain');
+    expect(screen.getByRole('button', { name: 'Search' }).className).toBe('flex');
   });
 
   it('lets a menu trigger be a toolbar item', async () => {

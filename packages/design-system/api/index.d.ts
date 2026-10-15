@@ -802,6 +802,52 @@ interface SegmentedControlItemProps extends Omit<HTMLAttributes<HTMLSpanElement>
 
 declare const SegmentedControlItem: react.ForwardRefExoticComponent<SegmentedControlItemProps & react.RefAttributes<HTMLSpanElement>>;
 
+interface ToolbarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'children'> {
+
+    label: string;
+
+    orientation?: 'horizontal' | 'vertical';
+
+    loopFocus?: boolean;
+
+    disabled?: boolean;
+
+    framed?: boolean;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const Toolbar: react.ForwardRefExoticComponent<ToolbarProps & react.RefAttributes<HTMLDivElement>>;
+
+type ToolbarButtonProps = ButtonElementProps & {
+
+    bare?: boolean;
+};
+
+declare const ToolbarButton: react.ForwardRefExoticComponent<(Omit<ButtonBaseProps & ButtonLabelledSize & react.ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+    pending?: boolean;
+    pendingLabel?: string;
+} & {
+
+    bare?: boolean;
+}, "ref"> | Omit<ButtonBaseProps & ButtonIconSize & react.ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+    pending?: boolean;
+    pendingLabel?: string;
+} & {
+
+    bare?: boolean;
+}, "ref">) & react.RefAttributes<HTMLButtonElement>>;
+interface ToolbarSeparatorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+
+    className?: string;
+}
+
+declare const ToolbarSeparator: react.ForwardRefExoticComponent<ToolbarSeparatorProps & react.RefAttributes<HTMLDivElement>>;
+
 interface SectionContainerProps {
     children: ReactNode;
     className?: string;
@@ -1182,12 +1228,19 @@ type DataTableProps<T> = DataTableSharedProps<T> & ({
 
 declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, appearance, density, emptyText, className, containerClassName, virtualize, ...rest }: DataTableProps<T>): react.JSX.Element;
 
+type DialogInitialFocus = boolean | RefObject<HTMLElement | null> | (() => boolean | HTMLElement | null | void);
 interface ModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
     isOpen: boolean;
     onClose: () => void;
+
     title: string;
     children: ReactNode;
-    footer?: ReactNode;
+
+    footer?: ReactNode | false;
+
+    initialFocus?: DialogInitialFocus;
+
+    headerless?: boolean;
 
     closeOnBackdropClick?: boolean;
     className?: string;
@@ -1206,6 +1259,14 @@ interface AlertDialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' 
     children: ReactNode;
     confirmLabel?: string;
     cancelLabel?: string;
+
+    confirmDisabled?: boolean;
+
+    confirmPending?: boolean;
+
+    confirmPendingLabel?: string;
+
+    confirmVariant?: ButtonVariant;
 
     footer?: ReactNode;
     className?: string;
@@ -1226,7 +1287,11 @@ interface DrawerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'ch
 
     placement?: DrawerPlacement;
 
-    footer?: ReactNode;
+    footer?: ReactNode | false;
+
+    initialFocus?: DialogInitialFocus;
+
+    headerless?: boolean;
 
     closeOnBackdropClick?: boolean;
 
@@ -3214,11 +3279,14 @@ export {
   BulletChart,
   type BulletChartProps,
   Button,
+  type ButtonBaseProps,
   type ButtonColourRole,
   type ButtonElementProps,
   ButtonGroup,
   type ButtonGroupContextValue,
   type ButtonGroupProps,
+  type ButtonIconSize,
+  type ButtonLabelledSize,
   type ButtonLinkProps,
   type ButtonProps,
   type ButtonVariant,
@@ -3263,6 +3331,7 @@ export {
   type DecisionOption,
   type DecisionProps,
   DesignSandbox,
+  type DialogInitialFocus,
   type DiffLineProps,
   type DiffRow,
   type DiffSign,
@@ -3577,6 +3646,12 @@ export {
   type TokenRule,
   TokenTable,
   type TokenTableProps,
+  Toolbar,
+  ToolbarButton,
+  type ToolbarButtonProps,
+  type ToolbarProps,
+  ToolbarSeparator,
+  type ToolbarSeparatorProps,
   Tooltip,
   type TooltipProps,
   TrackCard,
