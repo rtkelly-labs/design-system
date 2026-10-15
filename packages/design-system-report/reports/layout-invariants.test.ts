@@ -52,7 +52,9 @@ describe.skipIf(!chromiumAvailable())('compendium: geometric layout invariants (
       const geometry = await page.evaluate<CellGeometry[]>(collectGeometry);
       const pdfPath = path.join(scratch, 'compendium.pdf');
       await page.pdf({ path: pdfPath, format: 'A4', printBackground: true, preferCSSPageSize: true });
-      const fonts = fontViolations(await inspectFonts(pdfPath, geometry));
+      // Fonts go through the same allowlist: a decision to allow a face is one list, not two.
+      const { violations: fonts, allowed: allowedFonts } = applyAllowlist(fontViolations(await inspectFonts(pdfPath, geometry)));
+      allowed.push(...allowedFonts);
       const violations: Violation[] = [...layout, ...fonts];
 
       // Every finding is attributed and carries numbers.

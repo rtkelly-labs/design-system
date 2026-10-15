@@ -374,6 +374,7 @@ export const ALLOWLIST: readonly Allow[] = [
   { inv: 'escape', component: 'TickerTape', where: 'ticker-tape > div', reason: 'the marquee track is wider than its overflow:hidden window by design; it is what scrolls' },
   { inv: 'escape', component: 'ActivityGrid', where: 'activity-grid > span', reason: 'month labels hang over the next, empty, week column; no other text is there to collide with (overlap still checks)' },
   { inv: 'spill', component: 'ActivityGrid', where: 'activity-grid > span', reason: 'same month labels: spill into the empty neighbouring column is the layout' },
+  { inv: 'font', component: 'ColophonCard', reason: 'the section-mark watermark is set in the system serif stack on purpose (font-serif); which serif a machine has differs, so the font name is not a stable key' },
   { inv: 'spill', component: 'AnchorHeading', where: 'anchor-heading', reason: 'a heading box at tight leading: the descender of the last line sits 2px past the line box, painted and unclipped' },
 ];
 
