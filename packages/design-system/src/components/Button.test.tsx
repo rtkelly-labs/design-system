@@ -93,7 +93,11 @@ describe('Button', () => {
 
   // #252: a pending submit rendered exactly like a pressable one.
   it('carries a disabled treatment, and gates the press affordance on being enabled', () => {
-    render(<Button disabled>SAVE</Button>);
+    render(
+      <Button disabled variant="secondary">
+        SAVE
+      </Button>,
+    );
     const cls = screen.getByRole('button').className;
     expect(cls).toContain('disabled:bg-surface-sunken');
     expect(cls).toContain('disabled:text-content-muted');
@@ -229,5 +233,81 @@ describe('Button — pending', () => {
     const link = screen.getByRole('link');
     expect(link.hasAttribute('pending')).toBe(false);
     expect(link.hasAttribute('aria-disabled')).toBe(false);
+  });
+});
+
+/**
+ * Phase 1 decisions D1-D4. The classes are the contract here: the looks were
+ * chosen on a board as exact utility sets, and jsdom cannot measure pixels.
+ */
+describe('Button variants and sizes', () => {
+  const classesOf = () => screen.getByRole('button').className;
+
+  it('defaults to quiet: neutral outline, transparent fill, no shadow at rest (D1-A)', () => {
+    render(<Button>CANCEL</Button>);
+    const cls = classesOf();
+    expect(cls).toContain('border-edge-default');
+    expect(cls).toContain('bg-transparent');
+    expect(cls).toContain('text-content-primary');
+    expect(cls).toContain('hover:border-accent-primary');
+    expect(cls).toContain('hover:shadow-hard-md');
+    // The hover shadow is gated; the only shadow at rest would be an ungated one.
+    expect(cls.split(/\s+/)).not.toContain('shadow-hard-md');
+  });
+
+  it('draws secondary as an edge-strong outline with a hard shadow (D2-B)', () => {
+    render(<Button variant="secondary">SAVE DRAFT</Button>);
+    const tokens = classesOf().split(/\s+/);
+    expect(tokens).toContain('border-edge-strong');
+    expect(tokens).toContain('bg-transparent');
+    expect(tokens).toContain('shadow-hard-md');
+    expect(tokens).not.toContain('bg-accent-secondary');
+  });
+
+  it('draws danger as an outline that fills on hover and focus (D3-B)', () => {
+    render(<Button variant="danger">DELETE</Button>);
+    const cls = classesOf();
+    expect(cls).toContain('border-intent-danger');
+    expect(cls).toContain('text-intent-danger');
+    expect(cls).toContain('hover:bg-intent-danger');
+    expect(cls).toContain('hover:text-content-inverse');
+    expect(cls).toContain('focus-visible:bg-intent-danger');
+    expect(cls).toContain('focus-visible:text-content-inverse');
+  });
+
+  it('sizes xs at 28px, icon at 32px and icon-touch at 40px (D4)', () => {
+    const { rerender } = render(<Button size="xs">GO</Button>);
+    expect(classesOf()).toContain('h-7');
+    rerender(
+      <Button size="icon" aria-label="Close">
+        x
+      </Button>,
+    );
+    expect(classesOf()).toContain('h-8');
+    expect(classesOf()).toContain('w-8');
+    rerender(
+      <Button size="icon-touch" aria-label="Close">
+        x
+      </Button>,
+    );
+    expect(classesOf()).toContain('h-10');
+    expect(classesOf()).toContain('w-10');
+  });
+
+  it('requires an aria-label on the icon-only sizes, in the types', () => {
+    // @ts-expect-error an icon-only button has no text, so it needs a name.
+    render(<Button size="icon">x</Button>);
+    // @ts-expect-error likewise for the touch size.
+    render(<Button size="icon-touch">x</Button>);
+    expect(screen.getAllByRole('button')).toHaveLength(2);
+  });
+
+  it('gives an icon-only button its accessible name', () => {
+    render(
+      <Button size="icon" aria-label="Previous week">
+        &lt;
+      </Button>,
+    );
+    expect(screen.getByRole('button', { name: 'Previous week' })).toBeDefined();
   });
 });
