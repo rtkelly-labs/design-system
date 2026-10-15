@@ -521,6 +521,10 @@ export function mutateCell(arg: { kind: MutantKind; css: string; cell: string })
   };
 
   if (arg.kind === 'missing-font') {
+    // A cell whose only text is visually hidden (an sr-only label beside a glyph, as
+    // in Spinner) paints no font, so a font defect there is undetectable by design.
+    // Pick a cell with painted text instead.
+    if (!els.some((e) => ownText(e).length > 0)) return null;
     const s = document.createElement('style');
     s.id = '__mut_style';
     s.textContent = `[data-component="${cell.dataset.component}"][data-state="${cell.dataset.state}"][data-rung="${cell.dataset.rung}"] * { ${arg.css} }`;
