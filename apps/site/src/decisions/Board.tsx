@@ -5,6 +5,7 @@ import type { Decision, DecisionOption } from './data';
 import { DebugToggle } from './DebugToggle';
 import { Phase2 } from './p2/Phase2';
 import { Round3 } from './r3/Round3';
+import { Round4 } from './r4/Round4';
 import { Scenes } from './Scenes';
 import { Sheet } from './Sheet';
 import type { SheetMode } from './Sheet';
@@ -215,10 +216,9 @@ export function Board() {
         <h1 className="m-0 font-display text-4xl font-extrabold uppercase text-content-primary sm:text-5xl">Decision board</h1>
         <p className="m-0 max-w-3xl text-lg text-content-secondary">
           Pick one option per decision. Each is shown in context on both levels, next to a control row of what ships
-          today. Site-local styles only; delete this route once the choices are made. Phases 1 and 2 are decided and
-          collapsed (<a href="#phase-1" className="font-bold text-accent-primary">Phase 1</a>,{' '}
-          <a href="#phase-2" className="font-bold text-accent-primary">Phase 2</a>);{' '}
-          <a href="#round-3" className="font-bold text-accent-primary">Round 3</a> is open.
+          today. Site-local styles only; delete this route once the choices are made. Phases 1 and 2 and Round 3 are
+          decided and collapsed;{' '}
+          <a href="#round-4" className="font-bold text-accent-primary">Round 4: code renderer</a> is open.
         </p>
         <nav aria-label="Phase 1 decisions" className="border-2 border-edge-strong bg-surface-raised p-3 shadow-hard-md">
           <ul className="m-0 flex list-none flex-col gap-2 p-0 font-mono text-sm">
@@ -258,8 +258,29 @@ export function Board() {
           </details>
         ))}
       </section>
-      <Phase2 />
-      <Round3 />
+      <details className="border-2 border-edge-default">
+        <summary className="flex cursor-pointer flex-wrap items-baseline gap-x-3 gap-y-1 bg-surface-raised p-3 font-mono text-sm">
+          <span className="font-bold text-accent-primary">Phase 2</span>
+          <span className="text-content-primary">D6 to D10</span>
+          <span className="border-2 border-edge-default px-1.5 text-[11px] font-bold uppercase text-content-secondary">decided</span>
+        </summary>
+        <div className="p-3 sm:p-4">
+          <Phase2 />
+        </div>
+      </details>
+      <details className="border-2 border-edge-default">
+        <summary className="flex cursor-pointer flex-wrap items-baseline gap-x-3 gap-y-1 bg-surface-raised p-3 font-mono text-sm">
+          <span className="font-bold text-accent-primary">Round 3</span>
+          <span className="text-content-primary">D10 round 2, D11 labels in tables</span>
+          <span className="border-2 border-edge-default px-1.5 text-[11px] font-bold uppercase text-content-secondary">
+            decided: D11-C; D10 superseded by round 4
+          </span>
+        </summary>
+        <div className="p-3 sm:p-4">
+          <Round3 />
+        </div>
+      </details>
+      <Round4 />
     </div>
   );
 }
