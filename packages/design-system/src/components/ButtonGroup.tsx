@@ -15,7 +15,7 @@ export interface ButtonGroupContextValue {
 }
 
 /** Read by `Button`. Not part of the public vocabulary: a caller wraps, never reads. */
-export const ButtonGroupContext = createContext<ButtonGroupContextValue | null>(null);
+export const buttonGroupContext = createContext<ButtonGroupContextValue | null>(null);
 
 /**
  * The one use of `process.env.NODE_ENV` in the package, written as the bare
@@ -92,7 +92,7 @@ export const ButtonGroup = forwardRef<HTMLDivElement, ButtonGroupProps>(function
   const value = useMemo(() => ({ register }), [register]);
 
   return (
-    <ButtonGroupContext.Provider value={value}>
+    <buttonGroupContext.Provider value={value}>
       <div
         data-slot="button-group"
         ref={ref}
@@ -102,6 +102,6 @@ export const ButtonGroup = forwardRef<HTMLDivElement, ButtonGroupProps>(function
       >
         {children}
       </div>
-    </ButtonGroupContext.Provider>
+    </buttonGroupContext.Provider>
   );
 });

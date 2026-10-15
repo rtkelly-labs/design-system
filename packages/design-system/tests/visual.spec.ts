@@ -190,6 +190,12 @@ const CASES: readonly VisualCase[] = [
   // `InlineAction` in the table cells it was made for: the button form, a
   // disabled one, and the `href` form side by side.
   { id: 'components-actions-forms-inlineaction--in-table', snapshot: 'inlineaction-in-table.png' },
+  // The weight ladder (D1-D4): quiet, secondary, primary, inverse in one row.
+  // Baseline to be generated with `/update-snapshots` on the PR.
+  { id: 'components-actions-forms-button--variants', snapshot: 'button-variants.png' },
+  // D3: a quiet cancel beside a danger confirm — what a ButtonGroup asks for.
+  // Baseline to be generated with `/update-snapshots` on the PR.
+  { id: 'components-actions-forms-button-group--danger-beside-quiet', snapshot: 'buttongroup-danger-beside-quiet.png' },
   // The account flows (#252), every state a reader meets on the way through:
   // each flow at rest and after a failed submit, the reset flow's middle step,
   // and the settings page in `AppShell`. The a11y suite reads these ids, so

@@ -44,6 +44,7 @@ bracket-text	BracketText
 breadcrumbs	Breadcrumbs
 bullet-chart	BulletChart
 button	Button
+button-group	ButtonGroup
 button-status	Button
 card	Card
 change-bar	ChangeBar
