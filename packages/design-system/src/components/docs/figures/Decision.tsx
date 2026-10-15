@@ -37,6 +37,7 @@ export const Decision = React.forwardRef<HTMLDivElement, DecisionProps>(function
   ref,
 ) {
   const options = optionsProp ?? childItems(children, Option);
+  const picked = options.find((o) => o.picked);
   return (
     <div ref={ref} role="group" aria-label={question} {...rest} className={cn('border-[3px] border-intent-warning bg-surface-raised shadow-hard-md', className)}>
       <div className="border-b-2 border-intent-warning px-4 py-3">
@@ -44,8 +45,8 @@ export const Decision = React.forwardRef<HTMLDivElement, DecisionProps>(function
         {context && <p className="m-0 mt-1 font-mono text-xs text-content-muted">{context}</p>}
       </div>
       <div className="grid sm:grid-cols-2">
-        {options.map((o) => (
-          <div key={o.title} data-slot="decision-option" className={cn('flex flex-col gap-2 border-b border-edge-subtle px-4 py-3 sm:odd:border-r', o.picked && 'bg-surface-sunken')}>
+        {options.map((o, i) => (
+          <div key={`${o.title}-${i}`} data-slot="decision-option" className={cn('flex flex-col gap-2 border-b border-edge-subtle px-4 py-3 sm:odd:border-r', o.picked && 'bg-surface-sunken')}>
             <p className="m-0 flex items-baseline justify-between gap-2 font-display text-sm font-bold text-content-primary">
               <span>{o.title}</span>
               {o.picked && <span className="border-2 border-intent-success px-1 font-mono text-[0.6rem] uppercase text-intent-success">Recommended</span>}
@@ -55,6 +56,7 @@ export const Decision = React.forwardRef<HTMLDivElement, DecisionProps>(function
           </div>
         ))}
       </div>
+      <span className="sr-only">{options.length === 0 ? 'No options.' : `${options.length} option${options.length === 1 ? '' : 's'}${picked ? `, recommended: ${picked.title}` : ''}.`}</span>
       {recommendation && <div className="px-4 py-3 text-sm text-content-primary [&_p]:m-0">{recommendation}</div>}
     </div>
   );

@@ -10,4 +10,9 @@ describe('MetricStrip', () => {
     expect(screen.getByText('6').className).toContain('text-intent-success');
     expect(screen.getByText('brand drift')).toBeTruthy();
   });
+
+  it('announces an empty state', () => {
+    render(<MetricStrip items={[]} />);
+    expect(screen.getByText('No metrics.')).toBeTruthy();
+  });
 });

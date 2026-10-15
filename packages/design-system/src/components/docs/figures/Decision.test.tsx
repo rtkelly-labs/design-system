@@ -21,4 +21,9 @@ describe('Decision', () => {
     render(<Decision question="Q" options={[{ title: 'A' }, { title: 'B' }]} />);
     expect(screen.getByText('A')).toBeTruthy();
   });
+
+  it('announces an empty state', () => {
+    render(<Decision question="Which?" options={[]} />);
+    expect(screen.getByText('No options.')).toBeTruthy();
+  });
 });

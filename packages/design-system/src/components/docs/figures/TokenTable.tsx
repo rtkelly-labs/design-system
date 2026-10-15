@@ -43,7 +43,7 @@ export const TokenTable = React.forwardRef<HTMLDivElement, TokenTableProps>(func
   const hasBefore = rows.some((r) => r.before !== undefined);
   const hasNote = rows.some((r) => r.note);
   return (
-    <div ref={ref} {...rest} className={cn('min-w-0 overflow-x-auto border-2 border-edge-strong', className)}>
+    <div ref={ref} {...rest} className={cn('min-w-0 overflow-x-auto', className)}>
       <table aria-label={label} className="w-full min-w-[34rem] border-collapse text-sm">
         <thead>
           <tr>
@@ -55,17 +55,18 @@ export const TokenTable = React.forwardRef<HTMLDivElement, TokenTableProps>(func
           </tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
-            <tr key={r.token}>
+          {rows.map((r, ri) => (
+            <tr key={`${r.token}-${ri}`}>
               <th scope="row" className={cn(CELL, 'text-left font-mono text-xs font-bold text-content-primary')}>{r.token}</th>
               {hasBefore && <td className={CELL}><Chip value={r.before} /></td>}
               <td className={CELL}><Chip value={r.after} /></td>
-              {measures.map((m, i) => <td key={m} className={cn(CELL, 'font-mono text-xs tabular-nums text-content-secondary')}>{r.values?.[i] ?? '—'}</td>)}
+              {measures.map((m, i) => <td key={m} className={cn(CELL, 'font-mono text-xs tabular-nums text-content-secondary')}>{r.values?.[i] ?? <><span aria-hidden="true">—</span><span className="sr-only">not measured</span></>}</td>)}
               {hasNote && <td className={cn(CELL, 'text-content-secondary')}>{r.note}</td>}
             </tr>
           ))}
         </tbody>
       </table>
+      <span className="sr-only">{rows.length === 0 ? 'No tokens.' : `${rows.length} token${rows.length === 1 ? '' : 's'}.`}</span>
     </div>
   );
 });

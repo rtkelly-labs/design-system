@@ -29,7 +29,7 @@ export const Default: Story = {
   render: (args) => <FigureFrame title="PALETTE"><SwatchCompare {...args} /></FigureFrame>,
 };
 
-/** Verdicts say what happened to each column; a hatched cell means no value existed. */
+/** Verdicts say what happened to each column; a dashed cell means no value existed. */
 export const Verdicts: Story = {
   args: {
     label: 'Midnight palette, one hue new',

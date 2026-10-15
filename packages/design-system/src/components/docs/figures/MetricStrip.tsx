@@ -34,15 +34,16 @@ export const MetricStrip = React.forwardRef<HTMLDivElement, MetricStripProps>(fu
   ref,
 ) {
   return (
-    <div ref={ref} role="group" aria-label={label} {...rest} className={cn('border-2 border-edge-strong', className)}>
+    <div ref={ref} role="group" aria-label={label} {...rest} className={cn(className)}>
       <dl className="m-0 grid grid-cols-2 sm:grid-flow-col sm:auto-cols-fr sm:grid-cols-none">
-        {items.map((m) => (
-          <div key={m.label} className="flex min-w-0 flex-col-reverse gap-1 border-b border-r border-edge-subtle p-3 last:border-r-0">
+        {items.map((m, i) => (
+          <div key={`${m.label}-${i}`} className="flex min-w-0 flex-col-reverse gap-1 border-b border-edge-subtle p-3 odd:border-r sm:border-r last:border-r-0">
             <dt className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.1em] text-content-muted">{m.label}</dt>
             <dd className={cn('m-0 font-display text-xl font-extrabold tabular-nums', TONE[m.tone ?? 'neutral'])}>{m.value}</dd>
           </div>
         ))}
       </dl>
+      <span className="sr-only">{items.length === 0 ? 'No metrics.' : `${items.length} metric${items.length === 1 ? '' : 's'}.`}</span>
     </div>
   );
 });

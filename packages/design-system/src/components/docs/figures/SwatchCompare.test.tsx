@@ -7,7 +7,7 @@ const red = LEVELS.sketch.palette.red;
 const blue = LEVELS.sketch.palette.blue;
 
 describe('SwatchCompare', () => {
-  it('draws one swatch per value and a hatched cell where none exists', () => {
+  it('draws one swatch per value and a dashed cell where none exists', () => {
     render(
       <SwatchCompare
         label="Light palette"
@@ -30,5 +30,10 @@ describe('SwatchCompare', () => {
       <SwatchCompare level="sketch" columns={[{ name: 'red' }]} rows={[{ label: 'Now', values: [red] }]} />,
     );
     expect(container.querySelector('[data-theme="sketch"]')).toBeTruthy();
+  });
+
+  it('announces an empty state', () => {
+    render(<SwatchCompare columns={[]} rows={[]} />);
+    expect(screen.getByText('No colours.')).toBeTruthy();
   });
 });

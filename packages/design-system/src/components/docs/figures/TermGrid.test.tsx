@@ -14,4 +14,9 @@ describe('TermGrid', () => {
     expect(list.querySelectorAll('dt')).toHaveLength(2);
     expect(screen.getByText('0 = grey · 0.3 = neon')).toBeTruthy();
   });
+
+  it('announces an empty state', () => {
+    render(<TermGrid terms={[]} />);
+    expect(screen.getByText('No terms.')).toBeTruthy();
+  });
 });

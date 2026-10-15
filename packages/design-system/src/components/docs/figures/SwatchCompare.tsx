@@ -60,8 +60,8 @@ export const SwatchCompare = React.forwardRef<HTMLDivElement, SwatchCompareProps
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.label}>
+          {rows.map((row, ri) => (
+            <tr key={`${row.label}-${ri}`}>
               <th scope="row" className="pr-3 text-left font-bold uppercase tracking-[0.08em] text-content-muted">{row.label}</th>
               {columns.map((c, i) => {
                 const value = row.values[i] ?? null;
@@ -94,6 +94,7 @@ export const SwatchCompare = React.forwardRef<HTMLDivElement, SwatchCompareProps
           )}
         </tbody>
       </table>
+      <span className="sr-only">{rows.length === 0 || columns.length === 0 ? 'No colours.' : `${rows.length} row${rows.length === 1 ? '' : 's'} of ${columns.length} colour${columns.length === 1 ? '' : 's'}.`}</span>
     </div>
   );
 });

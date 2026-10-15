@@ -26,4 +26,9 @@ describe('TokenTable', () => {
     render(<TokenTable rows={[{ token: 'a', before: muted, after: muted }]} />);
     expect(screen.getByRole('columnheader', { name: 'Before' })).toBeTruthy();
   });
+
+  it('announces an empty state', () => {
+    render(<TokenTable rows={[]} />);
+    expect(screen.getByText('No tokens.')).toBeTruthy();
+  });
 });
