@@ -511,20 +511,12 @@ export default function InboxApp() {
 }
 
 function ListSkeleton({ density }: { density: TableDensity }) {
-  const h = density === 'compact' ? 'h-5' : 'h-6';
+  // D7-B / INB-04: the table-row preset, one hatched band per row at the density's height.
+  const h = density === 'compact' ? 'h-9' : 'h-12';
   return (
     <div role="status" aria-label="Loading issues" className="flex flex-col gap-0 border-2 border-edge-strong">
       {Array.from({ length: 12 }, (_, i) => (
-        <div
-          key={i}
-          className={`flex items-center gap-3 border-b border-edge-subtle px-3 ${density === 'compact' ? 'py-2' : 'py-3'}`}
-        >
-          <Skeleton className="h-4 w-4 shrink-0" />
-          <Skeleton className={`${h} w-8 shrink-0`} />
-          <Skeleton className={`${h} hidden w-16 shrink-0 md:block`} />
-          <Skeleton className={`${h} flex-1`} />
-          <Skeleton className={`${h} w-24 shrink-0`} />
-        </div>
+        <Skeleton key={i} shape="row" className={`${h} border-x-0 border-t-0 last:border-b-0`} />
       ))}
     </div>
   );
