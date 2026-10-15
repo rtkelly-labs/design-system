@@ -122,7 +122,8 @@ const CASES = [
   {
     name: 'tokens',
     imports: ['LEVELS', 'isThemeLevel'],
-    maxBytes: 2_200,
+    // D6/D8: tint and selection groups (and their strengths) join LEVELS (2,590 B).
+    maxBytes: 2_700,
     forbid: [...HEAVY, 'tailwind-variants', 'lucide-react'],
   },
   {
@@ -167,7 +168,8 @@ const CASES = [
     // Pagination current-page chip fix. Both are intended.
     // +14 B: NoteBlock intent mapping and no-break bracket spaces.
     // +1,516 B: the Button weight ladder above.
-    maxBytes: 65_400,
+    // +96 B: LEVELS gains the tint and selection groups.
+    maxBytes: 65_800,
     forbid: HEAVY,
   },
 ];

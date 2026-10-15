@@ -36,8 +36,10 @@ const BUDGETS = {
     // #339 adds shipped symbol faces to all four role stacks and explains
     // their fallback order: 27,295 B raw, 5,127 B gzip on Node 22 in CI.
     // Local zlib emits 5,138 B. Keep the existing ~2% headroom for tooling.
-    maxRaw: 27_850,
-    maxGzip: 5_250,
+    // D6/D8: per-level opaque role tints and the multi-select selection device:
+    // 29,788 B raw, 5,440 B gzip locally. ~2% headroom kept.
+    maxRaw: 30_400,
+    maxGzip: 5_560,
     desc: 'Design token CSS',
   },
 };
