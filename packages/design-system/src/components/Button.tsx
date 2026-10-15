@@ -11,7 +11,7 @@ import type {
 } from 'react';
 import { recipe } from '../lib/recipe';
 import { Spinner } from './Spinner';
-import { ButtonGroupContext } from './ButtonGroup';
+import { buttonGroupContext } from './ButtonGroup';
 import { BUTTON_COLOUR_ROLE } from './buttonHues';
 
 interface ButtonBaseProps {
@@ -338,7 +338,7 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
 
   // Tells an enclosing ButtonGroup what colour this button paints with, so it
   // can apply D3's rule. A no-op outside a group; the group does the dev-only check.
-  const group = useContext(ButtonGroupContext);
+  const group = useContext(buttonGroupContext);
   const id = useId();
   useEffect(() => {
     if (!group) return;
