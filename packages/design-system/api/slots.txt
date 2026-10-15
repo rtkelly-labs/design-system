@@ -1,3 +1,4 @@
+a11y-menu	A11yMenu
 activity-grid	ActivityGrid
 anchor-heading	AnchorHeading
 app-main	AppMain
@@ -118,6 +119,7 @@ indexed-section-body	IndexedSection
 indexed-section-header	IndexedSection
 indexed-section-index	IndexedSection
 indexed-section-title	IndexedSection
+intent-glyph	(shared)
 metadata-grid	MetadataGrid
 metadata-grid-cell	MetadataGrid
 metadata-grid-label	MetadataGrid
@@ -161,6 +163,9 @@ segmented-control-item	SegmentedControlItem
 select-icon	Select
 select-trigger	Select
 select-value	Select
+series-glyph	(shared)
+series-legend	SeriesLegend
+series-mark	SeriesMark
 site-footer	SiteFooter
 site-footer-body	SiteFooter
 site-footer-lead	SiteFooter

@@ -122,7 +122,7 @@ alias is still the wrong shape.
 ## 4. Contrast is arithmetic, and it is a gate
 
 Colour is the one axis with a machine-checkable definition of correct, so it is checked.
-`pnpm check:contrast` audits **294 pairs — 147 per theme** on every build and fails CI, plus 34 selection devices and 16 Role→Hue agreement checks. The per-theme figure is the one to reason from: it is what a third theme would add.
+`pnpm check:contrast` audits **294 pairs — 147 per theme** on every build and fails CI, plus 34 selection devices and 28 Role→Hue agreement checks (the 16 Roles, and the 12 series members each against the Hue it declares). The per-theme figure is the one to reason from: it is what a third theme would add.
 
 | | Floor | Why |
 |---|---|---|

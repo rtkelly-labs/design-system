@@ -232,7 +232,7 @@ would have found.
 
 ```
 Contrast OK — 294 pairs across 2 levels, all at or above minimum;
-34 selection devices clear 3:1; 16 Roles agree with their declared Hue.
+34 selection devices clear 3:1; 28 Roles agree with their declared Hue.
 ```
 
 axe disagrees, on a colour that is in no palette:

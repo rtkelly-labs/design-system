@@ -8,6 +8,8 @@
  * one overlap test serves both kinds.
  */
 
+import type { SeriesIndex } from '@rtkelly13/design-system';
+
 export type CalendarId = 'work' | 'team' | 'personal' | 'health' | 'holiday';
 /** Colour roles a calendar may wear. Roles only, never hue names. */
 export type CalendarRole = 'primary' | 'secondary' | 'tertiary' | 'success' | 'quiet';
@@ -18,14 +20,20 @@ export interface CalendarDef {
   /** One letter that repeats the colour, so colour is never the only cue. */
   code: string;
   role: CalendarRole;
+  /**
+   * Its member of the categorical series group (D9). Under the `patterns`
+   * preference the calendar's mark gains that series' shape, with `code` as
+   * its letter, wherever the calendar appears: the legend and every event.
+   */
+  series: SeriesIndex;
 }
 
 export const CALENDARS: CalendarDef[] = [
-  { id: 'work', label: 'WORK', code: 'W', role: 'primary' },
-  { id: 'team', label: 'TEAM', code: 'T', role: 'secondary' },
-  { id: 'personal', label: 'PERSONAL', code: 'P', role: 'tertiary' },
-  { id: 'health', label: 'HEALTH', code: 'H', role: 'success' },
-  { id: 'holiday', label: 'HOLIDAYS', code: 'D', role: 'quiet' },
+  { id: 'work', label: 'WORK', code: 'W', role: 'primary', series: 1 },
+  { id: 'team', label: 'TEAM', code: 'T', role: 'secondary', series: 2 },
+  { id: 'personal', label: 'PERSONAL', code: 'P', role: 'tertiary', series: 3 },
+  { id: 'health', label: 'HEALTH', code: 'H', role: 'success', series: 4 },
+  { id: 'holiday', label: 'HOLIDAYS', code: 'D', role: 'quiet', series: 5 },
 ];
 
 export interface CalEvent {

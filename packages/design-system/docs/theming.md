@@ -197,4 +197,35 @@ and its ink but sits on `surface.raised` with no fill:
 `<Card accent="info" emphasis="tentative">`. `'tint'` is the default for
 everything else. The edge says which role; the missing fill says "not yet".
 
+## ♿ Preferences and the series group (D9)
+
+A **Preference** is a choice the reader makes at runtime, applied as a
+`data-a11y-*` attribute on the document and set only when active (ADR 0007). It
+is a delta over whatever Level is on, not a Level: nothing here is a third
+palette. Four axes, each `system`, `on` or `off`:
+
+| Attribute | OS default | What it does |
+|---|---|---|
+| `data-a11y-motion="reduce"` or `"full"` | `prefers-reduced-motion` | zeroes the `--ds-duration-*` tokens; `full` restores them when the OS asks to reduce |
+| `data-a11y-contrast="more"` | `prefers-contrast: more` | borders step up a rung, `text.muted` becomes `text.secondary`, tints become the ground |
+| `data-a11y-cvd="patterns"` | none | reveals a shape and a letter on series marks, and an icon on `Badge` intents |
+| `data-a11y-links="underline"` | none | `Prose` links and `SiteLink` always underline |
+
+Put `getA11yInitScript()` in the document head beside `getThemeInitScript()`, wrap
+the app in `A11yPreferencesProvider`, and mount `A11yMenu` where the level picker
+is. The `contrast: more` values are not authored: `applyContrastDelta` derives
+them from the Level, the generator emits them as literals, and `check:contrast`
+holds the result to the same floors. A role mixed in at the selection strength
+would be the stronger tint, and fails: it is under 4.5:1 as text on its own
+fill, so the tint becomes the ground and the 4px role edge carries the role.
+
+The **series** group is six colours told apart rather than ranked, for
+categorical charts and calendars: `--ds-series-1` to `--ds-series-6`, utilities
+`bg-series-1` and friends. Each is a declared Hue (`seriesHue`), so it is the
+palette's value, and `check:contrast` gates their separation under normal
+vision. Under simulated colour-vision deficiency some pairs are close, which is
+what `SeriesMark`'s shape and letter are for. They are redundancy: every use of
+the group carries a text label by default (a legend, or a direct label), because
+WCAG 1.4.1 cannot rest on a preference the reader has to find first.
+
 

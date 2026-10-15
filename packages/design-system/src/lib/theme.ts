@@ -92,6 +92,18 @@ export type HueRef = Hue | 'neutral';
 /** Anything a component's `accent`-style prop will take. */
 export type AccentToken = Emphasis | Intent;
 
+/**
+ * A member of the categorical series group (D9-A), 1 to 6. A series is told
+ * apart from the others rather than ranked against them, so it is addressed by
+ * ordinal and not by emphasis or by hue.
+ */
+export type SeriesIndex = 1 | 2 | 3 | 4 | 5 | 6;
+
+/** The CSS variable expression for a series member's colour. */
+export function seriesVar(series: SeriesIndex): string {
+  return `var(--ds-series-${series})`;
+}
+
 const EMPHASIS_VARS: Record<Emphasis, string> = {
   primary: 'var(--ds-accent-primary)',
   secondary: 'var(--ds-accent-secondary)',

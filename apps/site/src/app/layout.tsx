@@ -1,6 +1,7 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import { A11yInitScript } from '@/components/chrome/A11yInitScript';
 import { Providers } from '@/components/chrome/Providers';
 import { ThemeInitScript } from '@/components/chrome/ThemeInitScript';
 import { searchIndex } from '@/content/registry';
@@ -23,13 +24,15 @@ export const viewport: Viewport = {
  *
  * `data-theme="midnight"` is the no-JavaScript default; the init script
  * replaces it before first paint, which is why React is told not to warn when
- * the attribute it hydrates differs from the one it rendered.
+ * the attribute it hydrates differs from the one it rendered. The accessibility
+ * script does the same for `data-a11y-*`, which the server never renders.
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" data-theme="midnight" suppressHydrationWarning>
       <head>
         <ThemeInitScript />
+        <A11yInitScript />
       </head>
       <body className="bg-surface-base text-content-primary">
         <Providers search={searchIndex()}>{children}</Providers>

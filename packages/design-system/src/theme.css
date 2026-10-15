@@ -111,6 +111,12 @@
   --color-palette-bright-violet: var(--ds-palette-bright-violet);
   --color-palette-bright-magenta: var(--ds-palette-bright-magenta);
   --color-palette-bright-pink: var(--ds-palette-bright-pink);
+  --color-series-1: var(--ds-series-1);
+  --color-series-2: var(--ds-series-2);
+  --color-series-3: var(--ds-series-3);
+  --color-series-4: var(--ds-series-4);
+  --color-series-5: var(--ds-series-5);
+  --color-series-6: var(--ds-series-6);
   --shadow-hard-sm: var(--ds-elev-sm) var(--ds-shadow-color);
   --shadow-hard-md: var(--ds-elev-md) var(--ds-shadow-color);
   --shadow-hard-lg: var(--ds-elev-lg) var(--ds-shadow-color);
@@ -266,10 +272,30 @@
   --ds-loop-unit: 300ms;
 }
 
+/* D9: the OS asks for reduced motion, unless the user chose "full"; or the user
+ * chose "reduce" with the OS silent. `data-a11y-motion` is set by the init
+ * script, and only when a stored choice exists. */
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  :root:not([data-a11y-motion="full"]) {
     --ds-duration-quick: 0ms;
     --ds-duration-considered: 0ms;
+  }
+}
+
+:root[data-a11y-motion="reduce"] {
+  --ds-duration-quick: 0ms;
+  --ds-duration-considered: 0ms;
+}
+
+/* `motion-reduce:` answers the same question, so it follows the attribute too. */
+@custom-variant motion-reduce {
+  @media (prefers-reduced-motion: reduce) {
+    &:where(:root:not([data-a11y-motion="full"]) *) {
+      @slot;
+    }
+  }
+  &:where(:root[data-a11y-motion="reduce"] *) {
+    @slot;
   }
 }
 
@@ -366,6 +392,12 @@
   --ds-tint-intent-warning: #302c28;
   --ds-tint-intent-danger: #331a33;
   --ds-selection-multi: #236b82;
+  --ds-series-1: #ff586e;
+  --ds-series-2: #facc15;
+  --ds-series-3: #34d399;
+  --ds-series-4: #38bdf8;
+  --ds-series-5: #c3afff;
+  --ds-series-6: #ff1cff;
   --ds-palette-red: #ff586e;
   --ds-palette-orange: #ff8c00;
   --ds-palette-yellow: #facc15;
@@ -437,6 +469,12 @@
   --color-palette-bright-violet: var(--ds-palette-bright-violet);
   --color-palette-bright-magenta: var(--ds-palette-bright-magenta);
   --color-palette-bright-pink: var(--ds-palette-bright-pink);
+  --color-series-1: var(--ds-series-1);
+  --color-series-2: var(--ds-series-2);
+  --color-series-3: var(--ds-series-3);
+  --color-series-4: var(--ds-series-4);
+  --color-series-5: var(--ds-series-5);
+  --color-series-6: var(--ds-series-6);
   --shadow-hard-sm: var(--ds-elev-sm) var(--ds-shadow-color);
   --shadow-hard-md: var(--ds-elev-md) var(--ds-shadow-color);
   --shadow-hard-lg: var(--ds-elev-lg) var(--ds-shadow-color);
@@ -493,6 +531,12 @@
   --ds-tint-intent-warning: #ebded1;
   --ds-tint-intent-danger: #f3dbd2;
   --ds-selection-multi: #5f8be3;
+  --ds-series-1: #bd0010;
+  --ds-series-2: #705a00;
+  --ds-series-3: #006859;
+  --ds-series-4: #1450d7;
+  --ds-series-5: #7d00f4;
+  --ds-series-6: #a300ad;
   --ds-palette-red: #bd0010;
   --ds-palette-orange: #974503;
   --ds-palette-yellow: #705a00;
@@ -564,6 +608,12 @@
   --color-palette-bright-violet: var(--ds-palette-bright-violet);
   --color-palette-bright-magenta: var(--ds-palette-bright-magenta);
   --color-palette-bright-pink: var(--ds-palette-bright-pink);
+  --color-series-1: var(--ds-series-1);
+  --color-series-2: var(--ds-series-2);
+  --color-series-3: var(--ds-series-3);
+  --color-series-4: var(--ds-series-4);
+  --color-series-5: var(--ds-series-5);
+  --color-series-6: var(--ds-series-6);
   --shadow-hard-sm: var(--ds-elev-sm) var(--ds-shadow-color);
   --shadow-hard-md: var(--ds-elev-md) var(--ds-shadow-color);
   --shadow-hard-lg: var(--ds-elev-lg) var(--ds-shadow-color);
@@ -585,6 +635,42 @@
   --shadow-glow-intent-danger: 0 0 10px color-mix(in oklab, var(--ds-intent-danger) 50%, transparent), 0 0 20px color-mix(in oklab, var(--ds-intent-danger) 30%, transparent);
   --shadow-glow-accent: 0 0 10px color-mix(in oklab, var(--ds-accent-primary) 50%, transparent), 0 0 20px color-mix(in oklab, var(--ds-accent-primary) 30%, transparent);
 
+}
+
+/* ==========================================================================
+   The Preference axis — a delta over the active Level (ADR 0007)
+   ========================================================================== */
+
+/* contrast: more. Literals from applyContrastDelta, per level. */
+:root[data-a11y-contrast="more"],
+[data-a11y-contrast="more"][data-theme="midnight"],
+[data-a11y-contrast="more"] [data-theme="midnight"] {
+  --ds-text-muted: #c3c3d4;
+  --ds-border-default: #ffffff;
+  --ds-border-subtle: #9d9db4;
+  --ds-tint-accent-primary: #0a0a1a;
+  --ds-tint-accent-secondary: #0a0a1a;
+  --ds-tint-accent-tertiary: #0a0a1a;
+  --ds-tint-accent-quiet: #0a0a1a;
+  --ds-tint-intent-info: #0a0a1a;
+  --ds-tint-intent-success: #0a0a1a;
+  --ds-tint-intent-warning: #0a0a1a;
+  --ds-tint-intent-danger: #0a0a1a;
+}
+
+[data-a11y-contrast="more"][data-theme="sketch"],
+[data-a11y-contrast="more"] [data-theme="sketch"] {
+  --ds-text-muted: #33373f;
+  --ds-border-default: #23262e;
+  --ds-border-subtle: #8f8672;
+  --ds-tint-accent-primary: #f5f3ec;
+  --ds-tint-accent-secondary: #f5f3ec;
+  --ds-tint-accent-tertiary: #f5f3ec;
+  --ds-tint-accent-quiet: #f5f3ec;
+  --ds-tint-intent-info: #f5f3ec;
+  --ds-tint-intent-success: #f5f3ec;
+  --ds-tint-intent-warning: #f5f3ec;
+  --ds-tint-intent-danger: #f5f3ec;
 }
 
 /* Print — always Sketch, whatever level is active on screen. */
@@ -621,6 +707,12 @@
   --ds-tint-intent-warning: #ebded1;
   --ds-tint-intent-danger: #f3dbd2;
   --ds-selection-multi: #5f8be3;
+  --ds-series-1: #bd0010;
+  --ds-series-2: #705a00;
+  --ds-series-3: #006859;
+  --ds-series-4: #1450d7;
+  --ds-series-5: #7d00f4;
+  --ds-series-6: #a300ad;
   --ds-palette-red: #bd0010;
   --ds-palette-orange: #974503;
   --ds-palette-yellow: #705a00;
@@ -644,6 +736,39 @@
   --ds-shadow-color: #23262e;
   --ds-polarity: light;
   }
+}
+
+@media print {
+  :root[data-a11y-contrast="more"],
+  [data-a11y-contrast="more"][data-theme],
+  [data-a11y-contrast="more"] [data-theme] {
+    --ds-text-muted: #33373f;
+    --ds-border-default: #23262e;
+    --ds-border-subtle: #8f8672;
+    --ds-tint-accent-primary: #f5f3ec;
+    --ds-tint-accent-secondary: #f5f3ec;
+    --ds-tint-accent-tertiary: #f5f3ec;
+    --ds-tint-accent-quiet: #f5f3ec;
+    --ds-tint-intent-info: #f5f3ec;
+    --ds-tint-intent-success: #f5f3ec;
+    --ds-tint-intent-warning: #f5f3ec;
+    --ds-tint-intent-danger: #f5f3ec;
+  }
+}
+
+/* cvd: patterns. A series glyph is in the markup and hidden until an ancestor asks (the document, or a preview). */
+[data-slot="series-glyph"], [data-slot="intent-glyph"] {
+  display: none;
+}
+
+[data-a11y-cvd="patterns"] [data-slot="series-glyph"],
+[data-a11y-cvd="patterns"] [data-slot="intent-glyph"] {
+  display: inline;
+}
+
+/* links: underline. Unlayered, so it beats a layered `no-underline`. */
+:root[data-a11y-links="underline"] :is(.prose a:not(:where(.not-prose, .not-prose *)), a[data-slot="site-link"]) {
+  text-decoration-line: underline;
 }
 
 /* Native form controls, scrollbars and the caret follow `color-scheme`, which
