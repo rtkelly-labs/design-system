@@ -193,6 +193,10 @@ const CASES: readonly VisualCase[] = [
   // D3: a quiet cancel beside a danger confirm — what a ButtonGroup asks for.
   // Baseline to be generated with `/update-snapshots` on the PR.
   { id: 'components-actions-forms-button-group--danger-beside-quiet', snapshot: 'buttongroup-danger-beside-quiet.png' },
+  // SegmentedControl (row 9): both sizes. Selection is a neutral placeholder
+  // (D6 pending). Baselines to be generated with `/update-snapshots`.
+  { id: 'components-actions-forms-segmented-control--default', snapshot: 'segmentedcontrol-default.png' },
+  { id: 'components-actions-forms-segmented-control--small', snapshot: 'segmentedcontrol-small.png' },
   // The account flows (#252), every state a reader meets on the way through:
   // each flow at rest and after a failed submit, the reset flow's middle step,
   // and the settings page in `AppShell`. The a11y suite reads these ids, so

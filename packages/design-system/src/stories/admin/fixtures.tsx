@@ -156,6 +156,13 @@ function FinanceOverview() {
 export interface FinanceConsoleProps {
   /** Called when `TRIGGER SYNC` is pressed. */
   onSync?: () => void;
+  /** Pass `div` when the host page owns the `<main>` landmark. See `AppShell`. */
+  mainAs?: 'main' | 'div';
+}
+
+export interface ContentStudioProps {
+  /** Pass `div` when the host page owns the `<main>` landmark. See `AppShell`. */
+  mainAs?: 'main' | 'div';
 }
 
 /**
@@ -163,11 +170,12 @@ export interface FinanceConsoleProps {
  * backups. The dashboard view carries content; every other entry is a view
  * the fixture has not built, and says so.
  */
-export function FinanceConsole({ onSync }: FinanceConsoleProps) {
+export function FinanceConsole({ onSync, mainAs }: FinanceConsoleProps) {
   const [activeId, setActiveId] = useState('dashboard');
   const current = FINANCE_NAV.find((item) => item.id === activeId);
   return (
     <AppShell
+      mainAs={mainAs}
       sidebar={
         <AppSidebar
           label="Admin console"
@@ -294,11 +302,12 @@ function StudioPosts() {
  * shape (a group with children), a menu for the account, a site switcher in
  * the topbar's leading slot, two actions instead of one.
  */
-export function ContentStudio() {
+export function ContentStudio({ mainAs }: ContentStudioProps = {}) {
   const [activeId, setActiveId] = useState('posts');
   const current = STUDIO_NAV.flatMap((item) => [item, ...(item.items ?? [])]).find((item) => item.id === activeId);
   return (
     <AppShell
+      mainAs={mainAs}
       sidebar={
         <AppSidebar
           label="Content studio"
