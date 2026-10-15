@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, forwardRef, useCallback, useContext, useId, useMemo, useState } from 'react';
+import { createContext, forwardRef, useCallback, useContext, useId, useMemo, useRef, useState } from 'react';
 import type {
   ButtonHTMLAttributes,
   CSSProperties,
@@ -40,6 +40,13 @@ export type TabsOrientation = 'horizontal' | 'vertical';
  * the colour, because the accent is a separate axis.
  */
 export type TabsVariant = 'merged' | 'underline' | 'segmented';
+
+/**
+ * How tab labels are cased. `uppercase` is the house look; `none` preserves
+ * the label as written, which a filename needs: `README.md` and `readme.md`
+ * are different files.
+ */
+export type TabsTransform = 'uppercase' | 'none';
 
 const tabs_ = recipe({
   slots: {
@@ -94,6 +101,12 @@ const tabs_ = recipe({
     selected: {
       true: {},
       false: {},
+    },
+    // Case. `uppercase` is the house look and adds nothing; `none` hands the
+    // label back as written, for a filename or any case-sensitive identifier.
+    transform: {
+      uppercase: {},
+      none: { tab: 'normal-case tracking-normal' },
     },
   },
   compoundVariants: [
@@ -169,6 +182,7 @@ const tabs_ = recipe({
     variant: 'merged',
     orientation: 'horizontal',
     selected: false,
+    transform: 'uppercase',
   },
 });
 
@@ -177,6 +191,7 @@ interface TabsContextValue {
   select: (value: string) => void;
   orientation: TabsOrientation;
   variant: TabsVariant;
+  transform: TabsTransform;
   tabId: (value: string) => string;
   panelId: (value: string) => string;
 }
@@ -233,6 +248,13 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChang
   /** The strip's shape. See {@link TabsVariant}. */
   variant?: TabsVariant;
   /**
+   * Label casing for every tab in the set. `uppercase` by default; `none`
+   * keeps the case the label was written in, for filenames, branch names and
+   * any identifier where case carries meaning. All-caps is also harder to read
+   * in long labels, which is the other reason to turn it off.
+   */
+  transform?: TabsTransform;
+  /**
    * Semantic accent for the selected tab, as an `Emphasis` or an `Intent`.
    * Selection is marked by a fill or a 4px edge in this colour, never by
    * swapping one surface for another — the surfaces are a few percent of
@@ -283,6 +305,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
     onValueChange,
     orientation = 'horizontal',
     variant = 'merged',
+    transform = 'uppercase',
     accent = 'primary',
     children,
     className,
@@ -312,10 +335,11 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
       select,
       orientation,
       variant,
+      transform,
       tabId: (v) => `${uid}-tab-${idPart(v)}`,
       panelId: (v) => `${uid}-panel-${idPart(v)}`,
     }),
-    [selected, select, orientation, variant, uid],
+    [selected, select, orientation, variant, transform, uid],
   );
 
   const styles = tabs_({ variant, orientation });
@@ -474,8 +498,54 @@ export interface TabsTabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
   value: string;
   /** The tab's label. Short — the strip scrolls rather than wraps. */
   children: ReactNode;
+  /**
+   * Makes the tab closable, and is called when it is closed: by the `Delete`
+   * key on the focused tab, or a click on the close control beside it.
+   *
+   * The package owns the focus move and the caller owns the removal. When the
+   * tab is closed from the keyboard, or by clicking the selected tab's close
+   * control, selection and focus move to the next tab (the previous one, for
+   * the last tab), as the ARIA practices' deletable-tabs pattern asks; the
+   * caller's `onValueChange` hears it. Removing the tab from the strip is the
+   * caller's job, because only the caller knows whether to confirm an unsaved
+   * one first.
+   *
+   * The close control is a sibling of the tab, never a child of it: a button
+   * inside a `role="tab"` button is an interactive child of an element whose
+   * children are presentational. It is a pointer affordance only — hidden from
+   * the accessibility tree and out of the tab order — because the keyboard and
+   * assistive-technology route is `Delete`, announced through
+   * `aria-keyshortcuts`. A screen reader user never meets a second stop per tab.
+   */
+  onClose?: () => void;
+  /**
+   * The tab holds unsaved changes. Draws a dot before the label and adds
+   * "unsaved changes" to the accessible name, so the state is not a colour
+   * alone. Independent of `onClose`: confirming a discard is the caller's.
+   */
+  dirty?: boolean;
+  /**
+   * The close control's accessible name, for a caller that needs another
+   * language or a clearer phrase. Defaults to `Close <label>` for a string
+   * label and `Close tab` otherwise.
+   */
+  closeLabel?: string;
   /** Merged onto the tab. */
   className?: string;
+}
+
+/**
+ * Moves focus (and selection, which follows it) off a tab that is going away:
+ * to the next tab, or the previous one when it is the last. Disabled tabs are
+ * skipped, as arrow traversal skips them.
+ */
+function neighbourOf(current: HTMLButtonElement): HTMLButtonElement | null {
+  const tablist = current.closest('[role="tablist"]');
+  if (!tablist) return null;
+  const list = Array.from(tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]:not(:disabled)'));
+  const index = list.indexOf(current);
+  if (index === -1) return null;
+  return list[index + 1] ?? list[index - 1] ?? null;
 }
 
 /**
@@ -486,9 +556,12 @@ export interface TabsTabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
  * selected tab is marked by the accent fill or edge its variant declares, and
  * never by a surface swap: `pnpm check:contrast` asserts both devices clear 3:1
  * on every rung of the ladder and reports the surface pair that does not.
+ *
+ * With `onClose` the tab can be closed, and with `dirty` it flags unsaved
+ * changes: the editor's open-files strip, in two props.
  */
 export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function TabsTab(
-  { value, children, className, onClick, onKeyDown, ...props },
+  { value, children, className, onClick, onKeyDown, onClose, dirty = false, closeLabel, ...props },
   ref,
 ) {
   const context = useTabsContext('TabsTab');
@@ -497,11 +570,35 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
     variant: context.variant,
     orientation: context.orientation,
     selected,
+    transform: context.transform,
   });
+  const tabRef = useRef<HTMLButtonElement | null>(null);
+  const setRef = useCallback(
+    (node: HTMLButtonElement | null) => {
+      tabRef.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
 
-  return (
+  // Which tab inherits focus is decided before the caller removes this one,
+  // while both are still in the DOM. A controlled caller's `onValueChange`
+  // then runs after its own `onClose` and wins.
+  const close = (moveFocus: boolean) => {
+    const current = tabRef.current;
+    const next = moveFocus && current ? neighbourOf(current) : null;
+    onClose?.();
+    const nextValue = next?.dataset.value;
+    if (next && nextValue !== undefined) {
+      context.select(nextValue);
+      next.focus();
+    }
+  };
+
+  const tab = (
     <button
-      ref={ref}
+      ref={setRef}
       {...props}
       type="button"
       role="tab"
@@ -511,8 +608,10 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
       // rather than a registry: the tabs a reader can arrow between are exactly
       // the ones rendered, with no bookkeeping to fall out of step.
       data-value={value}
+      data-dirty={dirty ? '' : undefined}
       aria-selected={selected}
       aria-controls={context.panelId(value)}
+      aria-keyshortcuts={onClose ? 'Delete' : undefined}
       tabIndex={selected ? 0 : -1}
       onClick={(event) => {
         onClick?.(event);
@@ -521,12 +620,48 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (event.defaultPrevented) return;
+        if (event.key === 'Delete' && onClose) {
+          event.preventDefault();
+          close(true);
+          return;
+        }
         moveBetweenTabs(event, context.orientation, context.select);
       }}
-      className={cn(styles.tab(), className)}
+      className={cn(styles.tab(), onClose && 'pr-8', className)}
     >
+      {dirty ? (
+        <span aria-hidden="true" data-slot="tabs-tab-dirty" className="mr-2 text-intent-warning">
+          ●
+        </span>
+      ) : null}
       {children}
+      {dirty ? <span className="sr-only">, unsaved changes</span> : null}
     </button>
+  );
+
+  if (!onClose) return tab;
+
+  const label = closeLabel ?? (typeof children === 'string' ? `Close ${children}` : 'Close tab');
+  return (
+    // `role="presentation"` so the frame is not a generic child the tablist
+    // must account for; the tab inside it is still the tablist's `tab`.
+    <span role="presentation" data-slot="tabs-tab-frame" className="relative flex shrink-0 items-end">
+      {tab}
+      <button
+        type="button"
+        data-slot="tabs-tab-close"
+        aria-label={label}
+        aria-hidden="true"
+        tabIndex={-1}
+        // Not focusable and not announced: see `onClose`. A click that does
+        // not take focus also leaves the roving focus where it was.
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => close(selected)}
+        className="absolute right-1.5 top-1/2 -mt-0.5 flex size-5 -translate-y-1/2 items-center justify-center font-mono text-sm leading-none text-content-muted hover:bg-surface-raised hover:text-content-primary"
+      >
+        &times;
+      </button>
+    </span>
   );
 });
 

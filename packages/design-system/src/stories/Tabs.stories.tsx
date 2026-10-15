@@ -139,3 +139,67 @@ export const Controlled: Story = {
     );
   },
 };
+
+/**
+ * Labels as written, for filenames and other identifiers where case means
+ * something: `transform="none"` turns off the house all-caps for the whole set.
+ */
+export const CasePreserved: Story = {
+  args: { defaultValue: 'readme', variant: 'underline', transform: 'none' },
+  render: (args) => (
+    <Tabs {...args}>
+      <TabsList label="Project files">
+        <TabsTab value="readme">README.md</TabsTab>
+        <TabsTab value="config">tsconfig.json</TabsTab>
+        <TabsTab value="app">App.tsx</TabsTab>
+      </TabsList>
+      <TabsPanel value="readme" className={panel}>
+        The first file anyone opens.
+      </TabsPanel>
+      <TabsPanel value="config" className={panel}>
+        Compiler options, and the paths they resolve.
+      </TabsPanel>
+      <TabsPanel value="app" className={panel}>
+        The root component.
+      </TabsPanel>
+    </Tabs>
+  ),
+};
+
+/**
+ * An editor's open files: `onClose` makes a tab closable and `dirty` flags
+ * unsaved changes. The close control is a pointer affordance beside the tab,
+ * not inside it; from the keyboard, `Delete` on a focused tab closes it and
+ * focus moves to the next. Try it: focus a tab and press `Delete`.
+ */
+export const ClosableAndDirty: Story = {
+  render: function ClosableTabs() {
+    const [files, setFiles] = useState([
+      { id: 'paginate.ts', dirty: true },
+      { id: 'math.ts', dirty: false },
+      { id: 'README.md', dirty: false },
+    ]);
+    const [active, setActive] = useState('paginate.ts');
+    return (
+      <Tabs value={active} onValueChange={setActive} variant="underline" transform="none">
+        <TabsList label="Open editors">
+          {files.map((f) => (
+            <TabsTab
+              key={f.id}
+              value={f.id}
+              dirty={f.dirty}
+              onClose={() => setFiles((all) => all.filter((x) => x.id !== f.id))}
+            >
+              {f.id}
+            </TabsTab>
+          ))}
+        </TabsList>
+        {files.map((f) => (
+          <TabsPanel key={f.id} value={f.id} className={panel}>
+            Contents of {f.id}.
+          </TabsPanel>
+        ))}
+      </Tabs>
+    );
+  },
+};
