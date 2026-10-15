@@ -208,6 +208,14 @@ function levelDocument(level) {
       accent: Object.fromEntries(Object.entries(def.tint.accent).map(([key, value]) => [key, colour(value)])),
       intent: Object.fromEntries(Object.entries(def.tint.intent).map(([key, value]) => [key, colour(value)])),
     },
+    selection: {
+      $type: 'color',
+      $description:
+        `Selected-row fill for multi-select collections (D6-B): accent.primary mixed into surface.base at ${def.selectionStrength}%, ` +
+        '3:1 against base and raised. A single current item takes a solid accent.primary fill instead.',
+      $extensions: { 'dev.ryankelly.design-system': { selectionStrength: def.selectionStrength } },
+      multi: colour(def.selection.multi),
+    },
     shadow: { $type: 'color', color: colour(def.shadow, 'Colour of the hard offset shadows.') },
   };
 }

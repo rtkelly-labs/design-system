@@ -560,6 +560,26 @@
       }
     }
   },
+  "selection": {
+    "$type": "color",
+    "$description": "Selected-row fill for multi-select collections (D6-B): accent.primary mixed into surface.base at 53%, 3:1 against base and raised. A single current item takes a solid accent.primary fill instead.",
+    "$extensions": {
+      "dev.ryankelly.design-system": {
+        "selectionStrength": 53
+      }
+    },
+    "multi": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.494,
+          0.0782,
+          223.23
+        ],
+        "hex": "#236b82"
+      }
+    }
+  },
   "shadow": {
     "$type": "color",
     "color": {

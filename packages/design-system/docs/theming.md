@@ -138,6 +138,42 @@ Pair either device with a text change (`text-content-muted` →
 `text-content-primary`, or `text-content-inverse` on a fill) so the state reads
 at a glance and not only in colour.
 
+### Two devices, by context (D6)
+
+Which device depends on whether the selection is one item among peers or one of
+many chosen at once.
+
+| Context | Device | Ink | Used by |
+|---|---|---|---|
+| **One "current" item** — it is the answer to "where am I" or "which one" | **D6-C: solid fill.** `bg-accent-primary` | `text-content-inverse` | `SegmentedControl`, `SiteNav`, `AppSidebarNav`, `DocsSidebar`, the calendar's selected day |
+| **Many chosen at once** — a collection with checkboxes or multi-select | **D6-B: opaque tint.** `bg-selection-multi` | `text-content-primary`, **never** secondary or muted | `Table` and `DataTable` rows (`data-state="selected"`), the inbox list, a lifted kanban card |
+
+The tint is declared per level as `selection.multi` with `selectionStrength`:
+`accent.primary` mixed into `surface.base` at the smallest strength that is 3:1
+against both `surface.base` and `surface.raised` (WCAG 1.4.11): **53%** on
+Midnight (3.26:1 on base, 3.01:1 on raised), **67%** on Sketch (3.01:1 on base,
+3.34:1 on raised). It is far stronger than a decorative tint, because a
+selected row is state. `text.primary` on it is 6.01:1 and 4.53:1; `secondary` is
+3.45:1 and 3.58:1, which is why a selected row does not step its text down, and
+why `Table` sets every cell in a selected row to primary ink.
+
+A multi-select row has three more states, and each has its own device so no two
+can be mistaken for each other:
+
+- **Cursor** (the row the keyboard is on): a **2px outline**, `border.strong`,
+  inset. It is not a glyph. `data-current="true"` on `TableRow`. It is 6.01:1 and
+  4.53:1 against the tint and at least 12:1 against base, so it still reads when
+  the cursor sits on a selected row.
+- **Hover**: an **inset edge-default ring**, which does not touch the fill, so
+  hover on a selected row still reads as hover. Hover is supplemental under
+  1.4.11 (the control is identified without it), so it is not gated.
+- **Selected and cursor** together: tint plus outline.
+
+`check:contrast` gates the tint against both grounds, the outline against both
+grounds and the tint, and `text.primary` on the tint, on both levels
+(`auditSelectionDevices`, `auditContrast`). Do not hand-roll an inset shadow or a
+4px edge for a selected row; the samples had, and no longer do.
+
 ## 🎨 Role Tints
 
 A **tint** is a role mixed into `surface.base`: an opaque fill that carries the

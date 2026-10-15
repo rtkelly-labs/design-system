@@ -447,6 +447,10 @@ export function auditContrast(
       check(`tint.${name}: ${name} on tint`, role, tint, floor.role);
       check(`tint.${name}: text.primary on tint`, def.text.primary, tint, floor.role);
     }
+    // D6-B: a selected row in a multi-select collection prints `text.primary`
+    // on `selection.multi`, and only that. `text.secondary` is 3.45:1 / 3.58:1
+    // there, which is why a row's other cells do not step down on selection.
+    check('selection.multi: text.primary on selection.multi', def.text.primary, def.selection.multi, floor.role);
     // `Select`'s open list (#164), named for the component because it used to
     // be the one surface the palette did not reach: the operating system
     // painted it. The rows are `text.primary` on `surface.raised`; a disabled
@@ -535,7 +539,7 @@ export function auditTextHierarchy(
 }
 
 /** How a component may mark a selected item. */
-export type SelectionDevice = 'fill' | 'edge' | 'surface pair';
+export type SelectionDevice = 'fill' | 'edge' | 'tint' | 'outline' | 'surface pair';
 
 export interface SelectionDeviceCheck {
   level: ThemeLevel;
@@ -608,6 +612,17 @@ export function auditSelectionDevices(
         check('edge', `accent.${tone} edge on ${groundName}`, def.accent[tone], ground);
       }
     }
+
+    // D6-B, the multi-select row. Two devices, both 1.4.11: the tint that marks
+    // a selected row against either ground the row can sit on, and the 2px
+    // outline that marks the cursor row against both ground and tint — the
+    // cursor can land on a selected row, so it must read on the tint too.
+    // Hover is supplemental under 1.4.11 and is not gated here.
+    for (const [groundName, ground] of grounds) {
+      check('tint', `selection.multi tint on ${groundName}`, def.selection.multi, ground);
+      check('outline', `border.strong cursor outline on ${groundName}`, def.border.strong, ground);
+    }
+    check('outline', 'border.strong cursor outline on selection.multi', def.border.strong, def.selection.multi);
 
     check('surface pair', 'surface.raised against surface.base', def.surface.raised, def.surface.base);
     check('surface pair', 'surface.sunken against surface.base', def.surface.sunken, def.surface.base);

@@ -96,6 +96,12 @@ interface LevelDefinition {
         intent: Readonly<Record<Intent, string>>;
     }>;
 
+    readonly selectionStrength: number;
+
+    readonly selection: Readonly<{
+        multi: string;
+    }>;
+
     readonly shadow: string;
 }
 
@@ -248,7 +254,7 @@ interface TextHierarchyStep {
 }
 declare function auditTextHierarchy(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): TextHierarchyStep[];
 
-type SelectionDevice = 'fill' | 'edge' | 'surface pair';
+type SelectionDevice = 'fill' | 'edge' | 'tint' | 'outline' | 'surface pair';
 interface SelectionDeviceCheck {
     level: ThemeLevel;
     device: SelectionDevice;
@@ -1181,6 +1187,7 @@ declare function Table({ className, containerClassName, label, appearance, densi
 declare function TableHeader({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
 declare function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
 declare function TableFooter({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
+
 declare function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowElement>): react.JSX.Element;
 
 declare function TableHead({ className, scope, ...props }: ThHTMLAttributes<HTMLTableCellElement>): react.JSX.Element;
