@@ -348,9 +348,11 @@ export function FormSpecimen() {
         <Button variant="primary" bracketed>
           PUBLISH
         </Button>
+        <Button>QUIET</Button>
         <Button variant="secondary">SECONDARY</Button>
         <Button variant="tertiary">TERTIARY</Button>
         <Button variant="inverse">INVERSE</Button>
+        <Button variant="danger">DANGER</Button>
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ export default function IncidentNote() {
         title="Incident INC-2291"
         footer={
           <div className="flex justify-end gap-3">
-            <Button size="sm" variant="inverse" onClick={() => setOpen(false)}>
+            <Button size="sm" onClick={() => setOpen(false)}>
               DISCARD
             </Button>
             <Button size="sm" variant="primary" onClick={() => setOpen(false)}>
