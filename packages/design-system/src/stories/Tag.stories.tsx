@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Tag } from '../components/Tag';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/Table';
 
 const meta: Meta<typeof Tag> = {
   title: 'Components/Content/Tag',
@@ -47,6 +48,53 @@ export const SmallAndPlain: Story = {
       <Tag text="react" accent="primary" size="sm" />
       <Tag text="Needs review" accent="secondary" size="sm" prefix="" uppercase={false} />
       <Tag text="Needs review" accent="quiet" prefix="" uppercase={false} />
+    </div>
+  ),
+};
+
+/**
+ * `appearance="hairline"` (D11): a 1px `border.subtle` outline, no fill,
+ * `text.secondary`, the small size, the label as written and no `#`.
+ */
+export const Hairline: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <Tag text="Needs review" appearance="hairline" />
+      <Tag text="a11y" appearance="hairline" />
+      <Tag text="Needs review" />
+    </div>
+  ),
+};
+
+/**
+ * Tags in a `Table` are hairline by default; the same tags outside one, such as
+ * on a card, keep today's look.
+ */
+export const InATableAndOutside: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <Tag text="bug" accent="danger" size="sm" />
+        <Tag text="a11y" accent="info" size="sm" />
+      </div>
+      <Table label="Issues" appearance="quiet" density="compact">
+        <TableHeader>
+          <TableRow>
+            <TableHead>Issue</TableHead>
+            <TableHead>Labels</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>Focus ring clipped</TableCell>
+            <TableCell>
+              <Tag text="bug" accent="danger" />
+              {' '}
+              <Tag text="a11y" accent="info" />
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
   ),
 };
