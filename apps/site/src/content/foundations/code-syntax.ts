@@ -4,12 +4,12 @@
  * (through round 6's `theme()` and `themeChecks()`), so a change to a level's
  * accents moves the checks with it. Nothing is typed in.
  *
- * TEMPORARY SOURCE: `theme()` and `fallbackValues()` read the decision board's
- * round-6 numbers. When the package ships `--ds-syntax-*` and `--ds-editor-*`,
- * read the values from the package instead; see `contract-fallback.ts`.
+ * The role table reads the package's own `LEVELS[level].syntax` / `.editor`. The
+ * checks still run through round 6's `theme()`, the same derivation the package
+ * uses (sketch's diff wash is 11% in the package, 12% on the board).
  */
 import { EDITOR_ROLES, SYNTAX_ROLES, editorVar, syntaxVar } from '@/components/specimen/contract';
-import { fallbackValues } from '@/components/specimen/contract-fallback';
+import { LEVELS } from '@rtkelly13/design-system';
 import { GEO } from '@/components/specimen';
 import type { NumbersTableData } from '@/components/specimen';
 import { ratio } from '@/decisions/p2/Frame';
@@ -47,7 +47,13 @@ export function alphaTable(): NumbersTableData {
 
 /** Every contract variable and the value it resolves to on each level. */
 export function roleTable(): NumbersTableData {
-  const [mid, sk] = LEVEL_IDS.map((lv) => fallbackValues(lv));
+  // The package's own values. Its editor keys are camelCase; the CSS contract is kebab-case.
+  const camel = (r: string) => r.replace(/-(\w)/g, (_, c: string) => c.toUpperCase());
+  const values = (lv: (typeof LEVEL_IDS)[number]) => ({
+    syntax: LEVELS[lv].syntax as Record<string, string>,
+    editor: Object.fromEntries(EDITOR_ROLES.map((r) => [r, (LEVELS[lv].editor as Record<string, string>)[camel(r)]!])),
+  });
+  const [mid, sk] = LEVEL_IDS.map(values);
   return {
     title: 'Role to variable',
     head: ['variable', ...LEVEL_IDS],

@@ -14,7 +14,6 @@ import {
   seg,
 } from '@/components/specimen';
 import { CONTRACT_ANSI, contractLook } from '@/components/specimen/contract';
-import { fallbackScope } from '@/components/specimen/contract-fallback';
 import { ShikiSnippet } from '@/components/specimen/ShikiSnippet';
 import { codeSyntax as article } from '@/content/articles';
 import { alphaTable, bandTables, codeSyntaxChecks, metricsTable, roleTable } from '@/content/foundations/code-syntax';
@@ -52,7 +51,7 @@ export default function CodeSyntaxPage() {
         with a search open, a selection, a current line, a bracket pair, three diagnostics and a diff, all at once.
       </p>
       <div className={BLOCK}>
-        <LevelPair scope={fallbackScope} columns="2xl">
+        <LevelPair columns="2xl">
           {() => <CodeFrame look={contractLook} rows={rows} title={FRAME_TITLE} status={FRAME_STATUS} />}
         </LevelPair>
       </div>
@@ -63,7 +62,7 @@ export default function CodeSyntaxPage() {
         shape of the underline and the mark in the gutter first, and by colour second.
       </p>
       <div className={BLOCK}>
-        <SpecimenLegend items={LEGEND_FULL} look={() => contractLook} notes={LEGEND_NOTES} title="Legend" idPrefix="legend" scope={fallbackScope} />
+        <SpecimenLegend items={LEGEND_FULL} look={() => contractLook} notes={LEGEND_NOTES} title="Legend" idPrefix="legend" />
       </div>
 
       <Heading article={article} id="structure" />
@@ -91,7 +90,7 @@ export default function CodeSyntaxPage() {
       </p>
       <div className={BLOCK}>
         <SurfacesStrip
-          scope={fallbackScope}
+         
           columns="2xl"
           surfaces={[
             { label: 'CodeBlock-style, CSS', render: () => <CodeFrame look={contractLook} rows={CSS_ROWS} geo={NO_GUTTER} title={CSS_TITLE} /> },

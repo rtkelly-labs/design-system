@@ -7,7 +7,7 @@ import type { CodeLook } from './look';
  * level is in scope and, once the package defines them, needs no change here.
  *
  * Names only. Values come from the package; until it ships them,
- * `contract-fallback.ts` computes stand-ins.
+ * The package defines them per level.
  */
 
 export const SYNTAX_ROLES = ['keyword', 'function', 'string', 'number', 'type', 'constant', 'comment', 'punctuation', 'operator', 'property', 'plain'] as const;
