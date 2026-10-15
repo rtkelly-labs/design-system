@@ -22,6 +22,8 @@ import {
   MenuRadioGroup,
   MenuRadioItem,
   MenuSeparator,
+  SegmentedControl,
+  SegmentedControlItem,
   Select,
   Skeleton,
   Table,
@@ -284,17 +286,12 @@ export default function InboxApp() {
         </p>
       </div>
 
-      <Tabs value={view} onValueChange={(v) => setView(v as View)} variant="underline" accent="primary">
-        <TabsList label="Issue views">
-          <TabsTab value="all">ALL [{counts.all}]</TabsTab>
-          <TabsTab value="mine">MINE [{counts.mine}]</TabsTab>
-          <TabsTab value="unread">UNREAD [{counts.unread}]</TabsTab>
-        </TabsList>
-        {/* Panels are required by the tab model; the list below is shared by all three. */}
-        <TabsPanel value="all" className="hidden">{null}</TabsPanel>
-        <TabsPanel value="mine" className="hidden">{null}</TabsPanel>
-        <TabsPanel value="unread" className="hidden">{null}</TabsPanel>
-      </Tabs>
+      {/* The list below is shared by all three views, so this is a switcher, not tabs. */}
+      <SegmentedControl label="Issue views" value={view} onValueChange={(v) => setView(v as View)} className="self-start">
+        <SegmentedControlItem value="all">ALL [{counts.all}]</SegmentedControlItem>
+        <SegmentedControlItem value="mine">MINE [{counts.mine}]</SegmentedControlItem>
+        <SegmentedControlItem value="unread">UNREAD [{counts.unread}]</SegmentedControlItem>
+      </SegmentedControl>
 
       {/* Toolbar: filters, or the bulk bar when something is selected */}
       {selectedRows.length > 0 ? (
