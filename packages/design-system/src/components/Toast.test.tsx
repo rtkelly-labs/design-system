@@ -61,6 +61,15 @@ describe('Toast — the live region', () => {
     expect(toasts()).toHaveLength(0);
   });
 
+  // AUD-F32: a hard shadow is 4 to 6px, so the stack's gap has to clear it.
+  it('keeps a 12px gap between stacked toasts so a shadow does not land on the next border', async () => {
+    mount();
+
+    const live = await screen.findByRole('region', { name: 'Notifications' });
+
+    expect(live.className).toContain('gap-3');
+  });
+
   /*
    * A toast shown from a child's mount effect — "Signed in", "Draft restored".
    * A child's effects run before its parent's, so any design in which the
