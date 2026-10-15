@@ -337,11 +337,11 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
   } = props;
 
   // Tells an enclosing ButtonGroup what colour this button paints with, so it
-  // can apply D3's rule. A no-op outside a group and in production.
+  // can apply D3's rule. A no-op outside a group; the group does the dev-only check.
   const group = useContext(ButtonGroupContext);
   const id = useId();
   useEffect(() => {
-    if (!group || process.env.NODE_ENV === 'production') return;
+    if (!group) return;
     return group.register(id, BUTTON_COLOUR_ROLE[variant]);
   }, [group, id, variant]);
 

@@ -103,7 +103,7 @@ function StackedExample() {
   return (
     <Modal isOpen onClose={() => {}} title="Deployments">
       <p style={{ marginBottom: '1rem' }}>Twelve deployments in the last seven days.</p>
-      <Button bracketed variant="tertiary" onClick={() => setFiltering(true)}>
+      <Button bracketed onClick={() => setFiltering(true)}>
         FILTER RESULTS
       </Button>
       <Drawer isOpen={filtering} onClose={() => setFiltering(false)} title="Filters">
