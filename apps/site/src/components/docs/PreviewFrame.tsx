@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { BracketText, ThemeProvider } from '@rtkelly13/design-system';
+import { ThemeProvider } from '@rtkelly13/design-system';
 import type { ThemeLevel } from '@rtkelly13/design-system';
 
 type Choice = 'page' | ThemeLevel;
@@ -41,7 +41,7 @@ export function PreviewFrame({ label, wide, children }: { label: string; wide?: 
   return (
     <div className="border-2 border-edge-strong">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-edge-strong bg-surface-raised px-3 py-1.5 font-mono text-xs uppercase tracking-wider">
-        <span className="font-bold text-content-muted"><BracketText>PREVIEW</BracketText></span>
+        <span className="font-bold text-content-muted">[&nbsp;PREVIEW&nbsp;]</span>
         <div role="group" aria-label={`Level for the ${label} preview`} className="flex gap-1">
           {CHOICES.map((choice) => (
             <button

@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { BracketText, MobileNav, SiteFooter, SiteHeader, SiteNav, SiteNavItem } from '@rtkelly13/design-system';
+import { MobileNav, SiteFooter, SiteHeader, SiteNav, SiteNavItem } from '@rtkelly13/design-system';
 import { REPO_URL, STORYBOOK_URL } from '@/lib/links';
 import { SearchButton } from './SearchButton';
 import { ThemeMenu } from './ThemeMenu';
@@ -26,7 +26,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
     <>
       <SiteHeader
         sticky
-        brand={<span><BracketText>RTK / DS</BracketText></span>}
+        brand={<span>[&nbsp;RTK / DS&nbsp;]</span>}
         nav={<SiteNav label="Primary">{items}</SiteNav>}
         mobileNav={<MobileNav label="Primary">{items}</MobileNav>}
         actions={
@@ -56,7 +56,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         }
         meta="MIT · built with @rtkelly13/design-system · every page static"
       >
-        <p className="m-0 font-display text-lg font-bold uppercase"><BracketText>RTK / DS</BracketText></p>
+        <p className="m-0 font-display text-lg font-bold uppercase">[&nbsp;RTK / DS&nbsp;]</p>
         <p className="mt-2 mb-0 text-content-secondary">
           The visual language of ryankelly.dev. Zero radius, hard shadows, colour by role.
         </p>

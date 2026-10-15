@@ -26,7 +26,6 @@ import { StatCard } from '../../components/StatCard';
 import { useOptionalTheme } from '../../components/ThemeProvider';
 import { useOptionalToast } from '../../components/Toast';
 import { LEVELS } from '../../theme/levels';
-import { BracketText } from '../../components/BracketText';
 
 // The two admin applications issue 249 asks `AppShell` to hold, with no change
 // to the shell between them.
@@ -174,7 +173,7 @@ export function FinanceConsole({ onSync }: FinanceConsoleProps) {
           label="Admin console"
           header={
             <div className="flex flex-col gap-1">
-              <span className="font-display text-lg font-black uppercase text-accent-primary"><BracketText>ADMIN CONSOLE</BracketText></span>
+              <span className="font-display text-lg font-black uppercase text-accent-primary">[ ADMIN CONSOLE ]</span>
               <span className="font-mono text-xs text-content-muted">v1.2.0 • SINGLE-PLAYER</span>
             </div>
           }

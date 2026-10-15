@@ -1,6 +1,5 @@
 import type React from 'react';
 import { Zap } from 'lucide-react';
-import { BracketText } from './BracketText';
 
 export interface TLDRProps {
   children: React.ReactNode;
@@ -29,7 +28,7 @@ export const TLDR: React.FC<TLDRProps> = ({ children }) => {
             color: 'var(--ds-accent-secondary)',
           }}
         >
-          <BracketText>TL;DR</BracketText>
+          [&nbsp;TL;DR&nbsp;]
         </span>
       </div>
       <div

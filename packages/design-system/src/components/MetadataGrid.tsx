@@ -1,6 +1,5 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../lib/recipe';
-import { BracketText } from './BracketText';
 
 export interface MetadataGridSeries {
   /** Series title or name. */
@@ -84,7 +83,7 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
                 data-slot="metadata-grid-label"
                 className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                <BracketText>{item.label}</BracketText>
+                [&nbsp;{item.label}&nbsp;]
               </span>
               {item.href ? (
                 <a
@@ -111,7 +110,7 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
                 data-slot="metadata-grid-label"
                 className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                <BracketText>PUBLISHED</BracketText>
+                [&nbsp;PUBLISHED&nbsp;]
               </span>
               <span
                 data-slot="metadata-grid-value"
@@ -130,7 +129,7 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
                 data-slot="metadata-grid-label"
                 className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                <BracketText>READ TIME</BracketText>
+                [&nbsp;READ TIME&nbsp;]
               </span>
               <span
                 data-slot="metadata-grid-value"
@@ -149,7 +148,7 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
                 data-slot="metadata-grid-label"
                 className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                <BracketText>SERIES TRACK</BracketText>
+                [&nbsp;SERIES TRACK&nbsp;]
               </span>
               {series ? (
                 series.href ? (
@@ -188,7 +187,7 @@ export const MetadataGrid = forwardRef<HTMLDivElement, MetadataGridProps>(
                 data-slot="metadata-grid-label"
                 className="text-[10px] font-black uppercase text-content-muted tracking-wide mb-1"
               >
-                <BracketText>TOPICS</BracketText>
+                [&nbsp;TOPICS&nbsp;]
               </span>
               {tags && tags.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5 mt-0.5">
