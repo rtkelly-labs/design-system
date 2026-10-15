@@ -25,7 +25,7 @@ export const EmptySearchResult: Story = {
   render: () => (
     <div className="w-full max-w-xl">
       <EmptyState
-        icon={<span className="font-mono text-2xl">[ ? ]</span>}
+        icon={<span className="font-mono text-2xl">[&nbsp;?&nbsp;]</span>}
         title="No matches"
         description={
           <>
@@ -61,7 +61,7 @@ export const FirstRun: Story = {
   render: () => (
     <div className="w-full max-w-xl">
       <EmptyState
-        icon={<span className="font-mono text-2xl">[ /// ]</span>}
+        icon={<span className="font-mono text-2xl">[&nbsp;///&nbsp;]</span>}
         title="No rules yet"
         description="A rule matches incoming statements and files them against a contract. Create one to see it run against the last 30 days."
         action={

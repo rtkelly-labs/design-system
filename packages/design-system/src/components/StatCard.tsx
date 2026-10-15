@@ -45,14 +45,14 @@ export function StatCard({
   return (
     <div data-slot="stat-card"
       className={cn(
-        'bg-surface-raised border-2 border-edge-strong p-6 transition-all duration-200',
+        'bg-surface-raised border-2 border-edge-strong p-6 transition-all duration-quick ease-brutalist',
         accentHoverEdgeClass(accent),
         className,
       )}
     >
       <div data-slot="statcard-header" className="flex justify-between items-start mb-2">
         <span data-slot="statcard-label" className="font-mono text-xs font-bold uppercase tracking-wider text-content-muted">
-          [ {title} ]
+          [&nbsp;{title}&nbsp;]
         </span>
         {Icon && <Icon className={cn('h-6 w-6', accentTextClass(accent))} />}
       </div>

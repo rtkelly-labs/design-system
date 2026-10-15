@@ -125,7 +125,7 @@ export const DesignSandbox: React.FC = () => {
           {/* Card & Button Primitives */}
           <Card>
             <h3 className="font-display text-xl font-bold text-accent-primary mb-4">
-              [ BADGES & BUTTON VARIANTS ]
+              [&nbsp;BADGES & BUTTON VARIANTS&nbsp;]
             </h3>
             <div className="flex gap-3 flex-wrap mb-6">
               <Badge accent="primary">CYAN BADGE</Badge>
@@ -144,7 +144,7 @@ export const DesignSandbox: React.FC = () => {
           {/* Form Primitives */}
           <div className="bg-surface-raised border-2 border-edge-strong p-6">
             <h3 className="font-display text-xl font-bold text-accent-secondary mb-4">
-              [ FORM & INPUT PRIMITIVES ]
+              [&nbsp;FORM & INPUT PRIMITIVES&nbsp;]
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <Input label="System API Key" placeholder="sk-brutalist-..." helperText="Required for cloud SDK initialization" />
@@ -163,7 +163,7 @@ export const DesignSandbox: React.FC = () => {
           </div>
 
           {/* Callouts */}
-          <NoteBlock title="SECURITY COMPLIANCE DIRECTIVE" type="warning">
+          <NoteBlock title="SECURITY COMPLIANCE DIRECTIVE" type="danger">
             All design system primitives strictly enforce dual-mode token remappings. Direct hardcoded hex literals are forbidden to ensure ink-on-paper sketch mode readability.
           </NoteBlock>
         </div>
@@ -174,7 +174,7 @@ export const DesignSandbox: React.FC = () => {
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center flex-wrap gap-4">
             <h2 className="font-display text-2xl font-bold text-accent-primary uppercase">
-              [ CLOUD OPERATIONS COMMAND CENTER ]
+              [&nbsp;CLOUD OPERATIONS COMMAND CENTER&nbsp;]
             </h2>
             <div className="w-full sm:w-72">
               <Input
@@ -196,7 +196,7 @@ export const DesignSandbox: React.FC = () => {
           {/* Data Table */}
           <div className="mt-4">
             <h3 className="font-display text-lg font-bold text-content-primary mb-3 uppercase">
-              [ AUTHORIZED WORKSPACE OPERATORS ]
+              [&nbsp;AUTHORIZED WORKSPACE OPERATORS&nbsp;]
             </h3>
             <DataTable<UserRecord>
               keyExtractor={(r) => r.id}

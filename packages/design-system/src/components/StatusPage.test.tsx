@@ -13,7 +13,7 @@ describe('StatusPage', () => {
     const headings = screen.getAllByRole('heading');
     expect(headings).toHaveLength(1);
     expect(headings[0].tagName).toBe('H1');
-    expect(headings[0].textContent).toBe('[ Down for maintenance ]');
+    expect(headings[0].textContent).toBe('[\u00a0Down for maintenance\u00a0]');
     expect(screen.getByText('503')).toBeDefined();
   });
 
@@ -68,7 +68,7 @@ describe('NotFoundPage', () => {
   it('fills in the 404 copy and a link home', () => {
     render(<NotFoundPage />);
 
-    expect(screen.getByRole('heading', { level: 1, name: '[ Page not found ]' })).toBeDefined();
+    expect(screen.getByRole('heading', { level: 1, name: '[\u00a0Page not found\u00a0]' })).toBeDefined();
     expect(screen.getByText('404')).toBeDefined();
     expect(screen.getByRole('link', { name: /GO HOME/ }).getAttribute('href')).toBe('/');
   });
@@ -93,7 +93,7 @@ describe('ServerErrorPage', () => {
   it('fills in the 500 copy and a link home', () => {
     render(<ServerErrorPage />);
 
-    expect(screen.getByRole('heading', { level: 1, name: '[ Something went wrong ]' })).toBeDefined();
+    expect(screen.getByRole('heading', { level: 1, name: '[\u00a0Something went wrong\u00a0]' })).toBeDefined();
     expect(screen.getByText('500')).toBeDefined();
     expect(screen.getByRole('link', { name: /GO HOME/ })).toBeDefined();
   });
@@ -110,7 +110,7 @@ describe('ServerErrorPage', () => {
 
   it('overrides its copy', () => {
     render(<ServerErrorPage title="Payment service unavailable" code="502" />);
-    expect(screen.getByRole('heading', { name: '[ Payment service unavailable ]' })).toBeDefined();
+    expect(screen.getByRole('heading', { name: '[\u00a0Payment service unavailable\u00a0]' })).toBeDefined();
     expect(screen.getByText('502')).toBeDefined();
   });
 });

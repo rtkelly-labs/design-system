@@ -47,7 +47,7 @@ function LevelPanel({ level }: { level: ThemeLevel }) {
         <span className="font-mono text-xs uppercase tracking-[0.18em] text-content-muted">
           {definition.polarity}
         </span>
-        <span className="font-display text-2xl font-bold">[ {definition.label} ]</span>
+        <span className="font-display text-2xl font-bold">[&nbsp;{definition.label}&nbsp;]</span>
         <span className="text-sm text-content-secondary">{definition.description}</span>
       </div>
 

@@ -101,7 +101,7 @@ function BarChartCanvas({
           fontSize={12}
           fontWeight="bold"
         >
-          [ {emptyMessage} ]
+          [&nbsp;{emptyMessage}&nbsp;]
         </text>
       </svg>
     );

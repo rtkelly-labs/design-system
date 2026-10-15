@@ -26,7 +26,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
     <>
       <SiteHeader
         sticky
-        brand={<span>[ RTK / DS ]</span>}
+        brand={<span>[&nbsp;RTK / DS&nbsp;]</span>}
         nav={<SiteNav label="Primary">{items}</SiteNav>}
         mobileNav={<MobileNav label="Primary">{items}</MobileNav>}
         actions={
@@ -56,7 +56,7 @@ export function SiteChrome({ children }: { children: ReactNode }) {
         }
         meta="MIT · built with @rtkelly13/design-system · every page static"
       >
-        <p className="m-0 font-display text-lg font-bold uppercase">[ RTK / DS ]</p>
+        <p className="m-0 font-display text-lg font-bold uppercase">[&nbsp;RTK / DS&nbsp;]</p>
         <p className="mt-2 mb-0 text-content-secondary">
           The visual language of ryankelly.dev. Zero radius, hard shadows, colour by role.
         </p>

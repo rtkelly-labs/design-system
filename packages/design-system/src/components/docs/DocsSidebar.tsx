@@ -54,7 +54,7 @@ export function DocsSidebar({
 
   return (
     <nav data-slot="docs-sidebar" className={cn('not-prose print:hidden', className)} aria-label="Documentation">
-      {label && <p className="docs-sidebar-label">[ {label} ]</p>}
+      {label && <p className="docs-sidebar-label">[&nbsp;{label}&nbsp;]</p>}
       <NodeList
         nodes={nav}
         currentPath={currentPath}
@@ -155,7 +155,7 @@ function NodeItem({
             aria-hidden="true"
             style={{
               transform: expanded ? 'rotate(90deg)' : 'none',
-              transition: 'transform 0.15s ease',
+              transition: 'transform var(--ds-duration-quick) var(--ds-ease)',
             }}
           />
         </button>

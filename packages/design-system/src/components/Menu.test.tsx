@@ -262,7 +262,7 @@ describe('Menu', () => {
 
       await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
       expect(onModalClose).not.toHaveBeenCalled();
-      expect(screen.getByRole('dialog', { name: '[ Settings ]' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: '[\u00a0Settings\u00a0]' })).toBeTruthy();
       await waitFor(() => expect(document.activeElement).toBe(trigger));
     });
   });

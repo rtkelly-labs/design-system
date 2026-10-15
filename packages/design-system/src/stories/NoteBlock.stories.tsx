@@ -32,11 +32,10 @@ export const Warning: Story = {
   },
 };
 
-export const Important: Story = {
+export const Danger: Story = {
   args: {
-    type: 'important',
-    title: 'Read before applying',
-    children: 'Existing resources must be imported first — declaring them makes the provider try to create them.',
+    type: 'danger',
+    children: 'Applying this plan destroys the resource and its data. There is no undo.',
   },
 };
 
@@ -47,7 +46,7 @@ export const AllTypes: Story = {
       <NoteBlock type="note">A neutral aside.</NoteBlock>
       <NoteBlock type="tip">Something worth doing.</NoteBlock>
       <NoteBlock type="warning">Something that bites.</NoteBlock>
-      <NoteBlock type="important">Something that must not be skipped.</NoteBlock>
+      <NoteBlock type="danger">Something that destroys data.</NoteBlock>
     </div>
   ),
 };

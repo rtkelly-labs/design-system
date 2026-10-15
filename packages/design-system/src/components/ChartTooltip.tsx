@@ -44,7 +44,7 @@ export const ChartTooltip = forwardRef<HTMLDivElement, ChartTooltipProps>(
               data-slot="chart-tooltip-title"
               className="mb-1 border-b border-edge-subtle pb-1 font-bold uppercase tracking-wider text-content-muted"
             >
-              [ {title} ]
+              [&nbsp;{title}&nbsp;]
             </div>
           )}
           <div data-slot="chart-tooltip-body" className="space-y-0.5 text-content-primary">

@@ -106,7 +106,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function E
         </div>
       )}
       <Title data-slot="empty-state-title" className={styles.title()}>
-        [ {title} ]
+        [&nbsp;{title}&nbsp;]
       </Title>
       {description && (
         // A `div`, not a `p`, for the reason `AlertDialog`'s body gives: the
