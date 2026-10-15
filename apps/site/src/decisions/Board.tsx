@@ -4,6 +4,7 @@ import { DECISIONS } from './data';
 import type { Decision, DecisionOption } from './data';
 import { DebugToggle } from './DebugToggle';
 import { Phase2 } from './p2/Phase2';
+import { Round3 } from './r3/Round3';
 import { Scenes } from './Scenes';
 import { Sheet } from './Sheet';
 import type { SheetMode } from './Sheet';
@@ -214,8 +215,10 @@ export function Board() {
         <h1 className="m-0 font-display text-4xl font-extrabold uppercase text-content-primary sm:text-5xl">Decision board</h1>
         <p className="m-0 max-w-3xl text-lg text-content-secondary">
           Pick one option per decision. Each is shown in context on both levels, next to a control row of what ships
-          today. Site-local styles only; delete this route once the choices are made. Phase 1 is decided and collapsed;{' '}
-          <a href="#phase-2" className="font-bold text-accent-primary">Phase 2</a> is open.
+          today. Site-local styles only; delete this route once the choices are made. Phases 1 and 2 are decided and
+          collapsed (<a href="#phase-1" className="font-bold text-accent-primary">Phase 1</a>,{' '}
+          <a href="#phase-2" className="font-bold text-accent-primary">Phase 2</a>);{' '}
+          <a href="#round-3" className="font-bold text-accent-primary">Round 3</a> is open.
         </p>
         <nav aria-label="Phase 1 decisions" className="border-2 border-edge-strong bg-surface-raised p-3 shadow-hard-md">
           <ul className="m-0 flex list-none flex-col gap-2 p-0 font-mono text-sm">
@@ -256,6 +259,7 @@ export function Board() {
         ))}
       </section>
       <Phase2 />
+      <Round3 />
     </div>
   );
 }
