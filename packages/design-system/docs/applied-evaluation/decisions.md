@@ -35,3 +35,11 @@ rests on. Roll-up rows refer to `../applied-evaluation.md` §2.
 
 - The × is a real button named `Close <label>` (or `closeLabel`), beside the `role="tab"` and not inside the `role="tablist"`. A first attempt put it in a `role="presentation"` frame next to the tab; axe still failed `aria-required-children` on the tablist ("children which are not allowed: button"), because a presentational wrapper is transparent and a focusable named button beneath a tablist is not a tab. So `TabsList` renders a `tabs-close-layer` beside the tablist, and each closable tab portals its button into it, laid over the tab's trailing edge (measured, and kept current by a `ResizeObserver`). Consequence: the button mounts after hydration, so server HTML carries the tab without it.
 - It is in the accessibility tree for every tab. Only the selected tab's control is a Tab stop, right after the roving tab, so a strip costs one extra stop. `Delete` on a focused tab is unchanged. The target is 24px (WCAG 2.5.8).
+
+## Round 3 — 2026-10-15
+
+| ID | Decision | Pick | Notes |
+|---|---|---|---|
+| D11 | Labels in tables | **D11-C hairline**: a 1px subtle outline, no fill, secondary text, small. The owner's reason: "we have a lot of colour already" | The label word carries identity; the hairline is decoration (1.61 / 1.59:1). Ink 5.5% vs 27.8% today in the DataTable. Kanban cards keep their Tags |
+| D10 round 2 | Syntax and highlights | **Superseded.** Restart the code and text renderer holistically: **terminal-native** (built on the shipped 16-slot ANSI palette) and **research-led**, with 2–3 complete directions compared side by side. The yellow/brown highlight fills are rejected. The editor's type metrics (size, line height, tracking, gutter) are in scope | Owner: "not happy with the direction". Monochrome-first was an option offered, not a requirement |
+| Boards | Presentation | Future boards show pass/fail flags, not walls of numbers. Measurements go behind a disclosure | Owner: "board numbers are hard to read" |
