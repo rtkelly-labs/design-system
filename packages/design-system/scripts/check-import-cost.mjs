@@ -123,7 +123,8 @@ const CASES = [
     name: 'tokens',
     imports: ['LEVELS', 'isThemeLevel'],
     // D6/D8: tint and selection groups (and their strengths) join LEVELS (2,590 B).
-    maxBytes: 2_700,
+    // D9: the series group and its hues join LEVELS (2,848 B).
+    maxBytes: 2_950,
     forbid: [...HEAVY, 'tailwind-variants', 'lucide-react'],
   },
   {
@@ -169,7 +170,8 @@ const CASES = [
     // +14 B: NoteBlock intent mapping and no-break bracket spaces.
     // +1,516 B: the Button weight ladder above.
     // +96 B: LEVELS gains the tint and selection groups.
-    maxBytes: 65_800,
+    // +197 B: Badge and Tag sizes, and the series data on LEVELS.
+    maxBytes: 66_200,
     forbid: HEAVY,
   },
 ];
