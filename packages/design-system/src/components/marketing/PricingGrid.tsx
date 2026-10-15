@@ -19,7 +19,9 @@ export interface PricingGridProps
   description?: ReactNode;
   /**
    * How many columns at desktop widths: `2`, `3` (the default) or `4`. Match
-   * it to the number of tiers. Below `md` the tiers stack in one column.
+   * it to the number of tiers. Below `md` the tiers stack in one column, and
+   * three tiers hold that single column until 900px, so an action keeps its
+   * label on one line.
    */
   columns?: SectionColumns;
   /** Where the heading block sits — `center` (the default) or `start`. */
@@ -47,7 +49,9 @@ export interface PricingGridProps
  * ```
  */
 export const PricingGrid = forwardRef<HTMLElement, PricingGridProps>(function PricingGrid(props, ref) {
-  return <SectionGrid ref={ref} slot="pricing-grid" {...props} />;
+  // Three tiers hold one column until 900px: at 768 each is about 224px, and a
+  // bracketed action breaks inside it.
+  return <SectionGrid ref={ref} slot="pricing-grid" stackBelow="wide" {...props} />;
 });
 
 /**

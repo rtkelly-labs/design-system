@@ -350,7 +350,9 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
       <span className="select-none" aria-hidden="true">
         [
       </span>
-      <span className="inline-flex items-center gap-2">{children}</span>
+      {/* `nowrap`: a bracketed label that wraps strands its brackets at the two
+          far ends of a three-line block. The button grows instead. */}
+      <span className="inline-flex items-center gap-2 whitespace-nowrap">{children}</span>
       <span className="select-none" aria-hidden="true">
         ]
       </span>
