@@ -31,7 +31,7 @@ rule matches it. That is the property that keeps the cost off everyone who has n
 | `data-a11y-motion` = `reduce` or `full` | `prefers-reduced-motion` | `reduce` forces the duration tokens to zero with the OS silent; `full` forces them back on when the OS says reduce |
 | `data-a11y-contrast` = `more` | `prefers-contrast: more` | borders step up a rung, `text.muted` becomes `text.secondary`, role tints become the ground |
 | `data-a11y-cvd` = `patterns` | none exists | reveals a shape and a letter on categorical marks, and an icon beside danger and success |
-| `data-a11y-links` = `underline` | none | inline links in `Prose` and the site and docs links always underline |
+| `data-a11y-links` = `underline` | none | inline links in `Prose`, and `SiteLink`, always underline |
 
 Every axis is tri-state in the API and the menu: `system`, `on`, `off`. `system` follows the OS
 signal where one exists and is the same as `off` where none does. The stored value is the user's

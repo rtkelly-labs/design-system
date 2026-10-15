@@ -440,7 +440,7 @@ ${glyphOn} {
 }
 
 /* links: underline. Unlayered, so it beats a layered \`no-underline\`. */
-:root[data-a11y-links="underline"] :is(.prose a:not(:where(.not-prose, .not-prose *)), a[data-slot="site-link"], a[data-slot="docs-link"]) {
+:root[data-a11y-links="underline"] :is(.prose a:not(:where(.not-prose, .not-prose *)), a[data-slot="site-link"]) {
   text-decoration-line: underline;
 }
 `;
