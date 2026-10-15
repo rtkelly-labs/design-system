@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { Button, Switch, useOptionalToast } from '@rtkelly13/design-system';
+import { Button, ButtonGroup, Switch, useOptionalToast } from '@rtkelly13/design-system';
 
 /**
  * Pieces the settings examples share. None of these exist in the package; each
@@ -72,12 +72,14 @@ export function SaveBar({
       <p role="status" className="m-0 mr-auto font-mono text-sm text-content-secondary">
         {dirtyCount > 0 ? `> ${dirtyCount} unsaved ${dirtyCount === 1 ? 'change' : 'changes'}` : '> all changes saved'}
       </p>
-      <Button type="button" variant="inverse" size="sm" onClick={onDiscard} disabled={dirtyCount === 0 || saving}>
-        DISCARD
-      </Button>
-      <Button type="submit" variant="primary" size="sm" bracketed disabled={dirtyCount === 0} onClick={onSave}>
-        {saving ? 'SAVING' : 'SAVE CHANGES'}
-      </Button>
+      <ButtonGroup aria-label="Save changes">
+        <Button type="button" size="sm" onClick={onDiscard} disabled={dirtyCount === 0 || saving}>
+          DISCARD
+        </Button>
+        <Button type="submit" variant="primary" size="sm" bracketed disabled={dirtyCount === 0} onClick={onSave}>
+          {saving ? 'SAVING' : 'SAVE CHANGES'}
+        </Button>
+      </ButtonGroup>
     </div>
   );
 }
@@ -100,7 +102,7 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
     }
   }
   return (
-    <Button type="button" size="sm" variant="secondary" onClick={copy} aria-label={`Copy ${label}`}>
+    <Button type="button" size="xs" onClick={copy} aria-label={`Copy ${label}`}>
       {copied ? 'COPIED' : 'COPY'}
     </Button>
   );

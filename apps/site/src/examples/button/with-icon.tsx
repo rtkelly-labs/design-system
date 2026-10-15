@@ -13,8 +13,8 @@ export default function ButtonWithIcon() {
         <GitBranch size={18} aria-hidden="true" /> NEW BRANCH
       </Button>
       {/* Icon-only: the label moves to aria-label, since there is no text. */}
-      <Button variant="inverse" size="sm" aria-label="Download build log">
-        <Download size={18} aria-hidden="true" />
+      <Button size="icon" aria-label="Download build log">
+        <Download size={16} aria-hidden="true" />
       </Button>
     </div>
   );

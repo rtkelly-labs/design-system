@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Button, Input, ThemeProvider } from '@rtkelly13/design-system';
+import { Badge, Button, ButtonGroup, Input, ThemeProvider } from '@rtkelly13/design-system';
 import type { ThemeLevel } from '@rtkelly13/design-system';
 
 function Specimen({ level }: { level: ThemeLevel }) {
@@ -18,14 +18,14 @@ function Specimen({ level }: { level: ThemeLevel }) {
           <p className="mt-1 mb-0 font-mono text-sm text-content-secondary">&gt; 3f9c2e1 fix: retry invoices on 409</p>
         </div>
         <Input label="Release note" defaultValue="Retries 409s instead of dropping them" />
-        <div className="flex flex-wrap gap-3">
+        <ButtonGroup>
           <Button size="sm" variant="primary" bracketed>
             PROMOTE
           </Button>
-          <Button size="sm" variant="tertiary">
+          <Button size="sm" variant="danger">
             ROLL BACK
           </Button>
-        </div>
+        </ButtonGroup>
       </div>
     </ThemeProvider>
   );
