@@ -357,3 +357,104 @@ describe('Tabs', () => {
     expect(list.parentElement?.getAttribute('aria-labelledby')).toBeNull();
   });
 });
+
+describe('Tabs: case', () => {
+  it('uppercases by default and preserves case with transform="none"', () => {
+    const { rerender } = render(
+      <Tabs defaultValue="a">
+        <TabsList label="Files">
+          <TabsTab value="a">README.md</TabsTab>
+        </TabsList>
+      </Tabs>,
+    );
+    expect(screen.getByRole('tab').className).toContain('uppercase');
+    expect(screen.getByRole('tab').className).not.toContain('normal-case');
+    rerender(
+      <Tabs defaultValue="a" transform="none">
+        <TabsList label="Files">
+          <TabsTab value="a">README.md</TabsTab>
+        </TabsList>
+      </Tabs>,
+    );
+    expect(screen.getByRole('tab').className).toContain('normal-case');
+    expect(screen.getByRole('tab').className).not.toMatch(/(^|\s)uppercase(\s|$)/);
+  });
+});
+
+describe('Tabs: closable and dirty', () => {
+  function Files({ onClose }: { onClose: (id: string) => void }) {
+    return (
+      <Tabs defaultValue="b.ts" transform="none">
+        <TabsList label="Open editors">
+          {['a.ts', 'b.ts', 'c.ts'].map((f) => (
+            <TabsTab key={f} value={f} dirty={f === 'a.ts'} onClose={() => onClose(f)}>
+              {f}
+            </TabsTab>
+          ))}
+        </TabsList>
+      </Tabs>
+    );
+  }
+
+  it('keeps the close control out of the tab: a sibling, hidden, not tabbable', () => {
+    render(<Files onClose={() => {}} />);
+    const tab = screen.getByRole('tab', { name: 'b.ts' });
+    expect(tab.querySelector('button')).toBeNull();
+    const close = document.querySelectorAll('[data-slot="tabs-tab-close"]');
+    expect(close).toHaveLength(3);
+    for (const c of Array.from(close)) {
+      expect(c.getAttribute('aria-hidden')).toBe('true');
+      expect(c.getAttribute('tabindex')).toBe('-1');
+      expect(c.closest('[role="tab"]')).toBeNull();
+    }
+    expect(tab.getAttribute('aria-keyshortcuts')).toBe('Delete');
+  });
+
+  it('puts the unsaved state in the accessible name, not in colour alone', () => {
+    render(<Files onClose={() => {}} />);
+    expect(screen.getByRole('tab', { name: /^a\.ts\s*, unsaved changes$/ })).toBeTruthy();
+  });
+
+  it('Delete closes the focused tab and moves focus and selection to the next', () => {
+    const onClose = vi.fn();
+    render(<Files onClose={onClose} />);
+    const b = screen.getByRole('tab', { name: 'b.ts' });
+    b.focus();
+    fireEvent.keyDown(b, { key: 'Delete' });
+    expect(onClose).toHaveBeenCalledWith('b.ts');
+    const c = screen.getByRole('tab', { name: 'c.ts' });
+    expect(document.activeElement).toBe(c);
+    expect(c.getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('Delete on the last tab moves to the previous one', () => {
+    render(<Files onClose={() => {}} />);
+    const c = screen.getByRole('tab', { name: 'c.ts' });
+    fireEvent.click(c);
+    fireEvent.keyDown(c, { key: 'Delete' });
+    expect(document.activeElement).toBe(screen.getByRole('tab', { name: 'b.ts' }));
+  });
+
+  it('closing an unselected tab with the pointer leaves selection alone', () => {
+    const onClose = vi.fn();
+    render(<Files onClose={onClose} />);
+    const closeA = document.querySelectorAll('[data-slot="tabs-tab-close"]')[0] as HTMLElement;
+    fireEvent.click(closeA);
+    expect(onClose).toHaveBeenCalledWith('a.ts');
+    expect(screen.getByRole('tab', { name: 'b.ts' }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('does nothing on Delete when the tab is not closable', () => {
+    render(
+      <Tabs defaultValue="a">
+        <TabsList label="x">
+          <TabsTab value="a">A</TabsTab>
+          <TabsTab value="b">B</TabsTab>
+        </TabsList>
+      </Tabs>,
+    );
+    const a = screen.getByRole('tab', { name: 'A' });
+    fireEvent.keyDown(a, { key: 'Delete' });
+    expect(a.getAttribute('aria-selected')).toBe('true');
+  });
+});
