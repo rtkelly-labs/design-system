@@ -1,8 +1,12 @@
+'use client';
+
 import { forwardRef } from 'react';
 import type React from 'react';
 import { accentVar } from '../lib/theme';
 import type { AccentToken } from '../lib/theme';
 import { cn } from '../lib/recipe';
+import { useLabelAppearance } from '../lib/labelAppearance';
+import type { LabelAppearance } from '../lib/labelAppearance';
 
 /**
  * What each intent draws under the `patterns` preference, so danger and success
@@ -36,6 +40,15 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
    * so it stops outweighing the data beside it.
    */
   size?: 'sm' | 'md';
+  /**
+   * `default` is the filled, accent-coloured badge. `hairline` is the quiet
+   * treatment for a label in a table (D11): a 1px `border.subtle` outline, no
+   * fill, `text.secondary`, the `sm` size and the label as written. The accent
+   * then no longer colours the text, but an intent accent still draws its icon
+   * under the `patterns` preference. Unset, it follows the nearest `Table`
+   * (hairline inside one, `default` elsewhere); pass a value to override.
+   */
+  appearance?: LabelAppearance;
 }
 
 /**
@@ -50,14 +63,22 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
  * that is pink and grey; on another level it is whatever those roles resolve
  * to, and the badge stays correct because it never names a hue.
  *
+ * Inside a `Table` or `DataTable` a badge is hairline by default, because a
+ * column of filled badges outweighs the data beside it and the word already
+ * names the state. Pass `appearance="default"` to keep the filled look there.
+ * The hairline's border steps up to `border.default` under the contrast-more
+ * preference on its own.
+ *
  * An intent accent also carries an icon (check, cross, triangle, info) that the
  * `patterns` preference reveals, so danger and success are told apart by more
  * than hue for a reader who has asked for that.
  */
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
-  { children, accent = 'primary', size = 'md', className = '', style, ...props },
+  { children, accent = 'primary', size: sizeProp = 'md', appearance, className = '', style, ...props },
   ref,
 ) {
+  const hairline = useLabelAppearance(appearance) === 'hairline';
+  const size = hairline ? 'sm' : sizeProp;
   const path = accent in INTENT_GLYPH ? INTENT_GLYPH[accent as keyof typeof INTENT_GLYPH] : undefined;
   const glyph = path ? (
     <svg
@@ -72,12 +93,15 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
   ) : null;
   return (
     <span data-slot="badge"
+      data-appearance={hairline ? 'hairline' : undefined}
       ref={ref}
       className={cn(
-        'inline-flex items-center border-edge-strong bg-surface-base font-mono font-bold',
-        size === 'sm'
-          ? 'gap-1 border px-1.5 py-0 text-[0.65rem]'
-          : 'gap-[0.4rem] border-2 px-[0.6rem] py-[0.2rem] text-[0.75rem]',
+        'inline-flex items-center font-mono',
+        hairline
+          ? 'gap-1 border border-edge-subtle bg-transparent px-1.5 py-0 text-[0.65rem] text-content-secondary'
+          : size === 'sm'
+            ? 'gap-1 border border-edge-strong bg-surface-base px-1.5 py-0 text-[0.65rem] font-bold'
+            : 'gap-[0.4rem] border-2 border-edge-strong bg-surface-base px-[0.6rem] py-[0.2rem] text-[0.75rem] font-bold',
         className
       )}
       // `text-[0.75rem]` rather than `text-xs`: the named size ships a paired
@@ -85,7 +109,7 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
       // badge inherited the article's unitless 1.5. Pinning any explicit
       // leading changes the line box. The accent is a runtime value, so it
       // stays an inline custom style rather than a build-time utility.
-      style={{ color: accentVar(accent), ...style }}
+      style={hairline ? style : { color: accentVar(accent), ...style }}
       {...props}
     >
       {glyph ? (
