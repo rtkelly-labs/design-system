@@ -1,12 +1,23 @@
+import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 import { cn } from '../lib/recipe';
-import { seriesVar } from '../lib/theme';
 import type { SeriesIndex } from '../lib/theme';
-import { SERIES_LETTERS, SERIES_SHAPES, SeriesShape } from './seriesShape';
+import { SERIES_LETTERS, SERIES_SHAPES } from './seriesMarks';
+import { SeriesShape } from './seriesShape';
 
-export { SERIES_LETTERS, SERIES_SHAPES };
-export type { SeriesShapeName } from './seriesShape';
+export { SERIES_LETTERS, SERIES_SHAPES } from './seriesMarks';
+export type { SeriesShapeName } from './seriesMarks';
 
+// Written out in full, one per member, because Tailwind's scanner reads source
+// text: `bg-series-${n}` would generate no CSS at all.
+const SERIES_CHIP: Record<SeriesIndex, string> = {
+  1: 'bg-series-1',
+  2: 'bg-series-2',
+  3: 'bg-series-3',
+  4: 'bg-series-4',
+  5: 'bg-series-5',
+  6: 'bg-series-6',
+};
 
 export interface SeriesMarkProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
   /** Which series member, 1 to 6. Picks the colour, the shape and the letter. */
@@ -35,19 +46,20 @@ export interface SeriesMarkProps extends Omit<HTMLAttributes<HTMLSpanElement>, '
  *
  * The whole mark is `aria-hidden`: it repeats what the adjacent text says.
  */
-export function SeriesMark({ series, swatch = true, letter, className, style, ...props }: SeriesMarkProps) {
+export const SeriesMark = forwardRef<HTMLSpanElement, SeriesMarkProps>(function SeriesMark(
+  { series, swatch = true, letter, className, ...props },
+  ref,
+) {
   const index = series - 1;
   return (
     <span
+      ref={ref}
       data-slot="series-mark"
       aria-hidden="true"
       className={cn('inline-flex items-center gap-1 align-middle leading-none', className)}
-      style={style}
       {...props}
     >
-      {swatch ? (
-        <span className="inline-block size-3 shrink-0" style={{ background: seriesVar(series) }} />
-      ) : null}
+      {swatch ? <span className={cn('inline-block size-3 shrink-0', SERIES_CHIP[series])} /> : null}
       <span data-slot="series-glyph" className="items-center gap-1 font-mono text-[11px] font-bold leading-none">
         <svg viewBox="0 0 10 10" className="inline-block size-3 shrink-0 align-middle" fill="currentColor">
           <SeriesShape shape={SERIES_SHAPES[index]!} />
@@ -56,7 +68,9 @@ export function SeriesMark({ series, swatch = true, letter, className, style, ..
       </span>
     </span>
   );
-}
+});
+
+SeriesMark.displayName = 'SeriesMark';
 
 export interface SeriesLegendItem {
   /** The series' name, in text. Always shown: it is the cue that does not depend on a preference. */
@@ -68,6 +82,7 @@ export interface SeriesLegendItem {
 }
 
 export interface SeriesLegendProps extends Omit<HTMLAttributes<HTMLUListElement>, 'children'> {
+  /** One entry per series: its name in text and which member it is. */
   items: readonly SeriesLegendItem[];
 }
 
@@ -76,9 +91,13 @@ export interface SeriesLegendProps extends Omit<HTMLAttributes<HTMLUListElement>
  * name in text. The names are what satisfy WCAG 1.4.1 by default; the mark's
  * shape and letter are what the `patterns` preference adds on top.
  */
-export function SeriesLegend({ items, className, ...props }: SeriesLegendProps) {
+export const SeriesLegend = forwardRef<HTMLUListElement, SeriesLegendProps>(function SeriesLegend(
+  { items, className, ...props },
+  ref,
+) {
   return (
     <ul
+      ref={ref}
       data-slot="series-legend"
       className={cn(
         'm-0 flex list-none flex-wrap gap-x-4 gap-y-1 p-0 font-mono text-xs text-content-primary',
@@ -94,4 +113,6 @@ export function SeriesLegend({ items, className, ...props }: SeriesLegendProps) 
       ))}
     </ul>
   );
-}
+});
+
+SeriesLegend.displayName = 'SeriesLegend';

@@ -1,18 +1,11 @@
 /**
- * The six series shapes and letters, and the one drawing of them.
+ * The one drawing of each series shape.
  *
  * Not exported from the package index: `SeriesMark` (HTML) and `BarChart` (SVG)
  * both draw from here so that series 3 is the same triangle in a legend and on a
  * bar, and nothing outside needs the primitive.
  */
-
-/** The shape of each series member, in order. Six that stay distinct at 12px and in one ink. */
-export const SERIES_SHAPES = ['circle', 'square', 'triangle', 'diamond', 'cross', 'ring'] as const;
-
-export type SeriesShapeName = (typeof SERIES_SHAPES)[number];
-
-/** The letter of each series member, in order, for a reader who cannot rely on the shape either. */
-export const SERIES_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'] as const;
+import type { SeriesShapeName } from './seriesMarks';
 
 /**
  * One shape in a 0..10 box, filled with the inherited `fill` (the ring is

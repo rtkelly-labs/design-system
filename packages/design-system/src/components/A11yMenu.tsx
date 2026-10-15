@@ -1,6 +1,7 @@
 'use client';
 
-import { Fragment } from 'react';
+import { Fragment, forwardRef } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
 import { Accessibility } from 'lucide-react';
 import { cn } from '../lib/recipe';
 import { Menu, MenuItem, MenuRadioGroup, MenuRadioItem, MenuSeparator } from './Menu';
@@ -37,7 +38,7 @@ const AXES: ReadonlyArray<{
 /** Order the radios the same way on every axis, so the position of "On" is learnable. */
 const CHOICES: readonly A11yChoice[] = ['system', 'on', 'off'];
 
-export interface A11yMenuProps {
+export interface A11yMenuProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'children' | 'type'> {
   /**
    * Classes for the trigger button. The default is the square bordered icon
    * button the site's own theme picker uses; `DocsHeader` passes its icon-button
@@ -69,7 +70,10 @@ const DEFAULT_TRIGGER =
  * </A11yPreferencesProvider>
  * ```
  */
-export function A11yMenu({ triggerClassName, align = 'end', defaultOpen }: A11yMenuProps) {
+export const A11yMenu = forwardRef<HTMLButtonElement, A11yMenuProps>(function A11yMenu(
+  { triggerClassName, align = 'end', defaultOpen, ...props },
+  ref,
+) {
   const prefs = useA11yPreferences();
   return (
     <Menu
@@ -77,10 +81,12 @@ export function A11yMenu({ triggerClassName, align = 'end', defaultOpen }: A11yM
       defaultOpen={defaultOpen}
       trigger={
         <button
+          ref={ref}
           type="button"
           data-slot="a11y-menu"
           className={cn(triggerClassName ?? DEFAULT_TRIGGER)}
           aria-label="Accessibility preferences"
+          {...props}
         >
           <Accessibility size={18} aria-hidden="true" />
         </button>
@@ -108,4 +114,6 @@ export function A11yMenu({ triggerClassName, align = 'end', defaultOpen }: A11yM
       <MenuItem onClick={prefs.reset}>Reset to system</MenuItem>
     </Menu>
   );
-}
+});
+
+A11yMenu.displayName = 'A11yMenu';

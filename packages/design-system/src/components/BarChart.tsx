@@ -9,7 +9,8 @@ import { Bar } from '@visx/shape';
 import { type ForwardedRef, forwardRef, type SVGProps } from 'react';
 import { cn } from '../lib/recipe';
 import { type AccentToken, type SeriesIndex, accentVar, seriesVar } from '../lib/theme';
-import { SERIES_LETTERS, SERIES_SHAPES, SeriesShape } from './seriesShape';
+import { SERIES_LETTERS, SERIES_SHAPES } from './seriesMarks';
+import { SeriesShape } from './seriesShape';
 
 export { ParentSize as ResponsiveChartContainer };
 
@@ -65,7 +66,7 @@ function BarGlyph({ series, x, y }: { series: SeriesIndex; x: number; y: number 
       data-slot="series-glyph"
       transform={`translate(${x}, ${y})`}
       aria-hidden="true"
-      style={{ color: 'var(--ds-text-primary)' }}
+      className="text-content-primary"
     >
       <g transform="scale(1.1)" fill="currentColor">
         <SeriesShape shape={SERIES_SHAPES[series - 1]!} />

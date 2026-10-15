@@ -49,6 +49,7 @@ const COMPONENTS = path.join(ROOT, 'src/components');
  */
 const PROVIDERS = {
   'ThemeProvider.tsx': 'A context provider. Its children render, it does not.',
+  'A11yPreferencesProvider.tsx': 'A context provider for the accessibility preferences; it renders no element.',
   'docs/DocsLinkProvider.tsx': 'A context provider for the link component.',
   'docs/mdxComponents.tsx': 'A mapping object handed to MDXProvider, not a component.',
 };
