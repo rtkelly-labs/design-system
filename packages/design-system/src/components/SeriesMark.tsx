@@ -56,7 +56,7 @@ export const SeriesMark = forwardRef<HTMLSpanElement, SeriesMarkProps>(function 
       ref={ref}
       data-slot="series-mark"
       aria-hidden="true"
-      className={cn('inline-flex items-center gap-1 align-middle leading-none', className)}
+      className={cn('inline-flex shrink-0 items-center gap-1 whitespace-nowrap align-middle leading-none', className)}
       {...props}
     >
       {swatch ? <span className={cn('inline-block size-3 shrink-0', SERIES_CHIP[series])} /> : null}
