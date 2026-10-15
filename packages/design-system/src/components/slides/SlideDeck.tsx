@@ -6,7 +6,6 @@ import { useHotkeys, type RegisterableHotkey } from '@tanstack/react-hotkeys';
 import { Button } from '../Button';
 import { Tooltip } from '../Tooltip';
 import type { SlideProps } from './Slide';
-import { BracketText } from '../BracketText';
 
 /**
  * The notes on one slide, if it has any.
@@ -347,7 +346,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
               marginBottom: '0.5rem',
             }}
           >
-            <BracketText>Speaker notes</BracketText>
+            [&nbsp;Speaker notes&nbsp;]
           </div>
           {currentNotes ?? 'No notes on this slide.'}
         </div>

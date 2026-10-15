@@ -8,7 +8,6 @@ import { useOptionalTheme } from '../ThemeProvider';
 import { LEVELS, isThemeLevel } from '../../theme/levels';
 import { cn } from '../../lib/recipe';
 import { Menu, MenuRadioGroup, MenuRadioItem } from '../Menu';
-import { BracketText } from '../BracketText';
 
 export interface DocsNavItem {
   label: string;
@@ -118,7 +117,7 @@ export function DocsHeader({
 
         <DocsLink href={titleHref} className="docs-header-brand">
           {Icon && <Icon className="docs-header-brand-icon" />}
-          <span><BracketText>{title.toUpperCase()}</BracketText></span>
+          <span>[&nbsp;{title.toUpperCase()}&nbsp;]</span>
         </DocsLink>
       </div>
 

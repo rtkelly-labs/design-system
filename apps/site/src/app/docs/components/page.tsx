@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BracketText, AnchorHeading } from '@rtkelly13/design-system';
+import { AnchorHeading } from '@rtkelly13/design-system';
 import { Article } from '@/components/docs/Article';
 import { catalogue as article } from '@/content/articles';
 import { COMPONENT_PAGES, componentHref } from '@/content/registry';
@@ -17,7 +17,7 @@ function Tile({ entry }: { entry: CatalogueEntry }) {
       <span className="flex items-baseline justify-between gap-3">
         <span className="font-display text-base font-extrabold uppercase tracking-wide text-content-primary">{entry.name}</span>
         <span className={'shrink-0 font-mono text-[0.65rem] font-bold uppercase tracking-wider ' + (page ? 'text-accent-primary' : 'text-content-muted')}>
-          <BracketText>{page ? 'PAGE' : 'STORYBOOK ↗'}</BracketText>
+          {page ? '[\u00a0PAGE\u00a0]' : '[\u00a0STORYBOOK ↗\u00a0]'}
         </span>
       </span>
       {entry.description ? (

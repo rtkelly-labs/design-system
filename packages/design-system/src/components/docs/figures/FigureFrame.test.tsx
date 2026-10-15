@@ -23,7 +23,7 @@ describe('FigureFrame', () => {
 
     const frame = screen.getByRole('figure', { name: 'FLOW' });
     expect(frame).toBeTruthy();
-    expect(screen.getByText('FLOW')).toBeTruthy();
+    expect(screen.getByText('[ FLOW ]')).toBeTruthy();
     expect(frame.className).toContain('border-edge-strong');
     expect(frame.className).toContain('bg-surface-base');
     expect(screen.getByText('A request flow.')).toBeTruthy();

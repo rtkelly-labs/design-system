@@ -3,7 +3,6 @@ import type { ReactNode, HTMLAttributes, CSSProperties } from 'react';
 import { cn } from '../lib/recipe';
 import { accentVar, semanticTokens } from '../lib/theme';
 import type { AccentToken } from '../lib/theme';
-import { BracketText } from './BracketText';
 
 
 /**
@@ -310,7 +309,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
               }}
               aria-label={`Link to ${title || 'details'}`}
             >
-              <BracketText>Learn More &rarr;</BracketText>
+              [&nbsp;Learn More &rarr;&nbsp;]
             </a>
           )}
         </div>

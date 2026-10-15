@@ -130,7 +130,7 @@ describe('Popover', () => {
 
       await waitFor(() => expect(screen.queryByRole('dialog', { name: 'About levels' })).toBeNull());
       expect(onModalClose).not.toHaveBeenCalled();
-      expect(screen.getByRole('dialog', { name: 'Settings' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: '[\u00a0Settings\u00a0]' })).toBeTruthy();
       await waitFor(() => expect(document.activeElement).toBe(trigger));
     });
 
@@ -143,7 +143,7 @@ describe('Popover', () => {
       // Same layer as the dialogs, later in the DOM: portalled after the
       // modal, so it paints over it.
       expect((popover.parentElement as HTMLElement).className).toContain('z-top');
-      const modal = screen.getByRole('dialog', { name: 'Settings' });
+      const modal = screen.getByRole('dialog', { name: '[\u00a0Settings\u00a0]' });
       expect(modal.compareDocumentPosition(popover) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
       const controls = focusables(popover);

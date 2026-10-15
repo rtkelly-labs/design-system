@@ -28,7 +28,7 @@ describe('Drawer', () => {
       </main>,
     );
 
-    const drawer = await screen.findByRole('dialog', { name: 'Navigation' });
+    const drawer = await screen.findByRole('dialog', { name: '[\u00a0Navigation\u00a0]' });
 
     expect(document.querySelector('[data-slot="drawer-backdrop"]')).not.toBeNull();
     expect(drawer.parentElement?.getAttribute('data-slot')).toBe('drawer-viewport');
@@ -293,7 +293,7 @@ describe('Drawer stacking', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Filter results' }));
 
-    const drawer = await screen.findByRole('dialog', { name: 'Filters' });
+    const drawer = await screen.findByRole('dialog', { name: '[\u00a0Filters\u00a0]' });
     await waitFor(() => expect(drawer.contains(document.activeElement)).toBe(true));
 
     fireEvent.keyDown(drawer, { key: 'Escape' });
@@ -301,10 +301,10 @@ describe('Drawer stacking', () => {
     // The drawer goes; the modal underneath it stays, and its `onClose` is
     // never reached. One Escape, one surface.
     await waitFor(() =>
-      expect(screen.queryByRole('dialog', { name: 'Filters' })).toBeNull(),
+      expect(screen.queryByRole('dialog', { name: '[\u00a0Filters\u00a0]' })).toBeNull(),
     );
     expect(onModalClose).not.toHaveBeenCalled();
-    expect(screen.getByRole('dialog', { name: 'Reports' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: '[\u00a0Reports\u00a0]' })).toBeTruthy();
   });
 
   function AlertOverDrawer({ onDrawerClose }: { onDrawerClose: () => void }) {
@@ -338,7 +338,7 @@ describe('Drawer stacking', () => {
 
     await waitFor(() => expect(screen.queryByRole('alertdialog')).toBeNull());
     expect(onDrawerClose).not.toHaveBeenCalled();
-    expect(screen.getByRole('dialog', { name: 'Navigation' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: '[\u00a0Navigation\u00a0]' })).toBeTruthy();
   });
 });
 
