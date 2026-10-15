@@ -5,6 +5,7 @@ import { SegmentedControl, SegmentedControlItem } from '../components/SegmentedC
 const meta: Meta<typeof SegmentedControl> = {
   title: 'Components/Actions & Forms/Segmented Control',
   component: SegmentedControl,
+  subcomponents: { SegmentedControlItem },
   tags: ['autodocs', 'stable'],
   argTypes: {
     size: { control: 'inline-radio', options: ['xs', 'sm'] },

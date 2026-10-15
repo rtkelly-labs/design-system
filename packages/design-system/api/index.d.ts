@@ -557,6 +557,8 @@ interface BadgeProps extends react__default.HTMLAttributes<HTMLSpanElement> {
     children: react__default.ReactNode;
 
     accent?: AccentToken;
+
+    size?: 'sm' | 'md';
 }
 
 declare const Badge: react__default.ForwardRefExoticComponent<BadgeProps & react__default.RefAttributes<HTMLSpanElement>>;
@@ -679,6 +681,10 @@ interface TagProps {
     className?: string;
 
     prefix?: string;
+
+    uppercase?: boolean;
+
+    size?: 'sm' | 'md';
     children?: ReactNode;
 }
 declare const Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLSpanElement | HTMLAnchorElement>>;
@@ -701,6 +707,8 @@ declare const Pagination: react.ForwardRefExoticComponent<PaginationProps & reac
 type TabsOrientation = 'horizontal' | 'vertical';
 
 type TabsVariant = 'merged' | 'underline' | 'segmented';
+
+type TabsTransform = 'uppercase' | 'none';
 interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
 
     value?: string;
@@ -712,6 +720,8 @@ interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
     orientation?: TabsOrientation;
 
     variant?: TabsVariant;
+
+    transform?: TabsTransform;
 
     accent?: AccentToken;
 
@@ -739,6 +749,12 @@ interface TabsTabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'va
 
     children: ReactNode;
 
+    onClose?: () => void;
+
+    dirty?: boolean;
+
+    closeLabel?: string;
+
     className?: string;
 }
 
@@ -755,6 +771,86 @@ interface TabsPanelProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 declare const TabsPanel: react.ForwardRefExoticComponent<TabsPanelProps & react.RefAttributes<HTMLDivElement>>;
+
+type SegmentedControlSize = 'xs' | 'sm';
+interface SegmentedControlProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue' | 'className'> {
+
+    label: string;
+
+    value?: string;
+
+    defaultValue?: string;
+
+    onValueChange?: (value: string) => void;
+
+    size?: SegmentedControlSize;
+
+    disabled?: boolean;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const SegmentedControl: react.ForwardRefExoticComponent<SegmentedControlProps & react.RefAttributes<HTMLDivElement>>;
+interface SegmentedControlItemProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'onChange' | 'className'> {
+
+    value: string;
+
+    disabled?: boolean;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const SegmentedControlItem: react.ForwardRefExoticComponent<SegmentedControlItemProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface ToolbarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'children'> {
+
+    label: string;
+
+    orientation?: 'horizontal' | 'vertical';
+
+    loopFocus?: boolean;
+
+    disabled?: boolean;
+
+    framed?: boolean;
+
+    children: ReactNode;
+
+    className?: string;
+}
+
+declare const Toolbar: react.ForwardRefExoticComponent<ToolbarProps & react.RefAttributes<HTMLDivElement>>;
+
+type ToolbarButtonProps = ButtonElementProps & {
+
+    bare?: boolean;
+};
+
+declare const ToolbarButton: react.ForwardRefExoticComponent<(Omit<ButtonBaseProps & ButtonLabelledSize & react.ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+    pending?: boolean;
+    pendingLabel?: string;
+} & {
+
+    bare?: boolean;
+}, "ref"> | Omit<ButtonBaseProps & ButtonIconSize & react.ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+    pending?: boolean;
+    pendingLabel?: string;
+} & {
+
+    bare?: boolean;
+}, "ref">) & react.RefAttributes<HTMLButtonElement>>;
+interface ToolbarSeparatorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+
+    className?: string;
+}
+
+declare const ToolbarSeparator: react.ForwardRefExoticComponent<ToolbarSeparatorProps & react.RefAttributes<HTMLDivElement>>;
 
 interface SectionContainerProps {
     children: ReactNode;
@@ -1136,12 +1232,19 @@ type DataTableProps<T> = DataTableSharedProps<T> & ({
 
 declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, appearance, density, emptyText, className, containerClassName, virtualize, ...rest }: DataTableProps<T>): react.JSX.Element;
 
+type DialogInitialFocus = boolean | RefObject<HTMLElement | null> | (() => boolean | HTMLElement | null | void);
 interface ModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
     isOpen: boolean;
     onClose: () => void;
+
     title: string;
     children: ReactNode;
-    footer?: ReactNode;
+
+    footer?: ReactNode | false;
+
+    initialFocus?: DialogInitialFocus;
+
+    headerless?: boolean;
 
     closeOnBackdropClick?: boolean;
     className?: string;
@@ -1160,6 +1263,14 @@ interface AlertDialogProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' 
     children: ReactNode;
     confirmLabel?: string;
     cancelLabel?: string;
+
+    confirmDisabled?: boolean;
+
+    confirmPending?: boolean;
+
+    confirmPendingLabel?: string;
+
+    confirmVariant?: ButtonVariant;
 
     footer?: ReactNode;
     className?: string;
@@ -1180,7 +1291,11 @@ interface DrawerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'ch
 
     placement?: DrawerPlacement;
 
-    footer?: ReactNode;
+    footer?: ReactNode | false;
+
+    initialFocus?: DialogInitialFocus;
+
+    headerless?: boolean;
 
     closeOnBackdropClick?: boolean;
 
@@ -1189,6 +1304,7 @@ interface DrawerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'ch
 
 declare const Drawer: react.ForwardRefExoticComponent<DrawerProps & react.RefAttributes<HTMLDivElement>>;
 
+type AppMainElement = 'main' | 'div';
 interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
 
     sidebar?: ReactNode;
@@ -1196,6 +1312,8 @@ interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'
     topbar?: ReactNode;
 
     children: ReactNode;
+
+    mainAs?: AppMainElement;
 
     sidebarOpen?: boolean;
 
@@ -2972,6 +3090,7 @@ export {
   type AnsiScheme,
   type AnsiSlot,
   AppMain,
+  type AppMainElement,
   type AppMainProps,
   type AppNavItem,
   AppShell,
@@ -3010,11 +3129,14 @@ export {
   BulletChart,
   type BulletChartProps,
   Button,
+  type ButtonBaseProps,
   type ButtonColourRole,
   type ButtonElementProps,
   ButtonGroup,
   type ButtonGroupContextValue,
   type ButtonGroupProps,
+  type ButtonIconSize,
+  type ButtonLabelledSize,
   type ButtonLinkProps,
   type ButtonProps,
   type ButtonVariant,
@@ -3056,6 +3178,7 @@ export {
   type DataTableProps,
   type DataTableVirtualization,
   DesignSandbox,
+  type DialogInitialFocus,
   type DiffLineProps,
   type DiffRow,
   type DiffSign,
@@ -3236,6 +3359,11 @@ export {
   type SectionColumns,
   SectionContainer,
   type SectionContainerProps,
+  SegmentedControl,
+  SegmentedControlItem,
+  type SegmentedControlItemProps,
+  type SegmentedControlProps,
+  type SegmentedControlSize,
   Select,
   type SelectOption,
   type SelectProps,
@@ -3318,6 +3446,7 @@ export {
   type TabsProps,
   TabsTab,
   type TabsTabProps,
+  type TabsTransform,
   type TabsVariant,
   Tag,
   type TagProps,
@@ -3348,6 +3477,12 @@ export {
   type ToastProviderProps,
   type TocEntry,
   type TokenRule,
+  Toolbar,
+  ToolbarButton,
+  type ToolbarButtonProps,
+  type ToolbarProps,
+  ToolbarSeparator,
+  type ToolbarSeparatorProps,
   Tooltip,
   type TooltipProps,
   TrackCard,

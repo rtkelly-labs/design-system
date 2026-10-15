@@ -14,7 +14,7 @@ import { Spinner } from './Spinner';
 import { buttonGroupContext } from './ButtonGroup';
 import { BUTTON_COLOUR_ROLE } from './buttonHues';
 
-interface ButtonBaseProps {
+export interface ButtonBaseProps {
   /**
    * The label. Written in caps at the call site rather than upper-cased in
    * CSS, so a screen reader is given the words rather than the shouting, and
@@ -58,7 +58,7 @@ interface ButtonBaseProps {
 }
 
 /** The sizes that carry a label. */
-interface ButtonLabelledSize {
+export interface ButtonLabelledSize {
   /**
    * Padding and type scale, not a semantic weight. `md` is the default and the
    * one to reach for; `lg` is a page's single primary action.
@@ -75,7 +75,7 @@ interface ButtonLabelledSize {
  * The sizes that draw a glyph in a fixed square. Each requires `aria-label`,
  * because the button has no text for a screen reader to read.
  */
-interface ButtonIconSize {
+export interface ButtonIconSize {
   /**
    * `icon` is 32x32px; `icon-touch` is 40x40px, for a surface a finger uses.
    * Pass a `NerdIcon` (or any glyph) as the child, with `aria-hidden`.

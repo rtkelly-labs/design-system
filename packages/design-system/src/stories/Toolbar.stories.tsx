@@ -6,6 +6,7 @@ import { Toolbar, ToolbarButton, ToolbarSeparator } from '../components/Toolbar'
 const meta: Meta<typeof Toolbar> = {
   title: 'Components/Actions & Forms/Toolbar',
   component: Toolbar,
+  subcomponents: { ToolbarButton, ToolbarSeparator },
   tags: ['autodocs', 'stable'],
   argTypes: {
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
@@ -60,6 +61,24 @@ export const Vertical: Story = {
           {name}
         </ToolbarButton>
       ))}
+    </Toolbar>
+  ),
+};
+
+/**
+ * `loopFocus={false}` stops the arrow keys at either end instead of wrapping,
+ * for a bar where reaching the last control and bouncing back to the first
+ * would be disorienting. An item can still be `disabled` on its own.
+ */
+export const NoLoop: Story = {
+  args: { label: 'Formatting', loopFocus: false },
+  render: (args) => (
+    <Toolbar {...args}>
+      <ToolbarButton size="xs">BOLD</ToolbarButton>
+      <ToolbarButton size="xs">ITALIC</ToolbarButton>
+      <ToolbarButton size="xs" disabled>
+        LINK
+      </ToolbarButton>
     </Toolbar>
   ),
 };
