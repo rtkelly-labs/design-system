@@ -27,6 +27,7 @@ import {
   Modal,
   Popover,
   Select,
+  SeriesMark,
   accentSurfaceClass,
   SegmentedControl,
   SegmentedControlItem,
@@ -136,6 +137,7 @@ const EventButton = forwardRef<HTMLButtonElement, EventButtonProps>(function Eve
         {...rest}
       >
         <span className={glyphOnly ? 'max-md:sr-only' : ''}>
+          <SeriesMark series={cal.series} letter={cal.code} swatch={false} className="mr-1" />
           {continuesLeft ? '< ' : ''}
           {ev.title}
           {continuesRight ? ' >' : ''}
@@ -154,6 +156,7 @@ const EventButton = forwardRef<HTMLButtonElement, EventButtonProps>(function Eve
         {...rest}
       >
         <span className="w-24 shrink-0 text-content-secondary">{ev.allDay ? 'ALL DAY' : `${time} - ${hhmm(ev.e - Math.floor((ev.e - 1) / MIN_DAY) * MIN_DAY)}`}</span>
+        <SeriesMark series={cal.series} letter={cal.code} swatch={false} className="shrink-0" />
         <span className="min-w-0 flex-1 truncate font-bold">{ev.title}</span>
         <span className="shrink-0 font-bold">[{cal.code}]</span>
       </button>
@@ -170,6 +173,7 @@ const EventButton = forwardRef<HTMLButtonElement, EventButtonProps>(function Eve
       {...rest}
     >
       <span className={`block ${glyphOnly ? 'max-md:sr-only' : ''}`}>
+        <SeriesMark series={cal.series} letter={cal.code} swatch={false} className="mr-1" />
         <span className="font-bold">{continuesLeft ? '< ' : ''}{ev.title}</span>
         {showTime && time ? <span className="ml-1 text-content-secondary">{time}</span> : null}
         {continuesRight ? <span className="text-content-secondary"> &gt;</span> : null}
@@ -816,13 +820,18 @@ export default function CalendarApp() {
             <legend className="px-1 font-mono text-xs font-bold">[&nbsp;CALENDARS&nbsp;]</legend>
             <div className="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col">
               {CALENDARS.map((c) => (
-                <Checkbox
-                  key={c.id}
-                  label={`[${c.code}] ${c.label}`}
-                  accent={c.role}
-                  checked={!off.includes(c.id)}
-                  onCheckedChange={(v) => setOff((o) => (v ? o.filter((x) => x !== c.id) : [...o, c.id]))}
-                />
+                // Every calendar is named in text, whatever the preference: the label is the
+                // cue that is always there. The mark beside it adds the series' shape under
+                // `patterns`, with the calendar's own letter.
+                <div key={c.id} className="flex items-center gap-1.5">
+                  <Checkbox
+                    label={`[${c.code}] ${c.label}`}
+                    accent={c.role}
+                    checked={!off.includes(c.id)}
+                    onCheckedChange={(v) => setOff((o) => (v ? o.filter((x) => x !== c.id) : [...o, c.id]))}
+                  />
+                  <SeriesMark series={c.series} letter={c.code} swatch={false} />
+                </div>
               ))}
             </div>
           </fieldset>
