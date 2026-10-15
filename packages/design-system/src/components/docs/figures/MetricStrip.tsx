@@ -34,7 +34,7 @@ export const MetricStrip = React.forwardRef<HTMLDivElement, MetricStripProps>(fu
   ref,
 ) {
   return (
-    <div ref={ref} role="group" aria-label={label} {...rest} className={cn(className)}>
+    <div data-slot="metric-strip" ref={ref} role="group" aria-label={label} {...rest} className={cn(className)}>
       <dl className="m-0 grid grid-cols-2 sm:grid-flow-col sm:auto-cols-fr sm:grid-cols-none">
         {items.map((m, i) => (
           <div key={`${m.label}-${i}`} className="flex min-w-0 flex-col-reverse gap-1 border-b border-edge-subtle p-3 odd:border-r sm:border-r last:border-r-0">

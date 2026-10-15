@@ -67,6 +67,8 @@ export const ALIASES = {
   Slope: { kind: 'data-carrier', reason: 'An MDX item BeforeAfter reads as data.' },
   Node: { kind: 'data-carrier', reason: 'An MDX item TreeDiagram reads as data.' },
   Step: { kind: 'data-carrier', reason: 'An MDX item Steps reads as data.' },
+  Option: { kind: 'data-carrier', reason: 'An MDX item Decision reads as data.' },
+  Term: { kind: 'data-carrier', reason: 'An MDX item TermGrid reads as data.' },
   CodeTab: { kind: 'data-carrier', reason: 'A fragment CodeTabs reads as data; it renders no element of its own.' },
 };
 

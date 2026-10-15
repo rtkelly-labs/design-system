@@ -43,7 +43,7 @@ export const TokenTable = React.forwardRef<HTMLDivElement, TokenTableProps>(func
   const hasBefore = rows.some((r) => r.before !== undefined);
   const hasNote = rows.some((r) => r.note);
   return (
-    <div ref={ref} {...rest} className={cn('min-w-0 overflow-x-auto', className)}>
+    <div data-slot="token-table" ref={ref} {...rest} className={cn('min-w-0 overflow-x-auto', className)}>
       <table aria-label={label} className="w-full min-w-[34rem] border-collapse text-sm">
         <thead>
           <tr>

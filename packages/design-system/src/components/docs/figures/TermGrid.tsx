@@ -32,7 +32,7 @@ export const TermGrid = React.forwardRef<HTMLDivElement, TermGridProps>(function
 ) {
   const terms = termsProp ?? childItems(children, Term);
   return (
-    <div ref={ref} role="group" aria-label={label} {...rest} className={cn(className)}>
+    <div data-slot="term-grid" ref={ref} role="group" aria-label={label} {...rest} className={cn(className)}>
       <dl className="m-0 grid sm:grid-cols-2">
         {terms.map((t, i) => (
           <div key={`${t.term}-${i}`} className="flex flex-col gap-1 border-b border-edge-subtle p-4 sm:odd:border-r">

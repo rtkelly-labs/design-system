@@ -39,7 +39,7 @@ export const Decision = React.forwardRef<HTMLDivElement, DecisionProps>(function
   const options = optionsProp ?? childItems(children, Option);
   const picked = options.find((o) => o.picked);
   return (
-    <div ref={ref} role="group" aria-label={question} {...rest} className={cn('border-[3px] border-intent-warning bg-surface-raised shadow-hard-md', className)}>
+    <div data-slot="decision" ref={ref} role="group" aria-label={question} {...rest} className={cn('border-[3px] border-intent-warning bg-surface-raised shadow-hard-md', className)}>
       <div className="border-b-2 border-intent-warning px-4 py-3">
         <p className="m-0 font-display text-base font-extrabold text-content-primary">{question}</p>
         {context && <p className="m-0 mt-1 font-mono text-xs text-content-muted">{context}</p>}

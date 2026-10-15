@@ -47,7 +47,7 @@ export const SwatchCompare = React.forwardRef<HTMLDivElement, SwatchCompareProps
   ref,
 ) {
   return (
-    <div ref={ref} {...rest} data-theme={level} className={cn('min-w-0 overflow-x-auto bg-surface-sunken p-3', className)}>
+    <div data-slot="swatch-compare" ref={ref} {...rest} data-theme={level} className={cn('min-w-0 overflow-x-auto bg-surface-sunken p-3', className)}>
       <table aria-label={label} className="w-full border-collapse font-mono text-xs">
         <thead>
           <tr>
