@@ -31,6 +31,11 @@ to.
 **The decision: a token declares which of exactly two orthogonal axes it varies on, and no
 token varies on both.**
 
+*Amended by [`0007`](./0007-preference-axis.md).* "Two axes" is about where a token is
+**declared**. A user's accessibility Preference is a third, runtime thing that is not a place to
+declare a token: it overrides values these two axes already declare, as a delta over the active
+Level, and never multiplies Levels or adds a column to the table below.
+
 | Axis | Selected | Varies |
 |---|---|---|
 | **Level** | at runtime, by `data-theme` | colour, and only colour |

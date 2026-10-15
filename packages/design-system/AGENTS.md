@@ -59,6 +59,8 @@ cost real time:
    is the second axis, `theme.css` carries only the `web` Medium, and the prefixes do not
    overlap — `--ds-text-primary` is an ink, `--ds-type-body` is a size. See
    [`docs/adr/0004-two-axes-level-and-medium.md`](./docs/adr/0004-two-axes-level-and-medium.md).
+   A user's accessibility Preference (`data-a11y-*`) is a runtime delta over the active Level,
+   not a third place to declare a token: [`docs/adr/0007-preference-axis.md`](./docs/adr/0007-preference-axis.md).
 3. **Colours are addressed by role, never by hue.** A component says `bg-surface-raised` or
    `text-intent-danger`, not `cyan`. See
    [`docs/adr/0001-hues-declared-below-roles.md`](./docs/adr/0001-hues-declared-below-roles.md)
