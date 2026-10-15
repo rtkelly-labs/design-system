@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Button } from '../components/Button';
 import { StatusPage } from '../components/StatusPage';
 import { SitePage, portfolio } from './siteChrome/fixtures';
+import { BracketText } from '../components/BracketText';
 
 const meta: Meta<typeof StatusPage> = {
   title: 'Components/Feedback/StatusPage',
@@ -72,7 +73,7 @@ export const Offline: Story = {
   args: {
     standalone: true,
     id: 'main-content',
-    code: <span aria-hidden="true">[&nbsp;~&nbsp;]</span>,
+    code: <span aria-hidden="true"><BracketText>~</BracketText></span>,
     title: 'You are offline',
     description: 'This page needs a connection and there is none. Pages you have already opened are still available.',
     action: (

@@ -7,6 +7,7 @@ import { Hero } from '../marketing/Hero';
 import { FeatureGrid, Feature } from '../marketing/FeatureGrid';
 import { PricingGrid, PricingTier } from '../marketing/PricingGrid';
 import type { PricingTier as PricingTierData } from '../marketing/PricingGrid';
+import { BracketText } from '../BracketText';
 
 /**
  * Placeholder pricing, deliberately generic.
@@ -208,7 +209,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
 
       <AsciiDivider style={DIVIDER_STYLE} />
 
-      <FeatureGrid title={'[\u00a0BUILT FOR EXTREME PERFORMANCE & CONTROL\u00a0]'}>
+      <FeatureGrid title={<BracketText>BUILT FOR EXTREME PERFORMANCE & CONTROL</BracketText>}>
         {FEATURES.map((feature) => (
           <Feature key={feature.title} title={feature.title} accent={feature.accent} icon={feature.icon}>
             {feature.desc}
@@ -218,7 +219,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
 
       <AsciiDivider style={DIVIDER_STYLE} />
 
-      <PricingGrid title={'[\u00a0TRANSPARENT PRICING\u00a0]'}>
+      <PricingGrid title={<BracketText>TRANSPARENT PRICING</BracketText>}>
         {pricingTiers.map((tier) => (
           <PricingTier
             key={tier.name}

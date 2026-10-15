@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { BracketText } from '@rtkelly13/design-system';
 
 /**
  * A framed piece of the homepage with a way into its documentation — the
@@ -21,7 +22,7 @@ export function DemoPanel({
   return (
     <div className={'flex min-w-0 flex-col border-2 border-edge-strong bg-surface-raised shadow-hard-md ' + className}>
       <div className="flex items-center justify-between gap-3 border-b-2 border-edge-strong px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-wider">
-        <span className="text-content-muted">[&nbsp;{label}&nbsp;]</span>
+        <span className="text-content-muted"><BracketText>{label}</BracketText></span>
         <Link href={docs} className="text-accent-primary no-underline hover:underline">
           Docs →<span className="sr-only"> for {label}</span>
         </Link>
@@ -45,7 +46,7 @@ export function SectionHead({
 }) {
   return (
     <div className="mb-8 flex max-w-3xl flex-col gap-3">
-      <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">[&nbsp;{eyebrow}&nbsp;]</p>
+      <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary"><BracketText>{eyebrow}</BracketText></p>
       <h2 id={id} className="m-0 font-display text-3xl font-extrabold uppercase tracking-tight sm:text-4xl">{title}</h2>
       {children ? <p className="m-0 text-lg text-content-secondary">{children}</p> : null}
     </div>
