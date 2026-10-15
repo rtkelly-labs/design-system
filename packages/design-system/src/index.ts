@@ -77,6 +77,12 @@ export * from './components/ThemeProvider';
 // Server-safe: a root layout calls `getThemeInitScript`, and that layout is a
 // server component under the Next App Router. See the module's header.
 export * from './components/themeInitScript';
+// The Preference axis (D9, ADR 0007): accessibility preferences chosen like the
+// theme. `a11yInitScript` is server-safe for the same reason `themeInitScript` is.
+export * from './components/a11yInitScript';
+export * from './components/A11yPreferencesProvider';
+export * from './components/A11yMenu';
+export * from './components/SeriesMark';
 export * from './components/BracketText';
 export * from './components/NoteBlock';
 export * from './components/TLDR';

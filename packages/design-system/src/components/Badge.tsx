@@ -1,8 +1,20 @@
 import { forwardRef } from 'react';
 import type React from 'react';
+import { AlertTriangle, CheckCircle2, Info, XCircle } from 'lucide-react';
 import { accentVar } from '../lib/theme';
 import type { AccentToken } from '../lib/theme';
 import { cn } from '../lib/recipe';
+
+/**
+ * What each intent draws under the `patterns` preference, so danger and success
+ * differ by more than hue. A distinct silhouette each: check, cross, triangle, i.
+ */
+const INTENT_GLYPH = {
+  success: CheckCircle2,
+  danger: XCircle,
+  warning: AlertTriangle,
+  info: Info,
+} as const;
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   /**
@@ -36,11 +48,17 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
  * `intent.danger` for a failure, `quiet` for a neutral count. On `midnight`
  * that is pink and grey; on another level it is whatever those roles resolve
  * to, and the badge stays correct because it never names a hue.
+ *
+ * An intent accent also carries an icon (check, cross, triangle, info) that the
+ * `patterns` preference reveals, so danger and success are told apart by more
+ * than hue for a reader who has asked for that.
  */
 export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
   { children, accent = 'primary', size = 'md', className = '', style, ...props },
   ref,
 ) {
+  const Glyph = accent in INTENT_GLYPH ? INTENT_GLYPH[accent as keyof typeof INTENT_GLYPH] : undefined;
+  const glyph = Glyph ? <Glyph size={size === 'sm' ? 10 : 12} strokeWidth={3} /> : null;
   return (
     <span data-slot="badge"
       ref={ref}
@@ -59,6 +77,11 @@ export const Badge = forwardRef<HTMLSpanElement, BadgeProps>(function Badge(
       style={{ color: accentVar(accent), ...style }}
       {...props}
     >
+      {glyph ? (
+        <span data-slot="intent-glyph" aria-hidden="true">
+          {glyph}
+        </span>
+      ) : null}
       {children}
     </span>
   );
