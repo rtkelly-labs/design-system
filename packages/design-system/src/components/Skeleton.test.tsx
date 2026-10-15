@@ -36,6 +36,7 @@ describe('Skeleton', () => {
     ['heading', 'h-7'],
     ['block', 'h-24'],
     ['avatar', 'size-12'],
+    ['row', 'h-10'],
   ] as const)('gives the %s shape its own default geometry', (shape, expected) => {
     const { container } = render(<Skeleton shape={shape} />);
 
@@ -62,5 +63,14 @@ describe('Skeleton', () => {
     expect(container.querySelector('[data-slot="skeleton"]')?.getAttribute('aria-hidden')).toBe(
       'false',
     );
+  });
+});
+
+describe('Skeleton hatch (D7-B)', () => {
+  it('is a diagonal hatch of text.muted strokes on the sunken ground', () => {
+    const { container } = render(<Skeleton />);
+    const cls = container.querySelector('[data-slot="skeleton"]')?.className ?? '';
+    expect(cls).toContain('repeating-linear-gradient(135deg,var(--ds-text-muted)');
+    expect(cls).toContain('var(--ds-surface-sunken)');
   });
 });
