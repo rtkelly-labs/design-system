@@ -124,7 +124,9 @@ const CASES = [
     imports: ['LEVELS', 'isThemeLevel'],
     // Applied refinements: per-level tints, selection, contrast ladder and the
     // series group join LEVELS (2,848 B).
-    maxBytes: 2_950,
+    // Round 6: the syntax and editor Groups and their sources join LEVELS (5,496 B).
+    // Worth splitting out if a consumer only needs the levels.
+    maxBytes: 5_650,
     forbid: [...HEAVY, 'tailwind-variants', 'lucide-react'],
   },
   {
@@ -166,7 +168,8 @@ const CASES = [
       'isThemeLevel',
     ],
     // Applied refinements: the Button and LEVELS growth above (65,978 B).
-    maxBytes: 67_300,
+    // Round 6: LEVELS growth above (69,004 B).
+    maxBytes: 70_400,
     forbid: HEAVY,
   },
 ];

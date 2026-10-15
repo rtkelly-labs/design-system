@@ -279,8 +279,10 @@ const BUDGETS = {
     // 461,751 B raw, 106,562 B gzip.
     // D9 accessibility preferences: provider, init script, A11yMenu, SeriesMark
     // and the series data: 481,009 B raw, 111,893 B gzip.
-    maxRaw: 491_000,
-    maxGzip: 114_100,
+    // Round 6: the syntax and editor Groups on every LevelDefinition (LEVELS ships
+    // in the bundle): 494,621 B raw, 115,066 B gzip.
+    maxRaw: 505_000,
+    maxGzip: 117_400,
     desc: 'ESM output, every module',
   },
   'src/theme.css': {
@@ -294,8 +296,10 @@ const BUDGETS = {
     // (D6, D8): 32,199 B raw, 5,703 B gzip locally; ~2% headroom kept.
     // D9: the contrast-more delta per level, the series group, the motion and
     // link preference rules: 36,444 B raw, 6,525 B gzip; ~2% headroom.
-    maxRaw: 37_200,
-    maxGzip: 6_660,
+    // Round 6: --ds-syntax-* and --ds-editor-* per level, in the print block and
+    // the contrast-more delta: 44,010 B raw, 7,162 B gzip.
+    maxRaw: 44_900,
+    maxGzip: 7_310,
     desc: 'Design token CSS',
   },
 };
