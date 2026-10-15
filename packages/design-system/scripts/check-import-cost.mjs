@@ -130,7 +130,9 @@ const CASES = [
     imports: ['Button'],
     // #320 adds pending activation guards and Spinner. Measured at 44,394 B
     // minified with the per-module build; retain about 2% headroom.
-    maxBytes: 45_300,
+    // D1–D4: quiet and danger variants, xs and icon sizes, and the ButtonGroup
+    // context the D3 hue check reads (46,068 B).
+    maxBytes: 47_000,
     forbid: [...HEAVY, 'lucide-react'],
   },
   {
@@ -164,7 +166,8 @@ const CASES = [
     // +200 B: the data-slot markers on Card and Pagination parts, plus the
     // Pagination current-page chip fix. Both are intended.
     // +14 B: NoteBlock intent mapping and no-break bracket spaces.
-    maxBytes: 63_300,
+    // +1,516 B: the Button weight ladder above.
+    maxBytes: 65_400,
     forbid: HEAVY,
   },
 ];
