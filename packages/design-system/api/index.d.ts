@@ -1430,7 +1430,7 @@ declare const Spinner: react.ForwardRefExoticComponent<SpinnerProps & react.RefA
 
 interface SkeletonProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
 
-    shape?: 'text' | 'heading' | 'block' | 'avatar';
+    shape?: 'text' | 'heading' | 'block' | 'avatar' | 'row';
 
     className?: string;
 }
