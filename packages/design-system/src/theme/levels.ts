@@ -332,6 +332,16 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
 export const DEFAULT_LEVEL: ThemeLevel = 'midnight';
 
 /**
+ * The level paper is printed in, whatever level is on screen (D5-B, PT-02).
+ *
+ * A Level selection, not a palette: `scripts/build-tokens.mjs` emits an
+ * `@media print` block into `theme.css` that re-points every `--ds-*` role,
+ * `color-scheme` and `--ds-ink-weight` to this level's values for the root and
+ * every `[data-theme]` subtree. A third level changes this constant only.
+ */
+export const PRINT_LEVEL: ThemeLevel = 'sketch';
+
+/**
  * Which level each OS colour-scheme preference maps to. `prefers-color-scheme`
  * is binary, so the ladder has to nominate a representative at each end; making
  * that an explicit constant means it can be changed in one place rather than
