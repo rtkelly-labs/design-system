@@ -285,8 +285,10 @@ const BUDGETS = {
     // Applied refinements, phase 1: the reduced-motion block that collapses the
     // duration tokens, and the print block that re-points every role to the
     // paper level (D5-B). 29,589 B raw, 5,479 B gzip locally; ~2% headroom kept.
-    maxRaw: 30_200,
-    maxGzip: 5_600,
+    // Phase 2 adds per-level opaque role tints and the multi-select device
+    // (D6, D8): 32,199 B raw, 5,703 B gzip locally; ~2% headroom kept.
+    maxRaw: 32_900,
+    maxGzip: 5_850,
     desc: 'Design token CSS',
   },
 };
