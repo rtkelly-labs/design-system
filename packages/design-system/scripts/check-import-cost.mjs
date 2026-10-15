@@ -171,7 +171,8 @@ const CASES = [
     // +1,516 B: the Button weight ladder above.
     // +96 B: LEVELS gains the tint and selection groups.
     // +197 B: Badge and Tag sizes, and the series data on LEVELS.
-    maxBytes: 66_200,
+    // +175 B: the hairline appearance and the Table label context (Tag goes client).
+    maxBytes: 66_500,
     forbid: HEAVY,
   },
 ];
