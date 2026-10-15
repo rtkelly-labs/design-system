@@ -274,8 +274,11 @@ const BUDGETS = {
     // variants and sizes. 101,635 B gzip locally; ~2% headroom kept.
     // Phase 3 adds SegmentedControl, Toolbar, closable Tabs and the dialog
     // shells' initialFocus/headerless modes: 451,056 B raw, 103,766 B gzip.
-    maxRaw: 460_000,
-    maxGzip: 105_800,
+    // Then: Table overflow cue (ResizeObserver), the Tabs close layer, the
+    // SlideDeck/TickerTape responsive paths and the tint helpers:
+    // 461,751 B raw, 106,562 B gzip.
+    maxRaw: 471_000,
+    maxGzip: 108_700,
     desc: 'ESM output, every module',
   },
   'src/theme.css': {
