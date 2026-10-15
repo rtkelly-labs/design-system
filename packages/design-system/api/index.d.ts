@@ -699,6 +699,8 @@ declare const Pagination: react.ForwardRefExoticComponent<PaginationProps & reac
 type TabsOrientation = 'horizontal' | 'vertical';
 
 type TabsVariant = 'merged' | 'underline' | 'segmented';
+
+type TabsTransform = 'uppercase' | 'none';
 interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
 
     value?: string;
@@ -710,6 +712,8 @@ interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
     orientation?: TabsOrientation;
 
     variant?: TabsVariant;
+
+    transform?: TabsTransform;
 
     accent?: AccentToken;
 
@@ -736,6 +740,12 @@ interface TabsTabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'va
     value: string;
 
     children: ReactNode;
+
+    onClose?: () => void;
+
+    dirty?: boolean;
+
+    closeLabel?: string;
 
     className?: string;
 }
@@ -3524,6 +3534,7 @@ export {
   type TabsProps,
   TabsTab,
   type TabsTabProps,
+  type TabsTransform,
   type TabsVariant,
   Tag,
   type TagProps,
