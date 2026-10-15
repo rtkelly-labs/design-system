@@ -330,6 +330,7 @@ export function auditHueAgreement(
     for (const [role, ref] of Object.entries(def.intentHue)) {
       check(`intent.${role}`, def.intent[role as Intent], ref);
     }
+    def.seriesHue.forEach((ref, i) => check(`series.${i + 1}`, def.series[i]!, ref));
   }
 
   return results;
@@ -630,4 +631,155 @@ export function auditSelectionDevices(
   }
 
   return results;
+}
+
+// ---------------------------------------------------------------------------
+// D9: the series group, and the `more` contrast preference
+// ---------------------------------------------------------------------------
+
+type V3 = readonly [number, number, number];
+
+const srgbToLinear = (c: number) => {
+  const s = c / 255;
+  return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+};
+const linearToSrgb = (l: number) => {
+  const c = Math.min(1, Math.max(0, l));
+  return 255 * (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+};
+
+/** The two colour-vision deficiencies the series group is simulated under. */
+export const CVD_SIMULATIONS = ['deuteranopia', 'protanopia'] as const;
+export type CvdSimulation = (typeof CVD_SIMULATIONS)[number];
+export type Vision = 'normal' | CvdSimulation;
+
+/** Machado, Oliveira and Fernandes 2009, severity 1.0, applied in linear RGB. */
+const CVD_MATRIX: Readonly<Record<CvdSimulation, readonly [V3, V3, V3]>> = {
+  deuteranopia: [
+    [0.367322, 0.860646, -0.227968],
+    [0.280085, 0.672501, 0.047413],
+    [-0.01182, 0.04294, 0.968881],
+  ],
+  protanopia: [
+    [0.152286, 1.052583, -0.204868],
+    [0.114503, 0.786281, 0.099216],
+    [-0.003882, -0.048116, 1.051998],
+  ],
+};
+
+/** A colour as it appears under `vision`, as OKLab. */
+function toOklabUnder(hex: string, vision: Vision): V3 {
+  const { r, g, b } = parseColor(hex);
+  let lin: V3 = [srgbToLinear(r), srgbToLinear(g), srgbToLinear(b)];
+  if (vision !== 'normal') {
+    const m = CVD_MATRIX[vision];
+    const row = (k: 0 | 1 | 2) => m[k][0] * lin[0] + m[k][1] * lin[1] + m[k][2] * lin[2];
+    lin = [row(0), row(1), row(2)];
+  }
+  // Clamp and round-trip through 8-bit sRGB, as a display would.
+  const [lr, lg, lb] = lin.map((c) => srgbToLinear(Math.round(linearToSrgb(c))));
+  const l = Math.cbrt(0.4122214708 * lr! + 0.5363325363 * lg! + 0.0514459929 * lb!);
+  const m = Math.cbrt(0.2119034982 * lr! + 0.6806995451 * lg! + 0.1073969566 * lb!);
+  const s = Math.cbrt(0.0883024619 * lr! + 0.2817188376 * lg! + 0.6299787005 * lb!);
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
+}
+
+/** Euclidean distance in OKLab, L in 0..1 — the scale `DESIGN.md`'s 0.04 gate is stated in. */
+export function deltaE(a: string, b: string, vision: Vision = 'normal'): number {
+  const x = toOklabUnder(a, vision);
+  const y = toOklabUnder(b, vision);
+  return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
+}
+
+/** Below this, two colours count as one (`DESIGN.md`). The floor for normal vision. */
+export const MINIMUM_SERIES_SEPARATION = 0.04;
+
+export interface SeriesSeparation {
+  readonly level: ThemeLevel;
+  readonly vision: Vision;
+  /** Smallest pairwise deltaE among the six members. */
+  readonly min: number;
+  /** The closest pair, as 1-based series numbers. */
+  readonly pair: readonly [number, number];
+  /** Only normal vision is gated: the simulations are what the glyphs are for. */
+  readonly gated: boolean;
+  readonly passes: boolean;
+}
+
+/**
+ * The closest pair of series members on every level, under normal vision (gated
+ * at {@link MINIMUM_SERIES_SEPARATION}) and under simulated deuteranopia and
+ * protanopia (reported). A deficiency collapses hue differences by design, so
+ * gating it would only force a palette that hides the case the `patterns`
+ * preference exists to cover.
+ */
+export function auditSeriesSeparation(
+  ladder: Readonly<Record<ThemeLevel, LevelDefinition>>,
+): SeriesSeparation[] {
+  const results: SeriesSeparation[] = [];
+  for (const level of Object.keys(ladder) as ThemeLevel[]) {
+    const series = ladder[level].series;
+    for (const vision of ['normal', ...CVD_SIMULATIONS] as const) {
+      let min = Infinity;
+      let pair: readonly [number, number] = [1, 2];
+      for (let i = 0; i < series.length; i++) {
+        for (let j = i + 1; j < series.length; j++) {
+          const d = deltaE(series[i]!, series[j]!, vision);
+          if (d < min) {
+            min = d;
+            pair = [i + 1, j + 1];
+          }
+        }
+      }
+      const gated = vision === 'normal';
+      results.push({ level, vision, min, pair, gated, passes: !gated || min >= MINIMUM_SERIES_SEPARATION });
+    }
+  }
+  return results;
+}
+
+/**
+ * The `more` contrast preference as a delta over one Level (ADR 0007).
+ *
+ * Not a third palette: every value is another value the same Level already
+ * declares, so the preference authors no colour and cannot disagree with the
+ * ladder. Borders step one rung up (subtle to default, default to strong),
+ * `text.muted` becomes `text.secondary`, and the role tints become
+ * `surface.base`, which is the edge-only treatment D8-C names: the 4px role edge
+ * stays and carries the role, and the role-coloured text on it gains contrast.
+ *
+ * The tints deliberately do **not** take the selection strength, though that is
+ * the strongest device available. Measured: a role mixed in at
+ * `selectionStrength` is 1.9 to 3.6:1 against the role as text and drops
+ * `text.primary` to 4.44:1 on Sketch, so every text-bearing fill would fail the
+ * 4.5:1 floor it must hold. `selection.multi` is unchanged: it is already a
+ * 3:1 device.
+ *
+ * `auditContrast` runs over the result, so the preference is gated by the same
+ * arithmetic as the Level it modifies.
+ */
+export function applyContrastDelta(def: LevelDefinition): LevelDefinition {
+  const base = def.surface.base;
+  return {
+    ...def,
+    text: { ...def.text, muted: def.text.secondary },
+    border: { ...def.border, subtle: def.border.default, default: def.border.strong },
+    tint: {
+      accent: { primary: base, secondary: base, tertiary: base, quiet: base },
+      intent: { info: base, success: base, warning: base, danger: base },
+    },
+  };
+}
+
+/** The ladder with {@link applyContrastDelta} applied to every Level. */
+export function contrastMoreLadder(
+  ladder: Readonly<Record<ThemeLevel, LevelDefinition>>,
+): Record<ThemeLevel, LevelDefinition> {
+  const out = {} as Record<ThemeLevel, LevelDefinition>;
+  for (const level of Object.keys(ladder) as ThemeLevel[]) out[level] = applyContrastDelta(ladder[level]);
+  return out;
 }
