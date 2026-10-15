@@ -51,3 +51,10 @@ apps/site/*.tsbuildinfo
 # The assembled Vercel output: Storybook at the root and the site under
 # site/, written by scripts/assemble-deploy.mjs.
 deploy-output/
+
+# Repo-local reports: the .tsx files are the artefacts; the HTML and PDFs are
+# cut from them on demand and never committed.
+packages/design-system-report/reports/*.html
+packages/design-system-report/reports/*.pdf
+# Scratch output of pdf.e2e.test.ts when a run is interrupted.
+packages/design-system-report/.pdf-e2e-tmp/

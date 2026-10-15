@@ -10,6 +10,7 @@
  */
 
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -56,6 +57,34 @@ function hasTypographyPlugin(base: string) {
   } catch {
     return false;
   }
+}
+
+/**
+ * A report is one file, so its fonts have to travel inside it. `@fontsource`
+ * stylesheets reference `./files/*.woff2` relative to themselves, and a copied
+ * `.html` has no such folder — every face silently fell back to Courier and
+ * Helvetica, in print as on screen. Each `@font-face` is therefore rewritten
+ * to carry its woff2 as a data URI.
+ *
+ * Only the `latin` subsets are kept. The browser downloads a subset only when a
+ * glyph in its `unicode-range` is used, but a data URI is paid for up front:
+ * inlining every script's subset is ~3MB per report for glyphs a report
+ * written in English never draws. Glyphs outside latin fall back, as they do
+ * for any face that lacks them.
+ */
+const FONT_FACE = /@font-face\s*\{[^}]*\}/g;
+
+function inlineFonts(css: string, base: string): string {
+  if (!css.includes('@font-face')) return css;
+  return css.replace(FONT_FACE, (block) => {
+    const woff2 = /url\((['"]?)(\.[^)'"]*?\.woff2)\1\)/.exec(block)?.[2];
+    if (!woff2 || !/-latin-(?!ext)/.test(woff2)) return '';
+    const data = readFileSync(path.resolve(base, woff2)).toString('base64');
+    return block.replace(
+      /src:[^;]*;/,
+      `src: url(data:font/woff2;base64,${data}) format('woff2');`,
+    );
+  });
 }
 
 /*
@@ -112,7 +141,8 @@ export async function createReportCssCompiler({
 
   const resolve: typeof loadStylesheet = async (id, from) => {
     const sheet = await loadStylesheet(id, from);
-    return typography ? sheet : { ...sheet, content: sheet.content.replace(TYPOGRAPHY_PLUGIN, '') };
+    const content = inlineFonts(sheet.content, sheet.base);
+    return typography ? { ...sheet, content } : { ...sheet, content: content.replace(TYPOGRAPHY_PLUGIN, '') };
   };
 
   let source = await readFile(entry, 'utf8');

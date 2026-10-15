@@ -11,7 +11,7 @@ import process from 'node:process';
 import { THEME_LEVELS, type ThemeLevel } from '@rtkelly13/design-system';
 import { formatProblems } from './lint';
 import path from 'node:path';
-import { htmlToPdf, type PaperSize } from './pdf';
+import { describeOverflow, htmlToPdf, type PaperSize } from './pdf';
 import { renderReports } from './render';
 
 const USAGE = `ds-report — render a TSX report to one self-contained HTML file
@@ -31,7 +31,8 @@ Options
                         downloaded Chromium — it is an optional peer.
       --paper <size>    A4 (default) or Letter. Read with --pdf: the page's own
                         @page rule wins over the format when it declares one.
-      --strict          Treat lint warnings as errors. Use this in CI.
+      --strict          Treat lint warnings and --pdf page overflow as errors.
+                        Use this in CI.
       --no-lint         Skip the design system lint. For files you did not write.
       --no-typecheck    Skip the type check. It is on by default.
   -h, --help            This text.
@@ -174,10 +175,19 @@ async function main(argv: readonly string[]) {
   // Printing is a post-step on finished documents, not a second render: the
   // outputs are absolute already, so the peer walk finds the author's project.
   const pdfs: string[] = [];
+  const overflows: string[] = [];
   if (options.pdf) {
     for (const result of results) {
-      pdfs.push(await htmlToPdf(result.output, { paper: options.paper }));
+      const printed = await htmlToPdf(result.output, { paper: options.paper });
+      pdfs.push(printed.output);
+      // Chromium adds a page without a word when a sheet outgrows the paper, so
+      // the page count against the document's own break rules is the only tell.
+      const overflow = describeOverflow(printed, options.paper);
+      if (overflow) overflows.push(overflow);
     }
+  }
+  for (const message of overflows) {
+    process.stderr.write(`  ${options.strict ? 'error  ' : 'warning'} page overflow: ${message}\n\n`);
   }
   for (const result of results) {
     process.stdout.write(
@@ -187,6 +197,7 @@ async function main(argv: readonly string[]) {
   for (const pdf of pdfs) {
     process.stdout.write(`${pdf}\n`);
   }
+  if (options.strict && overflows.length > 0) process.exitCode = 1;
 }
 
 main(process.argv.slice(2)).catch((error: unknown) => {
