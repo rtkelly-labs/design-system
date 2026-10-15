@@ -42,6 +42,8 @@ export interface Look {
     curBorder: string;
     curFill: string;
     curFg?: string;
+    /** Bold glyphs inside the current match. */
+    curBold?: boolean;
     otherW: number;
     curW: number;
   };
@@ -49,6 +51,9 @@ export interface Look {
   bracket: { border: string; fill: string; fg: string; bold: boolean };
   err: { fg: string; wash: string };
   warn: { fg: string; wash: string };
+  /** Round 6: an info diagnostic, and the underline style each severity uses (default wavy). */
+  info?: { fg: string };
+  diagStyle?: { err: 'wavy' | 'dashed' | 'dotted'; warn: 'wavy' | 'dashed' | 'dotted'; info: 'wavy' | 'dashed' | 'dotted' };
   add: { bar: string; wash: string };
   del: { bar: string; wash: string };
   guide: { rot: string[]; active: string[] };
