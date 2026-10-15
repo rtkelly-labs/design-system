@@ -8,6 +8,7 @@ export interface TLDRProps {
 export const TLDR: React.FC<TLDRProps> = ({ children }) => {
   return (
     <div
+      data-slot="tldr"
       style={{
         margin: '2rem 0',
         padding: '1.5rem',

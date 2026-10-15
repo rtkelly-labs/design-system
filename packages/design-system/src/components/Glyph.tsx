@@ -56,7 +56,7 @@ export function Glyph({
   }
 
   return (
-    <span
+    <span data-slot="glyph"
       className={cn(
         'inline-flex items-center font-mono select-none',
         accent === 'primary' && 'text-accent-primary',

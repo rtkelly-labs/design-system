@@ -218,7 +218,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
   }, [isPlaying, autoPlayInterval, nextSlide]);
 
   return (
-    <div
+    <div data-slot="slide-deck"
       ref={containerRef}
       style={{
         width: '100%',

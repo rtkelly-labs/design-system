@@ -52,7 +52,7 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
      included — `@tanstack/intent`'s validator)
    - `pnpm check:component-docs` (every component carries a JSDoc — a ratchet)
    - `pnpm check:component-contract` (refs, displayName, recipe, prop spreading — per clause)
-   - `pnpm check:licences` (every shipped package against a default-deny baseline)
+   - `pnpm check:slots` (every exported component carries a kebab-case `data-slot`, or a typed alias)   - `pnpm check:licences` (every shipped package against a default-deny baseline)
    - `pnpm check:reference-material` (unlicensed reference artwork stays untracked, its catalogue stays tracked)
    - `pnpm check:lint-budget` (the one ESLint pass: errors fail outright, warnings as a per-rule ratchet)
    - `pnpm test:a11y` (axe over every asserted story, on both Levels)

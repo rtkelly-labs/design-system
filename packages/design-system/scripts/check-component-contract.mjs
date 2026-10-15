@@ -23,10 +23,9 @@
  *
  * ## What is deliberately not here
  *
- * - **`data-slot`.** Whether a component has parts worth targeting is a
- *   judgement — a single-element component's root already is the part, and
- *   adding a slot there is ceremony. `docs/styling.md` states the rule; #187
- *   applied it to the twelve components that needed it.
+ * - **`data-slot`.** Once a judgement call; now a contract of its own, with its
+ *   own gate: `scripts/check-slots.mjs` and `src/slots/slots.test.tsx`. See
+ *   `docs/styling.md`.
  * - **`id` on the control, not the wrapper.** Real, and cost a debugging session
  *   in #159, but not decidable by reading source. It is in the styling docs.
  *

@@ -114,9 +114,9 @@ export const ActivityGrid = React.forwardRef<HTMLElement, ActivityGridProps>(fun
   const peak = max == null ? valid.reduce((largest, item) => Math.max(largest, item.count), 0) : Math.max(0, max);
   const weekdayLabels = weekStartsOn === 1 ? ['Mon', '', 'Wed', '', 'Fri', '', ''] : ['', 'Tue', '', 'Thu', '', 'Sat', ''];
 
-  if (!valid.length || !weeks.length) return <section ref={ref} aria-label="Activity grid" {...rest} className={cn('font-mono text-sm text-content-primary', className)}><p className="text-content-muted">{valid.length ? 'Date range is too large to display.' : 'No activity dates to display.'}</p><p className="sr-only">{summary}</p></section>;
+  if (!valid.length || !weeks.length) return <section data-slot="activity-grid" ref={ref} aria-label="Activity grid" {...rest} className={cn('font-mono text-sm text-content-primary', className)}><p className="text-content-muted">{valid.length ? 'Date range is too large to display.' : 'No activity dates to display.'}</p><p className="sr-only">{summary}</p></section>;
 
-  return <section ref={ref} aria-label="Activity grid" {...rest} className={cn('flex w-fit max-w-full min-w-0 flex-col gap-3 font-mono text-sm text-content-primary', className)}>
+  return <section data-slot="activity-grid" ref={ref} aria-label="Activity grid" {...rest} className={cn('flex w-fit max-w-full min-w-0 flex-col gap-3 font-mono text-sm text-content-primary', className)}>
     <p className="sr-only">{summary}, from {valid.reduce((a, b) => a.date < b.date ? a : b).date} to {valid.reduce((a, b) => a.date > b.date ? a : b).date}.</p>
     <div className="overflow-x-auto" role="img" aria-label={summary}>
       <div className="min-w-max">

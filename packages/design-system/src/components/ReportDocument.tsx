@@ -87,7 +87,7 @@ export const ReportDocument = forwardRef<HTMLElement, ReportDocumentProps>(funct
   const styles = document_();
 
   return (
-    <article ref={ref} className={cn(styles.root(), className)} {...props}>
+    <article data-slot="report-document" ref={ref} className={cn(styles.root(), className)} {...props}>
       <header className={styles.header()}>
         <h1 className={styles.title()}>{title}</h1>
         {subtitle ? <p className={styles.subtitle()}>{subtitle}</p> : null}
@@ -133,7 +133,7 @@ export const ReportSection = forwardRef<HTMLElement, ReportSectionProps>(functio
   const styles = document_();
   const anchor = id ?? slugify(childrenToText(title));
   return (
-    <section ref={ref} id={anchor} className={cn(styles.section(), className)} {...props}>
+    <section data-slot="report-section" ref={ref} id={anchor} className={cn(styles.section(), className)} {...props}>
       <h2 className={styles.sectionTitle()}>{title}</h2>
       <div className={styles.sectionBody()}>{children}</div>
     </section>
@@ -171,7 +171,7 @@ export const ReportDetails = forwardRef<HTMLDetailsElement, ReportDetailsProps>(
   function ReportDetails({ summary, note, open, children, className, ...props }, ref) {
     const styles = document_();
     return (
-      <details ref={ref} open={open} className={cn(styles.details(), className)} {...props}>
+      <details data-slot="report-details" ref={ref} open={open} className={cn(styles.details(), className)} {...props}>
         <summary className={styles.summary()}>
         {/* Text, not an icon: the marker has to survive greyscale printing and a
             reader who cannot see colour. */}

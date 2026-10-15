@@ -142,7 +142,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   );
 
   const content = scoped ? (
-    <div {...{ [THEME_ATTRIBUTE]: level }} className={className}>
+    <div data-slot="theme-provider" {...{ [THEME_ATTRIBUTE]: level }} className={className}>
       {children}
     </div>
   ) : (
