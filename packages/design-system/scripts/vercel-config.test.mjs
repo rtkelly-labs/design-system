@@ -67,7 +67,7 @@ describe('vercel.json — the embedded site', () => {
   });
 
   it('installs the site and, through it, the package', () => {
-    expect(config.installCommand).toMatch(/--filter @rtkelly13\/design-system-site\.\.\.(\s|$)/);
+    expect(config.installCommand).toMatch(/--filter @rtkelly-labs\/design-system-site\.\.\.(\s|$)/);
   });
 
   // Next writes content hashes into everything under `_next/static/`.

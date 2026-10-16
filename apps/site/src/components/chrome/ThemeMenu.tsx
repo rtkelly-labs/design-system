@@ -1,8 +1,8 @@
 'use client';
 
 import { Palette } from 'lucide-react';
-import { LEVELS, Menu, MenuRadioGroup, MenuRadioItem, useTheme } from '@rtkelly13/design-system';
-import type { ThemeLevel } from '@rtkelly13/design-system';
+import { LEVELS, Menu, MenuRadioGroup, MenuRadioItem, useTheme } from '@rtkelly-labs/design-system';
+import type { ThemeLevel } from '@rtkelly-labs/design-system';
 
 /**
  * The level picker for the marketing header.

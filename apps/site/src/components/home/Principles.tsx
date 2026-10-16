@@ -1,7 +1,7 @@
 'use client';
 
 import { Contrast, Layers, MousePointerClick, Palette, Square } from 'lucide-react';
-import { Feature, FeatureGrid } from '@rtkelly13/design-system';
+import { Feature, FeatureGrid } from '@rtkelly-labs/design-system';
 
 /** Icons are client-side here only because lucide-react ships a context provider. */
 export function Principles() {

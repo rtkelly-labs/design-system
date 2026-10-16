@@ -1,6 +1,6 @@
 'use client';
 
-import { DataTable } from '@rtkelly13/design-system';
+import { DataTable } from '@rtkelly-labs/design-system';
 import { DEPLOYMENTS, formatStamp } from '@/data/fixtures';
 
 export default function PaginatedTable() {

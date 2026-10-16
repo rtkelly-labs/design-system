@@ -2,7 +2,7 @@
  * stylesheet (Tailwind, the generated theme.css, prose.css and the fonts) and
  * nothing re-declared. Tailwind scans this app's `src/` automatically; the
  * package's own `@source` covers the compiled components. */
-@import "@rtkelly13/design-system/styles.css";
+@import "@rtkelly-labs/design-system/styles.css";
 
 /* Code colours, by role.
  *
