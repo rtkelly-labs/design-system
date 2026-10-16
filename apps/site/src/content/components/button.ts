@@ -12,14 +12,14 @@ export const button: ComponentPageDef = {
       id: 'variants',
       title: 'Variants',
       description:
-        'Four filled accents. They are named for roles, not colours, so each one changes with the level: `primary` is cyan on midnight and ink-blue on sketch. `tertiary` is the default.',
+        'A ladder from quiet to loud. `quiet` is the default: a neutral outline whose shadow and accent border arrive on hover. `secondary` is an outline with its shadow at rest, `primary` and `tertiary` are accent fills, `inverse` is a solid ink fill, and `danger` is an `intent.danger` outline that fills on hover and focus. The accents are named for roles, not colours, so each changes with the level: `primary` is cyan on midnight and ink-blue on sketch. `tertiary` is the same hue as `danger` on both levels, so never put them side by side.',
       file: 'button/variants.tsx',
     },
     {
       id: 'sizes',
       title: 'Sizes',
       description:
-        '`size` sets padding and type scale, not how important the button is. `md` is the default. `sm` still meets the 44px hit area on the web medium, so it is safe in dense table rows.',
+        '`size` sets padding and type scale, not how important the button is. `md` is the default. `xs` is 28px and `sm` 40px, for dense rows; both clear the 24px target of WCAG 2.5.8 but not the 44px of 2.5.5. `icon` (32px) and `icon-touch` (40px) are squares for a glyph and require an `aria-label`.',
       file: 'button/sizes.tsx',
     },
     {
@@ -55,7 +55,7 @@ export const button: ComponentPageDef = {
     notes: [
       'Write labels in capitals at the call site, not with `text-transform`. A screen reader then gets the words, not the shouting, and an acronym that is already in capitals does not read as emphasis.',
       'The press effect (the offset shadow folding into the button) is decoration. Focus is shown by the global `:focus-visible` outline, which also shows under forced colours.',
-      'Colour carries no meaning here. A destructive button uses `tertiary` for emphasis, and its label still has to say what it destroys.',
+      'Colour carries no meaning here. A `danger` button is also marked by its outline and by filling on hover, and its label still has to say what it destroys. Inside a `ButtonGroup` a danger button warns in development if a neighbour shares its hue.',
       'The ref goes to whichever element is rendered, so `<Tooltip>` and other Base UI compositions can position against it and return focus to it.',
     ],
     keyboard: [

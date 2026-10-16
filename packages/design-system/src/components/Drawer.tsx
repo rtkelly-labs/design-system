@@ -199,7 +199,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
 
             <div data-slot="drawer-footer" className={slots.footer()}>
               {footer || (
-                <Button onClick={onClose} variant="tertiary" bracketed size="sm">
+                <Button onClick={onClose} bracketed size="sm">
                   CLOSE
                 </Button>
               )}

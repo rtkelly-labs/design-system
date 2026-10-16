@@ -6,6 +6,7 @@ import {
   AlertDialog,
   Badge,
   Button,
+  ButtonGroup,
   ErrorSummary,
   Input,
   Select,
@@ -137,17 +138,17 @@ export function ApiKeys() {
                       <TableCell>{k.created}</TableCell>
                       <TableCell>{k.lastUsed}</TableCell>
                       <TableCell>
-                        <div className="flex flex-wrap justify-end gap-2">
+                        <ButtonGroup aria-label={`${k.name} key actions`} className="justify-end gap-2">
                           {k.kind !== 'publishable' ? (
-                            <Button type="button" size="sm" variant="inverse" aria-label={`Reveal ${k.name} key`} aria-pressed={shown} onClick={() => toggle(k.id)}>
+                            <Button type="button" size="xs" aria-label={`Reveal ${k.name} key`} aria-pressed={shown} onClick={() => toggle(k.id)}>
                               {shown ? 'HIDE' : 'REVEAL'}
                             </Button>
                           ) : null}
                           <CopyButton value={k.value} label={`${k.name} key`} />
-                          <Button type="button" size="sm" variant="tertiary" onClick={() => setRolling(k)} aria-label={`Roll ${k.name}`}>
+                          <Button type="button" size="xs" variant="danger" onClick={() => setRolling(k)} aria-label={`Roll ${k.name}`}>
                             ROLL
                           </Button>
-                        </div>
+                        </ButtonGroup>
                       </TableCell>
                     </TableRow>
                   );

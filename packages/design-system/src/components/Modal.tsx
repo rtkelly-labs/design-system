@@ -8,6 +8,7 @@ import { usePortalThemeAttribute } from './portalTheme';
 import { dialogSurface } from './dialogSurface';
 import { usePopupRef } from './dialogPopupRef';
 import { Button } from './Button';
+import { ButtonGroup } from './ButtonGroup';
 import { BracketText } from './BracketText';
 
 export interface ModalProps
@@ -141,13 +142,14 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
               {children}
             </div>
 
-            <div data-slot="modal-footer" className={slots.footer()}>
+            {/* A ButtonGroup, so D3's hue rule applies to a caller's footer too. */}
+            <ButtonGroup data-slot="modal-footer" className={slots.footer()}>
               {footer || (
-                <Button onClick={onClose} variant="tertiary" bracketed size="sm">
+                <Button onClick={onClose} bracketed size="sm">
                   CLOSE
                 </Button>
               )}
-            </div>
+            </ButtonGroup>
           </Dialog.Popup>
         </Dialog.Viewport>
       </Dialog.Portal>

@@ -422,6 +422,8 @@ export function auditContrast(
         floor.role,
       );
     }
+    // `Button variant="danger"` (D3-B) prints `text.inverse` on `intent.danger` when
+    // hovered or focused, so the pair is measured here rather than assumed.
     for (const tone of ['info', 'success', 'warning', 'danger'] as const satisfies readonly Intent[]) {
       check(
         `text.inverse on intent.${tone}`,
