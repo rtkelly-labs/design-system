@@ -8,7 +8,11 @@ name: Publish Design System to npm
 # Two modes:
 #   - Stable: push to main / v* tag (or a plain workflow_dispatch) publishes
 #     package.json's version under the `latest` dist-tag, skipping if it
-#     already exists.
+#     already exists. After a successful publish the released commit is
+#     tagged v<version> (the re-run that tag triggers skips publish and adds
+#     no further tags). On a successful publish the workflow then tags the
+#     released commit v<version> and pushes it, so npm versions stay
+#     traceable in git.
 #   - Dev: workflow_dispatch with dev=true (usually via the `/publish-dev` PR
 #     comment — see publish-dev-command.yml) publishes
 #     `<version>-dev.<pr>.<short-sha>` under the `dev` dist-tag so consumers
@@ -42,7 +46,7 @@ jobs:
     # See AGENTS.md rule 9 — no job runs to the six-hour default.
     timeout-minutes: 20
     permissions:
-      contents: read
+      contents: write # push v<version> tag after a successful publish
       id-token: write # OIDC for npm trusted publishing + provenance
 
     steps:
@@ -88,9 +92,24 @@ jobs:
           TAG="${{ inputs.dev == true && 'dev' || 'latest' }}"
           if npm view "@rtkelly13/design-system@${VERSION}" version > /dev/null 2>&1; then
             echo "Version ${VERSION} is already published to npm. Skipping publish step."
+            echo "published=false" >> "$GITHUB_ENV"
           else
             echo "Publishing version ${VERSION} to npm (dist-tag: ${TAG})..."
             npm publish --tag "${TAG}"
+            echo "published=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Tag published release
+        if: env.published == 'true' && inputs.dev != true
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if git ls-remote --exit-code --tags origin "refs/tags/v${VERSION}" > /dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists on origin. Nothing to do."
+          else
+            git tag "v${VERSION}"
+            git push origin "v${VERSION}"
+            echo "Tagged release commit as v${VERSION}" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Job summary
