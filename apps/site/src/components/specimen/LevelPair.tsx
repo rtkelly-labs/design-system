@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { Level } from './look';
+import { BracketText } from '@rtkelly13/design-system';
 
 export const LEVEL_IDS: Level[] = ['midnight', 'sketch'];
 
@@ -26,7 +27,7 @@ export function LevelPanel({
 }) {
   return (
     <div data-theme={level} style={style} className="min-w-0 border-2 border-edge-strong bg-surface-base p-3 text-content-primary sm:p-4">
-      <p className="m-0 mb-3 font-mono text-xs font-bold uppercase tracking-wider text-accent-primary">{`[ ${label ?? level} ]`}</p>
+      <p className="m-0 mb-3 font-mono text-xs font-bold uppercase tracking-wider text-accent-primary"><BracketText>{label ?? level}</BracketText></p>
       {children}
     </div>
   );

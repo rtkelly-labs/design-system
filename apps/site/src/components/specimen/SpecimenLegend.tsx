@@ -4,6 +4,7 @@ import type { RowSpec } from './CodeFrame';
 import { LEVEL_IDS } from './LevelPair';
 import type { CodeLook, Level } from './look';
 import { Label } from './parts';
+import { BracketText } from '@rtkelly13/design-system';
 
 export interface LegendItem {
   label: string;
@@ -33,7 +34,7 @@ export function SpecimenLegend({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <Label>{`[ ${title} ]`}</Label>
+      <Label><BracketText>{title}</BracketText></Label>
       <div className="grid grid-cols-1 gap-x-3 gap-y-2 sm:grid-cols-[8.5rem_minmax(0,1fr)_minmax(0,1fr)]">
         <span className="hidden sm:block" />
         {LEVEL_IDS.map((lv) => (
