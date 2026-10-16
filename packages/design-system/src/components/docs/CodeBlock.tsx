@@ -81,7 +81,7 @@ export function CodeBlock({
         </div>
       )}
 
-      <div className="docs-codeblock-body">
+      <div className="docs-codeblock-body [&_pre]:[tab-size:2]">
         {copyable && (
           <button
             type="button"

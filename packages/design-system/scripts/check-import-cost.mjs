@@ -124,7 +124,9 @@ const CASES = [
     imports: ['LEVELS', 'isThemeLevel'],
     // D6/D8: tint and selection groups (and their strengths) join LEVELS (2,590 B).
     // D9: the series group and its hues join LEVELS (2,848 B).
-    maxBytes: 2_950,
+    // #148/#80: the syntax and editor Groups and their sources join LEVELS (5,496 B).
+    // Worth splitting so a consumer that needs only the levels does not pay for them.
+    maxBytes: 5_650,
     forbid: [...HEAVY, 'tailwind-variants', 'lucide-react'],
   },
   {
@@ -172,7 +174,8 @@ const CASES = [
     // +96 B: LEVELS gains the tint and selection groups.
     // +197 B: Badge and Tag sizes, and the series data on LEVELS.
     // +175 B: the hairline appearance and the Table label context (Tag goes client).
-    maxBytes: 66_500,
+    // +2,523 B: LEVELS carries the syntax and editor Groups.
+    maxBytes: 69_400,
     forbid: HEAVY,
   },
 ];

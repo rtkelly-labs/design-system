@@ -602,6 +602,156 @@
       }
     }
   },
+  "syntax": {
+    "$type": "color",
+    "$description": "Code token roles (#148, Round 6), aliased onto the Role or Hue each declares in `syntaxSource`. Colour is by what the token is, never by hue: a keyword is accent.tertiary on every level.",
+    "keyword": {
+      "$value": "{accent.tertiary}"
+    },
+    "function": {
+      "$value": "{accent.primary}"
+    },
+    "string": {
+      "$value": "{intent.success}"
+    },
+    "number": {
+      "$value": "{accent.secondary}"
+    },
+    "type": {
+      "$value": "{accent.secondary}"
+    },
+    "constant": {
+      "$value": "{accent.secondary}"
+    },
+    "comment": {
+      "$value": "{text.muted}"
+    },
+    "punctuation": {
+      "$value": "{text.secondary}"
+    },
+    "operator": {
+      "$value": "{text.secondary}"
+    },
+    "property": {
+      "$value": "{text.primary}"
+    },
+    "plain": {
+      "$value": "{text.primary}"
+    }
+  },
+  "editor": {
+    "$type": "color",
+    "$description": "Editor chrome (#80, Round 6). Opaque roles alias their source. The four translucent ones (selection, bracketWash, diffAddedWash, diffRemovedWash) are literals: the source at the fitted `editorAlpha`, since color-mix cannot hold on both grounds.",
+    "$extensions": {
+      "dev.ryankelly.design-system": {
+        "editorAlpha": {
+          "selection": 30,
+          "bracket": 10,
+          "diff": 12
+        }
+      }
+    },
+    "selection": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.1333,
+          0.8275,
+          0.9333
+        ],
+        "alpha": 0.302
+      },
+      "$extensions": {
+        "dev.ryankelly.design-system": {
+          "source": "accent.primary"
+        }
+      }
+    },
+    "selectionInk": {
+      "$value": "{text.primary}"
+    },
+    "find": {
+      "$value": "{accent.secondary}"
+    },
+    "findCurrent": {
+      "$value": "{accent.secondary}"
+    },
+    "line": {
+      "$value": "{border.subtle}"
+    },
+    "lineNumber": {
+      "$value": "{text.muted}"
+    },
+    "lineNumberActive": {
+      "$value": "{accent.primary}"
+    },
+    "bracket": {
+      "$value": "{accent.tertiary}"
+    },
+    "bracketWash": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.9765,
+          0.3333,
+          0.6431
+        ],
+        "alpha": 0.102
+      },
+      "$extensions": {
+        "dev.ryankelly.design-system": {
+          "source": "accent.tertiary"
+        }
+      }
+    },
+    "error": {
+      "$value": "{palette.red}"
+    },
+    "warning": {
+      "$value": "{intent.warning}"
+    },
+    "info": {
+      "$value": "{intent.info}"
+    },
+    "diffAdded": {
+      "$value": "{intent.success}"
+    },
+    "diffRemoved": {
+      "$value": "{palette.red}"
+    },
+    "diffAddedWash": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.2235,
+          1,
+          0.0784
+        ],
+        "alpha": 0.1216
+      },
+      "$extensions": {
+        "dev.ryankelly.design-system": {
+          "source": "intent.success"
+        }
+      }
+    },
+    "diffRemovedWash": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          1,
+          0.3451,
+          0.4314
+        ],
+        "alpha": 0.1216
+      },
+      "$extensions": {
+        "dev.ryankelly.design-system": {
+          "source": "palette.red"
+        }
+      }
+    }
+  },
   "shadow": {
     "$type": "color",
     "color": {

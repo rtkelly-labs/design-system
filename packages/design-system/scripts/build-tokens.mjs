@@ -19,7 +19,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { LEVELS, THEME_LEVELS, FIXED_COLOURS, INK_WEIGHT, PRINT_LEVEL, SERIES_COUNT } from '../src/theme/levels.ts';
+import { LEVELS, THEME_LEVELS, FIXED_COLOURS, INK_WEIGHT, PRINT_LEVEL, SERIES_COUNT, SYNTAX_ROLES, EDITOR_ROLES } from '../src/theme/levels.ts';
 import { applyContrastDelta } from '../src/theme/contrast.ts';
 import { CSS_MEDIUM, LOOPS, LOOP_KEYFRAMES, MEDIA_DEFINITIONS } from '../src/theme/media.ts';
 
@@ -57,6 +57,9 @@ const BANNER = `/* GENERATED FILE — DO NOT EDIT.
  * re-declared inside each level block, which is free in a generated file.
  */`;
 
+/** `lineNumberActive` -> `line-number-active`. */
+const kebab = (name) => name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+
 /** `--ds-*` custom properties for one level, in a stable order. */
 function levelVariables(definition) {
   const lines = [];
@@ -74,6 +77,10 @@ function levelVariables(definition) {
   push('selection-multi', definition.selection.multi);
   // The categorical series group (D9): six colours told apart, not ranked.
   definition.series.forEach((value, i) => push(`series-${i + 1}`, value));
+  // The code Groups (#148, #80, Round 6): token colours, then editor chrome. The
+  // four translucent editor roles are literal #rrggbbaa, fitted per level.
+  for (const role of SYNTAX_ROLES) push(`syntax-${kebab(role)}`, definition.syntax[role]);
+  for (const role of EDITOR_ROLES) push(`editor-${kebab(role)}`, definition.editor[role]);
   // The Hue vocabulary, declared below the Roles above. A component may not
   // read these — see `docs/adr/0001-hues-declared-below-roles.md`. They exist
   // for Targets with no notion of jobs: ANSI's sixteen slots, a diagram
@@ -143,6 +150,11 @@ const SERIES_ALIASES = Array.from(
  * The Tailwind-facing aliases and the shadow utilities, repeated per level so
  * that var() substitution re-runs at the themed element. See the banner.
  */
+const CODE_ALIASES = [
+  ...SYNTAX_ROLES.map((role) => `  --color-syntax-${kebab(role)}: var(--ds-syntax-${kebab(role)});`),
+  ...EDITOR_ROLES.map((role) => `  --color-editor-${kebab(role)}: var(--ds-editor-${kebab(role)});`),
+].join('\n');
+
 const TAILWIND_ALIASES = `  --color-surface-base: var(--ds-surface-base);
   --color-surface-raised: var(--ds-surface-raised);
   --color-surface-sunken: var(--ds-surface-sunken);
@@ -192,6 +204,7 @@ const TAILWIND_ALIASES = `  --color-surface-base: var(--ds-surface-base);
   --color-palette-bright-magenta: var(--ds-palette-bright-magenta);
   --color-palette-bright-pink: var(--ds-palette-bright-pink);
 ${SERIES_ALIASES}
+${CODE_ALIASES}
   --shadow-hard-sm: var(--ds-elev-sm) var(--ds-shadow-color);
   --shadow-hard-md: var(--ds-elev-md) var(--ds-shadow-color);
   --shadow-hard-lg: var(--ds-elev-lg) var(--ds-shadow-color);

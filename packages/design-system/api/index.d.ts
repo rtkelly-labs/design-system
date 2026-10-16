@@ -21,6 +21,8 @@ type AnsiHue = Extract<Hue, 'red' | 'green' | 'yellow' | 'blue' | 'magenta' | 'c
 
 type HueRef = Hue | 'neutral';
 
+type RoleRef = `accent.${Emphasis}` | `intent.${Intent}` | `text.${TextTone}` | `border.${BorderTone}` | `palette.${Hue}`;
+
 type AccentToken = Emphasis | Intent;
 
 type SeriesIndex = 1 | 2 | 3 | 4 | 5 | 6;
@@ -115,7 +117,27 @@ interface LevelDefinition {
     }>;
 
     readonly shadow: string;
+
+    readonly syntaxSource: Readonly<Record<SyntaxRole, RoleRef>>;
+
+    readonly syntax: Readonly<Record<SyntaxRole, string>>;
+
+    readonly editorSource: Readonly<Record<EditorRole, RoleRef>>;
+
+    readonly editorAlpha: Readonly<{
+        selection: number;
+        bracket: number;
+        diff: number;
+    }>;
+
+    readonly editor: Readonly<Record<EditorRole, string>>;
 }
+
+declare const SYNTAX_ROLES: readonly ["keyword", "function", "string", "number", "type", "constant", "comment", "punctuation", "operator", "property", "plain"];
+type SyntaxRole = (typeof SYNTAX_ROLES)[number];
+
+declare const EDITOR_ROLES: readonly ["selection", "selectionInk", "find", "findCurrent", "line", "lineNumber", "lineNumberActive", "bracket", "bracketWash", "error", "warning", "info", "diffAdded", "diffRemoved", "diffAddedWash", "diffRemovedWash"];
+type EditorRole = (typeof EDITOR_ROLES)[number];
 
 declare const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>>;
 
@@ -308,6 +330,63 @@ declare function auditSeriesSeparation(ladder: Readonly<Record<ThemeLevel, Level
 declare function applyContrastDelta(def: LevelDefinition): LevelDefinition;
 
 declare function contrastMoreLadder(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): Record<ThemeLevel, LevelDefinition>;
+
+declare const EDITOR_TRANSLUCENT: {
+    readonly selection: "selection";
+    readonly bracketWash: "bracket";
+    readonly diffAddedWash: "diff";
+    readonly diffRemovedWash: "diff";
+};
+
+declare const EDITOR_ALPHA_TARGET: {
+    readonly selection: 30;
+    readonly bracket: 10;
+    readonly diff: 12;
+};
+type Sources = Pick<LevelDefinition, 'accent' | 'intent' | 'text' | 'border' | 'palette'>;
+
+declare function resolveRef(def: Sources, ref: RoleRef): string;
+
+declare function toHex(c: Rgb): string;
+
+declare function alphaHex(hex: string, percent: number): string;
+
+declare function flattenOnto(over: string, ground: string): string;
+
+declare function deriveSyntax(def: Sources & Pick<LevelDefinition, 'syntaxSource'>): Record<SyntaxRole, string>;
+
+declare function deriveEditor(def: Sources & Pick<LevelDefinition, 'editorSource' | 'editorAlpha'>, alpha?: LevelDefinition['editorAlpha']): Record<EditorRole, string>;
+
+declare function holdsEditorAlpha(def: LevelDefinition, key: 'selection' | 'bracket' | 'diff', percent: number, diff?: number): boolean;
+
+declare function fitEditorAlpha(def: LevelDefinition): LevelDefinition['editorAlpha'];
+interface EditorCheck {
+    level: ThemeLevel;
+
+    pair: string;
+    foreground: string;
+
+    background: string;
+    ratio: number;
+    minimum: number;
+    passes: boolean;
+}
+
+declare const EDITOR_TEXT_FLOOR = 4.5;
+
+declare const EDITOR_EDGE_FLOOR = 3;
+
+declare function auditEditor(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): EditorCheck[];
+interface EditorAgreement {
+    level: ThemeLevel;
+    role: string;
+    value: string;
+    expected: string;
+    source: string;
+    passes: boolean;
+}
+
+declare function auditEditorAgreement(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): EditorAgreement[];
 
 declare const ANSI_SLOTS: readonly ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "brightBlack", "brightRed", "brightGreen", "brightYellow", "brightBlue", "brightMagenta", "brightCyan", "brightWhite"];
 type AnsiSlot = (typeof ANSI_SLOTS)[number];
@@ -3559,6 +3638,14 @@ export {
   type DrawerProps,
   DrawingSheet,
   type DrawingSheetProps,
+  EDITOR_ALPHA_TARGET,
+  EDITOR_EDGE_FLOOR,
+  EDITOR_ROLES,
+  EDITOR_TEXT_FLOOR,
+  EDITOR_TRANSLUCENT,
+  type EditorAgreement,
+  type EditorCheck,
+  type EditorRole,
   type Emphasis,
   EmptyState,
   type EmptyStateProps,
@@ -3711,11 +3798,13 @@ export {
   ReportSection,
   type ReportSectionProps,
   type Rgb,
+  type RoleRef,
   SERIES_COUNT,
   SERIES_LETTERS,
   SERIES_SHAPES,
   SLIDE_DECK_HOTKEYS,
   SLOTS,
+  SYNTAX_ROLES,
   SYSTEM_LEVEL,
   SaasLandingPage,
   type SaasLandingPageProps,
@@ -3796,6 +3885,7 @@ export {
   type SwatchRow,
   Switch,
   type SwitchProps,
+  type SyntaxRole,
   THEME_ATTRIBUTE,
   THEME_LEVELS,
   THEME_STORAGE_KEY,
@@ -3889,11 +3979,14 @@ export {
   XIcon,
   accentSurfaceClass,
   accentVar,
+  alphaHex,
   ansiScheme,
   apcaContrast,
   applyContrastDelta,
   assertNever,
   auditContrast,
+  auditEditor,
+  auditEditorAgreement,
   auditHueAgreement,
   auditSelectionDevices,
   auditSeriesSeparation,
@@ -3908,11 +4001,16 @@ export {
   contrastRatio,
   createAnchorHeading,
   deltaE,
+  deriveEditor,
+  deriveSyntax,
   findHueCollisions,
+  fitEditorAlpha,
+  flattenOnto,
   fontVar,
   getA11yInitScript,
   getRecommendedColours,
   getThemeInitScript,
+  holdsEditorAlpha,
   hueOfRole,
   isA11yChoice,
   isExternalHref,
@@ -3926,6 +4024,7 @@ export {
   parseColor,
   relativeLuminance,
   resolveA11yAttributes,
+  resolveRef,
   scanRules,
   scanTokenRules,
   semanticTokens,
@@ -3935,6 +4034,7 @@ export {
   surfaceVar,
   textVar,
   tintVar,
+  toHex,
   useA11yPreferences,
   useActiveHeading,
   useCopyToClipboard,
