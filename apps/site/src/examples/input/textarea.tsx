@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TextArea } from '@rtkelly13/design-system';
+import { TextArea } from '@rtkelly-labs/design-system';
 
 const LIMIT = 280;
 

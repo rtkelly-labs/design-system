@@ -1,6 +1,6 @@
 # Capability readiness — the 1.0 matrix
 
-The canonical answer to *"is the system complete?"* ([#237](https://github.com/rtkelly13/design-system/issues/237)).
+The canonical answer to *"is the system complete?"* ([#237](https://github.com/rtkelly-labs/design-system/issues/237)).
 
 A component count cannot answer that question: the package had thirty-odd exports and still no way
 to express a checkbox. What a consumer actually asks is **can I build this site without inventing
@@ -80,7 +80,7 @@ off-canvas panel* (`Drawer`, #241, which *Mobile navigation* composes but does n
 
 ## The proof: account flows
 
-`SaaS/Account Flows` ([#252](https://github.com/rtkelly13/design-system/issues/252)) composes four
+`SaaS/Account Flows` ([#252](https://github.com/rtkelly-labs/design-system/issues/252)) composes four
 flows — sign in, create an account, reset a password, account settings inside `AppShell` — from the
 rows above, and `tests/a11y.spec.ts` completes each one from the keyboard. It is the check that the
 form rows are `ready` together and not only one at a time. What it found:
@@ -90,12 +90,12 @@ form rows are `ready` together and not only one at a time. What it found:
 - **Composed from utilities, with no system answer:** a heading for the top of a form panel
   (`PageTitle` and `PageHeader` are page-scale), and an inline text link outside `Prose`.
   Not blocking: both are typography over roles, not invented behaviour.
-  [#300](https://github.com/rtkelly13/design-system/issues/300).
+  [#300](https://github.com/rtkelly-labs/design-system/issues/300).
 - **Fixed:** every field error was `role="alert"`, so a failed submit announced each invalid field
   on top of `ErrorSummary` taking focus. Field errors are no longer live regions. The summary is
   announced, and each field's error is read as its control's description when a summary link lands
   there. `tests/a11y.spec.ts` asserts that after each failed submit.
-  [#299](https://github.com/rtkelly13/design-system/issues/299).
+  [#299](https://github.com/rtkelly-labs/design-system/issues/299).
 
 ## What is deliberately not a row
 

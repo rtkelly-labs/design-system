@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { FinanceConsole, ContentStudio } from '@/generated/admin';
-import { SaasLandingPage } from '@rtkelly13/design-system';
+import { SaasLandingPage } from '@rtkelly-labs/design-system';
 
 /**
  * The sample pages, keyed by the slug in `src/content/samples.ts`. Each is a

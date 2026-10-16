@@ -746,7 +746,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build Package
-        run: pnpm --filter @rtkelly13/design-system build
+        run: pnpm --filter @rtkelly-labs/design-system build
 
       # Lint (react-hooks, jsx-a11y, typescript-eslint at zero), the package's
       # own colour-rule scanner at zero, a typecheck, then the static export.

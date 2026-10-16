@@ -12,7 +12,7 @@ name: Publish Design System to npm
 #   - Dev: workflow_dispatch with dev=true (usually via the `/publish-dev` PR
 #     comment — see publish-dev-command.yml) publishes
 #     `<version>-dev.<pr>.<short-sha>` under the `dev` dist-tag so consumers
-#     can trial a branch: `pnpm add @rtkelly13/design-system@dev`.
+#     can trial a branch: `pnpm add @rtkelly-labs/design-system@dev`.
 #     Trusted publishing is scoped to this workflow FILE, not a branch, so
 #     dispatching it on a PR branch still authenticates.
 
@@ -86,7 +86,7 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           TAG="${{ inputs.dev == true && 'dev' || 'latest' }}"
-          if npm view "@rtkelly13/design-system@${VERSION}" version > /dev/null 2>&1; then
+          if npm view "@rtkelly-labs/design-system@${VERSION}" version > /dev/null 2>&1; then
             echo "Version ${VERSION} is already published to npm. Skipping publish step."
           else
             echo "Publishing version ${VERSION} to npm (dist-tag: ${TAG})..."
@@ -97,7 +97,7 @@ jobs:
         shell: bash
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          echo "Published (or found existing) **@rtkelly13/design-system@${VERSION}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "Published (or found existing) **@rtkelly-labs/design-system@${VERSION}**" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "pnpm add @rtkelly13/design-system@${VERSION}" >> "$GITHUB_STEP_SUMMARY"
+          echo "pnpm add @rtkelly-labs/design-system@${VERSION}" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
