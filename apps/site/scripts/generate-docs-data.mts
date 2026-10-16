@@ -219,7 +219,7 @@ function postSections(file: string): PostSection[] {
   const sections: PostSection[] = [];
   const seen = new Set<string>();
   for (const line of source.split('\n')) {
-    const match = /^(##|###) (.+)$/.exec(line);
+    const match = /^ {0,3}(##|###)[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/.exec(line);
     if (!match) continue;
     // Heading text as rendered: links and emphasis contribute their words, not their markup.
     const title = match[2]
@@ -228,8 +228,8 @@ function postSections(file: string): PostSection[] {
       .replace(/[`*]/g, '');
     // Markup the title regex above does not strip would make the slug here differ from the one
     // `AnchorHeading` computes from the rendered text, so the rail and the anchor would drift.
-    if (/[{<&_\\]/.test(title)) {
-      throw new Error(`${file}: heading "${title}" contains markup (one of { < & _ or a backslash); headings are plain text`);
+    if (/[{<&_\\[\]]/.test(title)) {
+      throw new Error(`${file}: heading "${title}" contains markup (one of { < & _ [ ] or a backslash); headings are plain text`);
     }
     const id = slugify(title);
     if (seen.has(id)) throw new Error(`${file}: two headings slug to ${id}`);
