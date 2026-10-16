@@ -1,8 +1,8 @@
 {
-  "name": "@rtkelly13/design-system-site",
+  "name": "@rtkelly-labs/design-system-site",
   "version": "0.0.0",
   "private": true,
-  "description": "The applied design-system website: a Next.js App Router consumer built entirely from @rtkelly13/design-system, with a live homepage and the component documentation.",
+  "description": "The applied design-system website: a Next.js App Router consumer built entirely from @rtkelly-labs/design-system, with a live homepage and the component documentation.",
   "type": "module",
   "engines": {
     "node": ">=22"
@@ -20,7 +20,7 @@
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@next/mdx": "^16.4.2",
-    "@rtkelly13/design-system": "workspace:*",
+    "@rtkelly-labs/design-system": "workspace:*",
     "lucide-react": "^1.28.0",
     "next": "^16.3.6",
     "react": "^19.2.8",

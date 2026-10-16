@@ -1,4 +1,4 @@
-// @rtkelly13/design-system main entrypoint
+// @rtkelly-labs/design-system main entrypoint
 
 export * from './tokens';
 

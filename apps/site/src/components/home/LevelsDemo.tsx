@@ -1,7 +1,7 @@
 'use client';
 
-import { Badge, Button, Input, ThemeProvider } from '@rtkelly13/design-system';
-import type { ThemeLevel } from '@rtkelly13/design-system';
+import { Badge, Button, Input, ThemeProvider } from '@rtkelly-labs/design-system';
+import type { ThemeLevel } from '@rtkelly-labs/design-system';
 
 function Specimen({ level }: { level: ThemeLevel }) {
   return (

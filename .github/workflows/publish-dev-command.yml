@@ -4,8 +4,8 @@ name: Publish dev version (command)
 # `<version>-dev.<pr>.<short-sha>` under the `dev` dist-tag, for trialling
 # design-system changes in a consumer (e.g. the blog) before merging:
 #
-#   pnpm add @rtkelly13/design-system@<exact-version>   # pin the build
-#   pnpm add @rtkelly13/design-system@dev               # latest dev build
+#   pnpm add @rtkelly-labs/design-system@<exact-version>   # pin the build
+#   pnpm add @rtkelly-labs/design-system@dev               # latest dev build
 #
 # npm trusted publishing only trusts publish-package.yml, so this workflow
 # doesn't publish itself — it dispatches publish-package.yml on the PR's head
@@ -97,8 +97,8 @@ jobs:
               `Watch the [publish workflow](${runsUrl}) — once green, install with:`,
               '',
               '```bash',
-              `pnpm add @rtkelly13/design-system@dev            # latest dev build`,
-              `pnpm view @rtkelly13/design-system dist-tags     # find the exact -dev.${prNum}.${sha} version`,
+              `pnpm add @rtkelly-labs/design-system@dev            # latest dev build`,
+              `pnpm view @rtkelly-labs/design-system dist-tags     # find the exact -dev.${prNum}.${sha} version`,
               '```',
               '',
               'In the blog, pin the exact version in `package.json`, test, and revert before merging.',

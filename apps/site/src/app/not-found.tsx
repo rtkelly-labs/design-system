@@ -1,4 +1,4 @@
-import { Button, EmptyState } from '@rtkelly13/design-system';
+import { Button, EmptyState } from '@rtkelly-labs/design-system';
 import { SiteChrome } from '@/components/chrome/SiteChrome';
 
 export default function NotFound() {
