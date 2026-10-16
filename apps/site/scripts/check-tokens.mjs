@@ -23,7 +23,7 @@ function walk(dir, found = []) {
     if (SKIP.has(entry)) continue;
     const full = path.join(dir, entry);
     if (statSync(full).isDirectory()) walk(full, found);
-    else if (/\.(tsx?|css)$/.test(entry)) found.push(full);
+    else if (/\.(tsx?|css|mdx)$/.test(entry)) found.push(full);
   }
   return found;
 }

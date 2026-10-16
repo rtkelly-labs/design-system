@@ -81,6 +81,10 @@ map, as an npm consumer would.
    import components from source by relative path, so importing one here would
    compile a second copy of the library into the site. Move a fixture to where both
    can import it first; do not copy it.
+10. **Posts are `.mdx` under `src/app/docs/<group>/<slug>/page.mdx`, registered in `src/content/posts.ts`.**
+    Sections come from the file's `##`/`###` headings at generate time, slugged with the package's
+    `slugify`, so an anchor cannot drift from the contents rail. Colours and figures come from the
+    package's exports, never literals; `check:tokens` scans `.mdx`.
 
 ## Adding a component page
 
