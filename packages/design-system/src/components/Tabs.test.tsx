@@ -242,6 +242,33 @@ describe('Tabs', () => {
     expect(panel.current?.className).toContain('p-4');
   });
 
+  it('renders sans-serif by default and mono when font="mono"', () => {
+    const { unmount } = render(
+      <Tabs defaultValue="a">
+        <TabsList label="Default">
+          <TabsTab value="a">a</TabsTab>
+        </TabsList>
+        <TabsPanel value="a">a</TabsPanel>
+      </Tabs>,
+    );
+    const defaultTab = screen.getByRole('tab');
+    expect(defaultTab.className).toContain('font-sans');
+    expect(defaultTab.className).not.toContain('font-mono');
+    unmount();
+
+    render(
+      <Tabs defaultValue="a" font="mono">
+        <TabsList label="Mono">
+          <TabsTab value="a">a</TabsTab>
+        </TabsList>
+        <TabsPanel value="a">a</TabsPanel>
+      </Tabs>,
+    );
+    const monoTab = screen.getByRole('tab');
+    expect(monoTab.className).toContain('font-mono');
+    expect(monoTab.className).toContain('uppercase');
+  });
+
   it('refuses to render a part outside a Tabs', () => {
     const quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => render(<TabsTab value="orphan">orphan</TabsTab>)).toThrow(

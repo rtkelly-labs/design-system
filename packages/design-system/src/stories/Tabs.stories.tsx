@@ -14,6 +14,7 @@ const meta: Meta<typeof Tabs> = {
   argTypes: {
     variant: { control: 'select', options: ['merged', 'underline', 'segmented'] },
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
+    font: { control: 'inline-radio', options: ['sans', 'mono'] },
     accent: {
       control: 'select',
       options: ['primary', 'secondary', 'tertiary', 'quiet', 'info', 'success', 'warning', 'danger'],
@@ -137,5 +138,17 @@ export const Controlled: Story = {
         </Tabs>
       </div>
     );
+  },
+};
+
+/**
+ * Technical / code-oriented tab styling with `font="mono"`, retaining monospace
+ * and uppercase tracking for package managers or developer toolbars.
+ */
+export const Monospace: Story = {
+  args: {
+    defaultValue: 'profile',
+    font: 'mono',
+    children: settings,
   },
 };

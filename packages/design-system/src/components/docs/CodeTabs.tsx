@@ -167,6 +167,7 @@ export function CodeTabs({
       value={activeLabel}
       onValueChange={select}
       variant={variant}
+      font="mono"
       accent={accent}
       className={cn('my-6', className)}
     >

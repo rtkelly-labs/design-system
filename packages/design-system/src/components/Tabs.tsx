@@ -36,6 +36,12 @@ import type { AccentToken } from '../lib/theme';
 export type TabsOrientation = 'horizontal' | 'vertical';
 
 /**
+ * The font style for the tabs strip: 'sans' for general UI/app navigation,
+ * or 'mono' for technical/code block contexts.
+ */
+export type TabsFont = 'sans' | 'mono';
+
+/**
  * The three tab-strip shapes, loudest first. Named for the part rather than
  * the colour, because the accent is a separate axis.
  */
@@ -47,12 +53,21 @@ const tabs_ = recipe({
     // `CodeTabs` supplies its own `my-6`.
     root: '',
     strip: 'relative z-10 flex border-2 border-edge-strong',
-    caption:
-      'truncate font-mono text-xs font-bold uppercase tracking-widest text-content-secondary',
+    caption: 'truncate text-xs text-content-secondary',
     list: 'flex items-end',
-    tab: 'shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-widest transition-colors focus-visible:ring-2 focus-visible:ring-[var(--tabs-accent)] focus-visible:ring-inset',
+    tab: 'shrink-0 whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-[var(--tabs-accent)] focus-visible:ring-inset',
   },
   variants: {
+    font: {
+      sans: {
+        tab: 'font-sans text-sm font-semibold tracking-normal normal-case',
+        caption: 'font-sans text-xs font-semibold uppercase tracking-wider',
+      },
+      mono: {
+        tab: 'font-mono text-xs font-bold uppercase tracking-widest',
+        caption: 'font-mono text-xs font-bold uppercase tracking-widest',
+      },
+    },
     variant: {
       // The loudest: a solid accent tab standing on the panel, its bottom rule
       // dropped so the fill runs into what it labels.
@@ -95,6 +110,12 @@ const tabs_ = recipe({
       true: {},
       false: {},
     },
+  },
+  defaultVariants: {
+    font: 'sans',
+    variant: 'merged',
+    orientation: 'horizontal',
+    selected: false,
   },
   compoundVariants: [
     {
@@ -165,11 +186,6 @@ const tabs_ = recipe({
       class: { tab: 'border-b-2 border-r-0 last:border-b-0' },
     },
   ],
-  defaultVariants: {
-    variant: 'merged',
-    orientation: 'horizontal',
-    selected: false,
-  },
 });
 
 interface TabsContextValue {
@@ -177,6 +193,7 @@ interface TabsContextValue {
   select: (value: string) => void;
   orientation: TabsOrientation;
   variant: TabsVariant;
+  font: TabsFont;
   tabId: (value: string) => string;
   panelId: (value: string) => string;
 }
@@ -233,6 +250,11 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChang
   /** The strip's shape. See {@link TabsVariant}. */
   variant?: TabsVariant;
   /**
+   * The font styling family. Defaults to `'sans'` for UI navigation, or
+   * `'mono'` for technical/code block contexts.
+   */
+  font?: TabsFont;
+  /**
    * Semantic accent for the selected tab, as an `Emphasis` or an `Intent`.
    * Selection is marked by a fill or a 4px edge in this colour, never by
    * swapping one surface for another — the surfaces are a few percent of
@@ -283,6 +305,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
     onValueChange,
     orientation = 'horizontal',
     variant = 'merged',
+    font = 'sans',
     accent = 'primary',
     children,
     className,
@@ -312,13 +335,14 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
       select,
       orientation,
       variant,
+      font,
       tabId: (v) => `${uid}-tab-${idPart(v)}`,
       panelId: (v) => `${uid}-panel-${idPart(v)}`,
     }),
-    [selected, select, orientation, variant, uid],
+    [selected, select, orientation, variant, font, uid],
   );
 
-  const styles = tabs_({ variant, orientation });
+  const styles = tabs_({ variant, orientation, font });
 
   // The accent is a runtime value, so it travels as a custom property that the
   // fill and edge utilities read — a utility cannot be assembled at build time
@@ -433,8 +457,8 @@ export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(function TabsL
   },
   ref,
 ) {
-  const { orientation, variant } = useTabsContext('TabsList');
-  const styles = tabs_({ variant, orientation });
+  const { orientation, variant, font } = useTabsContext('TabsList');
+  const styles = tabs_({ variant, orientation, font });
 
   return (
     <div
@@ -496,6 +520,7 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
   const styles = tabs_({
     variant: context.variant,
     orientation: context.orientation,
+    font: context.font,
     selected,
   });
 
