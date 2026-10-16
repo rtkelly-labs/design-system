@@ -8,6 +8,7 @@ import { usePortalThemeAttribute } from './portalTheme';
 import { dialogSurface } from './dialogSurface';
 import { Button } from './Button';
 import { ButtonGroup } from './ButtonGroup';
+import { BracketText } from './BracketText';
 
 export interface AlertDialogProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {

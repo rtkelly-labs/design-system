@@ -9,6 +9,7 @@ import { dialogSurface } from './dialogSurface';
 import { usePopupRef } from './dialogPopupRef';
 import { Button } from './Button';
 import { ButtonGroup } from './ButtonGroup';
+import { BracketText } from './BracketText';
 
 export interface ModalProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
