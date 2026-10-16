@@ -221,9 +221,11 @@ table-row	TableRow
 table-virtual-scroll	Table
 tabs	Tabs
 tabs-caption	Tabs
+tabs-close-layer	Tabs
 tabs-list	TabsList
 tabs-panel	TabsPanel
 tabs-tab	TabsTab
+tabs-tab-dirty	TabsTab
 tag	Tag
 telemetry-gauge	TelemetryGauge
 telemetry-gauge-metric	TelemetryGauge

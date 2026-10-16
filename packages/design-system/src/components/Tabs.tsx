@@ -1,12 +1,24 @@
 'use client';
 
-import { createContext, forwardRef, useCallback, useContext, useId, useMemo, useState } from 'react';
+import {
+  createContext,
+  forwardRef,
+  useCallback,
+  useContext,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { createPortal } from 'react-dom';
 import type {
   ButtonHTMLAttributes,
   CSSProperties,
   HTMLAttributes,
   KeyboardEvent,
   ReactNode,
+  RefObject,
 } from 'react';
 import { cn, recipe } from '../lib/recipe';
 import { accentVar } from '../lib/theme';
@@ -41,6 +53,13 @@ export type TabsOrientation = 'horizontal' | 'vertical';
  */
 export type TabsVariant = 'merged' | 'underline' | 'segmented';
 
+/**
+ * How tab labels are cased. `uppercase` is the house look; `none` preserves
+ * the label as written, which a filename needs: `README.md` and `readme.md`
+ * are different files.
+ */
+export type TabsTransform = 'uppercase' | 'none';
+
 const tabs_ = recipe({
   slots: {
     // The root owns no spacing: a page margin is the caller's decision, and
@@ -51,6 +70,10 @@ const tabs_ = recipe({
       'truncate font-mono text-xs font-bold uppercase tracking-widest text-content-secondary',
     list: 'flex items-end',
     tab: 'shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-widest transition-colors focus-visible:ring-2 focus-visible:ring-[var(--tabs-accent)] focus-visible:ring-inset',
+    // The close button, drawn over the tab's trailing edge from the strip's
+    // close layer. Its ink follows the tab it sits on: inverse on an accent fill.
+    close:
+      'pointer-events-auto absolute flex size-6 items-center justify-center font-mono text-sm leading-none text-content-muted hover:bg-surface-raised hover:text-content-primary focus-visible:ring-2 focus-visible:ring-[var(--tabs-accent)] focus-visible:ring-inset',
   },
   variants: {
     variant: {
@@ -95,6 +118,12 @@ const tabs_ = recipe({
       true: {},
       false: {},
     },
+    // Case. `uppercase` is the house look and adds nothing; `none` hands the
+    // label back as written, for a filename or any case-sensitive identifier.
+    transform: {
+      uppercase: {},
+      none: { tab: 'normal-case tracking-normal' },
+    },
   },
   compoundVariants: [
     {
@@ -102,6 +131,7 @@ const tabs_ = recipe({
       selected: true,
       class: {
         tab: 'relative z-10 border-edge-strong border-b-0 bg-[var(--tabs-accent)] text-content-inverse',
+        close: 'text-content-inverse hover:bg-transparent hover:text-content-inverse hover:ring-2 hover:ring-inset hover:ring-current focus-visible:ring-current',
       },
     },
     {
@@ -124,7 +154,10 @@ const tabs_ = recipe({
     {
       variant: 'segmented',
       selected: true,
-      class: { tab: 'bg-[var(--tabs-accent)] text-content-inverse' },
+      class: {
+        tab: 'bg-[var(--tabs-accent)] text-content-inverse',
+        close: 'text-content-inverse hover:bg-transparent hover:text-content-inverse hover:ring-2 hover:ring-inset hover:ring-current focus-visible:ring-current',
+      },
     },
     {
       variant: 'segmented',
@@ -169,6 +202,7 @@ const tabs_ = recipe({
     variant: 'merged',
     orientation: 'horizontal',
     selected: false,
+    transform: 'uppercase',
   },
 });
 
@@ -177,11 +211,19 @@ interface TabsContextValue {
   select: (value: string) => void;
   orientation: TabsOrientation;
   variant: TabsVariant;
+  transform: TabsTransform;
   tabId: (value: string) => string;
   panelId: (value: string) => string;
 }
 
 const TabsContext = createContext<TabsContextValue | null>(null);
+
+/**
+ * The layer a closable tab's close button is drawn into: an element in the
+ * strip beside the `tablist`, never inside it. `null` until the strip has
+ * mounted, so a tab renders no close button on the server or first paint.
+ */
+const CloseLayerContext = createContext<HTMLElement | null>(null);
 
 function useTabsContext(part: string): TabsContextValue {
   const context = useContext(TabsContext);
@@ -233,6 +275,13 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChang
   /** The strip's shape. See {@link TabsVariant}. */
   variant?: TabsVariant;
   /**
+   * Label casing for every tab in the set. `uppercase` by default; `none`
+   * keeps the case the label was written in, for filenames, branch names and
+   * any identifier where case carries meaning. All-caps is also harder to read
+   * in long labels, which is the other reason to turn it off.
+   */
+  transform?: TabsTransform;
+  /**
    * Semantic accent for the selected tab, as an `Emphasis` or an `Intent`.
    * Selection is marked by a fill or a 4px edge in this colour, never by
    * swapping one surface for another — the surfaces are a few percent of
@@ -283,6 +332,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
     onValueChange,
     orientation = 'horizontal',
     variant = 'merged',
+    transform = 'uppercase',
     accent = 'primary',
     children,
     className,
@@ -312,10 +362,11 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
       select,
       orientation,
       variant,
+      transform,
       tabId: (v) => `${uid}-tab-${idPart(v)}`,
       panelId: (v) => `${uid}-panel-${idPart(v)}`,
     }),
-    [selected, select, orientation, variant, uid],
+    [selected, select, orientation, variant, transform, uid],
   );
 
   const styles = tabs_({ variant, orientation });
@@ -435,6 +486,7 @@ export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(function TabsL
 ) {
   const { orientation, variant } = useTabsContext('TabsList');
   const styles = tabs_({ variant, orientation });
+  const [closeLayer, setCloseLayer] = useState<HTMLElement | null>(null);
 
   return (
     <div
@@ -448,19 +500,32 @@ export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(function TabsL
           {caption}
         </span>
       ) : null}
-      <div
-        role="tablist"
-        aria-label={label ?? ariaLabel}
-        aria-labelledby={ariaLabelledBy}
-        // Only stated when it is not the default: an `aria-orientation` of
-        // `horizontal` on a tablist says nothing a screen reader did not
-        // already assume.
-        aria-orientation={orientation === 'vertical' ? 'vertical' : undefined}
-        data-orientation={orientation}
-        className={styles.list()}
-      >
-        {children}
-      </div>
+      <CloseLayerContext.Provider value={closeLayer}>
+        <div
+          role="tablist"
+          aria-label={label ?? ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          // Only stated when it is not the default: an `aria-orientation` of
+          // `horizontal` on a tablist says nothing a screen reader did not
+          // already assume.
+          aria-orientation={orientation === 'vertical' ? 'vertical' : undefined}
+          data-orientation={orientation}
+          className={styles.list()}
+        >
+          {children}
+        </div>
+        {/*
+          Beside the tablist, not in it. A tablist may own only tabs
+          (`aria-required-children`), and a close button is not one, so the
+          buttons are drawn here and laid over the tabs they close. The layer
+          lives in the strip, so it scrolls with the tabs.
+        */}
+        <div
+          ref={setCloseLayer}
+          data-slot="tabs-close-layer"
+          className="pointer-events-none absolute inset-0 z-20"
+        />
+      </CloseLayerContext.Provider>
     </div>
   );
 });
@@ -474,8 +539,60 @@ export interface TabsTabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
   value: string;
   /** The tab's label. Short — the strip scrolls rather than wraps. */
   children: ReactNode;
+  /**
+   * Makes the tab closable, and is called when it is closed: by the `Delete`
+   * key on the focused tab, or a click on the close control beside it.
+   *
+   * The package owns the focus move and the caller owns the removal. When the
+   * tab is closed from the keyboard, or by clicking the selected tab's close
+   * control, selection and focus move to the next tab (the previous one, for
+   * the last tab), as the ARIA practices' deletable-tabs pattern asks; the
+   * caller's `onValueChange` hears it. Removing the tab from the strip is the
+   * caller's job, because only the caller knows whether to confirm an unsaved
+   * one first.
+   *
+   * The close control is a real button named `Close <label>`, beside the tab
+   * and never a child of it: a button inside a `role="tab"` button is an
+   * interactive child of an element whose children are presentational. It is
+   * not a descendant of the `tablist` either, which may own only tabs (axe's
+   * `aria-required-children`): it is drawn in a layer in the strip, next to the
+   * tablist, and laid over the tab's trailing edge. It is in the accessibility
+   * tree for every tab, so voice control and a screen reader can name and reach
+   * it. In the Tab order only the selected tab's control is a stop, straight
+   * after the tablist's roving tab, so `Tab` costs one extra stop per strip
+   * rather than one per tab. `Delete` on a focused tab stays the keyboard
+   * shortcut, announced through `aria-keyshortcuts`. The button appears after
+   * the strip mounts, so server-rendered HTML carries the tab without it.
+   */
+  onClose?: () => void;
+  /**
+   * The tab holds unsaved changes. Draws a dot before the label and adds
+   * "unsaved changes" to the accessible name, so the state is not a colour
+   * alone. Independent of `onClose`: confirming a discard is the caller's.
+   */
+  dirty?: boolean;
+  /**
+   * The close control's accessible name, for a caller that needs another
+   * language or a clearer phrase. Defaults to `Close <label>` for a string
+   * label and `Close tab` otherwise.
+   */
+  closeLabel?: string;
   /** Merged onto the tab. */
   className?: string;
+}
+
+/**
+ * Moves focus (and selection, which follows it) off a tab that is going away:
+ * to the next tab, or the previous one when it is the last. Disabled tabs are
+ * skipped, as arrow traversal skips them.
+ */
+function neighbourOf(current: HTMLButtonElement): HTMLButtonElement | null {
+  const tablist = current.closest('[role="tablist"]');
+  if (!tablist) return null;
+  const list = Array.from(tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]:not(:disabled)'));
+  const index = list.indexOf(current);
+  if (index === -1) return null;
+  return list[index + 1] ?? list[index - 1] ?? null;
 }
 
 /**
@@ -486,22 +603,50 @@ export interface TabsTabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElemen
  * selected tab is marked by the accent fill or edge its variant declares, and
  * never by a surface swap: `pnpm check:contrast` asserts both devices clear 3:1
  * on every rung of the ladder and reports the surface pair that does not.
+ *
+ * With `onClose` the tab can be closed, and with `dirty` it flags unsaved
+ * changes: the editor's open-files strip, in two props.
  */
 export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function TabsTab(
-  { value, children, className, onClick, onKeyDown, ...props },
+  { value, children, className, onClick, onKeyDown, onClose, dirty = false, closeLabel, ...props },
   ref,
 ) {
   const context = useTabsContext('TabsTab');
+  const closeLayer = useContext(CloseLayerContext);
   const selected = context.value === value;
   const styles = tabs_({
     variant: context.variant,
     orientation: context.orientation,
     selected,
+    transform: context.transform,
   });
+  const tabRef = useRef<HTMLButtonElement | null>(null);
+  const setRef = useCallback(
+    (node: HTMLButtonElement | null) => {
+      tabRef.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
+  );
 
-  return (
+  // Which tab inherits focus is decided before the caller removes this one,
+  // while both are still in the DOM. A controlled caller's `onValueChange`
+  // then runs after its own `onClose` and wins.
+  const close = (moveFocus: boolean) => {
+    const current = tabRef.current;
+    const next = moveFocus && current ? neighbourOf(current) : null;
+    onClose?.();
+    const nextValue = next?.dataset.value;
+    if (next && nextValue !== undefined) {
+      context.select(nextValue);
+      next.focus();
+    }
+  };
+
+  const tab = (
     <button
-      ref={ref}
+      ref={setRef}
       {...props}
       type="button"
       role="tab"
@@ -511,8 +656,10 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
       // rather than a registry: the tabs a reader can arrow between are exactly
       // the ones rendered, with no bookkeeping to fall out of step.
       data-value={value}
+      data-dirty={dirty ? '' : undefined}
       aria-selected={selected}
       aria-controls={context.panelId(value)}
+      aria-keyshortcuts={onClose ? 'Delete' : undefined}
       tabIndex={selected ? 0 : -1}
       onClick={(event) => {
         onClick?.(event);
@@ -521,14 +668,113 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
       onKeyDown={(event) => {
         onKeyDown?.(event);
         if (event.defaultPrevented) return;
+        if (event.key === 'Delete' && onClose) {
+          event.preventDefault();
+          close(true);
+          return;
+        }
         moveBetweenTabs(event, context.orientation, context.select);
       }}
-      className={cn(styles.tab(), className)}
+      className={cn(styles.tab(), onClose && 'pr-8', className)}
     >
+      {dirty ? (
+        <span aria-hidden="true" data-slot="tabs-tab-dirty" className="mr-2 text-intent-warning">
+          ●
+        </span>
+      ) : null}
       {children}
+      {dirty ? <span className="sr-only">, unsaved changes</span> : null}
     </button>
   );
+
+  const label = closeLabel ?? (typeof children === 'string' ? `Close ${children}` : 'Close tab');
+  return (
+    <>
+      {tab}
+      {onClose && closeLayer ? (
+        <TabCloseButton
+          layer={closeLayer}
+          tab={tabRef}
+          label={label}
+          tabbable={selected}
+          className={styles.close()}
+          onClose={() => close(selected)}
+        />
+      ) : null}
+    </>
+  );
 });
+
+/** The close button's square, in px. WCAG 2.5.8 asks for 24. */
+const CLOSE_SIZE = 24;
+/** Gap between the button and the tab's trailing edge, in px. */
+const CLOSE_INSET = 6;
+
+/**
+ * One tab's close button, portalled into the strip's close layer and laid over
+ * the tab's trailing edge.
+ *
+ * It is a real button with a name of its own, in the accessibility tree and
+ * reachable by voice control, and it is not a descendant of the `tablist`: that
+ * role may own only tabs. The position is measured from the tab, and kept
+ * current as the strip resizes, because the layer cannot lean on the tab's
+ * layout the way a child would.
+ */
+function TabCloseButton({
+  layer,
+  tab,
+  label,
+  tabbable,
+  className,
+  onClose,
+}: {
+  layer: HTMLElement;
+  tab: RefObject<HTMLButtonElement | null>;
+  label: string;
+  tabbable: boolean;
+  className: string;
+  onClose: () => void;
+}) {
+  const [at, setAt] = useState<{ left: number; top: number } | null>(null);
+
+  useLayoutEffect(() => {
+    const node = tab.current;
+    if (!node) return;
+    const place = () => {
+      const left = node.offsetLeft + node.offsetWidth - CLOSE_SIZE - CLOSE_INSET;
+      // Centred on the tab, less the 2px the tab overlaps the seam by.
+      const top = node.offsetTop + (node.offsetHeight - CLOSE_SIZE) / 2 - 2;
+      setAt((prev) => (prev && prev.left === left && prev.top === top ? prev : { left, top }));
+    };
+    place();
+    if (typeof ResizeObserver === 'undefined') return;
+    // The tab itself, and the list it stands in: a sibling growing moves this
+    // tab without resizing it.
+    const observer = new ResizeObserver(place);
+    observer.observe(node);
+    if (node.parentElement) observer.observe(node.parentElement);
+    return () => observer.disconnect();
+  }, [tab, label]);
+
+  return createPortal(
+    <button
+      type="button"
+      data-slot="tabs-tab-close"
+      aria-label={label}
+      // Only the selected tab's is a Tab stop; the others stay reachable by
+      // pointer and by name. A pointer press does not take focus, which leaves
+      // the roving focus where it was.
+      tabIndex={tabbable ? 0 : -1}
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={onClose}
+      style={{ left: at?.left, top: at?.top, visibility: at ? undefined : 'hidden' }}
+      className={className}
+    >
+      &times;
+    </button>,
+    layer,
+  );
+}
 
 export interface TabsPanelProps extends HTMLAttributes<HTMLDivElement> {
   /** The {@link TabsTab} value this panel belongs to. */
