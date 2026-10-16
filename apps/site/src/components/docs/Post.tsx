@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
 import { POSTS } from '@/content/posts';
-import { postSections } from '@/content/registry';
-import type { ArticleDef } from '@/content/types';
+import { postArticle } from '@/content/registry';
 import { Article } from './Article';
 
 function find(href: string) {
@@ -23,8 +22,5 @@ export function postMetadata(href: string): Metadata {
  * generator read from the same file, for the rail, the pager and search.
  */
 export function Post({ href, children }: { href: string; children: ReactNode }) {
-  const { file, ...rest } = find(href);
-  void file;
-  const article: ArticleDef = { ...rest, sections: postSections(href) };
-  return <Article article={article}>{children}</Article>;
+  return <Article article={postArticle(find(href))}>{children}</Article>;
 }
