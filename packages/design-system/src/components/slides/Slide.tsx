@@ -28,10 +28,14 @@ export const Slide: React.FC<SlideProps> = ({
       style={{
         width: '100%',
         height: '100%',
+        // In a narrow deck the stage is only a floor, so the slide fills it.
+        flex: '1 1 auto',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: '3rem 4rem',
+        // Padding and title step down with the viewport, and reach the authored
+        // 3rem / 4rem and 2.5rem from about 740px up.
+        padding: 'clamp(1rem, 6.5vw, 3rem) clamp(1rem, 8.5vw, 4rem)',
         backgroundColor: 'var(--ds-surface-base)',
         color: 'var(--ds-text-primary)',
         boxSizing: 'border-box',
@@ -39,11 +43,12 @@ export const Slide: React.FC<SlideProps> = ({
     >
       {/* Slide Header */}
       {title && (
-        <div style={{ marginBottom: '2rem', borderBottom: '2px solid var(--ds-border-strong)', paddingBottom: '1rem' }}>
+        <div style={{ marginBottom: 'clamp(1rem, 4vw, 2rem)', borderBottom: '2px solid var(--ds-border-strong)', paddingBottom: '1rem' }}>
           <h2
             style={{
               fontFamily: 'var(--ds-font-display)',
-              fontSize: '2.5rem',
+              fontSize: 'clamp(1.375rem, 6vw, 2.5rem)',
+              overflowWrap: 'anywhere',
               fontWeight: 800,
               textTransform: 'uppercase',
               letterSpacing: '-0.02em',
@@ -76,10 +81,12 @@ export const Slide: React.FC<SlideProps> = ({
       {/* Slide Footer Branding */}
       <div
         style={{
-          marginTop: '2rem',
+          marginTop: 'clamp(1rem, 4vw, 2rem)',
           paddingTop: '1rem',
           borderTop: '2px solid var(--ds-border-strong)',
           display: 'flex',
+          flexWrap: 'wrap',
+          gap: '0.25rem 1rem',
           justifyContent: 'space-between',
           alignItems: 'center',
           fontFamily: 'var(--ds-font-mono)',

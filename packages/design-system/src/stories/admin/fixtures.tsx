@@ -123,7 +123,9 @@ function FinanceOverview() {
   return (
     <>
       <PageHeader title="System overview" subtitle="Statements, reconciliation and backups at a glance." icon={LayoutDashboard} />
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      {/* As many columns as hold a 15rem card, so a beside-the-sidebar 768px page
+          gets two rather than three cramped ones. */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,15rem),1fr))] gap-6">
         <StatCard title="Net cashflow" value="+$4,280.00" change="+12.4%" changeType="positive" subtitle="vs last month" accent="primary" />
         <StatCard title="Unreconciled audits" value="3 variances" subtitle="Action required" accent="tertiary" />
         <StatCard title="Drive backup" value="Synced 10m ago" subtitle="~/Google Drive/Backup/" accent="secondary" />

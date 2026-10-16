@@ -85,14 +85,25 @@ function Swatch({ value, size = '2rem' }: { value: string; size?: string }) {
 /** Column headers for the per-level specimens, so the pair is never hardcoded. */
 function LevelColumns({ render }: { render: (level: ThemeLevel) => ReactNode }) {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="grid gap-6 sm:grid-cols-2">
       {THEME_LEVELS.map((level) => (
-        <div key={level} className="flex flex-col gap-3">
+        // Each half is its own scoped ground, the way `LevelDiptych` does it:
+        // without one, the other level's swatches and ratios are drawn on the
+        // page's level, and the contrast figures printed beside them are not
+        // true of what is on screen.
+        <ThemeProvider
+          key={level}
+          scoped
+          defaultLevel={level}
+          persist={false}
+          followSystem={false}
+          className="flex min-w-0 flex-col gap-3 border-2 border-edge-strong bg-surface-base p-5 text-content-primary"
+        >
           <span className="text-caption tracking-[0.16em] text-content-muted uppercase" style={MONO}>
             {LEVELS[level].label} · {LEVELS[level].polarity}
           </span>
           {render(level)}
-        </div>
+        </ThemeProvider>
       ))}
     </div>
   );
@@ -105,7 +116,10 @@ function LevelColumns({ render }: { render: (level: ThemeLevel) => ReactNode }) 
  */
 export function LevelDiptych() {
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    // Stacked below 640px; `min-w-0` lets a panel shrink below its widest child
+    // (a grid item defaults to `min-width: auto`, which is what pushed the page
+    // to 761px at 375).
+    <div className="grid gap-6 sm:grid-cols-2">
       {THEME_LEVELS.map((level) => (
         <ThemeProvider
           key={level}
@@ -113,7 +127,7 @@ export function LevelDiptych() {
           defaultLevel={level}
           persist={false}
           followSystem={false}
-          className="flex flex-col gap-4 border-2 border-edge-strong bg-surface-base p-5 text-content-primary"
+          className="flex min-w-0 flex-col gap-4 border-2 border-edge-strong bg-surface-base p-5 text-content-primary"
         >
           <div className="flex flex-col gap-1">
             <span className="text-caption tracking-[0.18em] text-content-muted uppercase" style={MONO}>
