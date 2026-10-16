@@ -187,7 +187,7 @@ export const Pagination = forwardRef<HTMLDivElement, PaginationProps>(function P
           ? renderEnd(prevPageNum, 'prev', 'Previous Page', <>&lt;&lt; PREV</>, 'bg-accent-primary')
           : renderDisabledEnd('Previous Page', <>&lt;&lt; PREV</>)}
         <span data-slot="pagination-status" className="md:hidden whitespace-nowrap text-content-primary font-bold border-2 border-edge-strong px-2 py-3 bg-surface-base">
-          [&nbsp;{current} / {totalPages}&nbsp;]
+          <BracketText>{current} / {totalPages}</BracketText>
         </span>
         <ul data-slot="pagination-list" className="hidden md:flex items-center gap-3">
           {items.map((item) =>

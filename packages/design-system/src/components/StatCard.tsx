@@ -53,7 +53,7 @@ export function StatCard({
     >
       <div data-slot="statcard-header" className="flex justify-between items-start mb-2">
         <span data-slot="statcard-label" className="min-w-0 font-mono text-xs font-bold uppercase tracking-wider text-content-muted">
-          [&nbsp;{title}&nbsp;]
+          <BracketText>{title}</BracketText>
         </span>
         {Icon && <Icon className={cn('h-6 w-6', accentTextClass(accent))} />}
       </div>
