@@ -51,8 +51,13 @@ export function buildNav(): DocsNavNode[] {
   const order = CATEGORIES.Components ?? [];
   const categories = [...byCategory.keys()].sort((a, b) => order.indexOf(a) - order.indexOf(b));
 
+  // One sidebar group per article group, in the order the groups first appear.
+  const groups = [...new Set(ARTICLES.map((a) => a.group))];
   return [
-    { label: 'Getting started', items: ARTICLES.map((a) => ({ label: a.title, href: a.href })) },
+    ...groups.map((group) => ({
+      label: group,
+      items: ARTICLES.filter((a) => a.group === group).map((a) => ({ label: a.title, href: a.href })),
+    })),
     {
       label: 'Components',
       items: categories.map((category) => ({
