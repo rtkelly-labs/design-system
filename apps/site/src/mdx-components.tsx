@@ -2,7 +2,7 @@ import type { MDXComponents } from 'mdx/types';
 import { isValidElement, type ReactNode } from 'react';
 import {
   AnchorHeading, NoteBlock, TLDR, BeforeAfter, Slope, ChangeSummary, Line, Timeline, Event, Steps, Step,
-  SwatchCompare, MetricStrip, TokenTable, Decision, Option, TermGrid, Term,
+  FigureFrame, SwatchCompare, MetricStrip, TokenTable, Decision, Option, TermGrid, Term,
 } from '@rtkelly13/design-system';
 import { Code } from '@/components/docs/Code';
 import type { CodeLanguage } from '@/lib/highlight';
@@ -37,7 +37,7 @@ const components: MDXComponents = {
     return f.lang ? <Code lang={f.lang} code={f.code} /> : <pre>{f.code}</pre>;
   },
   NoteBlock, TLDR, BeforeAfter, Slope, ChangeSummary, Line, Timeline, Event, Steps, Step,
-  SwatchCompare, MetricStrip, TokenTable, Decision, Option, TermGrid, Term,
+  FigureFrame, SwatchCompare, MetricStrip, TokenTable, Decision, Option, TermGrid, Term,
 };
 
 export function useMDXComponents(): MDXComponents {
