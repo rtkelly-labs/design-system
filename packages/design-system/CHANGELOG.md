@@ -11,7 +11,7 @@ in [`docs/adr/`](./docs/adr/).
 
 ## 0.17.0
 
-`NoteBlock` types match their intents: `warning` is now amber (`intent.warning`), a new `danger` is red, and `important` is gone. Use `warning` where you had `important`, and `danger` where a `warning` meant "this will break". Bracketed labels hold their brackets on the line (no-break spaces), display headings balance, and code `pre` blocks lose the typography plugin's 6px radius.
+`NoteBlock` types match their intents: `warning` is now amber (`intent.warning`), a new `danger` is red, and `important` is gone. Use `warning` where you had `important`, and `danger` where a `warning` meant "this will break". Bracket a label with `<BracketText>`, never `[ … ]` by hand: its brackets cannot strand on a line and are left out of the accessible name and of a copy, so a titled dialog, drawer or heading is now named `Delete domain`, not `[ Delete domain ]`. The package's `no-hand-brackets` lint rule rejects a hand-typed label in any whitespace, and `eslint --fix` converts it. Display headings balance, and code `pre` blocks lose the typography plugin's 6px radius.
 
 ## 0.16.0
 

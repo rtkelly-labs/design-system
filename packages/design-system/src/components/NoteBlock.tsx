@@ -1,6 +1,7 @@
 import type React from 'react';
 import { AlertCircle, CheckCircle2, Info, AlertTriangle } from 'lucide-react';
 import { semanticTokens } from '../lib/theme';
+import { BracketText } from './BracketText';
 
 export interface NoteBlockProps {
   type?: 'note' | 'tip' | 'warning' | 'danger';
@@ -70,7 +71,7 @@ export const NoteBlock: React.FC<NoteBlockProps> = ({
             color: config.color,
           }}
         >
-          [&nbsp;{title || config.defaultTitle}&nbsp;]
+          <BracketText>{title || config.defaultTitle}</BracketText>
         </span>
       </div>
       <div style={{ fontFamily: semanticTokens.font.mono, fontSize: '0.875rem', color: semanticTokens.text.primary, lineHeight: 1.6 }}>
