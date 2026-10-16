@@ -1,5 +1,5 @@
 import type { DocsNavNode, TocEntry } from '@rtkelly13/design-system';
-import { CATEGORIES, catalogueEntry } from '@/lib/docs-data';
+import { CATEGORIES, POST_SECTIONS, catalogueEntry } from '@/lib/docs-data';
 import type { SearchEntry } from '@/lib/search';
 import { ARTICLES } from './articles';
 import { barChart } from './components/bar-chart';
@@ -7,8 +7,9 @@ import { button } from './components/button';
 import { dataTable } from './components/data-table';
 import { input } from './components/input';
 import { modal } from './components/modal';
+import { POSTS, type PostDef } from './posts';
 import { SAMPLES, sampleHref } from './samples';
-import type { ComponentPageDef, Section } from './types';
+import type { ArticleDef, ComponentPageDef, Section } from './types';
 
 /**
  * Every page on the site, and everything derived from the list: the sidebar,
@@ -21,6 +22,23 @@ export const COMPONENT_PAGES: readonly ComponentPageDef[] = [button, input, moda
 export const componentHref = (page: ComponentPageDef) => `/docs/components/${page.slug}`;
 
 export const propsSectionId = (name: string) => `props-${name.toLowerCase()}`;
+
+/** A post's headings, as the generator read them from its `.mdx` file. */
+export function postSections(href: string): Section[] {
+  const sections = POST_SECTIONS[href];
+  if (!sections) throw new Error(`No generated sections for ${href} — run \`pnpm generate\``);
+  return sections;
+}
+
+/** A post as an article: its definition without the source file, plus the generated sections. */
+export function postArticle(def: PostDef): ArticleDef {
+  const { file, ...rest } = def;
+  void file;
+  return { ...rest, sections: postSections(def.href) };
+}
+
+/** Every page that has a lede and sections: the hand-written articles and the `.mdx` posts. */
+const ARTICLE_PAGES = (): ArticleDef[] => [...ARTICLES, ...POSTS.map(postArticle)];
 
 /** A component page's headings, in the order its template renders them. */
 export function componentSections(page: ComponentPageDef): Section[] {
@@ -51,8 +69,17 @@ export function buildNav(): DocsNavNode[] {
   const order = CATEGORIES.Components ?? [];
   const categories = [...byCategory.keys()].sort((a, b) => order.indexOf(a) - order.indexOf(b));
 
-  return [
+  const posts = (group: string): DocsNavNode[] =>
+    POSTS.filter((p) => p.group === group).map((p) => ({ label: p.title, href: p.href }));
+  // Order: Getting started, Foundations, Guides, Components. A group with no page is left out.
+  const articleGroups: DocsNavNode[] = [
     { label: 'Getting started', items: ARTICLES.map((a) => ({ label: a.title, href: a.href })) },
+    { label: 'Foundations', items: posts('Foundations') },
+    { label: 'Guides', items: posts('Guides') },
+  ].filter((g) => g.items.length > 0);
+
+  return [
+    ...articleGroups,
     {
       label: 'Components',
       items: categories.map((category) => ({
@@ -88,7 +115,7 @@ const toToc = (sections: readonly Section[]): TocEntry[] =>
 /** The contents rail for every path, keyed by pathname. */
 export function tocByPath(): Record<string, TocEntry[]> {
   const out: Record<string, TocEntry[]> = {};
-  for (const article of ARTICLES) out[article.href] = toToc(article.sections);
+  for (const article of ARTICLE_PAGES()) out[article.href] = toToc(article.sections);
   for (const page of COMPONENT_PAGES) out[componentHref(page)] = toToc(componentSections(page));
   return out;
 }
@@ -97,7 +124,7 @@ const plain = (markup: string) => markup.replace(/`/g, '');
 
 export function searchIndex(): SearchEntry[] {
   const entries: SearchEntry[] = [];
-  for (const article of ARTICLES) {
+  for (const article of ARTICLE_PAGES()) {
     entries.push({
       id: article.href,
       title: article.title,

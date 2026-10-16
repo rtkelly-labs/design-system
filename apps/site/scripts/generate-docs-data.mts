@@ -28,7 +28,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import docgen from 'react-docgen-typescript';
 
+import { slugify } from '@rtkelly13/design-system';
 import { CATEGORIES, GROUPS } from '../../../packages/design-system/.storybook/sidebar.ts';
+import { POSTS } from '../src/content/posts.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE = path.resolve(HERE, '..');
@@ -194,6 +196,51 @@ const catalogue: CatalogueEntry[] = titled.map((entry) => ({
   description: lede(docs[entry.name]?.description ?? ''),
 }));
 
+/* ------------------------------------------------------------------ */
+/* 3. The posts                                                        */
+/* ------------------------------------------------------------------ */
+
+interface PostSection {
+  id: string;
+  title: string;
+  depth: 2 | 3;
+}
+
+/**
+ * A post's `##` and `###` headings, in file order. Frontmatter and fenced code
+ * are dropped first, so a `## ` inside an example is not a heading. Ids come from
+ * the package's `slugify`, the function `AnchorHeading` uses when it renders
+ * the heading, so the contents rail and the anchor cannot disagree.
+ */
+function postSections(file: string): PostSection[] {
+  const source = readFileSync(path.join(SITE, 'src/app', file), 'utf8')
+    .replace(/^---\n[\s\S]*?\n---\n/, '')
+    .replace(/^(```|~~~)[^\n]*\n[\s\S]*?\n\1[ \t]*$/gm, '');
+  const sections: PostSection[] = [];
+  const seen = new Set<string>();
+  for (const line of source.split('\n')) {
+    const match = /^ {0,3}(##|###)[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/.exec(line);
+    if (!match) continue;
+    // Heading text as rendered: links and emphasis contribute their words, not their markup.
+    const title = match[2]
+      .trim()
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/[`*]/g, '');
+    // Markup the title regex above does not strip would make the slug here differ from the one
+    // `AnchorHeading` computes from the rendered text, so the rail and the anchor would drift.
+    if (/[{<&_\\[\]]/.test(title)) {
+      throw new Error(`${file}: heading "${title}" contains markup (one of { < & _ [ ] or a backslash); headings are plain text`);
+    }
+    const id = slugify(title);
+    if (seen.has(id)) throw new Error(`${file}: two headings slug to ${id}`);
+    seen.add(id);
+    sections.push({ id, title, depth: match[1] === '##' ? 2 : 3 });
+  }
+  return sections;
+}
+
+const posts = Object.fromEntries(POSTS.map((post) => [post.href, postSections(post.file)]));
+
 mkdirSync(path.dirname(OUT), { recursive: true });
 writeFileSync(
   OUT,
@@ -202,6 +249,7 @@ writeFileSync(
       groups: GROUPS,
       categories: CATEGORIES,
       catalogue,
+      posts,
       components: Object.fromEntries(Object.entries(docs).sort(([a], [b]) => a.localeCompare(b))),
     },
     null,
