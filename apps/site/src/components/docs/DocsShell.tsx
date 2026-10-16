@@ -40,7 +40,7 @@ export function DocsShell({
           title="RTK / DS"
           titleHref="/"
           nav={[
-            { label: 'Docs', href: '/docs', active: pathname === '/docs' || pathname === '/docs/installation' },
+            { label: 'Docs', href: '/docs', active: pathname === '/docs' || pathname === '/docs/installation' || pathname.startsWith('/docs/foundations') || pathname.startsWith('/docs/guides') },
             { label: 'Components', href: '/docs/components', active: pathname.startsWith('/docs/components') },
             { label: 'Examples', href: '/examples' },
             { label: 'Storybook', href: STORYBOOK_URL, external: true },

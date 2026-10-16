@@ -1,0 +1,31 @@
+import { auditContrast, LEVELS } from '@rtkelly13/design-system';
+import { Post, postMetadata } from '@/components/docs/Post';
+
+export const metadata = postMetadata('/docs/foundations/colour');
+
+export const checks = auditContrast(LEVELS);
+export const failing = checks.filter((c) => !c.passes).length;
+
+<Post href="/docs/foundations/colour">
+
+This page is a placeholder for the colour post.
+
+## Roles above hues
+
+Components ask for a role such as `content-primary`, never a hue. Each level defines what the role looks like.
+
+```tsx
+<p className="text-content-primary">Addressed by role</p>
+```
+
+## Held in CI
+
+<MetricStrip
+  label="Contrast audit"
+  items={[
+    { value: String(checks.length), label: 'Pairs checked' },
+    { value: String(failing), label: 'Failing', tone: failing === 0 ? 'success' : 'danger' },
+  ]}
+/>
+
+</Post>
