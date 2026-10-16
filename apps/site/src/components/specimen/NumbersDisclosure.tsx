@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Disclosure, Label, Swatch } from './parts';
+import { BracketText } from '@rtkelly13/design-system';
 
 export interface NumbersTableData {
   title: string;
@@ -11,7 +12,7 @@ export interface NumbersTableData {
 export function NumbersTable({ title, head, rows }: NumbersTableData) {
   return (
     <div className="flex flex-col gap-2">
-      <Label>{`[ ${title} ]`}</Label>
+      <Label><BracketText>{title}</BracketText></Label>
       <div className="overflow-x-auto">
         <table className="border-collapse font-mono text-[11px]">
           <thead>
