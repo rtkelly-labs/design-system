@@ -100,6 +100,112 @@ describe('no-colour-literals', () => {
   });
 }, 30_000);
 
+describe('no-hand-brackets', () => {
+  const RULE = 'brackets/no-hand-brackets';
+  const IMPORT = `import { BracketText } from './BracketText';\n`;
+  let fixing: ESLint;
+
+  beforeAll(() => {
+    fixing = new ESLint({ cwd: ROOT, fix: true });
+  });
+
+  /** `eslint --fix` to a fixpoint, as `pnpm lint --fix` runs it; returns the output and what is still reported. */
+  async function fix(code: string) {
+    const [result] = await fixing.lintText(code, {
+      filePath: path.join(ROOT, 'src/components/__lint_fixture__.tsx'),
+      warnIgnored: false,
+    });
+    const left = (result?.messages ?? []).filter((m) => m.ruleId === RULE).length;
+    return { output: result?.output ?? code, left };
+  }
+  const component = (body: string) => `export const C = () => ${body};\n`;
+
+  /*
+   * Every way to write the whitespace beside a bracket is the same label. The
+   * expected output is exact: the fix is a codemod, so it is pinned like one.
+   */
+  it.each([
+    ['a plain space', `<p>[ PAGE ]</p>`],
+    ['a tab', `<p>[\tPAGE\t]</p>`],
+    ['several spaces', `<p>[   PAGE   ]</p>`],
+    ['&nbsp;', `<p>[&nbsp;PAGE&nbsp;]</p>`],
+    ['decimal and hex entities', `<p>[&#160;PAGE&#xA0;]</p>`],
+    ['named Unicode-space entities', `<p>[&thinsp;PAGE&ensp;]</p>`],
+    ['a literal U+00A0', `<p>[ PAGE ]</p>`],
+    ['thin and narrow no-break spaces', `<p>[ PAGE ]</p>`],
+    ['zero-width and ideographic spaces', `<p>[​PAGE　]</p>`],
+    ['a byte-order mark and word joiner', `<p>[﻿PAGE⁠]</p>`],
+    ['mixed spellings', `<p>[ &nbsp; PAGE&#32; ]</p>`],
+  ])('fixes JSX text bracketed with %s', async (_name, body) => {
+    expect(await fix(component(body))).toEqual({ output: IMPORT + component('<p><BracketText>PAGE</BracketText></p>'), left: 0 });
+  });
+
+  it.each([
+    ['a label around an expression', `<p>[ {title} ]</p>`, `<p><BracketText>{title}</BracketText></p>`],
+    ['two labels in one run, text kept', `<p>go [ A ] or [&nbsp;B&nbsp;] now</p>`, `<p>go <BracketText>A</BracketText> or <BracketText>B</BracketText> now</p>`],
+    ['a label across lines', `<p>\n  [ {title} ]\n</p>`, `<p>\n  <BracketText>{title}</BracketText>\n</p>`],
+    ['a nested element', `<p>[ <b>X</b> ]</p>`, `<p><BracketText><b>X</b></BracketText></p>`],
+    ['a string child', `<p>{'[ PAGE ]'}</p>`, `<p><BracketText>PAGE</BracketText></p>`],
+    ['a string with \\u00a0 escapes', `<p>{'[\\u00a0PAGE\\u00a0]'}</p>`, `<p><BracketText>PAGE</BracketText></p>`],
+    ['a string with \\xa0 and \\u{a0}', `<p>{'[\\xa0PAGE\\u{a0}]'}</p>`, `<p><BracketText>PAGE</BracketText></p>`],
+    ['a label that needs quoting', `<p>{'[ A & B ]'}</p>`, `<p><BracketText>{'A & B'}</BracketText></p>`],
+    ['both branches of a conditional', `<p>{x ? '[ A ]' : '[\\u00a0B\\u00a0]'}</p>`, `<p>{x ? <BracketText>A</BracketText> : <BracketText>B</BracketText>}</p>`],
+    ['one branch of a conditional', `<p>{x ? '[ A ]' : 'b'}</p>`, `<p>{x ? <BracketText>A</BracketText> : 'b'}</p>`],
+    ['the right of &&', `<p>{x && '[ A ]'}</p>`, `<p>{x && <BracketText>A</BracketText>}</p>`],
+    ['a template split by an interpolation', '<p>{`[\\u00a0${n} RESULTS\\u00a0]`}</p>', '<p><BracketText>{`${n} RESULTS`}</BracketText></p>'],
+    ['a template that is only an interpolation', '<p>{`[\\u00a0${title}\\u00a0]`}</p>', '<p><BracketText>{title}</BracketText></p>'],
+    ['a fragment', `<>[ A ]</>`, `<><BracketText>A</BracketText></>`],
+    ['brackets inside BracketText', `<BracketText>[ A ]</BracketText>`, `<BracketText>A</BracketText>`],
+    ['padding inside BracketText', `<BracketText>&nbsp;A </BracketText>`, `<BracketText>A</BracketText>`],
+  ])('fixes %s', async (_name, body, fixed) => {
+    const head = `const x = true, n = 2, title = '';\n`;
+    const imported = body.startsWith('<BracketText>') ? `${IMPORT}${head}` : head;
+    const { output, left } = await fix(`${imported}${component(body)}`);
+    expect({ output, left }).toEqual({ output: `${IMPORT}${head}${component(fixed)}`, left: 0 });
+  });
+
+  it('merges into an existing import, and imports after a directive', async () => {
+    expect((await fix(`import { BRACKETED } from './BracketText';\n${component('<p>[ A ]</p>')}`)).output).toBe(
+      `import { BRACKETED, BracketText } from './BracketText';\n${component('<p><BracketText>A</BracketText></p>')}`,
+    );
+    expect((await fix(`'use client';\n${component('<p>[ A ]</p>')}`)).output).toBe(
+      `'use client';\n${IMPORT}${component('<p><BracketText>A</BracketText></p>')}`,
+    );
+  });
+
+  it('restores an import a merge dropped, when the JSX is already right', async () => {
+    const code = component('<p><BracketText>A</BracketText></p>');
+    expect(await fix(`import { cn } from '../lib/recipe';\n${code}`)).toEqual({
+      output: `import { cn } from '../lib/recipe';\n${IMPORT}${code}`,
+      left: 0,
+    });
+  });
+
+  it('adds to a multi-line import on its own line', async () => {
+    expect((await fix(`import {\n  BRACKETED,\n} from './BracketText';\n${component('<p>[ A ]</p>')}`)).output).toBe(
+      `import {\n  BRACKETED,\n  BracketText,\n} from './BracketText';\n${component('<p><BracketText>A</BracketText></p>')}`,
+    );
+  });
+
+  it('reports an attribute value but leaves it: whether the prop takes a node is a type question', async () => {
+    const code = component(`<Card title="[ PAGE ]" />`);
+    expect(await fix(code)).toEqual({ output: code, left: 1 });
+  });
+
+  it.each([
+    ['no whitespace', `<p>[x]</p>`],
+    ['an empty pair', `<p>[ ]</p>`],
+    ['whitespace on one side only', `<p>[ PAGE]</p>`],
+    ['an entity that is not whitespace', `<p>[&amp;PAGE&amp;]</p>`],
+    ['a string that is not rendered', `<p>{xs.join('[ 1, 2 ]')}</p>`],
+    ['SVG text', `<svg><text>[ NO DATA ]</text></svg>`],
+    ['a bare BracketText', `<BracketText>PAGE</BracketText>`],
+    ['BracketText laid out over lines', `<BracketText>\n  PAGE\n</BracketText>`],
+  ])('leaves %s alone', async (_name, body) => {
+    expect((await lintComponent(`const xs = [1];\nconst BracketText = (p: { children: string }) => <span>{p.children}</span>;\n${component(body)}`)).filter((m) => m.startsWith(RULE))).toEqual([]);
+  });
+}, 60_000);
+
 describe('no-custom-classname', () => {
   it('rejects a utility that exists in no namespace', async () => {
     const messages = await lintComponent(wrap(`<div className="bg-totallyfake-500" />`));

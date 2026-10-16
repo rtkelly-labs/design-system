@@ -20,6 +20,7 @@ import {
   Tag,
   TextArea,
   useToast,
+  BracketText,
 } from '@rtkelly13/design-system';
 import {
   ASSIGNEES,
@@ -489,7 +490,7 @@ export default function KanbanBoard() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="m-0 text-xs font-bold tracking-widest text-accent-primary uppercase">&gt; PROJECT / DS-CORE</p>
-            <h1 className="m-0 font-display text-3xl font-bold uppercase tracking-tight">[ SPRINT_42 BOARD ]</h1>
+            <h1 className="m-0 font-display text-3xl font-bold uppercase tracking-tight"><BracketText>SPRINT_42 BOARD</BracketText></h1>
           </div>
           <div className="w-full max-w-xs print:max-w-[16rem]">
             <Progress
@@ -571,7 +572,7 @@ export default function KanbanBoard() {
             >
               <div className="flex items-center justify-between gap-2 border-b-2 border-edge-default px-3 py-2">
                 <h2 id={headId} className="m-0 font-display text-sm font-bold tracking-wider uppercase">
-                  [ {col.title} ]
+                  <BracketText>{col.title}</BracketText>
                 </h2>
                 <span
                   className={['text-xs font-bold', wipOver ? 'text-intent-danger' : 'text-content-secondary'].join(' ')}

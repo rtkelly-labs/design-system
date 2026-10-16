@@ -1,13 +1,13 @@
 'use client';
 
 import { Contrast, Layers, MousePointerClick, Palette, Square } from 'lucide-react';
-import { Feature, FeatureGrid } from '@rtkelly13/design-system';
+import { BracketText, Feature, FeatureGrid } from '@rtkelly13/design-system';
 
 /** Icons are client-side here only because lucide-react ships a context provider. */
 export function Principles() {
   return (
     <FeatureGrid
-      title="[ WHAT HOLDS IT TOGETHER ]"
+      title={<BracketText>WHAT HOLDS IT TOGETHER</BracketText>}
       description="Rules the package checks in CI. None of them is a matter of taste."
       columns={3}
       align="start"

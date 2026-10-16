@@ -26,7 +26,7 @@ describe('AlertDialog', () => {
   it('announces as an alertdialog, named and described', async () => {
     open();
 
-    const alert = await screen.findByRole('alertdialog', { name: '[ Delete domain ]' });
+    const alert = await screen.findByRole('alertdialog', { name: 'Delete domain' });
 
     // The description is the reason this is not `Modal`: a confirmation that
     // does not say what it costs is a confirmation nobody can give.
