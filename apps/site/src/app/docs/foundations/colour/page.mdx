@@ -28,19 +28,25 @@ export const roles = [
 ];
 export const roleRows = (level) => {
   const def = LEVELS[level];
-  return roles.map(([token, pick]) => ({
-    token,
-    after: pick(def),
-    values: [
-      `${contrastRatio(pick(def), def.surface.sunken).toFixed(2)}:1`,
-      `${Math.round(Math.abs(apcaContrast(pick(def), def.surface.sunken)))}`,
-    ],
-  }));
+  const grounds = [def.surface.base, def.surface.raised, def.surface.sunken];
+  return roles.map(([token, pick]) => {
+    const colour = pick(def);
+    // The tightest ground has the lowest WCAG ratio. APCA is read on that same ground.
+    const ground = grounds.reduce((a, b) => (contrastRatio(colour, b) < contrastRatio(colour, a) ? b : a));
+    return {
+      token,
+      after: colour,
+      values: [
+        `${contrastRatio(colour, ground).toFixed(2)}:1`,
+        `${Math.round(Math.abs(apcaContrast(colour, ground)))}`,
+      ],
+    };
+  });
 };
 
 <Post href="/docs/foundations/colour">
 
-A component names a job. A Level decides what the job looks like. Colour is addressed by role, so one component reads correctly on both Levels.
+A component names a job. A Level decides what the job looks like. Colour is addressed by role, so one component reads correctly on both Levels. To use the package yourself, start with the [installation guide](/docs/installation/).
 
 ## Four words
 
@@ -49,7 +55,7 @@ A component names a job. A Level decides what the job looks like. Colour is addr
     <Term term="Lightness" scale="0 = black · 1 = white">How light a colour is, apart from how colourful.</Term>
     <Term term="Chroma" scale="0 = grey · higher = more vivid">How colourful a colour is.</Term>
     <Term term="Contrast ratio" scale="4.5:1 = WCAG AA for body text">Whether text reads on its ground.</Term>
-    <Term term="Delta E" scale="under 0.04 = the same colour to the eye">How different two colours look.</Term>
+    <Term term="Delta E" scale="under 0.04 = too close to tell apart">How different two colours look.</Term>
   </TermGrid>
 </FigureFrame>
 
@@ -71,7 +77,7 @@ Each Level authors its own ten hues. They share hue angles, so the two read as o
 
 ## Roles above hues
 
-Components ask for `text.primary` or `intent.danger`. Each Level answers with a value declared below the role and checked against it. Both tables measure every answer against `surface.sunken`.
+Components ask for `text.primary` or `intent.danger`. Each Level answers with a value declared below the role and checked against it. Both tables measure every answer against its Level's tightest ground, the one with the lowest WCAG ratio across base, raised and sunken. The APCA value is read on that same ground.
 
 <FigureFrame title="Midnight roles">
   <TokenTable label="Midnight roles" measures={['WCAG', 'APCA Lc']} rows={roleRows('midnight')} />
