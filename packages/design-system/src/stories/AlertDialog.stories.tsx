@@ -76,3 +76,53 @@ function StackedExample() {
     </Modal>
   );
 }
+
+/**
+ * Type-to-confirm: `confirmDisabled` holds the confirm until the reader has
+ * typed the name of what they are destroying. Cancel is never disabled. Type
+ * `acme/web` to enable the button. No custom footer is needed.
+ */
+export const TypeToConfirm: Story = {
+  render: function TypeToConfirmExample() {
+    const [typed, setTyped] = useState('');
+    return (
+      <AlertDialog
+        isOpen
+        title="Delete repository"
+        confirmLabel="DELETE REPOSITORY"
+        confirmDisabled={typed !== 'acme/web'}
+        onClose={() => {}}
+        onConfirm={() => {}}
+      >
+        <p>This permanently deletes acme/web and its issues. Type the name to confirm.</p>
+        <input
+          aria-label="Repository name"
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          className="mt-3 w-full border-2 border-edge-strong bg-surface-sunken px-3 py-2 font-mono text-sm text-content-primary"
+        />
+      </AlertDialog>
+    );
+  },
+};
+
+/**
+ * A request in flight. `confirmPending` is Button's `pending`: the confirm
+ * keeps focus and its width, shows a spinner and refuses a second activation,
+ * where `disabled` would have dropped focus to the page behind. For a
+ * consequential but harmless confirmation, `confirmVariant="primary"` replaces
+ * the default `danger`.
+ */
+export const Pending: Story = {
+  args: {
+    isOpen: true,
+    title: 'Publish release',
+    confirmLabel: 'PUBLISH',
+    confirmVariant: 'primary',
+    confirmPending: true,
+    confirmPendingLabel: 'Publishing',
+    onClose: () => {},
+    onConfirm: () => {},
+    children: 'This tags the release and notifies every subscriber.',
+  },
+};

@@ -112,3 +112,25 @@ function StackedExample() {
     </Modal>
   );
 }
+
+/**
+ * A detail panel that opens with its own heading. `headerless` keeps `title` as
+ * the accessible name but does not draw it, so the id is not said twice; the
+ * close control sits in the corner and stays visible.
+ */
+export const Headerless: Story = {
+  args: {
+    isOpen: true,
+    title: 'DS-1144',
+    headerless: true,
+    footer: false,
+    onClose: () => {},
+    children: (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <p>DS-1144</p>
+        <h2>Pagination resets on filter</h2>
+        <p>Changing the status filter jumps back to page one.</p>
+      </div>
+    ),
+  },
+};

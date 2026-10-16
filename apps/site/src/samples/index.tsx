@@ -17,21 +17,18 @@ import { SaasLandingPage } from '@rtkelly13/design-system';
  * the site's providers, so it follows the reader's level and the toast queue
  * is live.
  *
+ * **None of these renders a `<main>`.** The route
+ * (`app/examples/[slug]/page.tsx`) owns the page's one
+ * `<main id="main-content">` and puts every sample inside it, so a sample is a
+ * composition and never a document. A sample built on `AppShell` passes
+ * `mainAs="div"` so its `AppMain` hands that landmark back.
  */
 const SAMPLE_PAGES: Record<string, () => ReactNode> = {
-  'landing-page': () => (
-    <main id="main-content" className="bg-surface-base text-content-primary">
-      <SaasLandingPage />
-    </main>
-  ),
-  'admin-dashboard': () => <FinanceConsole />,
-  'content-studio': () => <ContentStudio />,
+  'landing-page': () => <SaasLandingPage />,
+  'admin-dashboard': () => <FinanceConsole mainAs="div" />,
+  'content-studio': () => <ContentStudio mainAs="div" />,
   kanban: () => <KanbanBoard />,
-  inbox: () => (
-    <main id="main-content">
-      <InboxApp />
-    </main>
-  ),
+  inbox: () => <InboxApp />,
   settings: () => (
     <div className="mx-auto flex max-w-4xl flex-col gap-8 p-4 sm:p-6">
       <RepositorySettings />
@@ -39,11 +36,7 @@ const SAMPLE_PAGES: Record<string, () => ReactNode> = {
       <DangerZone />
     </div>
   ),
-  calendar: () => (
-    <main id="main-content">
-      <CalendarApp />
-    </main>
-  ),
+  calendar: () => <CalendarApp />,
   editor: () => <EditorWorkbench />,
 };
 

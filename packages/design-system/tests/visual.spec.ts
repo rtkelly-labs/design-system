@@ -74,6 +74,12 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-overlays-modal--with-footer', snapshot: 'modal-with-footer.png' },
   { id: 'components-overlays-alertdialog--destructive', snapshot: 'alertdialog-destructive.png' },
   { id: 'components-overlays-drawer--from-the-right', snapshot: 'drawer-from-the-right.png' },
+  // Row 10 shells: headerless modal and drawer, type-to-confirm and pending
+  // alerts. Baselines come with `/update-snapshots`.
+  { id: 'components-overlays-modal--headerless-palette', snapshot: 'modal-headerless-palette.png' },
+  { id: 'components-overlays-drawer--headerless', snapshot: 'drawer-headerless.png' },
+  { id: 'components-overlays-alertdialog--type-to-confirm', snapshot: 'alertdialog-type-to-confirm.png' },
+  { id: 'components-overlays-alertdialog--pending', snapshot: 'alertdialog-pending.png' },
   { id: 'components-feedback-toast--all-intents', snapshot: 'toast-all-intents.png' },
   // The application shell (issue 247), asked to open its sidebar and at a
   // width where it must not: the persistent column, no drawer. The same story
@@ -200,6 +206,9 @@ const CASES: readonly VisualCase[] = [
   // (D6 pending). Baselines to be generated with `/update-snapshots`.
   { id: 'components-actions-forms-segmented-control--default', snapshot: 'segmentedcontrol-default.png' },
   { id: 'components-actions-forms-segmented-control--small', snapshot: 'segmentedcontrol-small.png' },
+  // Toolbar (rows INB-15, ED-F13). Baselines come with `/update-snapshots`.
+  { id: 'components-actions-forms-toolbar--default', snapshot: 'toolbar-default.png' },
+  { id: 'components-actions-forms-toolbar--vertical', snapshot: 'toolbar-vertical.png' },
   // The account flows (#252), every state a reader meets on the way through:
   // each flow at rest and after a failed submit, the reset flow's middle step,
   // and the settings page in `AppShell`. The a11y suite reads these ids, so
