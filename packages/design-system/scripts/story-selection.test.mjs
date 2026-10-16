@@ -45,7 +45,7 @@ describe('graphFromSource', () => {
       "import type { Props } from '../components/Types';",
       "import { type Props as NamedProps } from '../components/Types';",
       "export { type Props } from '../components/Types';",
-      "import tokens from '@rtkelly13/design-system/tokens/midnight.tokens.json';",
+      "import tokens from '@rtkelly-labs/design-system/tokens/midnight.tokens.json';",
       "const Lazy = () => import('../components/Lazy');",
     ].join('\n'),
     [P('src/components/Card.tsx')]: "export { cn } from '../lib/cn.js';",

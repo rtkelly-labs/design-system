@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const config: NextConfig = {
   output: 'export',
-  experimental: { optimizePackageImports: ['@rtkelly13/design-system'] },
+  experimental: { optimizePackageImports: ['@rtkelly-labs/design-system'] },
   // The site is served from inside the Storybook deployment, under `/site`
   // (docs/hosting.md, "The applied site, embedded"). `next/link` and the asset
   // URLs carry the prefix; `out/` itself does not, and the assembly step

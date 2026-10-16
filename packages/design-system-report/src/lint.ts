@@ -19,7 +19,7 @@
  *     `--strict` promotes them for CI.
  */
 
-import { TOKEN_RULES, scanRules, type TokenRule } from '@rtkelly13/design-system';
+import { TOKEN_RULES, scanRules, type TokenRule } from '@rtkelly-labs/design-system';
 
 interface StaticRule {
   id: 'nondeterministic' | 'inert';

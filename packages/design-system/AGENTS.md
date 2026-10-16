@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Foundational brutalist design system for ryankelly.dev and personal web applications (`@rtkelly13/design-system`, published to public npm).
+Foundational brutalist design system for ryankelly.dev and personal web applications (`@rtkelly-labs/design-system`, published to public npm).
 
 Package manager is **pnpm** (`node >=22`). The package is **ESM only** (`"type": "module"`, one
 build, `dist/*.js`), and `verbatimModuleSyntax` is on: a binding used only as a type is imported

@@ -10,7 +10,7 @@ importers:
 
   apps/site:
     dependencies:
-      '@rtkelly13/design-system':
+      '@rtkelly-labs/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
       lucide-react:
@@ -216,7 +216,7 @@ importers:
 
   packages/design-system-report:
     devDependencies:
-      '@rtkelly13/design-system':
+      '@rtkelly-labs/design-system':
         specifier: workspace:*
         version: link:../design-system
       '@tailwindcss/typography':

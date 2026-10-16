@@ -1,4 +1,4 @@
-import type { DocsNavNode, TocEntry } from '@rtkelly13/design-system';
+import type { DocsNavNode, TocEntry } from '@rtkelly-labs/design-system';
 import { CATEGORIES, catalogueEntry } from '@/lib/docs-data';
 import type { SearchEntry } from '@/lib/search';
 import { ARTICLES } from './articles';

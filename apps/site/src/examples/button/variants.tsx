@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@rtkelly13/design-system';
+import { Button } from '@rtkelly-labs/design-system';
 
 export default function ButtonVariants() {
   return (

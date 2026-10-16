@@ -1,18 +1,18 @@
-# 📄 @rtkelly13/design-system-report
+# 📄 @rtkelly-labs/design-system-report
 
 Render a `.tsx` file to **one self-contained `.html` file** — markup and every
 byte of CSS it needs, inlined. No build step, nothing to serve, styled by
-[`@rtkelly13/design-system`](../design-system).
+[`@rtkelly-labs/design-system`](../design-system).
 
 ```bash
-pnpm add -D @rtkelly13/design-system @rtkelly13/design-system-report esbuild tailwindcss
+pnpm add -D @rtkelly-labs/design-system @rtkelly-labs/design-system-report esbuild tailwindcss
 npx ds-report audit.tsx --theme white              # → audit.html
 npx ds-report audit.tsx --theme midnight,sketch    # both rungs, one render
 ```
 
 ```tsx
 // audit.tsx — the whole contract is a default export
-import { ReportDocument, ReportSection, StatCard, NoteBlock } from '@rtkelly13/design-system';
+import { ReportDocument, ReportSection, StatCard, NoteBlock } from '@rtkelly-labs/design-system';
 
 export default function Report() {
   return (
@@ -68,7 +68,7 @@ whole ladder from one file takes 603ms against 2402ms for four separate runs.
 
 ## Peers
 
-`@rtkelly13/design-system`, `react`, `react-dom`, `esbuild` and `tailwindcss` are
+`@rtkelly-labs/design-system`, `react`, `react-dom`, `esbuild` and `tailwindcss` are
 required. `typescript` and `@tailwindcss/typography` are optional — without the
 first the report is not typechecked, without the second the prose layer is
 skipped; the CLI says so in both cases rather than failing.

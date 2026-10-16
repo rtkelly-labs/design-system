@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Modal } from '@rtkelly13/design-system';
+import { Button, Modal } from '@rtkelly-labs/design-system';
 
 export default function BasicModal() {
   const [isOpen, setOpen] = useState(false);

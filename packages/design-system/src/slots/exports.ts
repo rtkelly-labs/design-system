@@ -3,7 +3,7 @@
  *
  * `analyse()` reads `src/index.ts` as the module and sorts every export into one of four classes, and
  * derives each composition part's parent mechanically. Three things consume it: the slot contract
- * (`slots.test.tsx`), the compendium's coverage test in `@rtkelly13/design-system-report`, and the
+ * (`slots.test.tsx`), the compendium's coverage test in `@rtkelly-labs/design-system-report`, and the
  * compendium's slot map. A NEW export is classified the moment it exists; nothing here is a list of
  * component names.
  *

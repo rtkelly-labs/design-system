@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { MobileNav, SiteFooter, SiteHeader, SiteNav, SiteNavItem } from '@rtkelly13/design-system';
+import { MobileNav, SiteFooter, SiteHeader, SiteNav, SiteNavItem } from '@rtkelly-labs/design-system';
 import { REPO_URL, STORYBOOK_URL } from '@/lib/links';
 import { SearchButton } from './SearchButton';
 import { ThemeMenu } from './ThemeMenu';
@@ -50,11 +50,11 @@ export function SiteChrome({ children }: { children: ReactNode }) {
             <SiteNav label="Project" orientation="vertical">
               <SiteNavItem href={STORYBOOK_URL}>Storybook ↗</SiteNavItem>
               <SiteNavItem href={REPO_URL}>Source ↗</SiteNavItem>
-              <SiteNavItem href="https://www.npmjs.com/package/@rtkelly13/design-system">npm ↗</SiteNavItem>
+              <SiteNavItem href="https://www.npmjs.com/package/@rtkelly-labs/design-system">npm ↗</SiteNavItem>
             </SiteNav>
           </>
         }
-        meta="MIT · built with @rtkelly13/design-system · every page static"
+        meta="MIT · built with @rtkelly-labs/design-system · every page static"
       >
         <p className="m-0 font-display text-lg font-bold uppercase">[ RTK / DS ]</p>
         <p className="mt-2 mb-0 text-content-secondary">

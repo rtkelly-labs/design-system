@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { CodeTab, CodeTabs } from '@rtkelly13/design-system';
+import { CodeTab, CodeTabs } from '@rtkelly-labs/design-system';
 import { Article, Heading } from '@/components/docs/Article';
 import { Code } from '@/components/docs/Code';
 import { installation as article } from '@/content/articles';
@@ -17,13 +17,13 @@ export default function InstallationPage() {
       </p>
       <CodeTabs group="pkg">
         <CodeTab label="pnpm">
-          <Code lang="bash" code={'pnpm add @rtkelly13/design-system\npnpm add -D tailwindcss @tailwindcss/postcss @tailwindcss/typography'} />
+          <Code lang="bash" code={'pnpm add @rtkelly-labs/design-system\npnpm add -D tailwindcss @tailwindcss/postcss @tailwindcss/typography'} />
         </CodeTab>
         <CodeTab label="npm">
-          <Code lang="bash" code={'npm install @rtkelly13/design-system\nnpm install -D tailwindcss @tailwindcss/postcss @tailwindcss/typography'} />
+          <Code lang="bash" code={'npm install @rtkelly-labs/design-system\nnpm install -D tailwindcss @tailwindcss/postcss @tailwindcss/typography'} />
         </CodeTab>
         <CodeTab label="yarn">
-          <Code lang="bash" code={'yarn add @rtkelly13/design-system\nyarn add -D tailwindcss @tailwindcss/postcss @tailwindcss/typography'} />
+          <Code lang="bash" code={'yarn add @rtkelly-labs/design-system\nyarn add -D tailwindcss @tailwindcss/postcss @tailwindcss/typography'} />
         </CodeTab>
       </CodeTabs>
       <p>
@@ -36,12 +36,12 @@ export default function InstallationPage() {
         Import one stylesheet from your CSS entry point. <code>styles.css</code> brings in Tailwind, the generated{' '}
         <code>theme.css</code> tokens, the prose layer, the self-hosted fonts and the global resets.
       </p>
-      <Code lang="css" title="app/globals.css" code={'@import "@rtkelly13/design-system/styles.css";'} />
+      <Code lang="css" title="app/globals.css" code={'@import "@rtkelly-labs/design-system/styles.css";'} />
       <Code lang="tsx" title="postcss.config.mjs" code={"export default {\n  plugins: { '@tailwindcss/postcss': {} },\n};"} />
       <p>
         To bring your own resets and fonts, compose the tokens alone instead. Do not import both.
       </p>
-      <Code lang="css" title="app/globals.css" code={'@import "tailwindcss";\n@import "@rtkelly13/design-system/theme.css";'} />
+      <Code lang="css" title="app/globals.css" code={'@import "tailwindcss";\n@import "@rtkelly-labs/design-system/theme.css";'} />
       <p>
         <code>theme.css</code> carries an <code>@source</code> directive for the compiled components. Tailwind v4 skips{' '}
         <code>node_modules</code> when it detects content, so without that directive none of the utilities the components
@@ -58,7 +58,7 @@ export default function InstallationPage() {
         title="app/providers.tsx"
         code={`'use client';
 
-import { ThemeProvider } from '@rtkelly13/design-system';
+import { ThemeProvider } from '@rtkelly-labs/design-system';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return <ThemeProvider defaultLevel="midnight">{children}</ThemeProvider>;
@@ -74,7 +74,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       </p>
       <Code
         title="app/theme-init-script.tsx"
-        code={`import { getThemeInitScript } from '@rtkelly13/design-system';
+        code={`import { getThemeInitScript } from '@rtkelly-labs/design-system';
 
 export function ThemeInitScript() {
   return <script dangerouslySetInnerHTML={{ __html: getThemeInitScript({ defaultLevel: 'midnight' }) }} />;
@@ -119,7 +119,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </p>
       <Code
         title="app/page.tsx"
-        code={`import { Card, Button } from '@rtkelly13/design-system';
+        code={`import { Card, Button } from '@rtkelly-labs/design-system';
 
 export default function Page() {
   return <Card><Button href="/docs">READ THE DOCS</Button></Card>;
@@ -127,7 +127,7 @@ export default function Page() {
       />
       <p>
         The default Turbopack build needs no extra setting. For webpack, add{' '}
-        <code>experimental.optimizePackageImports: ['@rtkelly13/design-system']</code> to{' '}
+        <code>experimental.optimizePackageImports: ['@rtkelly-labs/design-system']</code> to{' '}
         <code>next.config.ts</code> to keep unused client modules out of the browser bundle.
         Call <code>getThemeInitScript</code> directly in the server layout's head.
       </p>
@@ -145,7 +145,7 @@ export default function Page() {
 import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import { forwardRef } from 'react';
-import { LinkProvider, ThemeProvider, type LinkComponentProps } from '@rtkelly13/design-system';
+import { LinkProvider, ThemeProvider, type LinkComponentProps } from '@rtkelly-labs/design-system';
 
 const RouterLink = forwardRef<HTMLAnchorElement, LinkComponentProps>(function RouterLink({ href, ...rest }, ref) {
   return <NextLink ref={ref} href={href} {...rest} />;
@@ -173,7 +173,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         title="app/deploy-button.tsx"
         code={`'use client';
 
-import { Button } from '@rtkelly13/design-system';
+import { Button } from '@rtkelly-labs/design-system';
 
 export function DeployButton() {
   return (

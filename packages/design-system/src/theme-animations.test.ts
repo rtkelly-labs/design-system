@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest';
  * The documented Tailwind entrypoint is
  *
  *   @import "tailwindcss";
- *   @import "@rtkelly13/design-system/theme.css";
+ *   @import "@rtkelly-labs/design-system/theme.css";
  *
  * and nothing else — `styles.css` is the opinionated extra, not a requirement.
  * 0.10.0 declared the `--animate-ds-*` tokens and their `@keyframes` in
