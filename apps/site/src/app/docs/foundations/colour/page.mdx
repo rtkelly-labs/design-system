@@ -1,5 +1,5 @@
 import {
-  FigureFrame, LEVELS, MINIMUM_RATIO, PALETTE_HUES, apcaContrast, auditContrast, contrastRatio,
+  LEVELS, MINIMUM_RATIO, PALETTE_HUES, apcaContrast, auditContrast, contrastRatio,
 } from '@rtkelly13/design-system';
 import { Post, postMetadata } from '@/components/docs/Post';
 
@@ -7,6 +7,8 @@ export const metadata = postMetadata('/docs/foundations/colour');
 
 export const checks = auditContrast(LEVELS);
 export const failing = checks.filter((c) => !c.passes).length;
+
+{/* Data helpers: they compute each figure's data from package exports. Later posts keep such helpers at the top in the same way. */}
 
 export const hueHalves = [PALETTE_HUES.slice(0, 5), PALETTE_HUES.slice(5)];
 export const hueColumns = (hues) => hues.map((name) => ({ name }));
@@ -45,7 +47,7 @@ A component names a job. A Level decides what the job looks like. Colour is addr
 <FigureFrame title="Four words">
   <TermGrid label="Four words">
     <Term term="Lightness" scale="0 = black · 1 = white">How light a colour is, apart from how colourful.</Term>
-    <Term term="Chroma" scale="0 = grey · 0.3 = as vivid as a screen shows">How colourful a colour is.</Term>
+    <Term term="Chroma" scale="0 = grey · higher = more vivid">How colourful a colour is.</Term>
     <Term term="Contrast ratio" scale="4.5:1 = WCAG AA for body text">Whether text reads on its ground.</Term>
     <Term term="Delta E" scale="under 0.04 = the same colour to the eye">How different two colours look.</Term>
   </TermGrid>
@@ -57,13 +59,13 @@ Each Level authors its own ten hues. They share hue angles, so the two read as o
 
 <FigureFrame title="Midnight">
   {hueHalves.map((hues, i) => (
-    <SwatchCompare key={i} label="Midnight hues" level="midnight" columns={hueColumns(hues)} rows={hueRows("midnight", hues)} />
+    <SwatchCompare key={i} label={`Midnight hues, ${i + 1} of 2`} level="midnight" columns={hueColumns(hues)} rows={hueRows("midnight", hues)} />
   ))}
 </FigureFrame>
 
 <FigureFrame title="Sketch">
   {hueHalves.map((hues, i) => (
-    <SwatchCompare key={i} label="Sketch hues" level="sketch" columns={hueColumns(hues)} rows={hueRows("sketch", hues)} />
+    <SwatchCompare key={i} label={`Sketch hues, ${i + 1} of 2`} level="sketch" columns={hueColumns(hues)} rows={hueRows("sketch", hues)} />
   ))}
 </FigureFrame>
 
