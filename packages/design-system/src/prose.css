@@ -608,9 +608,10 @@ html {
 .docs-sidebar-link[data-active='true'] {
   opacity: 1;
   font-weight: 700;
-  color: var(--ds-accent-primary);
+  /* D6-C: the one current page is the solid accent fill with inverse ink. */
+  color: var(--ds-text-inverse);
   border-left-color: var(--ds-accent-primary);
-  background-color: color-mix(in oklab, var(--ds-accent-primary) 12%, transparent);
+  background-color: var(--ds-accent-primary);
 }
 
 .docs-sidebar-group-label {

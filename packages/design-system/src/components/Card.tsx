@@ -1,8 +1,9 @@
 import { forwardRef } from 'react';
 import type { ReactNode, HTMLAttributes, CSSProperties } from 'react';
 import { cn } from '../lib/recipe';
-import { accentVar, semanticTokens } from '../lib/theme';
+import { accentVar, semanticTokens, tintVar } from '../lib/theme';
 import type { AccentToken } from '../lib/theme';
+import type { AccentEmphasis } from '../lib/accentClasses';
 
 
 /**
@@ -62,6 +63,14 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
   /** Semantic accent for the left border highlight. */
   accent?: AccentToken;
+  /**
+   * How the `accent` marks the card beyond its stripe. Unset, the card stays on
+   * `surface.base`. `tint` fills it with the accent's opaque tint (D8-A/B,
+   * strength declared per Level); `tentative` seats it on `surface.raised` with
+   * the stripe alone (D8-C), for a lower-priority or tentative card. Needs
+   * `accent` to mean anything.
+   */
+  emphasis?: AccentEmphasis;
   /** Badge text shown in the card header */
   badge?: string;
   /**
@@ -125,6 +134,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
   children,
   className = '',
   accent,
+  emphasis,
   badge,
   panel = false,
   variant,
@@ -144,7 +154,12 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
   const form: CardVariant = variant ?? (panel || (!title && children) ? 'panel' : 'card');
 
   const baseCardStyle: CSSProperties = {
-    backgroundColor: semanticTokens.surface.base,
+    backgroundColor:
+      accent && emphasis === 'tint'
+        ? tintVar(accent)
+        : accent && emphasis === 'tentative'
+          ? semanticTokens.surface.raised
+          : semanticTokens.surface.base,
     color: semanticTokens.text.primary,
     border: `2px solid ${semanticTokens.border.strong}`,
     transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',

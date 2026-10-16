@@ -39,6 +39,8 @@ export interface CalEvent {
   allDay: boolean;
   where?: string;
   note?: string;
+  /** Not yet accepted, or declined: drawn edge-only (D8-C) instead of tinted. */
+  tentative?: boolean;
 }
 
 export const MIN_DAY = 1440;
@@ -121,6 +123,9 @@ function whole(title: string, cal: CalendarId, from: string, to: string, where?:
   return { id: `e${++seq}`, title, cal, s: a * MIN_DAY, e: (b + 1) * MIN_DAY, allDay: true, where, note };
 }
 
+/** Marks an event tentative (or declined): the calendar draws it edge-only (D8-C). */
+const tent = (ev: CalEvent): CalEvent => ({ ...ev, tentative: true });
+
 function buildSeed(): CalEvent[] {
   seq = 0;
   const out: CalEvent[] = [];
@@ -131,21 +136,21 @@ function buildSeed(): CalEvent[] {
   out.push(
     // Overlap cluster on Wednesday (today): 4 events, 3 columns.
     timed('DESIGN REVIEW', 'work', '2026-10-14', '10:00', '11:00', 'ROOM 4', 'Calendar grid, final pass.'),
-    timed('VENDOR CALL', 'work', '2026-10-14', '10:30', '11:30', 'MEET', 'Renewal terms.'),
+    tent(timed('VENDOR CALL', 'work', '2026-10-14', '10:30', '11:30', 'MEET', 'Renewal terms.')),
     timed('1:1 / ALEX', 'team', '2026-10-14', '10:45', '12:00', 'WALK', 'Quarter goals.'),
     timed('SHIP NOTES', 'work', '2026-10-14', '11:45', '12:15', undefined, 'Draft in the release doc.'),
     timed('LUNCH', 'personal', '2026-10-14', '12:30', '13:15'),
     timed('PAIR / TOKENS', 'team', '2026-10-14', '14:00', '16:00', 'ROOM 2'),
     timed('PHYSIO', 'health', '2026-10-14', '17:15', '18:00', 'CLINIC 9', 'Bring the band.'),
-    timed('QUICK SYNC', 'work', '2026-10-14', '15:00', '15:15'),
+    tent(timed('QUICK SYNC', 'work', '2026-10-14', '15:00', '15:15')),
     // Monday
     timed('PLANNING', 'work', '2026-10-12', '11:00', '12:30', 'ROOM 4'),
     timed('RUN', 'health', '2026-10-12', '07:00', '07:45'),
     timed('DENTIST', 'health', '2026-10-12', '16:30', '17:30', 'CLINIC 2'),
     // Tuesday
     timed('RETRO', 'team', '2026-10-13', '13:00', '14:00', 'ROOM 2'),
-    timed('GROCERIES', 'personal', '2026-10-13', '18:00', '18:45'),
-    timed('INTERVIEW', 'work', '2026-10-13', '14:00', '15:00', 'MEET'),
+    tent(timed('GROCERIES', 'personal', '2026-10-13', '18:00', '18:45')),
+    tent(timed('INTERVIEW', 'work', '2026-10-13', '14:00', '15:00', 'MEET')),
     // Thursday, including an overnight on-call that crosses midnight.
     timed('ON-CALL HANDOVER', 'work', '2026-10-15', '09:00', '09:30'),
     timed('ARCH SYNC', 'work', '2026-10-15', '13:30', '15:30', 'ROOM 1'),
@@ -170,10 +175,10 @@ function buildSeed(): CalEvent[] {
     timed('QUARTER REVIEW', 'work', '2026-10-06', '13:00', '15:00', 'ROOM 4'),
     timed('DENTAL FLOSS CLUB', 'health', '2026-10-07', '08:00', '08:30'),
     timed('BOARD PREP', 'work', '2026-10-08', '10:00', '11:30'),
-    timed('PIZZA FRIDAY', 'personal', '2026-10-09', '12:30', '13:30'),
+    tent(timed('PIZZA FRIDAY', 'personal', '2026-10-09', '12:30', '13:30')),
     timed('ALL HANDS', 'work', '2026-10-20', '16:00', '17:00', 'ATRIUM'),
     timed('ONBOARDING', 'work', '2026-10-21', '10:00', '12:00', 'ROOM 1'),
-    timed('PRESENTATION', 'work', '2026-10-21', '11:00', '12:30', 'ROOM 4'),
+    tent(timed('PRESENTATION', 'work', '2026-10-21', '11:00', '12:30', 'ROOM 4')),
     timed('1:1 / SAM', 'team', '2026-10-21', '11:30', '12:00'),
     timed('PHYSIO', 'health', '2026-10-21', '17:15', '18:00', 'CLINIC 9'),
     timed('HALLOWEEN PARTY', 'personal', '2026-10-31', '19:00', '23:00'),

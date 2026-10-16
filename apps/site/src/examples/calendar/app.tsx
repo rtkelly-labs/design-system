@@ -27,6 +27,7 @@ import {
   Modal,
   Popover,
   Select,
+  accentSurfaceClass,
   SegmentedControl,
   SegmentedControlItem,
   BracketText,
@@ -59,33 +60,33 @@ import type { CalEvent, CalendarDef, CalendarId, CalendarRole } from './model';
 
 /* ---------- colour by role: literal classes so Tailwind can see them ---------- */
 
-const ROLE: Record<CalendarRole, { block: string; bar: string; swatch: string; ink: string }> = {
+const ROLE: Record<CalendarRole, { dash: string; bar: string; swatch: string; ink: string }> = {
   primary: {
-    block: 'border-l-accent-primary bg-[color-mix(in_oklab,var(--ds-accent-primary)_16%,var(--ds-surface-raised))]',
+    dash: '',
     bar: 'bg-accent-primary text-content-inverse',
     swatch: 'bg-accent-primary',
     ink: 'text-accent-primary',
   },
   secondary: {
-    block: 'border-l-accent-secondary bg-[color-mix(in_oklab,var(--ds-accent-secondary)_16%,var(--ds-surface-raised))]',
+    dash: '',
     bar: 'bg-accent-secondary text-content-inverse',
     swatch: 'bg-accent-secondary',
     ink: 'text-accent-secondary',
   },
   tertiary: {
-    block: 'border-l-accent-tertiary bg-[color-mix(in_oklab,var(--ds-accent-tertiary)_16%,var(--ds-surface-raised))]',
+    dash: '',
     bar: 'bg-accent-tertiary text-content-inverse',
     swatch: 'bg-accent-tertiary',
     ink: 'text-accent-tertiary',
   },
   success: {
-    block: 'border-l-intent-success bg-[color-mix(in_oklab,var(--ds-intent-success)_16%,var(--ds-surface-raised))]',
+    dash: '',
     bar: 'bg-intent-success text-content-inverse',
     swatch: 'bg-intent-success',
     ink: 'text-intent-success',
   },
   quiet: {
-    block: 'border-l-accent-quiet bg-[color-mix(in_oklab,var(--ds-accent-quiet)_16%,var(--ds-surface-raised))] border-dashed',
+    dash: 'border-dashed',
     bar: 'bg-accent-quiet text-content-inverse',
     swatch: 'bg-accent-quiet',
     ink: 'text-accent-quiet',
@@ -120,7 +121,8 @@ const EventButton = forwardRef<HTMLButtonElement, EventButtonProps>(function Eve
   const role = ROLE[cal.role];
   const d0 = Math.floor(ev.s / MIN_DAY);
   const time = ev.allDay ? '' : hhmm(ev.s - d0 * MIN_DAY);
-  const label = `${ev.title}, ${whenLabel(ev)}, ${cal.label} calendar`;
+  const surface = accentSurfaceClass(cal.role, ev.tentative ? 'tentative' : 'tint');
+  const label = `${ev.title}, ${whenLabel(ev)}, ${cal.label} calendar${ev.tentative ? ', tentative' : ''}`;
   const base =
     'block w-full min-w-0 cursor-pointer overflow-hidden text-left font-mono text-xs leading-4 '
     + 'hover:shadow-hard-sm focus-visible:z-30';
@@ -148,7 +150,7 @@ const EventButton = forwardRef<HTMLButtonElement, EventButtonProps>(function Eve
         ref={ref}
         type="button"
         aria-label={label}
-        className={`${base} flex items-center gap-3 border border-l-4 border-edge-subtle px-3 py-2 text-sm text-content-primary ${role.block} ${className}`}
+        className={`${base} flex items-center gap-3 border border-l-4 border-edge-subtle px-3 py-2 text-sm text-content-primary ${surface} ${role.dash} ${className}`}
         style={style}
         {...rest}
       >
@@ -164,7 +166,7 @@ const EventButton = forwardRef<HTMLButtonElement, EventButtonProps>(function Eve
       type="button"
       aria-label={label}
       title={`${ev.title} / ${whenLabel(ev)}`}
-      className={`${base} border border-l-4 border-edge-subtle px-1 text-content-primary ${role.block} ${className}`}
+      className={`${base} border border-l-4 border-edge-subtle px-1 text-content-primary ${surface} ${role.dash} ${className}`}
       style={style}
       {...rest}
     >
@@ -200,6 +202,7 @@ function EventPopover({
           <span aria-hidden className={`inline-block size-3 ${ROLE[cal.role].swatch}`} />
           [{cal.code}] {cal.label}
         </dd>
+        {ev.tentative ? (<><dt className="text-content-muted">STATUS</dt><dd className="m-0">TENTATIVE</dd></>) : null}
         {ev.where ? (<><dt className="text-content-muted">WHERE</dt><dd className="m-0">{ev.where}</dd></>) : null}
         {ev.note ? (<><dt className="text-content-muted">NOTES</dt><dd className="m-0">{ev.note}</dd></>) : null}
       </dl>
@@ -459,7 +462,7 @@ function TimeGrid({
                     }}
                   >
                     {active ? (
-                      <div aria-hidden className="pointer-events-none absolute inset-x-0 z-0 border-2 border-accent-primary bg-accent-primary/10" style={{ top: slot * 30 * ppm, height: 30 * ppm }} />
+                      <div aria-hidden className="pointer-events-none absolute inset-x-0 z-0 border-2 border-accent-primary bg-tint-accent-primary" style={{ top: slot * 30 * ppm, height: 30 * ppm }} />
                     ) : null}
                     {placed.map((p) => {
                       const overlay = p.cols >= 3;
