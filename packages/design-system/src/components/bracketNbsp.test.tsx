@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { BracketText } from './BracketText';
 import { PageHeader } from './PageHeader';
@@ -42,5 +42,19 @@ describe('bracketed labels use no-break spaces inside the brackets', () => {
   it('Pagination status', () => {
     const { container } = render(<Pagination currentPage={2} totalPages={9} onPageChange={() => {}} />);
     expect(container.textContent).toContain(`[${NBSP}2 / 9${NBSP}]`);
+  });
+});
+
+describe('BracketText keeps its brackets out of the name and out of a copy', () => {
+  it('names a heading by its label alone', () => {
+    render(<h2><BracketText>Delete domain</BracketText></h2>);
+    expect(screen.getByRole('heading', { name: 'Delete domain' })).toBeTruthy();
+  });
+
+  it('draws each bracket, with its no-break space, in an aria-hidden, unselectable span', () => {
+    const { container } = render(<BracketText>X</BracketText>);
+    const marks = [...container.querySelectorAll('[data-slot="bracket-text"] > [aria-hidden="true"]')];
+    expect(marks.map((m) => m.textContent)).toEqual([`[${NBSP}`, `${NBSP}]`]);
+    for (const m of marks) expect(m.className).toContain('select-none');
   });
 });

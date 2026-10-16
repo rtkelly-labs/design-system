@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { recipe } from '../lib/recipe';
+import { BracketText } from './BracketText';
 
 /**
  * A dashed well. The border is the one place this component departs from the
@@ -106,7 +107,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(function E
         </div>
       )}
       <Title data-slot="empty-state-title" className={styles.title()}>
-        [&nbsp;{title}&nbsp;]
+        <BracketText>{title}</BracketText>
       </Title>
       {description && (
         // A `div`, not a `p`, for the reason `AlertDialog`'s body gives: the

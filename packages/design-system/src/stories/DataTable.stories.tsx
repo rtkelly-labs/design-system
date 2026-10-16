@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '../components/Table';
+import { BracketText } from '../components/BracketText';
 
 interface Deployment {
   id: string;
@@ -221,9 +222,9 @@ export const CompoundTable: Story = {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>[&nbsp;CLUSTER&nbsp;]</TableHead>
-          <TableHead>[&nbsp;HEALTH&nbsp;]</TableHead>
-          <TableHead>[&nbsp;LATENCY&nbsp;]</TableHead>
+          <TableHead><BracketText>CLUSTER</BracketText></TableHead>
+          <TableHead><BracketText>HEALTH</BracketText></TableHead>
+          <TableHead><BracketText>LATENCY</BracketText></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -269,7 +270,7 @@ export const AppearanceMatrix: Story = {
           className="flex min-w-0 flex-col gap-4 border-2 border-edge-strong bg-surface-base p-4 text-content-primary"
         >
           <div className="flex items-baseline justify-between gap-4 border-b border-edge-subtle pb-2">
-            <h2 className="font-display text-xl font-bold">[ {LEVELS[level].label} ]</h2>
+            <h2 className="font-display text-xl font-bold"><BracketText>{LEVELS[level].label}</BracketText></h2>
             <span className="font-mono text-xs uppercase text-content-muted">
               {LEVELS[level].polarity} level
             </span>

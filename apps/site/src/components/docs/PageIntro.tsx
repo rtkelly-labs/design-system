@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Inline } from './Inline';
+import { BracketText } from '@rtkelly13/design-system';
 
 /**
  * The head of every docs page: a bracketed eyebrow naming where the page sits,
@@ -19,7 +20,7 @@ export function PageIntro({
 }) {
   return (
     <header className="not-prose mt-6 mb-8 flex flex-col gap-4 border-b-4 border-double border-edge-strong pb-8">
-      <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary">[&nbsp;{eyebrow}&nbsp;]</p>
+      <p className="m-0 font-mono text-xs font-bold uppercase tracking-[0.2em] text-accent-primary"><BracketText>{eyebrow}</BracketText></p>
       <h1 className="m-0 font-display text-4xl font-extrabold uppercase tracking-tight text-content-primary sm:text-5xl">
         {title}
       </h1>

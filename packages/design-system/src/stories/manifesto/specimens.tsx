@@ -503,7 +503,7 @@ export function VoiceSpecimen() {
         <Badge accent="success">PUBLISHED</Badge>
         <Badge accent="warning">DRAFT</Badge>
         <Badge accent="danger">FAILED</Badge>
-        <BracketText accent="primary">[ LATEST POSTS ]</BracketText>
+        <BracketText accent="primary">LATEST POSTS</BracketText>
       </div>
       <NoteBlock type="tip" title="A CONTROL SAYS EXACTLY WHAT HAPPENS">
         Terse. Technical. Lowercase in code contexts, <code style={MONO}>UPPERCASE_SNAKE</code> for

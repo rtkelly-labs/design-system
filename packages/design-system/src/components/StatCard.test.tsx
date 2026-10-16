@@ -8,7 +8,7 @@ describe('StatCard', () => {
   it('renders the title bracketed and the value plainly', () => {
     render(<StatCard title="Revenue" value="$4,280" />);
 
-    expect(screen.getByText('[ Revenue ]')).toBeDefined();
+    expect(screen.getByText('Revenue', { selector: '[data-slot="bracket-text"]' })).toBeDefined();
     expect(screen.getByText('$4,280')).toBeDefined();
   });
 
