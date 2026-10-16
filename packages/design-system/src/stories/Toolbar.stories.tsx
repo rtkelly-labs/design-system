@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ButtonGroup } from '../components/ButtonGroup';
 import { Menu, MenuItem } from '../components/Menu';
 import { Toolbar, ToolbarButton, ToolbarSeparator } from '../components/Toolbar';
+import { BracketText } from '../components/BracketText';
 
 const meta: Meta<typeof Toolbar> = {
   title: 'Components/Actions & Forms/Toolbar',
@@ -27,7 +28,7 @@ export const Default: Story = {
   render: (args) => (
     <Toolbar {...args}>
       <span className="font-mono text-sm font-bold uppercase text-content-primary">
-        [&nbsp;3 SELECTED&nbsp;]
+        <BracketText>3 SELECTED</BracketText>
       </span>
       <ButtonGroup aria-label="Apply to selection">
         <Menu trigger={<ToolbarButton size="xs">STATUS</ToolbarButton>}>
