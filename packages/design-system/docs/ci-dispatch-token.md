@@ -165,7 +165,7 @@ Design A is also strictly less code: one input, no new trigger.
    (Settings → Developer settings → Personal access tokens → **Fine-grained tokens**).
 2. **Token name:** `design-system-ci-dispatch` — name it after the job, so a future
    audit of your tokens says what breaks if you revoke it.
-3. **Resource owner:** `rtkelly13`.
+3. **Resource owner:** `rtkelly-labs` (the org that owns the repo; an org may need to approve fine-grained tokens).
 4. **Expiration:** 90 days is a reasonable default. Longer trades rotation effort
    for a longer window if it leaks. Whatever you pick, see *Expiry is a silent
    failure* below.
