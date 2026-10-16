@@ -184,7 +184,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
                 <Dialog.Title
                   data-slot="modal-title"
                   className={slots.title()}
-                  render={<h3>[&nbsp;{title}&nbsp;]</h3>}
+                  render={<h3><BracketText>{title}</BracketText></h3>}
                 />
                 <Dialog.Close
                   data-slot="modal-close"
