@@ -18,7 +18,7 @@ export function SampleBar({ title, story }: { title: string; story: string }) {
         <SiteLink href="/examples" className="text-accent-primary no-underline hover:underline">
           ← Examples
         </SiteLink>
-        <span className="truncate text-content-muted">[&nbsp;{title}&nbsp;]</span>
+        <span className="truncate text-content-muted"><BracketText>{title}</BracketText></span>
       </div>
       <div className="flex items-center gap-3">
         <SiteLink href={story} className="text-accent-primary no-underline hover:underline">
