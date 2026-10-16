@@ -35,6 +35,10 @@
  * An attribute value (`title="[ X ]"`) is reported and not fixed: whether that
  * prop takes a node is a type question, so it is a person's call.
  *
+ * A `<BracketText>` that nothing in the file binds — what a merge or rebase
+ * leaves when the other side's import block wins — is reported, and the fix
+ * adds the import.
+ *
  * Inside `<BracketText>` itself, a child that brings its own brackets
  * (`<BracketText>[ X ]</BracketText>` renders `[ [ X ] ]`) or pads itself with
  * whitespace on the same line is reported, and fixed by stripping both.
@@ -243,7 +247,37 @@ export const noHandBrackets = {
       report(node, range, `<BracketText>${child}</BracketText>`);
     }
 
+    /*
+     * `<BracketText>` used with nothing binding the name: the state a merge or
+     * rebase leaves when one side converted the label and the other side's
+     * import block won. The JSX is right, so nothing above fires; this does,
+     * and its fix is the import alone.
+     */
+    function checkBinding(node) {
+      const bound = source.ast.body.some(
+        (n) =>
+          (n.type === 'ImportDeclaration' && n.specifiers.some((s) => s.local.name === 'BracketText')) ||
+          (n.type === 'FunctionDeclaration' && n.id?.name === 'BracketText') ||
+          (n.type === 'VariableDeclaration' && n.declarations.some((d) => d.id.name === 'BracketText')) ||
+          ((n.type === 'ExportNamedDeclaration' || n.type === 'ExportDefaultDeclaration') &&
+            (n.declaration?.id?.name === 'BracketText' || n.declaration?.declarations?.some((d) => d.id.name === 'BracketText'))),
+      );
+      if (bound) return;
+      context.report({
+        node,
+        message: '<BracketText> is used here but not imported.',
+        fix: (fixer) => importFix(fixer),
+      });
+    }
+
+    let firstUse = null;
     return {
+      JSXOpeningElement(node) {
+        if (!firstUse && node.name.type === 'JSXIdentifier' && node.name.name === 'BracketText') firstUse = node;
+      },
+      'Program:exit'() {
+        if (firstUse) checkBinding(firstUse);
+      },
       JSXElement: checkChildren,
       JSXFragment: checkChildren,
       Literal(node) {

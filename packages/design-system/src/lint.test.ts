@@ -173,6 +173,14 @@ describe('no-hand-brackets', () => {
     );
   });
 
+  it('restores an import a merge dropped, when the JSX is already right', async () => {
+    const code = component('<p><BracketText>A</BracketText></p>');
+    expect(await fix(`import { cn } from '../lib/recipe';\n${code}`)).toEqual({
+      output: `import { cn } from '../lib/recipe';\n${IMPORT}${code}`,
+      left: 0,
+    });
+  });
+
   it('adds to a multi-line import on its own line', async () => {
     expect((await fix(`import {\n  BRACKETED,\n} from './BracketText';\n${component('<p>[ A ]</p>')}`)).output).toBe(
       `import {\n  BRACKETED,\n  BracketText,\n} from './BracketText';\n${component('<p><BracketText>A</BracketText></p>')}`,
