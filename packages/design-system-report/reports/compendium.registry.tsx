@@ -27,6 +27,8 @@ import * as TimelineStories from '../../design-system/src/stories/Timeline.stori
 import * as TabsStories from '../../design-system/src/stories/Tabs.stories';
 import * as SegmentedControlStories from '../../design-system/src/stories/SegmentedControl.stories';
 import * as ToolbarStories from '../../design-system/src/stories/Toolbar.stories';
+import * as A11yMenuStories from '../../design-system/src/stories/A11yMenu.stories';
+import * as SeriesMarkStories from '../../design-system/src/stories/SeriesMark.stories';
 import * as AppShellStories from '../../design-system/src/stories/AppShell.stories';
 import * as AvatarStories from '../../design-system/src/stories/Avatar.stories';
 import * as BracketTextStories from '../../design-system/src/stories/BracketText.stories';
@@ -313,6 +315,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'Timeline', group: 'Figures', height: 106, layout: 'side', states: [...fromStories(TimelineStories, ['Shipped']), mdxState('mdx-items', () => (<FigureFrame title="MDX ITEMS"><Timeline><Event date="Mar 12" state="done">CLI copies the files</Event><Event date="Mar 18" state="now">Launch</Event></Timeline></FigureFrame>))] },
 
   { component: 'Avatar', group: 'Content', height: 26, layout: 'side', states: fromStories(AvatarStories, ['Default']) },
+  { component: 'SeriesMark', group: 'Content', height: 60, layout: 'side', states: fromStories(SeriesMarkStories, ['Default', 'Legend']) },
   { component: 'BracketText', group: 'Content', height: 39, layout: 'side', states: fromStories(BracketTextStories, ['Emphasis']) },
   { component: 'NoteBlock', group: 'Content', height: 126, layout: 'side', states: fromStories(NoteBlockStories, ['AllTypes']) },
   { component: 'TLDR', group: 'Content', height: 60, layout: 'side', states: fromStories(TLDRStories, ['Default']) },
@@ -410,6 +413,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'Tabs', group: 'Navigation', height: 125, layout: 'stack', states: fromStories(TabsStories, ['Default', 'Underline']) },
   { component: 'SegmentedControl', group: 'Navigation', height: 30, layout: 'side', states: fromStories(SegmentedControlStories, ['Default']) },
   { component: 'Toolbar', group: 'Navigation', height: 30, layout: 'side', states: fromStories(ToolbarStories, ['Default']) },
+  { component: 'A11yMenu', group: 'Navigation', height: 38, layout: 'side', states: fromStories(A11yMenuStories, ['Trigger']) },
 ];
 
 /** Plates in the document's order: by group, then as listed. Stable, so the index is deterministic. */

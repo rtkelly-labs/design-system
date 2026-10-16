@@ -112,6 +112,19 @@ export const PALETTE_HUES = [
 ] as const satisfies readonly Hue[];
 
 /**
+ * How many members the categorical `series` group has (D9-A).
+ *
+ * Six is what a legend can name and a reader can hold, and the six Hues chosen
+ * are the best subset of the palette by worst-level separation (see
+ * `auditSeriesSeparation`). A tuple, not an array, so a seventh member is a
+ * compile error in every level at once.
+ */
+export const SERIES_COUNT = 6;
+
+/** A value for each of the {@link SERIES_COUNT} series members, in order. */
+export type SeriesTuple<T> = readonly [T, T, T, T, T, T];
+
+/**
  * Every colour a level must define. Adding a field here is a compile error in
  * all four levels until each one answers it — the property that a bare string
  * union cannot provide.
@@ -155,6 +168,28 @@ export interface LevelDefinition {
   readonly accentHue: Readonly<Record<Emphasis, HueRef>>;
   /** As `accentHue`, for the meaning Roles. */
   readonly intentHue: Readonly<Record<Intent, HueRef>>;
+  /**
+   * Which Hue each categorical series member is (D9-A): red, yellow, teal, blue,
+   * violet, magenta, in that order. Declared per level, like `accentHue`, and for
+   * the same reason: the Hue is the lookup and `series` below is its value, so
+   * `check:contrast` can assert the two agree.
+   */
+  readonly seriesHue: SeriesTuple<Hue>;
+  /**
+   * The categorical series group: N colours to be told apart from one another
+   * rather than ranked (`accent` is four steps of emphasis). Each is its Hue's
+   * `palette` value, so each clears the Hue floor on every ground. Colour alone
+   * never carries a series: a legend names every member, and the `patterns`
+   * preference adds a shape and a letter (D9, WCAG 1.4.1).
+   *
+   * Closest pair, OKLab deltaE (`auditSeriesSeparation`): midnight 0.1406
+   * (blue/violet), sketch 0.1254 (yellow/teal), both well past the 0.04 gate
+   * under normal vision. Under simulated colour-vision deficiency they are not:
+   * midnight protanopia blue/violet 0.0081, sketch deuteranopia red/yellow
+   * 0.0396. That is the case the glyphs exist for, so only normal vision is
+   * gated and the simulations are reported.
+   */
+  readonly series: SeriesTuple<string>;
   /**
    * How much of a role is mixed into `surface.base` to make its tint, in
    * percent. **Declared per level, not shared** (D8): levels are independently
@@ -286,6 +321,8 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       magenta: '#ff88fd',
       pink: '#ff8ebe',
     },
+    seriesHue: ['red', 'yellow', 'teal', 'blue', 'violet', 'magenta'],
+    series: ['#ff586e', '#facc15', '#34d399', '#38bdf8', '#c3afff', '#ff1cff'],
     tintStrength: 20,
     tint: {
       accent: { primary: '#172c3e', secondary: '#302c28', tertiary: '#331a33', quiet: '#202032' },
@@ -369,6 +406,8 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       magenta: '#7f0080',
       pink: '#8a0052',
     },
+    seriesHue: ['red', 'yellow', 'teal', 'blue', 'violet', 'magenta'],
+    series: ['#bd0010', '#705a00', '#006859', '#1450d7', '#7d00f4', '#a300ad'],
     tintStrength: 12,
     tint: {
       accent: { primary: '#d9e1ec', secondary: '#dae2d4', tertiary: '#f3dbd2', quiet: '#e3e0d8' },

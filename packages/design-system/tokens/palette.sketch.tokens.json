@@ -459,6 +459,28 @@
       "$value": "{palette.red}"
     }
   },
+  "series": {
+    "1": {
+      "$value": "{palette.red}"
+    },
+    "2": {
+      "$value": "{palette.yellow}"
+    },
+    "3": {
+      "$value": "{palette.teal}"
+    },
+    "4": {
+      "$value": "{palette.blue}"
+    },
+    "5": {
+      "$value": "{palette.violet}"
+    },
+    "6": {
+      "$value": "{palette.magenta}"
+    },
+    "$type": "color",
+    "$description": "Categorical series (D9-A): six colours told apart, not ranked, aliased onto Hues by the declared `seriesHue` list. Colour never carries a series alone: pair each with a label, and a glyph under the `patterns` preference."
+  },
   "tint": {
     "$type": "color",
     "$description": "Opaque role tints (D8): each Role mixed into surface.base at 12%, in OKLab. Literals, not aliases: a tint is a mix, not a Hue.",
