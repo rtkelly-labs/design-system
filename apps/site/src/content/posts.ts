@@ -18,6 +18,7 @@ export const POSTS: readonly PostDef[] = [
     href: '/docs/foundations/colour',
     title: 'Colour',
     group: 'Foundations',
-    lede: 'Colour is addressed by role, and every role pair is held to a contrast floor in CI.',
+    lede: 'Colour is addressed by role. Ten hues per Level, and every role pair measured.',
+    keywords: 'colour color hue palette role contrast WCAG APCA Level midnight sketch',
   },
 ];
