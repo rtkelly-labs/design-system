@@ -7,7 +7,7 @@ import { button } from './components/button';
 import { dataTable } from './components/data-table';
 import { input } from './components/input';
 import { modal } from './components/modal';
-import { POSTS } from './posts';
+import { POSTS, type PostDef } from './posts';
 import { SAMPLES, sampleHref } from './samples';
 import type { ArticleDef, ComponentPageDef, Section } from './types';
 
@@ -30,15 +30,15 @@ export function postSections(href: string): Section[] {
   return sections;
 }
 
+/** A post as an article: its definition without the source file, plus the generated sections. */
+export function postArticle(def: PostDef): ArticleDef {
+  const { file, ...rest } = def;
+  void file;
+  return { ...rest, sections: postSections(def.href) };
+}
+
 /** Every page that has a lede and sections: the hand-written articles and the `.mdx` posts. */
-const ARTICLE_PAGES = (): ArticleDef[] => [
-  ...ARTICLES,
-  ...POSTS.map((post): ArticleDef => {
-    const { file, ...rest } = post;
-    void file;
-    return { ...rest, sections: postSections(post.href) };
-  }),
-];
+const ARTICLE_PAGES = (): ArticleDef[] => [...ARTICLES, ...POSTS.map(postArticle)];
 
 /** A component page's headings, in the order its template renders them. */
 export function componentSections(page: ComponentPageDef): Section[] {

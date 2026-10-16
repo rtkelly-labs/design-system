@@ -226,6 +226,11 @@ function postSections(file: string): PostSection[] {
       .trim()
       .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
       .replace(/[`*]/g, '');
+    // Markup the title regex above does not strip would make the slug here differ from the one
+    // `AnchorHeading` computes from the rendered text, so the rail and the anchor would drift.
+    if (/[{<&_\\]/.test(title)) {
+      throw new Error(`${file}: heading "${title}" contains markup (one of { < & _ or a backslash); headings are plain text`);
+    }
     const id = slugify(title);
     if (seen.has(id)) throw new Error(`${file}: two headings slug to ${id}`);
     seen.add(id);

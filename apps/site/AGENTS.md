@@ -84,7 +84,7 @@ map, as an npm consumer would.
 10. **Posts are `.mdx` under `src/app/docs/<group>/<slug>/page.mdx`, registered in `src/content/posts.ts`.**
     Sections come from the file's `##`/`###` headings at generate time, slugged with the package's
     `slugify`, so an anchor cannot drift from the contents rail. Colours and figures come from the
-    package's exports, never literals; `check:tokens` scans `.mdx`.
+    package's exports, never literals; `check:tokens` scans `.mdx`. The steps are under "Adding a post".
 
 ## Adding a component page
 
@@ -93,6 +93,21 @@ map, as an npm consumer would.
    examples, the components whose props to show, accessibility notes and keys).
 3. Add it to `COMPONENT_PAGES` in `src/content/registry.ts`. The nav, pager,
    TOC, search and static params follow from that.
+
+## Adding a post
+
+1. Create `src/app/docs/<group>/<slug>/page.mdx`.
+2. Register it in `src/content/posts.ts` (file, href, title, group, lede, keywords).
+3. Wrap the body in `<Post href="/docs/<group>/<slug>">` and export
+   `metadata = postMetadata('/docs/<group>/<slug>')`, both from `@/components/docs/Post`.
+4. `src/generated/` is gitignored and `pnpm dev` generates once, so re-run `pnpm generate`
+   after you edit a heading.
+5. A package figure the post uses must also be added to `src/mdx-components.tsx`, which lists
+   components one by one.
+6. Headings are plain text. The generator throws on `{ < & _` or a backslash in one.
+7. Link issues by URL. `#NNN` trips the hex rule in `check:tokens`.
+8. Colours and numbers come from package exports (`LEVELS`, `PALETTE_HUES`, `contrastRatio`,
+   `auditContrast`), never literals.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
