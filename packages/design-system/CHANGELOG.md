@@ -9,6 +9,10 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## 0.19.0
+
+Badge and Tag take `appearance="hairline"` (a 1px subtle outline, no fill, secondary text, small, as-written case). Inside a `Table` or `DataTable` it is the default, through a new `labelAppearance` prop on the table; pass `appearance="default"` on a label, or `labelAppearance="default"` on the table, to keep the filled look. `Tag` is now a client component, because it reads the table's context.
+
 ## 0.18.0
 
 `Button` defaults to the new `quiet` variant (it was `tertiary`), and `secondary` is now an outline with a hard shadow rather than an ink fill. Add `variant="tertiary"` where the old default was wanted. New: `variant="danger"`, sizes `xs`, `icon` and `icon-touch` (icon sizes require `aria-label`), and `ButtonGroup`, which warns in development when a danger button sits beside a same-hue one. Modal and AlertDialog footers are ButtonGroups. `sm` is 40px tall, as measured.
