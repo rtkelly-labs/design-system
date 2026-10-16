@@ -583,7 +583,7 @@ export default function EditorWorkbench() {
         >
           <NerdIcon name="folder" size="sm" />
         </Button>
-        <span className="font-display text-base font-bold uppercase tracking-wider text-accent-primary">[&nbsp;rtk.edit&nbsp;]</span>
+        <span className="font-display text-base font-bold uppercase tracking-wider text-accent-primary"><BracketText>rtk.edit</BracketText></span>
         <span className="hidden truncate text-content-muted sm:inline">pagination-kit</span>
         <button
           ref={paletteTrigger}
