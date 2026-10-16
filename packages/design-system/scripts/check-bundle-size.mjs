@@ -38,7 +38,8 @@ const BUDGETS = {
     // Local zlib emits 5,138 B. Keep the existing ~2% headroom for tooling.
     // D6/D8: per-level opaque role tints and the multi-select selection device:
     // 29,788 B raw, 5,440 B gzip locally. ~2% headroom kept.
-    maxRaw: 30_400,
+    // D5-B: one @media print rule re-points every role to the paper level: 32,199 B raw.
+    maxRaw: 32_900,
     // The reduced-motion block that collapses the duration tokens, and the
     // --transition-duration-* names Tailwind reads: 5,636 B gzip.
     maxGzip: 5_760,

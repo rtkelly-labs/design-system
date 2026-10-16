@@ -48,7 +48,7 @@ const tableStyles = recipe({
       + 'data-[more-left]:shadow-[-4px_0_0_0_var(--ds-border-strong)] '
       + 'data-[more-left]:data-[more-right]:shadow-[-4px_0_0_0_var(--ds-border-strong),4px_0_0_0_var(--ds-border-strong)]',
     table: 'w-full caption-bottom text-left font-mono text-sm border-collapse',
-    header: 'bg-surface-raised border-b-2 border-edge-strong',
+    header: 'bg-surface-raised border-b-2 border-edge-strong print:table-header-group',
     head: 'h-11 px-4 py-3 text-left align-middle font-display text-xs font-bold uppercase tracking-wider text-accent-primary border-r-2 border-edge-strong last:border-r-0',
     rowHead: 'px-4 py-3 text-left align-middle text-sm font-bold text-content-primary border-r-2 border-edge-strong last:border-r-0',
     body: 'divide-y-2 divide-edge-strong [&_tr:last-child]:border-0',
