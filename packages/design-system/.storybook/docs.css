@@ -82,6 +82,11 @@
   margin-bottom: 1.5rem !important;
 }
 
+.sbdocs .docs-story figure {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
 .sbdocs .docs-story > div:first-child {
   border-bottom: 1px solid var(--ds-border-subtle) !important;
   background-color: var(--ds-surface-raised) !important;

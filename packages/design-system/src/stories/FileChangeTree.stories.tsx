@@ -31,3 +31,7 @@ export const Translated: Story = {
 
 /** The marks keep their intent roles against the sketch surface. */
 export const SketchTheme: Story = { render: (args) => <FigureFrame title="SKETCH"><FileChangeTree {...args} /></FigureFrame>, globals: { level: 'sketch' } };
+
+/** The tree rendered standalone on its own surface without an enclosing FigureFrame. */
+export const Standalone: Story = { render: (args) => <div className="p-4 bg-surface-base"><FileChangeTree {...args} /></div> };
+
