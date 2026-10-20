@@ -239,7 +239,10 @@ function stripFences(source: string): string {
  */
 function postSections(file: string): PostSection[] {
   const source = stripFences(
-    readFileSync(path.join(SITE, 'src/app', file), 'utf8').replace(/^---\n[\s\S]*?\n---\n/, ''),
+    readFileSync(path.join(SITE, 'src/app', file), 'utf8')
+      // CRLF and lone CR become LF first, so a fence line ending in \r still closes.
+      .replace(/\r\n?/g, '\n')
+      .replace(/^---\n[\s\S]*?\n---\n/, ''),
   );
   const sections: PostSection[] = [];
   const seen = new Set<string>();
