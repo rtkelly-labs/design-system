@@ -207,15 +207,40 @@ interface PostSection {
 }
 
 /**
+ * Drops fenced code blocks, pairing markers as CommonMark (and so MDX) does. An opening fence is
+ * 0-3 spaces, then 3+ of one marker (backtick or tilde) and an info string, which for a backtick
+ * fence may not itself contain a backtick. It closes on 0-3 spaces, at least as many of the same
+ * marker, then only whitespace. An unclosed fence runs to the end of the file.
+ */
+function stripFences(source: string): string {
+  const kept: string[] = [];
+  let open: { marker: string; length: number } | null = null;
+  for (const line of source.split('\n')) {
+    if (open) {
+      const close = /^ {0,3}(`{3,}|~{3,})[ \t]*$/.exec(line);
+      if (close && close[1][0] === open.marker && close[1].length >= open.length) open = null;
+      continue;
+    }
+    const start = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    if (start && !(start[1][0] === '`' && start[2].includes('`'))) {
+      open = { marker: start[1][0], length: start[1].length };
+      continue;
+    }
+    kept.push(line);
+  }
+  return kept.join('\n');
+}
+
+/**
  * A post's `##` and `###` headings, in file order. Frontmatter and fenced code
  * are dropped first, so a `## ` inside an example is not a heading. Ids come from
  * the package's `slugify`, the function `AnchorHeading` uses when it renders
  * the heading, so the contents rail and the anchor cannot disagree.
  */
 function postSections(file: string): PostSection[] {
-  const source = readFileSync(path.join(SITE, 'src/app', file), 'utf8')
-    .replace(/^---\n[\s\S]*?\n---\n/, '')
-    .replace(/^(```|~~~)[^\n]*\n[\s\S]*?\n\1[ \t]*$/gm, '');
+  const source = stripFences(
+    readFileSync(path.join(SITE, 'src/app', file), 'utf8').replace(/^---\n[\s\S]*?\n---\n/, ''),
+  );
   const sections: PostSection[] = [];
   const seen = new Set<string>();
   for (const line of source.split('\n')) {
