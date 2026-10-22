@@ -165,6 +165,19 @@ try {
     readFileSync(path.join(project, 'again.html'), 'utf8') === sketchHtml,
   );
 
+  // The second bin. Plain output to a pipe, so the waterfall reads as text.
+  console.log('\nDriving ds-trace:');
+  writeFileSync(
+    path.join(project, 'trace.json'),
+    JSON.stringify([
+      { id: 'a', name: 'GET /checkout', service: 'web', start: 0, end: 400 },
+      { id: 'b', parentId: 'a', name: 'db.query', service: 'postgres', start: 20, end: 140, status: 'error' },
+    ]),
+  );
+  const trace = run('npx', ['--yes', 'ds-trace', 'trace.json', '--columns', '20'], project, true);
+  check('ds-trace draws a waterfall', trace.ok && /TRACE {2}2 spans · 400ms/.test(trace.out) && /└─ db\.query/.test(trace.out), trace.out.slice(0, 300));
+  check('ds-trace writes no colour to a pipe', !trace.out.includes('\u001b['));
+
   // A consumer resolves this package to `dist/index.d.ts`, which `skipLibCheck`
   // skips — so the check should cost about a second here even though extending
   // this repo's own tsconfig (whose `paths` point at source) costs four.

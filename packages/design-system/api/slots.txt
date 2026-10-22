@@ -235,6 +235,8 @@ ticker-tape-track	TickerTape
 timeline	Timeline
 tldr	TLDR
 token-table	TokenTable
+trace-viewer	TraceViewer
+trace-waterfall	TraceWaterfall
 track-card	TrackCard
 track-card-badge	TrackCard
 track-card-description	TrackCard

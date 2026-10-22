@@ -384,6 +384,17 @@ interface UseActiveHeadingOptions {
 
 declare function useActiveHeading(ids: readonly string[], { offset, enabled }?: UseActiveHeadingOptions): string | null;
 
+interface UseTraceClockOptions {
+
+    running?: boolean;
+
+    interval?: number;
+
+    read?: () => number;
+}
+
+declare function useTraceClock({ running, interval, read }?: UseTraceClockOptions): number;
+
 interface ButtonOwnProps {
 
     children: ReactNode;
@@ -1995,6 +2006,148 @@ interface BulletChartProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' 
 
 declare const BulletChart: react.ForwardRefExoticComponent<BulletChartProps & react.RefAttributes<HTMLDivElement>>;
 
+type TraceAttributeValue = string | number | boolean;
+
+type TraceSpanStatus = 'ok' | 'error' | 'unset';
+
+interface TraceSpanInput {
+
+    id: string;
+
+    parentId?: string | null;
+
+    name: string;
+
+    service?: string;
+
+    start: number;
+
+    end?: number;
+
+    duration?: number;
+
+    status?: TraceSpanStatus;
+
+    kind?: string;
+
+    attributes?: Record<string, TraceAttributeValue>;
+}
+
+interface TraceSpan {
+    id: string;
+    parentId: string | null;
+    name: string;
+    service: string;
+    status: TraceSpanStatus;
+    kind?: string;
+    attributes: Record<string, TraceAttributeValue>;
+
+    depth: number;
+
+    children: string[];
+
+    offset: number;
+
+    duration: number;
+
+    selfTime: number;
+
+    inFlight: boolean;
+
+    critical: boolean;
+}
+
+interface TraceModel {
+
+    spans: TraceSpan[];
+    byId: ReadonlyMap<string, TraceSpan>;
+
+    start: number;
+
+    duration: number;
+
+    services: string[];
+    errorCount: number;
+    inFlightCount: number;
+
+    criticalPath: string[];
+}
+interface BuildTraceOptions {
+
+    now?: number;
+}
+
+declare function buildTrace(input: readonly TraceSpanInput[] | TraceModel, options?: BuildTraceOptions): TraceModel;
+
+declare function visibleTraceSpans(model: TraceModel, collapsed?: ReadonlySet<string>, filter?: (span: TraceSpan) => boolean): TraceSpan[];
+
+declare function matchTraceSpan(span: TraceSpan, query: string): boolean;
+
+declare function formatTraceDuration(ms: number): string;
+
+declare function traceTicks(duration: number, target?: number): number[];
+
+declare function parseOtlpTrace(document: unknown): TraceSpanInput[];
+
+declare function parseTraceDocument(input: unknown): TraceSpanInput[];
+interface FormatTraceWaterfallOptions extends BuildTraceOptions {
+
+    columns?: number;
+
+    labelWidth?: number;
+
+    color?: boolean;
+
+    ascii?: boolean;
+
+    hideService?: boolean;
+}
+
+declare function formatTraceWaterfall(input: readonly TraceSpanInput[] | TraceModel, options?: FormatTraceWaterfallOptions): string;
+
+declare function describeTraceSpan(span: TraceSpan): string;
+interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
+
+    spans: readonly TraceSpanInput[] | TraceModel;
+
+    now?: number;
+
+    selectedId?: string | null;
+
+    defaultSelectedId?: string | null;
+
+    onSelectedChange?: (id: string | null) => void;
+
+    collapsed?: readonly string[];
+
+    defaultCollapsed?: readonly string[];
+
+    onCollapsedChange?: (ids: string[]) => void;
+
+    filter?: string;
+
+    ticks?: number;
+
+    label?: string;
+}
+
+declare const TraceWaterfall: react.ForwardRefExoticComponent<TraceWaterfallProps & react.RefAttributes<HTMLDivElement>>;
+
+interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
+
+    spans: readonly TraceSpanInput[] | TraceModel;
+
+    now?: number;
+
+    title?: string;
+
+    defaultSelectedId?: string | null;
+
+    searchable?: boolean;
+}
+
+declare const TraceViewer: react.ForwardRefExoticComponent<TraceViewerProps & react.RefAttributes<HTMLElement>>;
+
 interface SlideProps {
     title?: string;
     subtitle?: string;
@@ -3061,6 +3214,7 @@ export {
   Breadcrumbs,
   type BreadcrumbsProps,
   type BrutalistTheme,
+  type BuildTraceOptions,
   BulletChart,
   type BulletChartProps,
   Button,
@@ -3167,6 +3321,7 @@ export {
   type FlowPathProps,
   type FlowRow,
   type FlowTone,
+  type FormatTraceWaterfallOptions,
   GanttChart,
   type GanttChartProps,
   type GanttItem,
@@ -3418,6 +3573,15 @@ export {
   type TokenTableProps,
   Tooltip,
   type TooltipProps,
+  type TraceAttributeValue,
+  type TraceModel,
+  type TraceSpan,
+  type TraceSpanInput,
+  type TraceSpanStatus,
+  TraceViewer,
+  type TraceViewerProps,
+  TraceWaterfall,
+  type TraceWaterfallProps,
   TrackCard,
   type TrackCardProps,
   type TrackItem,
@@ -3432,6 +3596,7 @@ export {
   type UptimeStripProps,
   type UseActiveHeadingOptions,
   type UseCopyToClipboardResult,
+  type UseTraceClockOptions,
   type VerdictTone,
   WEB_FLOOR,
   XIcon,
@@ -3444,22 +3609,29 @@ export {
   auditSelectionDevices,
   auditTextHierarchy,
   borderVar,
+  buildTrace,
   childrenToText,
   cn,
   collectHeadings,
   composite,
   contrastRatio,
   createAnchorHeading,
+  describeTraceSpan,
   fontVar,
+  formatTraceDuration,
+  formatTraceWaterfall,
   getRecommendedColours,
   getThemeInitScript,
   isExternalHref,
   isMedium,
   isRecommendedColourClass,
   isThemeLevel,
+  matchTraceSpan,
   mdxComponents,
   nextLevel,
   parseColor,
+  parseOtlpTrace,
+  parseTraceDocument,
   relativeLuminance,
   scanRules,
   scanTokenRules,
@@ -3467,6 +3639,7 @@ export {
   slugify,
   surfaceVar,
   textVar,
+  traceTicks,
   useActiveHeading,
   useCopyToClipboard,
   useDocsLinkComponent,
@@ -3476,4 +3649,6 @@ export {
   useOptionalToast,
   useTheme,
   useToast,
+  useTraceClock,
+  visibleTraceSpans,
 };

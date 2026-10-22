@@ -35,6 +35,7 @@ export * from './lib/slug';
 // Hooks
 export * from './hooks/useCopyToClipboard';
 export * from './hooks/useActiveHeading';
+export * from './hooks/useTraceClock';
 
 // Primitives & Callouts
 export * from './components/Button';
@@ -171,6 +172,12 @@ export * from './components/BarChart';
 export * from './components/Sparkline';
 export * from './components/ChartTooltip';
 export * from './components/BulletChart';
+// Traces: one model (`lib/trace`) drawn three ways — the waterfall, the viewer
+// around it, and `formatTraceWaterfall` for a terminal, which `ds-trace` in the
+// report package prints. Pure functions, so they are safe in a Node bin.
+export * from './lib/trace';
+export * from './components/TraceWaterfall';
+export * from './components/TraceViewer';
 
 // Slides & Presentation Deck Engine
 export * from './components/slides/Slide';

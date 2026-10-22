@@ -253,6 +253,8 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-data-sparkline--primary-trend', snapshot: 'sparkline-primary-trend.png' },
   { id: 'components-data-bulletchart--primary-benchmark', snapshot: 'bulletchart-primary-benchmark.png' },
   { id: 'components-data-charttooltip--primary', snapshot: 'charttooltip-primary.png' },
+  { id: 'components-data-tracewaterfall--checkout', snapshot: 'tracewaterfall-checkout.png' },
+  { id: 'components-data-traceviewer--checkout', snapshot: 'traceviewer-checkout.png' },
   { id: 'components-icons-socialicon--brand-marks', snapshot: 'socialicon-brand-marks.png' },
 
   // System feedback. Each row is the state that rots unseen — a loading card
