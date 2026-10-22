@@ -399,3 +399,29 @@ function isSpanInput(value: unknown): value is TraceSpanInput {
   const span = value as TraceSpanInput | null;
   return !!span && typeof span === 'object' && typeof span.id === 'string' && finite(span.start);
 }
+
+/**
+ * The trace as it stood `elapsed` milliseconds after it began: spans that had
+ * not started are absent, and spans still running are open — no end, and no
+ * status, because a status is only known once a span finishes. Feed it a
+ * clock and a finished trace plays back as it was recorded.
+ */
+export function replayTrace(input: readonly TraceSpanInput[] | TraceModel, elapsed: number): TraceSpanInput[] {
+  const model = buildTrace(input);
+  const at = finite(elapsed) ? elapsed : model.duration;
+  return model.spans
+    .filter((span) => span.offset <= at)
+    .map((span) => {
+      const done = !span.inFlight && span.offset + span.duration <= at;
+      return {
+        id: span.id,
+        parentId: span.parentId,
+        name: span.name,
+        service: span.service,
+        kind: span.kind,
+        attributes: span.attributes,
+        start: span.offset,
+        ...(done ? { end: span.offset + span.duration, status: span.status } : {}),
+      };
+    });
+}

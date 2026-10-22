@@ -13,7 +13,9 @@ in [`docs/adr/`](./docs/adr/).
 
 Traces. `TraceWaterfall` and `TraceViewer` draw distributed traces — spans nested by parent on
 one time axis, a keyboard tree, the critical path marked, in-flight spans drawn to a `now` that
-`useTraceClock` advances. The model is public and React-free: `buildTrace`, and
+`useTraceClock` advances. `TraceViewer replay` plays a finished trace back in real time — rows
+fade in as spans start, bars grow to a playhead on a fixed axis — with play, pause, scrub and
+speed; `useTraceReplay` and `replayTrace` do the same for a bare `TraceWaterfall`. The model is public and React-free: `buildTrace`, and
 `parseTraceDocument` / `parseOtlpTrace` for OTLP/JSON and NDJSON. Nothing to change.
 
 ## 0.16.0

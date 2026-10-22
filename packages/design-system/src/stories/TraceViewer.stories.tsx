@@ -4,7 +4,7 @@ import { TextArea } from '../components/Input';
 import { parseTraceDocument } from '../lib/trace';
 import { TraceViewer } from '../components/TraceViewer';
 import { useTraceClock } from '../hooks/useTraceClock';
-import { checkoutTrace, deployTrace } from './traceFixtures';
+import { checkoutTrace, deployTrace, orderTrace } from './traceFixtures';
 
 const meta: Meta<typeof TraceViewer> = {
   title: 'Components/Data/TraceViewer',
@@ -26,6 +26,18 @@ type Story = StoryObj<typeof TraceViewer>;
 export const Checkout: Story = {
   args: { spans: checkoutTrace, title: 'GET /checkout · 4f2a91', defaultSelectedId: 'e1' },
   parameters: { docs: { description: { story: 'The payment span is selected: its self time, status and attributes show beside the waterfall.' } } },
+};
+
+/** Played back in real time, with transport controls. Not snapshotted: it moves. */
+export const Replay: Story = {
+  args: { spans: orderTrace, title: 'POST /orders · replay', replay: true, autoPlay: true, loop: true, defaultSelectedId: 's6' },
+  parameters: { docs: { description: { story: 'With `replay`, the trace plays back as it was recorded: rows fade in as spans start and bars grow to a playhead. Pause, scrub, restart, or change speed from the transport; the summary counts only what has happened so far.' } } },
+};
+
+/** Replay controls on a still trace: press Play to watch it unfold. */
+export const ReplayControls: Story = {
+  args: { spans: checkoutTrace, title: 'GET /checkout · 4f2a91', replay: true, defaultSelectedId: 'e1' },
+  parameters: { docs: { description: { story: 'The transport without autoplay. The full trace shows until Play is pressed; the scrubber jumps to any moment.' } } },
 };
 
 /** Nothing selected and no filter field, for embedding in a smaller panel. */

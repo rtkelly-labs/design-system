@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { createRef } from 'react';
-import { describe, expect, it } from 'vitest';
+import { act } from 'react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TraceSpanInput } from '../lib/trace';
 import { TraceViewer } from './TraceViewer';
 
@@ -42,5 +43,42 @@ describe('TraceViewer', () => {
     render(<TraceViewer spans={spans} defaultSelectedId={null} searchable={false} />);
     expect(screen.getByText('Select a span to see its details.')).toBeTruthy();
     expect(screen.queryByLabelText('Filter spans')).toBeNull();
+  });
+
+  describe('replay', () => {
+    afterEach(() => vi.useRealTimers());
+    const rows = () => screen.queryAllByRole('treeitem').map((row) => row.getAttribute('data-span-id'));
+
+    it('shows the whole trace until played, then draws spans as they start', () => {
+      vi.useFakeTimers({ toFake: ['requestAnimationFrame', 'cancelAnimationFrame', 'performance', 'Date'] });
+      render(<TraceViewer spans={spans} replay />);
+      expect(rows()).toEqual(['a', 'b', 'c']);
+      fireEvent.click(screen.getByRole('button', { name: 'Replay' }));
+      expect(rows()).toEqual(['a']);
+      act(() => { vi.advanceTimersByTime(100); });
+      expect(rows()).toEqual(['a', 'b']);
+      expect(screen.getByRole('treeitem', { name: /^SELECT cart_items/ }).getAttribute('data-in-flight')).toBe('true');
+      fireEvent.click(screen.getByRole('button', { name: 'Pause' }));
+      act(() => { vi.advanceTimersByTime(1000); });
+      expect(rows()).toEqual(['a', 'b']);
+    });
+
+    it('scrubs and changes speed from the transport', () => {
+      render(<TraceViewer spans={spans} replay />);
+      const scrubber = screen.getByRole('slider', { name: 'Replay position' });
+      fireEvent.change(scrubber, { target: { value: '200' } });
+      expect(rows()).toEqual(['a', 'b', 'c']);
+      expect(screen.getByRole('treeitem', { name: /^payment.authorize/ }).getAttribute('data-status')).toBe('unset');
+      expect(screen.getByText('200ms / 400ms')).toBeTruthy();
+      const fast = screen.getByRole('button', { name: '4×' });
+      fireEvent.click(fast);
+      expect(fast.getAttribute('aria-pressed')).toBe('true');
+      expect(screen.getByRole('button', { name: '1×' }).getAttribute('aria-pressed')).toBe('false');
+    });
+
+    it('has no transport without replay', () => {
+      render(<TraceViewer spans={spans} />);
+      expect(screen.queryByRole('group', { name: 'Replay' })).toBeNull();
+    });
   });
 });

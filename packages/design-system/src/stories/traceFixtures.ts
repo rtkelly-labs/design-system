@@ -25,12 +25,8 @@ export function deployTrace(start: number): TraceSpanInput[] {
   ];
 }
 
-/**
- * A request that unfolds over 4.2s. `streamTrace(elapsed)` returns what a
- * collector would have seen by then: spans appear when they start and close
- * when they end, so a story replaying it shows the waterfall being written.
- */
-const script: Array<TraceSpanInput & { end: number }> = [
+/** An order request that takes 4.2s, with a broker that fails once before a retry lands. */
+export const orderTrace: TraceSpanInput[] = [
   { id: 's1', name: 'POST /orders', service: 'api', kind: 'server', start: 0, end: 4200 },
   { id: 's2', parentId: 's1', name: 'validate', service: 'api', start: 60, end: 240 },
   { id: 's3', parentId: 's1', name: 'INSERT orders', service: 'postgres', kind: 'client', start: 260, end: 1100, attributes: { 'db.system': 'postgresql' } },
@@ -40,11 +36,3 @@ const script: Array<TraceSpanInput & { end: number }> = [
   { id: 's7', parentId: 's6', name: 'retry 1', service: 'events', start: 2900, end: 3300, status: 'error' },
   { id: 's8', parentId: 's6', name: 'retry 2', service: 'events', start: 3500, end: 4000 },
 ];
-
-export const STREAM_LENGTH = 4200;
-
-export function streamTrace(elapsed: number): TraceSpanInput[] {
-  return script
-    .filter((span) => span.start <= elapsed)
-    .map((span) => (span.end <= elapsed ? span : { ...span, end: undefined, status: undefined }));
-}

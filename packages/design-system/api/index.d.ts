@@ -395,6 +395,33 @@ interface UseTraceClockOptions {
 
 declare function useTraceClock({ running, interval, read }?: UseTraceClockOptions): number;
 
+interface UseTraceReplayOptions {
+
+    autoPlay?: boolean;
+
+    loop?: boolean;
+
+    speed?: number;
+
+    loopDelay?: number;
+}
+interface TraceReplay {
+
+    elapsed: number;
+    playing: boolean;
+    speed: number;
+    play: () => void;
+    pause: () => void;
+    toggle: () => void;
+
+    restart: () => void;
+
+    seek: (elapsed: number) => void;
+    setSpeed: (speed: number) => void;
+}
+
+declare function useTraceReplay(duration: number, { autoPlay, loop, speed: initialSpeed, loopDelay }?: UseTraceReplayOptions): TraceReplay;
+
 interface ButtonOwnProps {
 
     children: ReactNode;
@@ -2089,6 +2116,8 @@ declare function parseOtlpTrace(document: unknown): TraceSpanInput[];
 
 declare function parseTraceDocument(input: unknown): TraceSpanInput[];
 
+declare function replayTrace(input: readonly TraceSpanInput[] | TraceModel, elapsed: number): TraceSpanInput[];
+
 declare function describeTraceSpan(span: TraceSpan): string;
 interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
 
@@ -2112,6 +2141,12 @@ interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSe
 
     ticks?: number;
 
+    range?: number;
+
+    playhead?: number;
+
+    animate?: boolean;
+
     label?: string;
 }
 
@@ -2128,6 +2163,14 @@ interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
     defaultSelectedId?: string | null;
 
     searchable?: boolean;
+
+    replay?: boolean;
+
+    autoPlay?: boolean;
+
+    loop?: boolean;
+
+    defaultSpeed?: number;
 }
 
 declare const TraceViewer: react.ForwardRefExoticComponent<TraceViewerProps & react.RefAttributes<HTMLElement>>;
@@ -3558,6 +3601,7 @@ export {
   type TooltipProps,
   type TraceAttributeValue,
   type TraceModel,
+  type TraceReplay,
   type TraceSpan,
   type TraceSpanInput,
   type TraceSpanStatus,
@@ -3580,6 +3624,7 @@ export {
   type UseActiveHeadingOptions,
   type UseCopyToClipboardResult,
   type UseTraceClockOptions,
+  type UseTraceReplayOptions,
   type VerdictTone,
   WEB_FLOOR,
   XIcon,
@@ -3615,6 +3660,7 @@ export {
   parseOtlpTrace,
   parseTraceDocument,
   relativeLuminance,
+  replayTrace,
   scanRules,
   scanTokenRules,
   semanticTokens,
@@ -3631,5 +3677,6 @@ export {
   useTheme,
   useToast,
   useTraceClock,
+  useTraceReplay,
   visibleTraceSpans,
 };

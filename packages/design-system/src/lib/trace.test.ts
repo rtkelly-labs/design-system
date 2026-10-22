@@ -5,6 +5,7 @@ import {
   matchTraceSpan,
   parseOtlpTrace,
   parseTraceDocument,
+  replayTrace,
   visibleTraceSpans,
   type TraceSpanInput,
 } from './trace';
@@ -116,5 +117,19 @@ describe('parsing', () => {
     const ndjson = `${JSON.stringify(checkout[0])}\n{"id": "trunc\n${JSON.stringify(otlp)}\n`;
     expect(parseTraceDocument(ndjson).map((span) => span.id)).toEqual(['a', '01', '02']);
     expect(parseTraceDocument('')).toEqual([]);
+  });
+});
+
+describe('replayTrace', () => {
+  it('shows only started spans, open until they end, with status held back', () => {
+    const at = (elapsed: number) => buildTrace(replayTrace(checkout, elapsed), { now: elapsed });
+    expect(at(-1).spans).toHaveLength(0);
+    expect(at(50).spans.map((span) => span.id)).toEqual(['a', 'b', 'c']);
+    expect(at(60).spans.map((span) => span.id)).toEqual(['a', 'b', 'c', 'd']);
+    expect(at(50).byId.get('a')).toMatchObject({ inFlight: true, duration: 50 });
+    expect(at(50).byId.get('b')).toMatchObject({ inFlight: false, duration: 34 });
+    expect(at(200).byId.get('e')).toMatchObject({ inFlight: true, status: 'unset' });
+    expect(at(400).byId.get('e')).toMatchObject({ inFlight: false, status: 'error' });
+    expect(at(400).duration).toBe(400);
   });
 });

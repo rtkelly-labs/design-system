@@ -36,6 +36,7 @@ export * from './lib/slug';
 export * from './hooks/useCopyToClipboard';
 export * from './hooks/useActiveHeading';
 export * from './hooks/useTraceClock';
+export * from './hooks/useTraceReplay';
 
 // Primitives & Callouts
 export * from './components/Button';
