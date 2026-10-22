@@ -110,6 +110,10 @@ const MIN_STORIES = 3;
 const CEILING = 44;
 
 const EXCLUDED = {
+  'Showcase/ChartLab': {
+    propsTable:
+      'A bench, not a component (issue 418): it draws `TimeSeriesChart`, `LatencyHistogram` and `LatencyHeatmap` through stress datasets. Its controls are those charts\u2019 variation props, and each chart\u2019s own page carries the props table they come from.',
+  },
   'Showcase/DesignSandbox': {
     samples:
       'The kitchen sink — one page rendering every component at once, several screens tall. Its variants are the four theme levels, and those are the toolbar, not stories.',

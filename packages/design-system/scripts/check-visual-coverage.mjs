@@ -50,6 +50,16 @@ const SPEC = path.join(ROOT, 'tests', 'visual.spec.ts');
 const EXCLUDED = {
   'foundations-theme-ladder--contrast-matrix':
     'Renders the contrast gate’s own numbers. `pnpm check:contrast` already fails CI on any violation, so a pixel diff of the table adds nothing and would churn on every palette tweak.',
+  'showcase-chartlab--contact-sheet-story':
+    'A bench for comparing chart variations (issue 418), several screens tall. It redraws whenever any chart does, so a pixel diff would churn on every chart change and localise nothing; each chart is asserted by its own baseline, and `pnpm walkthrough` captures the lab for review on both levels.',
+  'showcase-chartlab--time-series-sweep':
+    'A bench for comparing chart variations (issue 418), several screens tall. It redraws whenever any chart does, so a pixel diff would churn on every chart change and localise nothing; each chart is asserted by its own baseline, and `pnpm walkthrough` captures the lab for review on both levels.',
+  'showcase-chartlab--histogram-sweep':
+    'A bench for comparing chart variations (issue 418), several screens tall. It redraws whenever any chart does, so a pixel diff would churn on every chart change and localise nothing; each chart is asserted by its own baseline, and `pnpm walkthrough` captures the lab for review on both levels.',
+  'showcase-chartlab--heatmap-sweep':
+    'A bench for comparing chart variations (issue 418), several screens tall. It redraws whenever any chart does, so a pixel diff would churn on every chart change and localise nothing; each chart is asserted by its own baseline, and `pnpm walkthrough` captures the lab for review on both levels.',
+  'showcase-chartlab--palette':
+    'A bench for comparing chart variations (issue 418), several screens tall. It redraws whenever any chart does, so a pixel diff would churn on every chart change and localise nothing; each chart is asserted by its own baseline, and `pnpm walkthrough` captures the lab for review on both levels.',
   'showcase-designsandbox--default-sandbox':
     'The kitchen sink — every component, several screens tall. Too broad to localise a failure, and it changes whenever anything does.',
   'components-icons-nerdicon--developer-glyphs':
