@@ -9,6 +9,14 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## 0.17.0
+
+Traces. `TraceWaterfall` and `TraceViewer` draw distributed traces — spans nested by parent on
+one time axis, a keyboard tree, the critical path marked, in-flight spans drawn to a `now` that
+`useTraceClock` advances. The model is public and React-free: `buildTrace`,
+`parseTraceDocument` / `parseOtlpTrace` for OTLP/JSON and NDJSON, and `formatTraceWaterfall`
+for a terminal, which `ds-trace` in `@rtkelly13/design-system-report` prints. Nothing to change.
+
 ## 0.16.0
 
 Five MDX figures: `SwatchCompare`, `MetricStrip`, `TokenTable`, `Decision` with `Option`, `TermGrid` with `Term`. Registered in `mdxComponents`.
