@@ -84,6 +84,23 @@ describe('TraceWaterfall', () => {
     expect(labels).toEqual(['0ms', '100ms', '200ms', '300ms']);
   });
 
+  it('holds the axis to a fixed range, draws a playhead, and animates rows on request', () => {
+    const { container } = render(<TraceWaterfall spans={[{ id: 'r', name: 'job', start: 0, end: 100 }]} range={400} playhead={100} animate />);
+    const labels = [...container.querySelectorAll('[data-part="axis"] > span:nth-child(2) > span')].map((node) => node.textContent);
+    expect(labels).toEqual(['0ms', '100ms', '200ms', '300ms']);
+    expect(container.querySelector('rect')!.getAttribute('width')).toBe('250');
+    expect(container.querySelector('[data-part="playhead"]')!.getAttribute('x1')).toBe('250');
+    expect(screen.getByRole('treeitem').className).toContain('starting:opacity-0');
+    expect(screen.getByRole('treeitem').className).toContain('motion-reduce:transition-none');
+  });
+
+  it('never draws the axis shorter than the spans, and is still by default', () => {
+    const { container } = render(<TraceWaterfall spans={[{ id: 'r', name: 'job', start: 0, end: 100 }]} range={10} />);
+    expect(container.querySelector('rect')!.getAttribute('width')).toBe('1000');
+    expect(container.querySelector('[data-part="playhead"]')).toBeNull();
+    expect(screen.getByRole('treeitem').className).not.toContain('starting:');
+  });
+
   it('renders an empty state', () => {
     render(<TraceWaterfall spans={[]} />);
     expect(screen.getByText('No spans to display.')).toBeTruthy();

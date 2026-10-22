@@ -31,6 +31,9 @@ const traceWaterfall = recipe({
   },
   variants: {
     selected: { true: { row: 'border-accent-primary bg-surface-raised' } },
+    // A row fades in from the left as it mounts — `@starting-style`, so no
+    // keyframes and no timer. Off by default: a static trace should not move.
+    animate: { true: { row: 'transition-[opacity,translate] duration-300 ease-out starting:-translate-x-2 starting:opacity-0 motion-reduce:transition-none' } },
     critical: { true: { name: 'font-bold' } },
     error: { true: { duration: 'text-intent-danger' } },
   },
@@ -94,6 +97,16 @@ export interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>
   filter?: string;
   /** Roughly how many axis intervals to draw. Default 4. */
   ticks?: number;
+  /**
+   * Fix the axis to this many milliseconds instead of fitting the spans — so a
+   * replay's bars grow across a still axis rather than the axis shrinking
+   * under them. Never shorter than the spans themselves.
+   */
+  range?: number;
+  /** Draw a playhead at this offset, in milliseconds from the trace start. */
+  playhead?: number;
+  /** Fade rows in as they appear. For replays and streams. Default false. */
+  animate?: boolean;
   /** Accessible name for the span tree. Default `Trace waterfall`. */
   label?: string;
 }
@@ -120,6 +133,9 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
     onCollapsedChange,
     filter,
     ticks = 4,
+    range,
+    playhead,
+    animate = false,
     label = 'Trace waterfall',
     className,
     ...props
@@ -137,7 +153,9 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
   // Evenly divided: the labels sit in equal-width cells, and placing them
   // anywhere else would take inline style.
   const intervals = Math.max(1, Math.min(12, Math.round(ticks)));
-  const axis = useMemo(() => Array.from({ length: intervals }, (_, index) => (model.duration * index) / intervals), [model.duration, intervals]);
+  const extent = Number.isFinite(range) && (range as number) > model.duration ? (range as number) : model.duration;
+  const axis = useMemo(() => Array.from({ length: intervals }, (_, index) => (extent * index) / intervals), [extent, intervals]);
+  const playheadX = playhead !== undefined && Number.isFinite(playhead) && extent > 0 ? Math.max(0, Math.min(SCALE, (playhead / extent) * SCALE)) : null;
 
   // Roving tabindex: one row is in the tab order, and arrow keys move it.
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -214,7 +232,7 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
             </span>
           ))}
         </span>
-        <span className="text-right">{formatTraceDuration(model.duration)}</span>
+        <span className="text-right">{formatTraceDuration(extent)}</span>
       </div>
       {rows.length ? null : <p className={styles.empty()}>No spans match the filter.</p>}
       <div role="tree" aria-label={label} className={styles.tree()}>
@@ -222,8 +240,8 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
           const selected = span.id === selectedId;
           const hasChildren = span.children.length > 0;
           const open = hasChildren && !collapsed.has(span.id);
-          const x = model.duration > 0 ? (span.offset / model.duration) * SCALE : 0;
-          const width = model.duration > 0 ? Math.max(2, (span.duration / model.duration) * SCALE) : SCALE;
+          const x = extent > 0 ? (span.offset / extent) * SCALE : 0;
+          const width = extent > 0 ? Math.max(2, (span.duration / extent) * SCALE) : SCALE;
           return (
             <div
               key={span.id}
@@ -238,7 +256,7 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
               data-status={span.status}
               data-critical={span.critical || undefined}
               data-in-flight={span.inFlight || undefined}
-              className={styles.row({ selected })}
+              className={styles.row({ selected, animate })}
               onFocus={() => setActiveId(span.id)}
               onClick={(event) => {
                 if ((event.target as HTMLElement).closest('[data-part="toggle"]')) toggle(span);
@@ -254,10 +272,11 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
               </span>
               <svg aria-hidden="true" viewBox={`0 0 ${SCALE} 12`} preserveAspectRatio="none" className={styles.bar()}>
                 {axis.slice(1).map((tick, index) => {
-                  const at = model.duration > 0 ? (tick / model.duration) * SCALE : 0;
+                  const at = extent > 0 ? (tick / extent) * SCALE : 0;
                   return <line key={index} x1={at} x2={at} y1={0} y2={12} vectorEffect="non-scaling-stroke" className="stroke-edge-subtle" strokeDasharray="2 2" />;
                 })}
                 <rect x={Math.min(x, SCALE - width)} y={1} width={width} height={10} className={cn(barFill(span), span.inFlight && 'opacity-70')} />
+                {playheadX === null ? null : <line data-part="playhead" x1={playheadX} x2={playheadX} y1={-2} y2={14} vectorEffect="non-scaling-stroke" className="stroke-content-primary" strokeWidth={1.5} />}
               </svg>
               <span className={styles.duration({ error: span.status === 'error' })}>
                 {formatTraceDuration(span.duration)}{span.inFlight ? '…' : ''}

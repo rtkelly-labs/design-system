@@ -63,7 +63,7 @@ layer down — silent, plausible-looking, wrong output.
 
 ### 3. Turn the transitions off
 
-There are 62 CSS transitions and **3** `@keyframes`. Most of the transitions are hover- or focus-intent, so they are
+There are 64 CSS transitions and **3** `@keyframes`. Most of the transitions are hover- or focus-intent, so they are
 inert wherever there is no pointer — but since #162 that is no longer all of them. `Modal`,
 `AlertDialog` and `Drawer` fade their backdrop and popup on open and close, driven by Base UI's
 `data-starting-style` / `data-ending-style` attributes rather than by a pointer, so a capture taken
@@ -83,7 +83,10 @@ by showing the toast with `timeout: 0` — which is what its asserted story does
 shared surface recipe; a story that opens one on load (`defaultOpen`, which each asserted story
 does) is mid-fade for its first frames, and the popup is placed by the positioning engine after it
 mounts rather than in the same frame, so a capture should wait for the popup to be visible as well
-as suppress the fade. `Popover`'s close control adds a hover colour transition like the dialogs' does. All of them carry
+as suppress the fade. `Popover`'s close control adds a hover colour transition like the dialogs' does. `TraceWaterfall`
+(`animate`) fades and slides each row in on mount through `@starting-style`, so a replay or a
+stream caught mid-frame shows its newest row part-way in; it is off by default, which is why the
+asserted trace stories are still. All of them carry
 `motion-reduce:transition-none`, which makes `prefers-reduced-motion` a second and more honest lever
 than the reset below; the reset is still what a capture harness should use, because it does not
 depend on the component having remembered.

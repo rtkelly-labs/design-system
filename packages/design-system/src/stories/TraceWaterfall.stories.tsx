@@ -2,7 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { TraceWaterfall } from '../components/TraceWaterfall';
 import { useTraceClock } from '../hooks/useTraceClock';
-import { checkoutTrace, deployTrace, STREAM_LENGTH, streamTrace } from './traceFixtures';
+import { useTraceReplay } from '../hooks/useTraceReplay';
+import { buildTrace, replayTrace } from '../lib/trace';
+import { checkoutTrace, deployTrace, orderTrace } from './traceFixtures';
 
 const meta: Meta<typeof TraceWaterfall> = {
   title: 'Components/Data/TraceWaterfall',
@@ -50,18 +52,25 @@ export const Live: Story = {
   parameters: { docs: { description: { story: 'A deploy whose upload and smoke checks are still running: `now` advances every 100ms and their bars grow.' } } },
 };
 
-function StreamingTrace() {
-  const [start] = useState(() => Date.now());
-  const now = useTraceClock({ interval: 80 });
-  // Replays the script on a loop, with a beat at the end to read the result.
-  const elapsed = (now - start) % (STREAM_LENGTH + 1500);
-  return <TraceWaterfall spans={streamTrace(elapsed)} now={Math.min(elapsed, STREAM_LENGTH)} />;
+const orderModel = buildTrace(orderTrace);
+
+function ReplayedTrace() {
+  const player = useTraceReplay(orderModel.duration, { autoPlay: true, loop: true });
+  return (
+    <TraceWaterfall
+      spans={replayTrace(orderModel, player.elapsed)}
+      now={player.elapsed}
+      range={orderModel.duration}
+      playhead={player.elapsed}
+      animate
+    />
+  );
 }
 
-/** Spans arrive as they start and close as they end. Not snapshotted: it moves. */
-export const Streaming: Story = {
-  render: () => <StreamingTrace />,
-  parameters: { docs: { description: { story: 'A request replayed as a collector sees it: rows appear when a span starts, bars grow while it runs, and the axis rescales as the trace gets longer. Loops every few seconds.' } } },
+/** A finished trace played back in real time. Not snapshotted: it moves. */
+export const Replay: Story = {
+  render: () => <ReplayedTrace />,
+  parameters: { docs: { description: { story: '`useTraceReplay` drives `replayTrace`: each span appears as it starts, fades in, and grows until it ends, while the playhead sweeps a fixed axis. Statuses land when spans finish — the failed retry turns red only once it fails. Loops.' } } },
 };
 
 /** The sketch level, frozen at a fixed `now`. */

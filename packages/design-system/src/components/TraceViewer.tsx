@@ -1,9 +1,11 @@
 'use client';
 
 import { forwardRef, useId, useMemo, useState, type HTMLAttributes } from 'react';
+import { useTraceReplay } from '../hooks/useTraceReplay';
+import { Button } from './Button';
 import { Input } from './Input';
 import { recipe } from '../lib/recipe';
-import { buildTrace, formatTraceDuration, type TraceModel, type TraceSpanInput } from '../lib/trace';
+import { buildTrace, formatTraceDuration, replayTrace, type TraceModel, type TraceSpanInput } from '../lib/trace';
 import { TraceWaterfall } from './TraceWaterfall';
 
 const traceViewer = recipe({
@@ -22,6 +24,11 @@ const traceViewer = recipe({
     term: 'text-content-muted',
     value: 'break-words',
     hint: 'text-xs text-content-muted',
+    transport: 'flex flex-wrap items-center gap-2 border border-edge-subtle bg-surface-sunken px-2 py-1.5',
+    speeds: 'flex border border-edge-default',
+    speed: 'cursor-pointer border-l border-edge-default px-2 py-1 text-xs tabular-nums text-content-secondary first:border-l-0 hover:bg-surface-raised hover:text-content-primary aria-pressed:bg-accent-primary aria-pressed:text-content-inverse',
+    scrubber: 'min-w-32 flex-1 accent-accent-primary',
+    clock: 'tabular-nums text-xs text-content-secondary',
   },
 });
 
@@ -36,20 +43,43 @@ export interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'tit
   defaultSelectedId?: string | null;
   /** Show the filter field. Default true. */
   searchable?: boolean;
+  /**
+   * Add replay controls: the trace plays back in real time, each span drawn
+   * as it starts and grown until it ends, on an axis fixed to the full trace.
+   */
+  replay?: boolean;
+  /** With `replay`, start playing on mount. Default false. */
+  autoPlay?: boolean;
+  /** With `replay`, start again from zero at the end. Default false. */
+  loop?: boolean;
+  /** With `replay`, the initial playback rate. Default 1. */
+  defaultSpeed?: number;
 }
+
+/** Playback rates offered by the transport. */
+const TRACE_REPLAY_SPEEDS = [0.25, 0.5, 1, 2, 4] as const;
 
 /**
  * A trace viewer: a summary strip, a filterable `TraceWaterfall`, and the
  * selected span's details — timing, self time, status and attributes.
  *
  * Live when spans are in flight and `now` advances; load OTLP/JSON with
- * `parseTraceDocument`.
+ * `parseTraceDocument`. With `replay`, a finished trace plays back in real
+ * time — play, pause, scrub, change speed — and the rows fade in as their
+ * spans start.
  */
 export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function TraceViewer(
-  { spans, now, title = 'Trace', defaultSelectedId, searchable = true, className, ...props },
+  { spans, now, title = 'Trace', defaultSelectedId, searchable = true, replay = false, autoPlay = false, loop = false, defaultSpeed = 1, className, ...props },
   ref,
 ) {
-  const model = useMemo(() => buildTrace(spans, { now }), [spans, now]);
+  const full = useMemo(() => buildTrace(spans, { now }), [spans, now]);
+  const player = useTraceReplay(full.duration, { autoPlay: replay && autoPlay, loop, speed: defaultSpeed });
+  // Not replaying, or replayed to the end: the trace itself, untouched.
+  const replaying = replay && player.elapsed < full.duration;
+  const model = useMemo(
+    () => (replaying ? buildTrace(replayTrace(full, player.elapsed), { now: player.elapsed }) : full),
+    [replaying, full, player.elapsed],
+  );
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(defaultSelectedId === undefined ? null : defaultSelectedId);
   const headingId = useId();
@@ -90,6 +120,33 @@ export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function Tr
           className="max-w-xs"
         />
       ) : null}
+      {replay ? (
+        <div role="group" aria-label="Replay" data-part="transport" className={styles.transport()}>
+          <Button size="sm" variant="primary" onClick={player.toggle} disabled={!full.duration}>
+            {player.playing ? 'Pause' : player.elapsed >= full.duration ? 'Replay' : 'Play'}
+          </Button>
+          <Button size="sm" onClick={player.restart} disabled={!full.duration}>Restart</Button>
+          <div role="group" aria-label="Speed" className={styles.speeds()}>
+            {TRACE_REPLAY_SPEEDS.map((rate) => (
+              <button key={rate} type="button" aria-pressed={player.speed === rate} onClick={() => player.setSpeed(rate)} className={styles.speed()}>
+                {rate}×
+              </button>
+            ))}
+          </div>
+          <input
+            type="range"
+            aria-label="Replay position"
+            aria-valuetext={`${formatTraceDuration(player.elapsed)} of ${formatTraceDuration(full.duration)}`}
+            min={0}
+            max={full.duration}
+            step="any"
+            value={player.elapsed}
+            onChange={(event) => player.seek(Number(event.target.value))}
+            className={styles.scrubber()}
+          />
+          <span className={styles.clock()}>{formatTraceDuration(player.elapsed)} / {formatTraceDuration(full.duration)}</span>
+        </div>
+      ) : null}
       <div className={styles.body()}>
         <TraceWaterfall
           spans={model}
@@ -97,6 +154,9 @@ export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function Tr
           selectedId={selected?.id ?? null}
           onSelectedChange={setSelectedId}
           label={`${title} spans`}
+          range={replay ? full.duration : undefined}
+          playhead={replaying ? player.elapsed : undefined}
+          animate={replay}
         />
         <aside aria-label="Span details" data-part="details" className={styles.details()}>
           {selected ? (
