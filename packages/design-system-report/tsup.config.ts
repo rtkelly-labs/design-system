@@ -1,12 +1,12 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  // Three entries: the library and the two bins. Everything this package touches at
+  // Two entries: the library and the bin. Everything this package touches at
   // runtime — esbuild, tailwindcss, the design system — is a peer, so tsup
   // externalises it automatically and the bundle stays small.
-  entry: ['src/index.ts', 'src/cli.ts', 'src/trace-cli.ts'],
+  entry: ['src/index.ts', 'src/cli.ts'],
   format: ['cjs', 'esm'],
-  // Types for the importable entry only. The CLIs are `bin`s; nothing imports
+  // Types for the importable entry only. `cli.ts` is a `bin`; nothing imports
   // it, so it has no exported types.
   dts: { entry: ['src/index.ts'] },
   splitting: false,

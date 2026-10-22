@@ -77,6 +77,13 @@ describe('TraceWaterfall', () => {
     expect(screen.getByText('250ms…')).toBeTruthy();
   });
 
+  it('keeps one axis label per interval while a trace grows from zero length', () => {
+    const { container, rerender } = render(<TraceWaterfall spans={[{ id: 'r', name: 'job', start: 0 }]} now={0} />);
+    rerender(<TraceWaterfall spans={[{ id: 'r', name: 'job', start: 0 }]} now={400} />);
+    const labels = [...container.querySelectorAll('[data-part="axis"] > span:nth-child(2) > span')].map((node) => node.textContent);
+    expect(labels).toEqual(['0ms', '100ms', '200ms', '300ms']);
+  });
+
   it('renders an empty state', () => {
     render(<TraceWaterfall spans={[]} />);
     expect(screen.getByText('No spans to display.')).toBeTruthy();

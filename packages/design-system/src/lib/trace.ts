@@ -1,11 +1,9 @@
 /**
  * The trace model: spans in, a laid-out waterfall out.
  *
- * One module answers "where does this span sit, and why is it slow?" for every
- * renderer that draws a trace — `TraceWaterfall` and `TraceViewer` in React,
- * and `formatTraceWaterfall` for a terminal or a CI log. Pure data, no React,
- * so the bin in `@rtkelly13/design-system-report` (`ds-trace`) can import it
- * from the package entry and draw exactly the layout the components draw.
+ * One module answers "where does this span sit, and why is it slow?" for
+ * `TraceWaterfall` and `TraceViewer`. Pure data, no React, so a consumer can
+ * build, filter or inspect a trace without rendering one.
  *
  * ## Time
  *
@@ -288,20 +286,6 @@ export function formatTraceDuration(ms: number): string {
   return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
 }
 
-/**
- * Evenly spaced axis ticks on a "nice" step (1, 2 or 5 × 10ⁿ) covering
- * `duration`, at most `target + 1` of them, always starting at 0.
- */
-export function traceTicks(duration: number, target = 4): number[] {
-  if (!finite(duration) || duration <= 0) return [0];
-  const raw = duration / Math.max(1, target);
-  const magnitude = 10 ** Math.floor(Math.log10(raw));
-  const step = [1, 2, 5, 10].map((m) => m * magnitude).find((candidate) => candidate >= raw) ?? raw;
-  const ticks: number[] = [];
-  for (let tick = 0; tick <= duration + step * 1e-9; tick += step) ticks.push(Number(tick.toPrecision(12)));
-  return ticks;
-}
-
 // ---------------------------------------------------------------------------
 // Parsing
 // ---------------------------------------------------------------------------
@@ -414,124 +398,4 @@ export function parseTraceDocument(input: unknown): TraceSpanInput[] {
 function isSpanInput(value: unknown): value is TraceSpanInput {
   const span = value as TraceSpanInput | null;
   return !!span && typeof span === 'object' && typeof span.id === 'string' && finite(span.start);
-}
-
-// ---------------------------------------------------------------------------
-// Text output
-// ---------------------------------------------------------------------------
-
-export interface FormatTraceWaterfallOptions extends BuildTraceOptions {
-  /** Character cells for the bar column. Clamped to 8–400. Default 48. */
-  columns?: number;
-  /** Width of the name column, tree guides included. Default: fit, at most 40. */
-  labelWidth?: number;
-  /** Emit ANSI colour. Default false — a log file should read as text. */
-  color?: boolean;
-  /** Draw with `#`, `=` and `|` instead of block and box characters. */
-  ascii?: boolean;
-  /** Hide the service column. */
-  hideService?: boolean;
-}
-
-/** SGR codes by role. Base ANSI slots, so a themed terminal paints them. */
-const ANSI = {
-  reset: '\u001b[0m',
-  dim: '\u001b[2m',
-  bold: '\u001b[1m',
-  danger: '\u001b[31m',
-  info: '\u001b[36m',
-  accent: ['\u001b[34m', '\u001b[35m', '\u001b[32m', '\u001b[33m'],
-} as const;
-
-const EIGHTHS = ['', '▏', '▎', '▍', '▌', '▋', '▊', '▉'];
-
-function fit(text: string, width: number): string {
-  const chars = [...text];
-  if (chars.length <= width) return text + ' '.repeat(width - chars.length);
-  return `${chars.slice(0, Math.max(0, width - 1)).join('')}…`;
-}
-
-/**
- * A trace as a fixed-width text waterfall: a summary line, an axis, then one
- * row per span — tree guides, name, service, bar, duration. With `color`, bars
- * are painted by service, errors in the danger slot and in-flight spans in the
- * info slot; `◆` marks the critical path either way, so it survives a log.
- */
-export function formatTraceWaterfall(input: readonly TraceSpanInput[] | TraceModel, options: FormatTraceWaterfallOptions = {}): string {
-  const model = buildTrace(input, options);
-  const paint = (code: string, text: string) => (options.color ? `${code}${text}${ANSI.reset}` : text);
-  const cells = Math.max(8, Math.min(400, Math.round(finite(options.columns) ? options.columns : 48)));
-  const ascii = !!options.ascii;
-  const guides = ascii ? { tee: '|- ', last: '`- ', pipe: '|  ', gap: '   ' } : { tee: '├─ ', last: '└─ ', pipe: '│  ', gap: '   ' };
-
-  const summary = [
-    `${model.spans.length} span${model.spans.length === 1 ? '' : 's'}`,
-    formatTraceDuration(model.duration),
-    `${model.services.length} service${model.services.length === 1 ? '' : 's'}`,
-    model.errorCount ? paint(ANSI.danger, `${model.errorCount} error${model.errorCount === 1 ? '' : 's'}`) : '0 errors',
-    ...(model.inFlightCount ? [paint(ANSI.info, `${model.inFlightCount} in flight`)] : []),
-  ].join(' · ');
-  if (!model.spans.length) return `TRACE  ${summary}\n`;
-
-  // Tree prefixes, built per row from which ancestors still have siblings below.
-  const prefix = new Map<string, string>();
-  const lastChild = (span: TraceSpan) => {
-    const siblings = span.parentId ? model.byId.get(span.parentId)!.children : model.spans.filter((s) => s.parentId === null).map((s) => s.id);
-    return siblings[siblings.length - 1] === span.id;
-  };
-  for (const span of model.spans) {
-    if (span.parentId === null) { prefix.set(span.id, ''); continue; }
-    const parent = model.byId.get(span.parentId)!;
-    const inherited = parent.parentId === null ? '' : `${prefix.get(parent.id)!.slice(0, -3)}${lastChild(parent) ? guides.gap : guides.pipe}`;
-    prefix.set(span.id, `${inherited}${lastChild(span) ? guides.last : guides.tee}`);
-  }
-
-  const labels = model.spans.map((span) => `${prefix.get(span.id)}${span.critical ? '◆ ' : ''}${span.name}`);
-  const labelWidth = Math.max(8, Math.min(200, options.labelWidth ?? Math.min(40, Math.max(...labels.map((label) => [...label].length)))));
-  const serviceWidth = options.hideService ? 0 : Math.min(16, Math.max(...model.services.map((service) => service.length)));
-  const durations = model.spans.map((span) => `${formatTraceDuration(span.duration)}${span.inFlight ? '…' : ''}`);
-  const durationWidth = Math.max(...durations.map((text) => text.length));
-  const lead = labelWidth + (serviceWidth ? serviceWidth + 2 : 0) + 2;
-  const scale = model.duration > 0 ? cells / model.duration : 0;
-
-  const axis: string[] = Array.from({ length: cells }, () => ' ');
-  const axisLine: string[] = Array.from({ length: cells }, () => (ascii ? '-' : '─'));
-  for (const tick of traceTicks(model.duration, Math.max(1, Math.floor(cells / 12)))) {
-    const at = Math.min(cells - 1, Math.round(tick * scale));
-    const label = formatTraceDuration(tick);
-    const from = Math.min(Math.max(0, at), cells - label.length);
-    if (axis.slice(from, from + label.length + 1).some((ch) => ch !== ' ')) continue;
-    [...label].forEach((ch, i) => { axis[from + i] = ch; });
-    axisLine[at] = ascii ? '+' : '┬';
-  }
-
-  const lines = [
-    `${paint(ANSI.bold, 'TRACE')}  ${summary}`,
-    `${' '.repeat(lead)}${paint(ANSI.dim, axis.join(''))}`,
-    `${' '.repeat(lead)}${paint(ANSI.dim, axisLine.join(''))}`,
-  ];
-  model.spans.forEach((span, row) => {
-    const from = span.offset * scale;
-    const to = (span.offset + span.duration) * scale;
-    const startCell = Math.min(cells - 1, Math.floor(from));
-    let bar: string;
-    if (ascii) {
-      const width = Math.max(1, Math.round(to) - startCell);
-      bar = `${' '.repeat(startCell)}${(span.inFlight ? '=' : '#').repeat(Math.min(width, cells - startCell))}`;
-    } else {
-      // Sub-cell precision on the right edge with the eighth blocks.
-      const length = Math.max(1 / 8, to - startCell);
-      const whole = Math.min(cells - startCell, Math.floor(length));
-      const eighth = whole < cells - startCell ? Math.round((length - whole) * 8) : 0;
-      bar = `${' '.repeat(startCell)}${(span.inFlight ? '▒' : '█').repeat(whole)}${eighth === 8 ? '█' : EIGHTHS[eighth]}`;
-      if (!whole && !eighth) bar += '▏';
-    }
-    bar = fit(bar, cells);
-    const tone = span.status === 'error' ? ANSI.danger : span.inFlight ? ANSI.info : ANSI.accent[model.services.indexOf(span.service) % ANSI.accent.length]!;
-    const label = fit(labels[row]!, labelWidth);
-    const service = serviceWidth ? `  ${paint(ANSI.dim, fit(span.service, serviceWidth))}` : '';
-    const duration = durations[row]!.padStart(durationWidth);
-    lines.push(`${span.critical ? paint(ANSI.bold, label) : label}${service}  ${paint(tone, bar)} ${span.status === 'error' ? paint(ANSI.danger, duration) : duration}`);
-  });
-  return `${lines.join('\n')}\n`;
 }

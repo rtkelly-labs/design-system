@@ -1,7 +1,7 @@
 {
   "name": "@rtkelly13/design-system-report",
-  "version": "0.2.0",
-  "description": "Render a TSX file to one self-contained HTML report, styled by @rtkelly13/design-system — and draw traces as terminal waterfalls",
+  "version": "0.1.1",
+  "description": "Render a TSX file to one self-contained HTML report, styled by @rtkelly13/design-system",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -14,8 +14,7 @@
     }
   },
   "bin": {
-    "ds-report": "./dist/cli.js",
-    "ds-trace": "./dist/trace-cli.js"
+    "ds-report": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -53,7 +52,7 @@
   "author": "Ryan Kelly",
   "license": "MIT",
   "peerDependencies": {
-    "@rtkelly13/design-system": "^0.17.0 || ^0.16.0 || ^0.15.0 || ^0.14.0 || ^0.13.0 || ^0.12.0",
+    "@rtkelly13/design-system": "^0.16.0 || ^0.15.0 || ^0.14.0 || ^0.13.0 || ^0.12.0",
     "@tailwindcss/typography": "^0.5.16",
     "esbuild": "^0.25.0 || ^0.26.0 || ^0.27.0 || ^0.28.0",
     "playwright": "^1.62.1",

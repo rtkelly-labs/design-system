@@ -24,3 +24,27 @@ export function deployTrace(start: number): TraceSpanInput[] {
     { id: 'p5', parentId: 'p', name: 'smoke checks', service: 'edge', start: start + 6400 },
   ];
 }
+
+/**
+ * A request that unfolds over 4.2s. `streamTrace(elapsed)` returns what a
+ * collector would have seen by then: spans appear when they start and close
+ * when they end, so a story replaying it shows the waterfall being written.
+ */
+const script: Array<TraceSpanInput & { end: number }> = [
+  { id: 's1', name: 'POST /orders', service: 'api', kind: 'server', start: 0, end: 4200 },
+  { id: 's2', parentId: 's1', name: 'validate', service: 'api', start: 60, end: 240 },
+  { id: 's3', parentId: 's1', name: 'INSERT orders', service: 'postgres', kind: 'client', start: 260, end: 1100, attributes: { 'db.system': 'postgresql' } },
+  { id: 's4', parentId: 's1', name: 'reserve stock', service: 'inventory', start: 1120, end: 2300 },
+  { id: 's5', parentId: 's4', name: 'GET /stock/sku-81', service: 'inventory', kind: 'client', start: 1160, end: 1900 },
+  { id: 's6', parentId: 's1', name: 'publish order.created', service: 'events', kind: 'producer', start: 2320, end: 4100, status: 'error', attributes: { 'error.type': 'broker unavailable' } },
+  { id: 's7', parentId: 's6', name: 'retry 1', service: 'events', start: 2900, end: 3300, status: 'error' },
+  { id: 's8', parentId: 's6', name: 'retry 2', service: 'events', start: 3500, end: 4000 },
+];
+
+export const STREAM_LENGTH = 4200;
+
+export function streamTrace(elapsed: number): TraceSpanInput[] {
+  return script
+    .filter((span) => span.start <= elapsed)
+    .map((span) => (span.end <= elapsed ? span : { ...span, end: undefined, status: undefined }));
+}

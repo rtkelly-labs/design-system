@@ -2085,25 +2085,9 @@ declare function matchTraceSpan(span: TraceSpan, query: string): boolean;
 
 declare function formatTraceDuration(ms: number): string;
 
-declare function traceTicks(duration: number, target?: number): number[];
-
 declare function parseOtlpTrace(document: unknown): TraceSpanInput[];
 
 declare function parseTraceDocument(input: unknown): TraceSpanInput[];
-interface FormatTraceWaterfallOptions extends BuildTraceOptions {
-
-    columns?: number;
-
-    labelWidth?: number;
-
-    color?: boolean;
-
-    ascii?: boolean;
-
-    hideService?: boolean;
-}
-
-declare function formatTraceWaterfall(input: readonly TraceSpanInput[] | TraceModel, options?: FormatTraceWaterfallOptions): string;
 
 declare function describeTraceSpan(span: TraceSpan): string;
 interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
@@ -3321,7 +3305,6 @@ export {
   type FlowPathProps,
   type FlowRow,
   type FlowTone,
-  type FormatTraceWaterfallOptions,
   GanttChart,
   type GanttChartProps,
   type GanttItem,
@@ -3619,7 +3602,6 @@ export {
   describeTraceSpan,
   fontVar,
   formatTraceDuration,
-  formatTraceWaterfall,
   getRecommendedColours,
   getThemeInitScript,
   isExternalHref,
@@ -3639,7 +3621,6 @@ export {
   slugify,
   surfaceVar,
   textVar,
-  traceTicks,
   useActiveHeading,
   useCopyToClipboard,
   useDocsLinkComponent,

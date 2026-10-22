@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { TraceWaterfall } from '../components/TraceWaterfall';
 import { useTraceClock } from '../hooks/useTraceClock';
-import { checkoutTrace, deployTrace } from './traceFixtures';
+import { checkoutTrace, deployTrace, STREAM_LENGTH, streamTrace } from './traceFixtures';
 
 const meta: Meta<typeof TraceWaterfall> = {
   title: 'Components/Data/TraceWaterfall',
@@ -12,7 +12,7 @@ const meta: Meta<typeof TraceWaterfall> = {
     docs: {
       description: {
         component:
-          'A distributed-trace waterfall: spans nested by parent on one time axis, bars in the primary accent, errors in the danger role, in-flight spans in the info role, and `◆` on the critical path. The rows are a keyboard tree — arrows move, Left/Right collapse and expand, Enter selects. The same layout prints to a terminal through `formatTraceWaterfall` and the `ds-trace` bin.',
+          'A distributed-trace waterfall: spans nested by parent on one time axis, bars in the primary accent, errors in the danger role, in-flight spans in the info role, and `◆` on the critical path. The rows are a keyboard tree — arrows move, Left/Right collapse and expand, Enter selects.',
       },
     },
   },
@@ -48,6 +48,20 @@ function LiveDeploy() {
 export const Live: Story = {
   render: () => <LiveDeploy />,
   parameters: { docs: { description: { story: 'A deploy whose upload and smoke checks are still running: `now` advances every 100ms and their bars grow.' } } },
+};
+
+function StreamingTrace() {
+  const [start] = useState(() => Date.now());
+  const now = useTraceClock({ interval: 80 });
+  // Replays the script on a loop, with a beat at the end to read the result.
+  const elapsed = (now - start) % (STREAM_LENGTH + 1500);
+  return <TraceWaterfall spans={streamTrace(elapsed)} now={Math.min(elapsed, STREAM_LENGTH)} />;
+}
+
+/** Spans arrive as they start and close as they end. Not snapshotted: it moves. */
+export const Streaming: Story = {
+  render: () => <StreamingTrace />,
+  parameters: { docs: { description: { story: 'A request replayed as a collector sees it: rows appear when a span starts, bars grow while it runs, and the axis rescales as the trace gets longer. Loops every few seconds.' } } },
 };
 
 /** The sketch level, frozen at a fixed `now`. */

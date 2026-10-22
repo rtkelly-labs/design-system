@@ -134,8 +134,8 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
     () => visibleTraceSpans(model, collapsed, filter?.trim() ? (span) => matchTraceSpan(span, filter) : undefined),
     [model, collapsed, filter],
   );
-  // Evenly divided rather than `traceTicks`' round numbers: the labels sit in
-  // equal-width cells, and placing them anywhere else would take inline style.
+  // Evenly divided: the labels sit in equal-width cells, and placing them
+  // anywhere else would take inline style.
   const intervals = Math.max(1, Math.min(12, Math.round(ticks)));
   const axis = useMemo(() => Array.from({ length: intervals }, (_, index) => (model.duration * index) / intervals), [model.duration, intervals]);
 
@@ -207,8 +207,9 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
       <div aria-hidden="true" data-part="axis" className={styles.axis()}>
         <span>Span</span>
         <span className="flex min-w-0">
-          {axis.map((tick) => (
-            <span key={tick} className="min-w-0 flex-1 truncate border-l border-edge-subtle pl-1">
+          {axis.map((tick, index) => (
+            // Keyed by position: a zero-length trace has every tick at 0.
+            <span key={index} className="min-w-0 flex-1 truncate border-l border-edge-subtle pl-1">
               {formatTraceDuration(tick)}
             </span>
           ))}
@@ -252,9 +253,9 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
                 <span className={styles.name({ critical: span.critical })} title={`${span.name} · ${span.service}`}>{span.name}</span>
               </span>
               <svg aria-hidden="true" viewBox={`0 0 ${SCALE} 12`} preserveAspectRatio="none" className={styles.bar()}>
-                {axis.slice(1).map((tick) => {
+                {axis.slice(1).map((tick, index) => {
                   const at = model.duration > 0 ? (tick / model.duration) * SCALE : 0;
-                  return <line key={tick} x1={at} x2={at} y1={0} y2={12} vectorEffect="non-scaling-stroke" className="stroke-edge-subtle" strokeDasharray="2 2" />;
+                  return <line key={index} x1={at} x2={at} y1={0} y2={12} vectorEffect="non-scaling-stroke" className="stroke-edge-subtle" strokeDasharray="2 2" />;
                 })}
                 <rect x={Math.min(x, SCALE - width)} y={1} width={width} height={10} className={cn(barFill(span), span.inFlight && 'opacity-70')} />
               </svg>

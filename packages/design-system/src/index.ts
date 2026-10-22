@@ -172,9 +172,8 @@ export * from './components/BarChart';
 export * from './components/Sparkline';
 export * from './components/ChartTooltip';
 export * from './components/BulletChart';
-// Traces: one model (`lib/trace`) drawn three ways — the waterfall, the viewer
-// around it, and `formatTraceWaterfall` for a terminal, which `ds-trace` in the
-// report package prints. Pure functions, so they are safe in a Node bin.
+// Traces: one React-free model (`lib/trace`) — layout, critical path, OTLP
+// parsing — drawn by the waterfall and the viewer around it.
 export * from './lib/trace';
 export * from './components/TraceWaterfall';
 export * from './components/TraceViewer';
