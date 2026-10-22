@@ -8,7 +8,7 @@
  * Time is epoch milliseconds, and nothing here reads the clock.
  */
 
-import type { LogSeverity } from '../components/SeverityBadge';
+import type { LogSeverity } from './severity';
 import { formatTimestamp, type TimeRange } from './timeRange';
 
 /** A log field value, flattened the way OTLP attributes are. */

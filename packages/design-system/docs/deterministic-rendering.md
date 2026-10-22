@@ -63,7 +63,8 @@ layer down — silent, plausible-looking, wrong output.
 
 ### 3. Turn the transitions off
 
-There are 64 CSS transitions and **3** `@keyframes`. Most of the transitions are hover- or focus-intent, so they are
+There are 72 CSS transitions and **3** `@keyframes`. Most of the transitions are hover- or focus-intent — the observability
+set (#407) adds only hover colour on legend toggles, filter chips and alert rows — so they are
 inert wherever there is no pointer — but since #162 that is no longer all of them. `Modal`,
 `AlertDialog` and `Drawer` fade their backdrop and popup on open and close, driven by Base UI's
 `data-starting-style` / `data-ending-style` attributes rather than by a pointer, so a capture taken

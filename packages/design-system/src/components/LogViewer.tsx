@@ -24,7 +24,8 @@ import {
 } from '../lib/logs';
 import { recipe } from '../lib/recipe';
 import { formatTimestamp, normaliseRange, type TimeRange as TimeWindow } from '../lib/timeRange';
-import { SeverityBadge, type LogSeverity } from './SeverityBadge';
+import type { LogSeverity } from '../lib/severity';
+import { SeverityBadge } from './SeverityBadge';
 import { useTimeCursor, useTimeRange } from './TimeRange';
 
 /** Collapsed row height, in px. Fixed (`h-8`) so a windowed list plans exactly. */

@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { FinanceConsole, ContentStudio } from '@/generated/admin';
-import { SaasLandingPage } from '@rtkelly13/design-system';
+import { ObservabilityConsole, SaasLandingPage } from '@rtkelly13/design-system';
 
 /**
  * The sample pages, keyed by the slug in `src/content/samples.ts`. Each is a
@@ -19,6 +19,7 @@ const SAMPLE_PAGES: Record<string, () => ReactNode> = {
   ),
   'admin-dashboard': () => <FinanceConsole />,
   'content-studio': () => <ContentStudio />,
+  observability: () => <ObservabilityConsole />,
 };
 
 export function SamplePage({ slug }: { slug: string }) {

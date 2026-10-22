@@ -302,7 +302,26 @@ describe('TimeSeriesChart', () => {
       const many: TimeSeries[] = Array.from({ length: 7 }, (_, index) => ({ id: `s${index}`, label: `s${index}`, points: [[t(30), index + 1], [t(10), index + 2]] }));
       const { container } = render(<TimeSeriesChart series={many} range={range} />);
       expect(container.innerHTML).not.toContain('accent-tertiary');
-      expect(container.querySelector('[data-series="s5"] [data-part="line"]')!.getAttribute('class')).toContain('stroke-accent-primary');
+      // Two colours that differ on every level, then a neutral; the fourth series reuses
+      // primary, told apart by dash rather than a colour that collides or means something.
+      const line = (id: string) => container.querySelector(`[data-series="${id}"] [data-part="line"]`)!;
+      expect(line('s0').getAttribute('class')).toContain('stroke-accent-primary');
+      expect(line('s0').getAttribute('stroke-dasharray')).toBeNull();
+      expect(line('s2').getAttribute('class')).toContain('stroke-content-secondary');
+      expect(line('s3').getAttribute('class')).toContain('stroke-accent-primary');
+      expect(line('s3').getAttribute('stroke-dasharray')).toBe('6 3');
+      expect(line('s6').getAttribute('stroke-dasharray')).toBe('2 3');
+      expect(container.innerHTML).not.toContain('stroke-intent-info');
+    });
+
+    it('pins a series to a role when its colour carries a meaning', () => {
+      const status: TimeSeries[] = [
+        { id: 'ok', label: '2xx', tone: 'primary', points: [[t(30), 300], [t(10), 310]] },
+        { id: 'err', label: '5xx', tone: 'danger', points: [[t(30), 3], [t(10), 9]] },
+      ];
+      const { container } = render(<TimeSeriesChart series={status} range={range} />);
+      expect(container.querySelector('[data-series="err"] [data-part="line"]')!.getAttribute('class')).toContain('stroke-intent-danger');
+      expect(container.querySelector('[data-series="ok"] [data-part="line"]')!.getAttribute('class')).toContain('stroke-accent-primary');
     });
 
     it('renders annotations and reads them in the summary', () => {

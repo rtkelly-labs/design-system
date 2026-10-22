@@ -105,19 +105,45 @@ const MIN_BRUSH = 4;
 const TOOLTIP_WIDTH = 196;
 
 /**
- * Series colours, cycling, addressed by role. `accent-tertiary` is left out on
- * purpose: on the midnight level it is the same pink as `intent-danger`
- * (#398), and danger has to keep meaning danger. Spelled out in full so
- * Tailwind's scanner sees every class.
+ * Series colours, cycling, addressed by role — and only two of them.
+ *
+ * The roles name fewer distinct colours than they look like: `intent.info`
+ * is `accent.primary` on both levels, `intent.success` is `accent.secondary`
+ * on sketch and `intent.warning` is on midnight, and `accent.tertiary` is
+ * `intent.danger` on both (#398). Only primary and secondary are a pair that
+ * differs, and means nothing, on every level. So the cycle is those two and a
+ * neutral, and from the fourth series on lines are told apart by dash pattern
+ * rather than by a colour that would collide or claim a meaning. A series
+ * whose colour does mean something says so with `tone` (a 5xx series is
+ * `danger`). Spelled out in full so Tailwind's scanner sees every class.
  */
 const SERIES_TONES = [
   { stroke: 'stroke-accent-primary', fill: 'fill-accent-primary', swatch: 'bg-accent-primary' },
   { stroke: 'stroke-accent-secondary', fill: 'fill-accent-secondary', swatch: 'bg-accent-secondary' },
-  { stroke: 'stroke-intent-info', fill: 'fill-intent-info', swatch: 'bg-intent-info' },
-  { stroke: 'stroke-intent-success', fill: 'fill-intent-success', swatch: 'bg-intent-success' },
   { stroke: 'stroke-content-secondary', fill: 'fill-content-secondary', swatch: 'bg-content-secondary' },
 ] as const;
-type Tone = { stroke: string; fill: string; swatch: string };
+/** Dash patterns for each pass through the cycle after the first. */
+const SERIES_DASHES = [undefined, '6 3', '2 3', '8 3 2 3'] as const;
+/** The roles a caller may pin a series to, when its colour carries a meaning. */
+const NAMED_TONES = {
+  primary: SERIES_TONES[0],
+  secondary: SERIES_TONES[1],
+  neutral: SERIES_TONES[2],
+  info: { stroke: 'stroke-intent-info', fill: 'fill-intent-info', swatch: 'bg-intent-info' },
+  success: { stroke: 'stroke-intent-success', fill: 'fill-intent-success', swatch: 'bg-intent-success' },
+  warning: { stroke: 'stroke-intent-warning', fill: 'fill-intent-warning', swatch: 'bg-intent-warning' },
+  danger: { stroke: 'stroke-intent-danger', fill: 'fill-intent-danger', swatch: 'bg-intent-danger' },
+} as const;
+type Tone = { stroke: string; fill: string; swatch: string; dash?: string };
+
+/** A short line sample of a series' stroke — colour and, past the third series, dash. */
+function Swatch({ tone, className }: { tone: Tone; className?: string }) {
+  return (
+    <svg aria-hidden="true" width={16} height={8} className={cn('shrink-0 overflow-visible', className)}>
+      <line x1={0} x2={16} y1={4} y2={4} className={tone.stroke} strokeWidth={3} strokeDasharray={tone.dash} />
+    </svg>
+  );
+}
 /** What every series but the emphasised one wears under `colorStrategy="emphasis"`. */
 const MUTED_TONE: Tone = { stroke: 'stroke-content-muted', fill: 'fill-content-muted', swatch: 'bg-content-muted' };
 
@@ -138,7 +164,6 @@ const timeSeriesChart = recipe({
     mark: 'font-mono text-[10px] font-bold',
     legend: 'flex flex-wrap gap-1.5',
     toggle: 'inline-flex cursor-pointer items-center gap-1.5 border border-edge-default px-2 py-0.5 text-content-primary transition-colors hover:bg-surface-raised motion-reduce:transition-none aria-[pressed=false]:text-content-muted aria-[pressed=false]:line-through',
-    swatch: 'inline-block size-2.5 shrink-0',
     readout: 'flex items-center justify-between gap-3 tabular-nums',
   },
   variants: {
@@ -151,7 +176,6 @@ const timeSeriesChart = recipe({
         mark: 'text-[9px]',
         legend: 'gap-1',
         toggle: 'gap-1 px-1.5 py-0',
-        swatch: 'size-2',
       },
     },
   },
@@ -337,9 +361,10 @@ export const TimeSeriesChart = forwardRef<HTMLDivElement, TimeSeriesChartProps>(
   const emphasised = emphasisSeriesId ?? series[0]?.id;
   const all = useMemo(
     () => series.map((entry, index) => {
+      const cycled: Tone = { ...SERIES_TONES[index % SERIES_TONES.length]!, dash: SERIES_DASHES[Math.floor(index / SERIES_TONES.length) % SERIES_DASHES.length] };
       const tone: Tone = colorStrategy === 'emphasis'
         ? (entry.id === emphasised ? SERIES_TONES[0] : MUTED_TONE)
-        : SERIES_TONES[index % SERIES_TONES.length]!;
+        : entry.tone ? NAMED_TONES[entry.tone] : cycled;
       return { ...entry, points: cleanPoints(entry.points), tone };
     }),
     [series, colorStrategy, emphasised],
@@ -572,7 +597,7 @@ export const TimeSeriesChart = forwardRef<HTMLDivElement, TimeSeriesChartProps>(
     <div role="group" aria-label={`${label} series`} data-part="legend" className={styles.legend()}>
       {all.map((entry) => (
         <button key={entry.id} type="button" aria-pressed={!hidden.has(entry.id)} data-series={entry.id} className={styles.toggle()} onClick={() => toggleSeries(entry.id)}>
-          <span aria-hidden="true" className={cn(styles.swatch(), entry.tone.swatch, hidden.has(entry.id) && 'opacity-30')} />
+          <Swatch tone={entry.tone} className={cn(hidden.has(entry.id) && 'opacity-30')} />
           {entry.label}
         </button>
       ))}
@@ -664,7 +689,7 @@ export const TimeSeriesChart = forwardRef<HTMLDivElement, TimeSeriesChartProps>(
                   {drawOrder.map(({ entry, bands, lines, marks }) => (
                     <g key={entry.id} data-series={entry.id}>
                       {bands.length ? <path data-part="area" d={areaPath(bands, curve)} className={entry.tone.fill} fillOpacity={areaOpacity} /> : null}
-                      <path data-part="line" d={linePath(lines, curve)} className={cn('fill-none', entry.tone.stroke)} strokeWidth={strokeWidth} strokeLinejoin="round" strokeLinecap="round" />
+                      <path data-part="line" d={linePath(lines, curve)} className={cn('fill-none', entry.tone.stroke)} strokeDasharray={entry.tone.dash} strokeWidth={strokeWidth} strokeLinejoin="round" strokeLinecap="round" />
                       {pointMarkers === 'all'
                         ? marks.map((mark) => <circle key={mark.time} data-part="point" cx={mark.x} cy={mark.y} r={markerRadius} className={entry.tone.fill} />)
                         : null}
@@ -740,7 +765,7 @@ export const TimeSeriesChart = forwardRef<HTMLDivElement, TimeSeriesChartProps>(
                       {readout.rows.map((row) => (
                         <div key={row.entry.id} className={styles.readout()}>
                           <span className="flex min-w-0 items-center gap-1.5">
-                            <span aria-hidden="true" className={cn(styles.swatch(), row.entry.tone.swatch)} />
+                            <Swatch tone={row.entry.tone} />
                             <span className="truncate">{row.entry.label}</span>
                           </span>
                           <span>{describeValue(row.value, row.entry.unit)}</span>

@@ -57,7 +57,7 @@ consumer sees it without reading this file.
 | `SaaS/*` | `experimental` | ~20–25%, "screenshots of one specific product" |
 | `Showcase/*` | `experimental` | a sandbox, not a component |
 
-Six entries depart from their group, all tagged `preview` rather than `stable` for the same
+Nineteen entries depart from their group, all tagged `preview` rather than `stable` for the same
 reason. Each is gated end to end like everything else in the group, but no consumer depends on
 it yet, so its API has not met a caller. `stable` claims a shape has survived use, and these
 have survived a story. Retag each one when something depends on it.
@@ -67,6 +67,11 @@ have survived a story. Retag each one when something depends on it.
 - `Components/Feedback/StatusPage`, `NotFoundPage` and `ServerErrorPage` (#251): no site serves
   them as its error pages yet.
 - `Components/Data/TraceWaterfall` and `TraceViewer`: no app renders traces with them yet.
+- The observability set (#407): `TimeRangePicker`, `TimeSeriesChart`, `LatencyHistogram`,
+  `LatencyHeatmap`, `LogViewer`, `FilterBar`, `ServiceMap`, `AlertList`, `IncidentTimeline`,
+  `IdChip`, and under `Components/Feedback`, `SeverityBadge` and `FreshnessIndicator`. Their only
+  caller is the `SaaS/ObservabilityConsole` sample, and the chart props are still being evaluated
+  in the chart lab (#418), so their shape is expected to move.
 
 The vocabulary is Storybook's own feature lifecycle — `stable`, `experimental`, `preview`,
 `deprecated` — rather than a second one to maintain. A group cannot be added to the sidebar

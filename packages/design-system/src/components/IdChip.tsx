@@ -6,6 +6,7 @@ import { recipe } from '../lib/recipe';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { SiteLink } from './LinkProvider';
 import { Tooltip } from './Tooltip';
+import { truncateId } from '../lib/ids';
 
 export interface IdChipProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'onCopy'> {
   /** The identifier — a trace id, span id or request id. Copied, linked and announced in full. */
@@ -35,11 +36,6 @@ const idChip = recipe({
   },
 });
 
-/** The visible part of an id: its first `count` characters and `…`, or all of it. */
-export function truncateId(value: string, count = 8): string {
-  if (count <= 0 || value.length <= count) return value;
-  return `${value.slice(0, count)}…`;
-}
 
 /**
  * A compact, monospace identifier — trace, span or request id — sized for a

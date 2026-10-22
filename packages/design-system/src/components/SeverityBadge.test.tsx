@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it } from 'vitest';
-import { SEVERITY_ACCENTS, SeverityBadge, severityAccent } from './SeverityBadge';
+import { SEVERITY_ACCENTS, severityAccent } from '../lib/severity';
+import { SeverityBadge } from './SeverityBadge';
 
 describe('SeverityBadge', () => {
   it('labels and colours from the fixed vocabulary, and forwards its ref', () => {

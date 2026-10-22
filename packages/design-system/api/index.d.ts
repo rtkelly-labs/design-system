@@ -2175,6 +2175,840 @@ interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
 
 declare const TraceViewer: react.ForwardRefExoticComponent<TraceViewerProps & react.RefAttributes<HTMLElement>>;
 
+interface TimeRange {
+    from: number;
+    to: number;
+}
+
+interface TimeRangePreset {
+    id: string;
+    label: string;
+
+    duration: number;
+}
+
+declare const TIME_RANGE_PRESETS: readonly TimeRangePreset[];
+
+declare function presetRange(preset: TimeRangePreset, now: number): TimeRange;
+
+declare function normaliseRange(range: TimeRange | null | undefined): TimeRange | null;
+
+declare function clampToRange(time: number, range: TimeRange): number;
+
+declare function formatClock(time: number, seconds?: boolean): string;
+
+declare function formatDay(time: number): string;
+
+declare function formatTimestamp(time: number, precision?: 'minute' | 'second' | 'millisecond'): string;
+
+declare function formatTimeTick(time: number, span: number): string;
+
+declare function formatRangeDuration(ms: number): string;
+
+declare function formatRange(range: TimeRange): string;
+
+declare function timeTicks(range: TimeRange, target?: number): number[];
+
+declare function bucketTimes(range: TimeRange, count: number): TimeRange[];
+
+interface TimeRangeState {
+
+    now: number;
+
+    range: TimeRange;
+
+    presetId: string | null;
+    presets: readonly TimeRangePreset[];
+
+    setRange: (range: TimeRange, presetId?: string | null) => void;
+
+    selectPreset: (id: string) => void;
+}
+interface TimeCursorState {
+
+    cursor: number | null;
+    setCursor: (time: number | null) => void;
+}
+
+declare function useTimeRange(): TimeRangeState | null;
+
+declare function useTimeCursor(): TimeCursorState | null;
+interface TimeRangeProviderProps {
+
+    now: number;
+
+    defaultPresetId?: string;
+
+    range?: TimeRange;
+
+    onRangeChange?: (range: TimeRange, presetId: string | null) => void;
+
+    presets?: readonly TimeRangePreset[];
+    children?: ReactNode;
+}
+
+declare function TimeRangeProvider({ now, defaultPresetId, range: rangeProp, onRangeChange, presets, children }: TimeRangeProviderProps): react.JSX.Element;
+interface TimeRangePickerProps extends HTMLAttributes<HTMLDivElement> {
+
+    label?: string;
+}
+
+declare const TimeRangePicker: react.ForwardRefExoticComponent<TimeRangePickerProps & react.RefAttributes<HTMLDivElement>>;
+
+type LogSeverity = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
+
+type AlertState = 'firing' | 'pending' | 'resolved' | 'silenced';
+
+type AlertSeverity = 'critical' | 'warning' | 'info';
+
+type Severity = LogSeverity | AlertState | AlertSeverity;
+
+declare const SEVERITY_ACCENTS: Readonly<Record<Severity, AccentToken>>;
+
+declare function severityAccent(severity: string): AccentToken;
+
+interface SeverityBadgeProps extends Omit<BadgeProps, 'accent' | 'children'> {
+
+    severity: Severity;
+
+    children?: BadgeProps['children'];
+}
+
+declare const SeverityBadge: react.ForwardRefExoticComponent<SeverityBadgeProps & react.RefAttributes<HTMLSpanElement>>;
+
+type TimeSeriesPoint = readonly [time: number, value: number | null];
+
+interface TimeSeries {
+
+    id: string;
+
+    label: string;
+
+    points: ReadonlyArray<TimeSeriesPoint>;
+
+    unit?: string;
+
+    tone?: 'primary' | 'secondary' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+}
+
+type TimeSeriesCurve = 'linear' | 'monotone' | 'step';
+
+interface TimeSeriesThreshold {
+
+    value: number;
+
+    label: string;
+
+    intent: 'warning' | 'danger';
+}
+
+interface TimeSeriesAnnotation {
+
+    time: number;
+
+    label: string;
+
+    intent?: 'info' | 'warning' | 'danger';
+}
+
+declare const TIME_SERIES_VARIANTS: {
+    readonly variant: readonly ["line", "area", "stacked"];
+    readonly curve: readonly ["linear", "monotone", "step"];
+    readonly points: readonly ["none", "hover", "all"];
+    readonly grid: readonly ["none", "horizontal", "both"];
+    readonly yScale: readonly ["linear", "log"];
+    readonly yDomain: readonly ["zero", "data"];
+    readonly legend: readonly ["top", "bottom", "none", "inline"];
+    readonly colorStrategy: readonly ["categorical", "emphasis"];
+    readonly density: readonly ["regular", "compact"];
+};
+
+type TimeSeriesVariant = (typeof TIME_SERIES_VARIANTS.variant)[number];
+
+type TimeSeriesPointMarkers = (typeof TIME_SERIES_VARIANTS.points)[number];
+
+type TimeSeriesGrid = (typeof TIME_SERIES_VARIANTS.grid)[number];
+
+type TimeSeriesYScale = (typeof TIME_SERIES_VARIANTS.yScale)[number];
+
+type TimeSeriesYDomain = (typeof TIME_SERIES_VARIANTS.yDomain)[number] | readonly [min: number, max: number];
+
+type TimeSeriesLegend = (typeof TIME_SERIES_VARIANTS.legend)[number];
+
+type TimeSeriesColorStrategy = (typeof TIME_SERIES_VARIANTS.colorStrategy)[number];
+
+type TimeSeriesDensity = (typeof TIME_SERIES_VARIANTS.density)[number];
+interface TimeSeriesChartProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    series: readonly TimeSeries[];
+
+    variant?: TimeSeriesVariant;
+
+    curve?: TimeSeriesCurve;
+
+    strokeWidth?: number;
+
+    points?: TimeSeriesPointMarkers;
+
+    fillOpacity?: number;
+
+    grid?: TimeSeriesGrid;
+
+    yScale?: TimeSeriesYScale;
+
+    yDomain?: TimeSeriesYDomain;
+
+    legend?: TimeSeriesLegend;
+
+    colorStrategy?: TimeSeriesColorStrategy;
+
+    emphasisSeriesId?: string;
+
+    density?: TimeSeriesDensity;
+
+    annotations?: readonly TimeSeriesAnnotation[];
+
+    showAxes?: boolean;
+
+    thresholds?: readonly TimeSeriesThreshold[];
+
+    range?: TimeRange;
+
+    formatValue?: (value: number) => string;
+
+    unit?: string;
+
+    hiddenSeries?: readonly string[];
+
+    defaultHiddenSeries?: readonly string[];
+
+    onHiddenSeriesChange?: (ids: string[]) => void;
+
+    onRangeSelect?: (range: TimeRange) => void;
+
+    zoomable?: boolean;
+
+    height?: number;
+
+    title?: string;
+
+    showTitle?: boolean;
+}
+
+declare const TimeSeriesChart: react.ForwardRefExoticComponent<TimeSeriesChartProps & react.RefAttributes<HTMLDivElement>>;
+
+interface LatencyBucket {
+
+    from: number;
+
+    to: number;
+
+    count: number;
+}
+
+interface LatencyPoint {
+
+    time: number;
+
+    value: number;
+}
+
+interface LatencyCell {
+
+    column: number;
+
+    row: number;
+
+    timeRange: TimeRange;
+
+    latencyRange: {
+        from: number;
+        to: number;
+    };
+
+    count: number;
+}
+
+interface LatencyGrid {
+    cells: LatencyCell[];
+    columns: number;
+    rows: number;
+
+    max: number;
+
+    total: number;
+}
+
+declare function latencyBuckets(min: number, max: number, count: number): number[];
+
+declare function linearBuckets(min: number, max: number, count: number): number[];
+
+declare function bucketIndex(value: number, edges: readonly number[]): number;
+
+declare function histogram(samples: readonly number[], edges: readonly number[]): LatencyBucket[];
+
+declare function percentile(samples: readonly number[], p: number): number;
+
+declare function percentiles(samples: readonly number[], ps?: readonly number[]): number[];
+
+declare function bucketPercentile(buckets: readonly LatencyBucket[], p: number): number;
+
+declare function shareAbove(samples: readonly number[], threshold: number): number;
+
+declare function latencyExtent(values: Iterable<number>): {
+    min: number;
+    max: number;
+} | null;
+
+declare function logTicks(min: number, max: number, target?: number): number[];
+
+declare function heatmapCells(points: readonly LatencyPoint[], timeBuckets: readonly TimeRange[], latencyEdges: readonly number[]): LatencyGrid;
+
+type IntensityScale = 'sqrt' | 'linear' | 'log' | 'quantile';
+
+declare function intensityThresholds(counts: readonly number[], levels?: number, scale?: IntensityScale): number[];
+
+declare function intensityLevel(count: number, thresholds: readonly number[]): number;
+
+declare function latencyRowPosition(value: number, edges: readonly number[]): number;
+
+declare function formatCount(value: number): string;
+
+declare function formatShare(share: number): string;
+
+declare function formatLatencyRange(from: number, to: number, format?: (ms: number) => string): string;
+
+declare function formatRequests(count: number): string;
+
+declare const LATENCY_HISTOGRAM_VARIANTS: {
+    readonly scale: readonly ["log", "linear"];
+    readonly binning: readonly ["log", "linear"];
+    readonly bar: readonly ["bars", "steps", "outline"];
+    readonly markers: readonly ["lines", "labels", "none"];
+    readonly density: readonly ["regular", "compact"];
+    readonly cumulative: readonly [false, true];
+};
+
+interface LatencySlo {
+
+    value: number;
+
+    label?: string;
+}
+interface LatencyHistogramProps extends HTMLAttributes<HTMLDivElement> {
+
+    samples?: readonly number[];
+
+    buckets?: readonly LatencyBucket[];
+
+    percentiles?: readonly number[];
+
+    slo?: LatencySlo;
+
+    scale?: 'log' | 'linear';
+
+    binning?: 'log' | 'linear';
+
+    bins?: number;
+
+    min?: number;
+
+    max?: number;
+
+    height?: number;
+
+    title?: string;
+
+    formatValue?: (ms: number) => string;
+
+    bar?: 'bars' | 'steps' | 'outline';
+
+    cumulative?: boolean;
+
+    markers?: 'lines' | 'labels' | 'none';
+
+    density?: 'regular' | 'compact';
+}
+
+declare const LatencyHistogram: react.ForwardRefExoticComponent<LatencyHistogramProps & react.RefAttributes<HTMLDivElement>>;
+
+declare const LATENCY_HEATMAP_VARIANTS: {
+    readonly colorScale: readonly ["sqrt", "linear", "log", "quantile"];
+    readonly colorSteps: readonly [6, 3, 4, 5, 7, 8, 9];
+    readonly density: readonly ["regular", "compact"];
+    readonly showLegend: readonly [true, false];
+    readonly zoomable: readonly [true, false];
+    readonly cellGap: readonly [1, 0, 2, 4];
+    readonly percentileOverlay: readonly [readonly [], readonly [50], readonly [50, 99]];
+};
+interface LatencyHeatmapProps extends HTMLAttributes<HTMLDivElement> {
+
+    points: readonly LatencyPoint[];
+
+    range?: TimeRange;
+
+    columns?: number;
+
+    rows?: number;
+
+    min?: number;
+
+    max?: number;
+
+    height?: number;
+
+    title?: string;
+
+    onCellSelect?: (cell: LatencyCell) => void;
+
+    onRangeSelect?: (range: TimeRange) => void;
+
+    zoomable?: boolean;
+
+    formatValue?: (ms: number) => string;
+
+    colorSteps?: number;
+
+    colorScale?: IntensityScale;
+
+    cellGap?: number;
+
+    showLegend?: boolean;
+
+    density?: 'regular' | 'compact';
+
+    percentileOverlay?: readonly number[];
+}
+
+declare const LatencyHeatmap: react.ForwardRefExoticComponent<LatencyHeatmapProps & react.RefAttributes<HTMLDivElement>>;
+
+type LogFieldValue = string | number | boolean;
+
+interface LogEntry {
+
+    id: string;
+
+    time: number;
+
+    severity: LogSeverity;
+
+    message: string;
+
+    service?: string;
+
+    traceId?: string;
+
+    spanId?: string;
+
+    fields?: Record<string, LogFieldValue>;
+}
+
+declare const LOG_SEVERITIES: readonly LogSeverity[];
+
+interface LogFilter {
+
+    query?: string;
+
+    severities?: readonly LogSeverity[];
+
+    range?: TimeRange | null;
+}
+
+declare function matchLogEntry(entry: LogEntry, query: string): boolean;
+
+declare function inLogRange(time: number, range: TimeRange): boolean;
+
+declare function filterLogEntries(entries: readonly LogEntry[], filter?: LogFilter): LogEntry[];
+
+declare function sortLogEntries(entries: readonly LogEntry[], order?: 'asc' | 'desc'): LogEntry[];
+
+interface LogHighlightPart {
+    text: string;
+    match: boolean;
+}
+
+declare function highlightLogText(text: string, query: string | undefined): LogHighlightPart[];
+
+declare function nearestLogIndex(entries: readonly LogEntry[], time: number | null | undefined): number | null;
+
+declare function describeLogEntry(entry: LogEntry): string;
+
+interface LogViewerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+
+    entries: readonly LogEntry[];
+
+    order?: 'asc' | 'desc';
+
+    query?: string;
+
+    severities?: readonly LogSeverity[];
+
+    range?: TimeRange;
+
+    followRange?: boolean;
+
+    follow?: boolean;
+
+    onTraceSelect?: (traceId: string, entry: LogEntry) => void;
+
+    height?: number;
+
+    virtualize?: boolean;
+
+    showHeader?: boolean;
+
+    announce?: boolean;
+
+    defaultExpanded?: readonly string[];
+
+    emptyText?: ReactNode;
+
+    label?: string;
+}
+
+declare const LogViewer: react.ForwardRefExoticComponent<LogViewerProps & react.RefAttributes<HTMLDivElement>>;
+
+type FilterOperator = '=' | '!=' | '~' | '!~';
+
+interface Filter {
+
+    key: string;
+    operator: FilterOperator;
+    value: string;
+}
+
+declare const FREE_TEXT_KEY = "*";
+
+type FilterParseResult = {
+    ok: true;
+    filter: Filter;
+} | {
+    ok: false;
+    error: string;
+};
+
+declare const FILTER_OPERATORS: readonly FilterOperator[];
+
+declare const FILTER_OPERATOR_LABELS: Record<FilterOperator, string>;
+
+declare function tryParseFilter(text: string): FilterParseResult | null;
+
+declare function parseFilter(text: string): Filter | null;
+
+declare function formatFilter(filter: Filter): string;
+
+declare function describeFilter(filter: Filter): string;
+
+declare function sameFilter(a: Filter, b: Filter): boolean;
+
+declare function lookupField(record: Record<string, unknown>, key: string): unknown;
+
+declare function matchFilters(record: Record<string, unknown>, filters: readonly Filter[]): boolean;
+
+interface FilterBarField {
+
+    key: string;
+
+    label?: string;
+
+    values?: readonly string[];
+}
+interface FilterBarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
+
+    filters?: readonly Filter[];
+
+    defaultFilters?: readonly Filter[];
+
+    onFiltersChange?: (filters: Filter[]) => void;
+
+    fields?: readonly FilterBarField[];
+
+    label?: string;
+
+    hideLabel?: boolean;
+
+    placeholder?: string;
+
+    summary?: ReactNode;
+
+    clearLabel?: string;
+}
+
+declare const FilterBar: react.ForwardRefExoticComponent<FilterBarProps & react.RefAttributes<HTMLDivElement>>;
+
+type ServiceNodeKind = 'service' | 'database' | 'queue' | 'external';
+
+interface ServiceNode {
+
+    id: string;
+
+    requests: number;
+
+    errors: number;
+
+    avgDuration: number;
+
+    p95Duration?: number;
+
+    kind?: ServiceNodeKind;
+}
+
+interface ServiceEdge {
+
+    from: string;
+
+    to: string;
+
+    calls: number;
+
+    errors: number;
+
+    avgDuration: number;
+}
+
+interface ServiceGraph {
+
+    nodes: ServiceNode[];
+
+    edges: ServiceEdge[];
+}
+
+declare function serviceGraph(input: readonly TraceSpanInput[] | readonly (readonly TraceSpanInput[])[]): ServiceGraph;
+
+interface ServiceGraphPoint {
+    x: number;
+    y: number;
+}
+
+interface ServiceGraphLayoutNode {
+    id: string;
+    x: number;
+    y: number;
+
+    layer: number;
+
+    index: number;
+}
+
+interface ServiceGraphLayoutEdge {
+    from: string;
+    to: string;
+
+    source: ServiceGraphPoint;
+
+    target: ServiceGraphPoint;
+
+    back: boolean;
+
+    dip?: number;
+}
+
+interface ServiceGraphLayout {
+
+    nodes: ServiceGraphLayoutNode[];
+
+    edges: ServiceGraphLayoutEdge[];
+
+    width: number;
+    height: number;
+
+    nodeWidth: number;
+    nodeHeight: number;
+
+    layers: number;
+}
+
+interface ServiceGraphLayoutOptions {
+
+    columnGap?: number;
+
+    rowGap?: number;
+
+    nodeWidth?: number;
+
+    nodeHeight?: number;
+}
+
+declare function layoutServiceGraph(graph: ServiceGraph, options?: ServiceGraphLayoutOptions): ServiceGraphLayout;
+
+declare function serviceEdgePath(edge: ServiceGraphLayoutEdge): string;
+
+declare function serviceEdgeMidpoint(edge: ServiceGraphLayoutEdge): ServiceGraphPoint;
+
+declare function formatServiceCount(value: number): string;
+
+declare function formatServiceErrorRate(errors: number, total: number): string;
+
+interface ServiceMapProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    graph?: ServiceGraph;
+
+    spans?: readonly TraceSpanInput[] | readonly (readonly TraceSpanInput[])[];
+
+    selectedId?: string | null;
+
+    defaultSelectedId?: string | null;
+
+    onSelectedChange?: (id: string | null) => void;
+
+    errorThreshold?: number;
+
+    title?: string;
+
+    height?: number | string;
+
+    edgeLabels?: 'auto' | 'always' | 'interactive';
+}
+
+declare const ServiceMap: react.ForwardRefExoticComponent<ServiceMapProps & react.RefAttributes<HTMLDivElement>>;
+
+interface Alert {
+
+    id: string;
+
+    name: string;
+
+    state: AlertState;
+
+    severity: AlertSeverity;
+
+    since: number;
+
+    service?: string;
+
+    summary?: string;
+
+    value?: string;
+
+    threshold?: string;
+
+    trend?: readonly number[];
+}
+
+declare const ALERT_STATE_ORDER: readonly AlertState[];
+
+declare function sortAlerts(alerts: readonly Alert[]): Alert[];
+
+declare function formatAlertDuration(alert: Pick<Alert, 'state' | 'since'>, now: number): string;
+interface AlertListProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
+
+    alerts: readonly Alert[];
+
+    now: number;
+
+    stateFilter?: readonly AlertState[];
+
+    defaultStateFilter?: readonly AlertState[];
+
+    onStateFilterChange?: (states: AlertState[]) => void;
+
+    selectedId?: string | null;
+
+    defaultSelectedId?: string | null;
+
+    onSelectedChange?: (id: string | null) => void;
+
+    renderActions?: (alert: Alert) => ReactNode;
+
+    heading?: ReactNode;
+
+    emptyMessage?: ReactNode;
+
+    label?: string;
+}
+
+declare const AlertList: react.ForwardRefExoticComponent<AlertListProps & react.RefAttributes<HTMLDivElement>>;
+
+type IncidentEventKind = 'detected' | 'alert' | 'acknowledged' | 'update' | 'deploy' | 'mitigated' | 'resolved';
+
+interface IncidentEvent {
+
+    id: string;
+
+    time: number;
+
+    kind: IncidentEventKind;
+
+    title: string;
+
+    detail?: string;
+
+    author?: string;
+}
+
+interface IncidentSummary {
+
+    status: 'ongoing' | 'resolved';
+
+    start: number | null;
+
+    timeToAcknowledge: number | null;
+
+    timeToMitigate: number | null;
+
+    timeToResolve: number | null;
+
+    duration: number | null;
+}
+
+declare function summariseIncident(events: readonly IncidentEvent[], now?: number): IncidentSummary;
+interface IncidentTimelineProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    events: readonly IncidentEvent[];
+
+    title?: ReactNode;
+
+    severity?: AlertSeverity;
+
+    now?: number;
+
+    order?: 'oldest-first' | 'newest-first';
+
+    onEventSelect?: (event: IncidentEvent) => void;
+
+    label?: string;
+}
+
+declare const IncidentTimeline: react.ForwardRefExoticComponent<IncidentTimelineProps & react.RefAttributes<HTMLDivElement>>;
+
+interface FreshnessIndicatorProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
+
+    updatedAt: number;
+
+    now: number;
+
+    staleAfter?: number;
+
+    live?: boolean;
+
+    paused?: boolean;
+}
+
+type FreshnessState = 'fresh' | 'stale' | 'paused';
+
+declare function formatAge(ms: number): string;
+
+declare const FreshnessIndicator: react.ForwardRefExoticComponent<FreshnessIndicatorProps & react.RefAttributes<HTMLSpanElement>>;
+
+declare function truncateId(value: string, count?: number): string;
+
+interface IdChipProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'onCopy'> {
+
+    value: string;
+
+    label?: string;
+
+    truncate?: number;
+
+    href?: string;
+
+    copyable?: boolean;
+
+    onCopy?: (value: string, ok: boolean) => void;
+}
+
+declare const IdChip: react.ForwardRefExoticComponent<IdChipProps & react.RefAttributes<HTMLSpanElement>>;
+
 interface SlideProps {
     title?: string;
     subtitle?: string;
@@ -2377,6 +3211,19 @@ interface SaasLandingPageProps {
 }
 
 declare const SaasLandingPage: react__default.FC<SaasLandingPageProps>;
+
+type View = 'overview' | 'logs' | 'traces' | 'services' | 'alerts';
+interface ObservabilityConsoleProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
+
+    defaultView?: View;
+}
+
+declare const ObservabilityConsole: react.ForwardRefExoticComponent<ObservabilityConsoleProps & react.RefAttributes<HTMLDivElement>>;
+
+declare const OBSERVABILITY_INCIDENT_WINDOW: {
+    from: number;
+    to: number;
+};
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 interface AnchorHeadingProps extends Omit<HTMLAttributes<HTMLHeadingElement>, 'id'> {
@@ -3193,13 +4040,19 @@ declare const mdxComponents: {
 type MdxComponents = typeof mdxComponents;
 
 export {
+  ALERT_STATE_ORDER,
   ANSI_SLOTS,
   type AccentToken,
   type ActivityDay,
   ActivityGrid,
   type ActivityGridProps,
+  type Alert,
   AlertDialog,
   type AlertDialogProps,
+  AlertList,
+  type AlertListProps,
+  type AlertSeverity,
+  type AlertState,
   AnchorHeading,
   type AnchorHeadingProps,
   type AnsiChrome,
@@ -3326,7 +4179,10 @@ export {
   type ExperimentItem,
   ExperimentsView,
   type ExperimentsViewProps,
+  FILTER_OPERATORS,
+  FILTER_OPERATOR_LABELS,
   FIXED_COLOURS,
+  FREE_TEXT_KEY,
   Feature,
   FeatureGrid,
   type FeatureGridProps,
@@ -3340,6 +4196,12 @@ export {
   FileChangeTree,
   type FileChangeTreeProps,
   type FileChangeView,
+  type Filter,
+  FilterBar,
+  type FilterBarField,
+  type FilterBarProps,
+  type FilterOperator,
+  type FilterParseResult,
   type Finding,
   type FixedColour,
   FlowDiagram,
@@ -3348,6 +4210,9 @@ export {
   type FlowPathProps,
   type FlowRow,
   type FlowTone,
+  FreshnessIndicator,
+  type FreshnessIndicatorProps,
+  type FreshnessState,
   GanttChart,
   type GanttChartProps,
   type GanttItem,
@@ -3362,12 +4227,32 @@ export {
   type HueAgreementCheck,
   type HueRef,
   INK_WEIGHT,
+  IdChip,
+  type IdChipProps,
+  type IncidentEvent,
+  type IncidentEventKind,
+  type IncidentSummary,
+  IncidentTimeline,
+  type IncidentTimelineProps,
   IndexedSection,
   type IndexedSectionProps,
   Input,
   type InputProps,
+  type IntensityScale,
   type Intent,
+  LATENCY_HEATMAP_VARIANTS,
+  LATENCY_HISTOGRAM_VARIANTS,
   LEVELS,
+  LOG_SEVERITIES,
+  type LatencyBucket,
+  type LatencyCell,
+  type LatencyGrid,
+  LatencyHeatmap,
+  type LatencyHeatmapProps,
+  LatencyHistogram,
+  type LatencyHistogramProps,
+  type LatencyPoint,
+  type LatencySlo,
   Legend,
   type LegendProps,
   type LevelDefinition,
@@ -3376,6 +4261,13 @@ export {
   LinkProvider,
   type LinkProviderProps,
   LinkedInIcon,
+  type LogEntry,
+  type LogFieldValue,
+  type LogFilter,
+  type LogHighlightPart,
+  type LogSeverity,
+  LogViewer,
+  type LogViewerProps,
   LoremIpsumPost,
   MAXIMUM_NEUTRAL_CHROMA,
   MEDIA,
@@ -3419,6 +4311,9 @@ export {
   type NotFoundPageProps,
   NoteBlock,
   type NoteBlockProps,
+  OBSERVABILITY_INCIDENT_WINDOW,
+  ObservabilityConsole,
+  type ObservabilityConsoleProps,
   Option,
   type OverlayAlign,
   type OverlaySide,
@@ -3464,6 +4359,7 @@ export {
   ReportSection,
   type ReportSectionProps,
   type Rgb,
+  SEVERITY_ACCENTS,
   SLIDE_DECK_HOTKEYS,
   SLOTS,
   SYSTEM_LEVEL,
@@ -3480,6 +4376,20 @@ export {
   type SelectionDeviceCheck,
   ServerErrorPage,
   type ServerErrorPageProps,
+  type ServiceEdge,
+  type ServiceGraph,
+  type ServiceGraphLayout,
+  type ServiceGraphLayoutEdge,
+  type ServiceGraphLayoutNode,
+  type ServiceGraphLayoutOptions,
+  type ServiceGraphPoint,
+  ServiceMap,
+  type ServiceMapProps,
+  type ServiceNode,
+  type ServiceNodeKind,
+  type Severity,
+  SeverityBadge,
+  type SeverityBadgeProps,
   SiteFooter,
   type SiteFooterProps,
   SiteHeader,
@@ -3535,6 +4445,8 @@ export {
   THEME_ATTRIBUTE,
   THEME_LEVELS,
   THEME_STORAGE_KEY,
+  TIME_RANGE_PRESETS,
+  TIME_SERIES_VARIANTS,
   TLDR,
   type TLDRProps,
   TOKEN_RULES,
@@ -3582,6 +4494,29 @@ export {
   type ThemeProviderProps,
   TickerTape,
   type TickerTapeProps,
+  type TimeCursorState,
+  type TimeRange,
+  TimeRangePicker,
+  type TimeRangePickerProps,
+  type TimeRangePreset,
+  TimeRangeProvider,
+  type TimeRangeProviderProps,
+  type TimeRangeState,
+  type TimeSeries,
+  type TimeSeriesAnnotation,
+  TimeSeriesChart,
+  type TimeSeriesChartProps,
+  type TimeSeriesColorStrategy,
+  type TimeSeriesCurve,
+  type TimeSeriesDensity,
+  type TimeSeriesGrid,
+  type TimeSeriesLegend,
+  type TimeSeriesPoint,
+  type TimeSeriesPointMarkers,
+  type TimeSeriesThreshold,
+  type TimeSeriesVariant,
+  type TimeSeriesYDomain,
+  type TimeSeriesYScale,
   Timeline,
   type TimelineEvent,
   type TimelineProps,
@@ -3637,36 +4572,91 @@ export {
   auditSelectionDevices,
   auditTextHierarchy,
   borderVar,
+  bucketIndex,
+  bucketPercentile,
+  bucketTimes,
   buildTrace,
   childrenToText,
+  clampToRange,
   cn,
   collectHeadings,
   composite,
   contrastRatio,
   createAnchorHeading,
+  describeFilter,
+  describeLogEntry,
   describeTraceSpan,
+  filterLogEntries,
   fontVar,
+  formatAge,
+  formatAlertDuration,
+  formatClock,
+  formatCount,
+  formatDay,
+  formatFilter,
+  formatLatencyRange,
+  formatRange,
+  formatRangeDuration,
+  formatRequests,
+  formatServiceCount,
+  formatServiceErrorRate,
+  formatShare,
+  formatTimeTick,
+  formatTimestamp,
   formatTraceDuration,
   getRecommendedColours,
   getThemeInitScript,
+  heatmapCells,
+  highlightLogText,
+  histogram,
+  inLogRange,
+  intensityLevel,
+  intensityThresholds,
   isExternalHref,
   isMedium,
   isRecommendedColourClass,
   isThemeLevel,
+  latencyBuckets,
+  latencyExtent,
+  latencyRowPosition,
+  layoutServiceGraph,
+  linearBuckets,
+  logTicks,
+  lookupField,
+  matchFilters,
+  matchLogEntry,
   matchTraceSpan,
   mdxComponents,
+  nearestLogIndex,
   nextLevel,
+  normaliseRange,
   parseColor,
+  parseFilter,
   parseOtlpTrace,
   parseTraceDocument,
+  percentile,
+  percentiles,
+  presetRange,
   relativeLuminance,
   replayTrace,
+  sameFilter,
   scanRules,
   scanTokenRules,
   semanticTokens,
+  serviceEdgeMidpoint,
+  serviceEdgePath,
+  serviceGraph,
+  severityAccent,
+  shareAbove,
   slugify,
+  sortAlerts,
+  sortLogEntries,
+  summariseIncident,
   surfaceVar,
   textVar,
+  timeTicks,
+  truncateId,
+  tryParseFilter,
   useActiveHeading,
   useCopyToClipboard,
   useDocsLinkComponent,
@@ -3675,6 +4665,8 @@ export {
   useOptionalTheme,
   useOptionalToast,
   useTheme,
+  useTimeCursor,
+  useTimeRange,
   useToast,
   useTraceClock,
   useTraceReplay,
