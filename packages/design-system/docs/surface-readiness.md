@@ -66,8 +66,7 @@ have survived a story. Retag each one when something depends on it.
   this repository yet.
 - `Components/Feedback/StatusPage`, `NotFoundPage` and `ServerErrorPage` (#251): no site serves
   them as its error pages yet.
-- `Components/Data/TraceWaterfall` and `TraceViewer`: no app renders traces with them yet; the
-  `ds-trace` bin shares their model, not their markup.
+- `Components/Data/TraceWaterfall` and `TraceViewer`: no app renders traces with them yet.
 
 The vocabulary is Storybook's own feature lifecycle — `stable`, `experimental`, `preview`,
 `deprecated` — rather than a second one to maintain. A group cannot be added to the sidebar

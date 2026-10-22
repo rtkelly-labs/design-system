@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { TextArea } from '../components/Input';
+import { parseTraceDocument } from '../lib/trace';
 import { TraceViewer } from '../components/TraceViewer';
 import { useTraceClock } from '../hooks/useTraceClock';
 import { checkoutTrace, deployTrace } from './traceFixtures';
@@ -42,4 +44,30 @@ function LiveDeploy() {
 export const Live: Story = {
   render: () => <LiveDeploy />,
   parameters: { docs: { description: { story: 'Two steps are in flight; the duration, the in-flight count and their bars update as the clock ticks.' } } },
+};
+
+const SAMPLE = JSON.stringify(checkoutTrace.slice(0, 5), null, 2);
+
+function TracePlayground() {
+  const [text, setText] = useState(SAMPLE);
+  const spans = useMemo(() => parseTraceDocument(text), [text]);
+  return (
+    <div className="flex flex-col gap-4">
+      <TextArea
+        label="Trace JSON"
+        helperText="OTLP/JSON ({ resourceSpans }), an array of spans, { spans }, or one JSON document per line."
+        rows={10}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        className="font-mono text-xs"
+      />
+      <TraceViewer spans={spans} title={`${spans.length} parsed spans`} />
+    </div>
+  );
+}
+
+/** Paste a trace and see it drawn. Not snapshotted: it is a tool, not a state. */
+export const Playground: Story = {
+  render: () => <TracePlayground />,
+  parameters: { docs: { description: { story: 'Paste an exported trace — from an OpenTelemetry collector’s file exporter, or spans written by hand — and the viewer redraws as you type. Broken lines are skipped, so a half-pasted stream still renders.' } } },
 };

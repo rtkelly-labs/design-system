@@ -42,9 +42,8 @@ export interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'tit
  * A trace viewer: a summary strip, a filterable `TraceWaterfall`, and the
  * selected span's details — timing, self time, status and attributes.
  *
- * Built from the same model `ds-trace` prints to a terminal, so the page and
- * the log agree on every number. Live when spans are in flight and `now`
- * advances.
+ * Live when spans are in flight and `now` advances; load OTLP/JSON with
+ * `parseTraceDocument`.
  */
 export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function TraceViewer(
   { spans, now, title = 'Trace', defaultSelectedId, searchable = true, className, ...props },

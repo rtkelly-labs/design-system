@@ -13,9 +13,8 @@ in [`docs/adr/`](./docs/adr/).
 
 Traces. `TraceWaterfall` and `TraceViewer` draw distributed traces — spans nested by parent on
 one time axis, a keyboard tree, the critical path marked, in-flight spans drawn to a `now` that
-`useTraceClock` advances. The model is public and React-free: `buildTrace`,
-`parseTraceDocument` / `parseOtlpTrace` for OTLP/JSON and NDJSON, and `formatTraceWaterfall`
-for a terminal, which `ds-trace` in `@rtkelly13/design-system-report` prints. Nothing to change.
+`useTraceClock` advances. The model is public and React-free: `buildTrace`, and
+`parseTraceDocument` / `parseOtlpTrace` for OTLP/JSON and NDJSON. Nothing to change.
 
 ## 0.16.0
 

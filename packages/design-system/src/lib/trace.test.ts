@@ -2,11 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   buildTrace,
   formatTraceDuration,
-  formatTraceWaterfall,
   matchTraceSpan,
   parseOtlpTrace,
   parseTraceDocument,
-  traceTicks,
   visibleTraceSpans,
   type TraceSpanInput,
 } from './trace';
@@ -88,36 +86,6 @@ describe('visibleTraceSpans and matchTraceSpan', () => {
 describe('formatting', () => {
   it('formats durations across magnitudes', () => {
     expect([0, 0.42, 3, 3.25, 412, 1240, 125_000, -1].map(formatTraceDuration)).toEqual(['0ms', '0.42ms', '3ms', '3.3ms', '412ms', '1.24s', '2m 05s', '—']);
-  });
-  it('picks round tick steps', () => {
-    expect(traceTicks(412, 4)).toEqual([0, 200, 400]);
-    expect(traceTicks(1000, 4)).toEqual([0, 250, 500, 750, 1000].filter((tick) => tick % 500 === 0));
-    expect(traceTicks(0)).toEqual([0]);
-  });
-});
-
-describe('formatTraceWaterfall', () => {
-  it('prints a summary, an axis and one guided row per span', () => {
-    const text = formatTraceWaterfall(checkout, { columns: 40 });
-    const lines = text.trimEnd().split('\n');
-    expect(lines[0]).toBe('TRACE  5 spans · 400ms · 5 services · 1 error');
-    expect(lines).toHaveLength(3 + 5);
-    expect(lines[3]).toMatch(/^◆ GET \/checkout\s+web\s+█{40} 400ms$/);
-    expect(lines[6]).toContain('│  └─ SELECT cart_items');
-    expect(lines[7]).toContain('└─ ◆ payment.authorize');
-    expect(text).not.toContain('\u001b[');
-  });
-
-  it('draws ASCII, colour, and in-flight spans on request', () => {
-    const ascii = formatTraceWaterfall([{ id: 'r', name: 'job', start: 0 }], { columns: 10, ascii: true, now: 10 });
-    expect(ascii).toContain('==========');
-    expect(ascii).toContain('10ms…');
-    expect(ascii).toContain('1 in flight');
-    expect(formatTraceWaterfall(checkout, { color: true })).toContain('\u001b[31m');
-  });
-
-  it('says so when there is nothing to draw', () => {
-    expect(formatTraceWaterfall([])).toBe('TRACE  0 spans · 0ms · 0 services · 0 errors\n');
   });
 });
 
