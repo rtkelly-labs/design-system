@@ -103,9 +103,9 @@ export const LATENCY_SERIES = [
 
 /** Requests per second by status class, for a stacked chart. */
 export const THROUGHPUT_SERIES = [
-  { id: '2xx', label: '2xx', unit: 'req/s', points: minute.ok },
-  { id: '4xx', label: '4xx', unit: 'req/s', points: minute.clientErr },
-  { id: '5xx', label: '5xx', unit: 'req/s', points: minute.serverErr },
+  { id: '2xx', label: '2xx', unit: 'req/s', tone: 'primary' as const, points: minute.ok },
+  { id: '4xx', label: '4xx', unit: 'req/s', tone: 'warning' as const, points: minute.clientErr },
+  { id: '5xx', label: '5xx', unit: 'req/s', tone: 'danger' as const, points: minute.serverErr },
 ];
 
 /** Individual request latencies, for the heatmap and histogram. */

@@ -3,7 +3,8 @@
 import { forwardRef, useMemo, type HTMLAttributes, type ReactNode } from 'react';
 import { cn, recipe } from '../lib/recipe';
 import { formatRangeDuration, formatTimestamp } from '../lib/timeRange';
-import { SeverityBadge, type AlertSeverity } from './SeverityBadge';
+import type { AlertSeverity } from '../lib/severity';
+import { SeverityBadge } from './SeverityBadge';
 
 /** What happened at one point in an incident. */
 export type IncidentEventKind = 'detected' | 'alert' | 'acknowledged' | 'update' | 'deploy' | 'mitigated' | 'resolved';

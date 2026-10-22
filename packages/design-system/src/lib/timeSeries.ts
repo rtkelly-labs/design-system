@@ -21,6 +21,11 @@ export interface TimeSeries {
   points: ReadonlyArray<TimeSeriesPoint>;
   /** Unit for this series' values; falls back to the chart's `unit`. */
   unit?: string;
+  /**
+   * Pin the series to a role when its colour carries a meaning — a 5xx series
+   * is `danger`, a 4xx one `warning`. Omitted, series take the neutral cycle.
+   */
+  tone?: 'primary' | 'secondary' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 }
 
 /**

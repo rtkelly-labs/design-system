@@ -178,6 +178,27 @@ export * from './components/BulletChart';
 export * from './lib/trace';
 export * from './components/TraceWaterfall';
 export * from './components/TraceViewer';
+// Observability (#407): one time window and hover cursor that every view on a
+// page shares, and the views that follow it. Each works standalone too.
+export * from './lib/timeRange';
+export * from './components/TimeRange';
+export * from './lib/severity';
+export * from './components/SeverityBadge';
+export * from './components/TimeSeriesChart';
+export * from './lib/latency';
+export * from './components/LatencyHistogram';
+export * from './components/LatencyHeatmap';
+export * from './lib/logs';
+export * from './components/LogViewer';
+export * from './lib/filters';
+export * from './components/FilterBar';
+export * from './lib/serviceGraph';
+export * from './components/ServiceMap';
+export * from './components/AlertList';
+export * from './components/IncidentTimeline';
+export * from './components/FreshnessIndicator';
+export * from './lib/ids';
+export * from './components/IdChip';
 
 // Slides & Presentation Deck Engine
 export * from './components/slides/Slide';
@@ -196,6 +217,7 @@ export * from './components/experiments/DesignSandbox';
 
 // SaaS Landing Pages
 export * from './components/saas/SaasLandingPage';
+export * from './components/saas/ObservabilityConsole';
 
 // Documentation Portal Chrome & MDX Rendering
 export * from './components/docs';

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useEffect, useState } from 'react';
 import { LogViewer } from '../components/LogViewer';
-import type { LogSeverity } from '../components/SeverityBadge';
+import type { LogSeverity } from '../lib/severity';
 import { TimeRangePicker, TimeRangeProvider } from '../components/TimeRange';
 import type { LogEntry } from '../lib/logs';
 

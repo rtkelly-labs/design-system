@@ -3,7 +3,8 @@
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent, type ReactNode } from 'react';
 import { cn, recipe } from '../lib/recipe';
 import { formatRangeDuration } from '../lib/timeRange';
-import { SeverityBadge, severityAccent, type AlertSeverity, type AlertState } from './SeverityBadge';
+import { severityAccent, type AlertSeverity, type AlertState } from '../lib/severity';
+import { SeverityBadge } from './SeverityBadge';
 import { Sparkline } from './Sparkline';
 
 /** One alert as an alerting backend reports it. */

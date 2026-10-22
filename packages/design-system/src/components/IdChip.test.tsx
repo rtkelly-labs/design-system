@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { IdChip, truncateId } from './IdChip';
+import { truncateId } from '../lib/ids';
+import { IdChip } from './IdChip';
 
 const trace = '4bf92f3577b34da6a3ce929d0e0e4736';
 
