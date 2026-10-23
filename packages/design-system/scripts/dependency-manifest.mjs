@@ -76,7 +76,7 @@ export const MANIFEST = {
   },
   '@visx/scale': {
     kind: 'runtime',
-    why: 'D3-backed coordinate projection (scaleBand, scaleLinear) mapping domains to SVG pixels; rendering math only. See ADR 0005.',
+    why: 'D3-backed coordinate projection (scaleBand, scaleLinear, scaleLog, scaleTime) mapping domains to SVG pixels; rendering math only. The log and time scales arrived with the observability charts (#407): latency spans orders of magnitude, and a time axis needs calendar-aware ticks. See ADR 0005.',
   },
   '@visx/shape': {
     kind: 'runtime',
