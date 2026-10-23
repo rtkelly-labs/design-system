@@ -64,6 +64,20 @@ import * as ServerErrorPageStories from '../../design-system/src/stories/ServerE
 import * as StatusPageStories from '../../design-system/src/stories/StatusPage.stories';
 import * as ChartTooltipStories from '../../design-system/src/stories/ChartTooltip.stories';
 import * as BarChartStories from '../../design-system/src/stories/BarChart.stories';
+import * as TraceWaterfallStories from '../../design-system/src/stories/TraceWaterfall.stories';
+import * as TraceViewerStories from '../../design-system/src/stories/TraceViewer.stories';
+import * as TimeRangePickerStories from '../../design-system/src/stories/TimeRangePicker.stories';
+import * as SeverityBadgeStories from '../../design-system/src/stories/SeverityBadge.stories';
+import * as TimeSeriesChartStories from '../../design-system/src/stories/TimeSeriesChart.stories';
+import * as LatencyHistogramStories from '../../design-system/src/stories/LatencyHistogram.stories';
+import * as LatencyHeatmapStories from '../../design-system/src/stories/LatencyHeatmap.stories';
+import * as LogViewerStories from '../../design-system/src/stories/LogViewer.stories';
+import * as FilterBarStories from '../../design-system/src/stories/FilterBar.stories';
+import * as ServiceMapStories from '../../design-system/src/stories/ServiceMap.stories';
+import * as AlertListStories from '../../design-system/src/stories/AlertList.stories';
+import * as IncidentTimelineStories from '../../design-system/src/stories/IncidentTimeline.stories';
+import * as FreshnessIndicatorStories from '../../design-system/src/stories/FreshnessIndicator.stories';
+import * as IdChipStories from '../../design-system/src/stories/IdChip.stories';
 import * as BulletChartStories from '../../design-system/src/stories/BulletChart.stories';
 import * as ActivityGridStories from '../../design-system/src/stories/ActivityGrid.stories';
 import * as AsciiGaugeStories from '../../design-system/src/stories/AsciiGauge.stories';
@@ -363,6 +377,21 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'StatusPage', rungs: ['sketch'], group: 'Feedback', height: 86, layout: 'stack', states: fromStories(StatusPageStories, ['Maintenance']) },
   { component: 'ChartTooltip', group: 'Data display', height: 34, layout: 'side', states: fromStories(ChartTooltipStories, ['Primary']) },
   { component: 'BarChart', group: 'Data display', height: 126, layout: 'side', states: [...fromStories(BarChartStories, ['Vertical']), custom('responsive', () => (<div style={{ height: 280 }}><BarChart responsive data={[{ label: 'Mon', value: 4 }, { label: 'Tue', value: 7 }, { label: 'Wed', value: 5 }]} /></div>))] },
+  // The observability set (#407). Each plate is the component's static baseline story.
+  { component: 'TimeRangePicker', group: 'Data display', height: 30, layout: 'side', states: fromStories(TimeRangePickerStories, ['LastHour']) },
+  { component: 'TimeSeriesChart', group: 'Data display', height: 128, layout: 'stack', states: fromStories(TimeSeriesChartStories, ['Latency']) },
+  { component: 'LatencyHistogram', group: 'Data display', height: 112, layout: 'stack', states: fromStories(LatencyHistogramStories, ['Checkout']) },
+  { component: 'LatencyHeatmap', group: 'Data display', height: 138, layout: 'stack', states: fromStories(LatencyHeatmapStories, ['Bimodal']) },
+  { component: 'TraceWaterfall', group: 'Data display', height: 120, layout: 'stack', states: fromStories(TraceWaterfallStories, ['Checkout']) },
+  { component: 'TraceViewer', rungs: ['sketch'], group: 'Data display', height: 138, layout: 'stack', states: fromStories(TraceViewerStories, ['Checkout']) },
+  { component: 'LogViewer', rungs: ['sketch'], group: 'Data display', height: 138, layout: 'stack', states: fromStories(LogViewerStories, ['Tail']) },
+  { component: 'FilterBar', group: 'Data display', height: 40, layout: 'stack', states: fromStories(FilterBarStories, ['Default']) },
+  { component: 'ServiceMap', rungs: ['sketch'], group: 'Data display', height: 138, layout: 'stack', states: fromStories(ServiceMapStories, ['Checkout']) },
+  { component: 'AlertList', rungs: ['sketch'], group: 'Data display', height: 138, layout: 'stack', states: fromStories(AlertListStories, ['Mixed']) },
+  { component: 'IncidentTimeline', rungs: ['sketch'], group: 'Data display', height: 138, layout: 'stack', states: fromStories(IncidentTimelineStories, ['Resolved']) },
+  { component: 'IdChip', group: 'Data display', height: 60, layout: 'side', states: fromStories(IdChipStories, ['InTable']) },
+  { component: 'SeverityBadge', group: 'Feedback', height: 34, layout: 'side', states: fromStories(SeverityBadgeStories, ['LogLevels', 'AlertStates']) },
+  { component: 'FreshnessIndicator', group: 'Feedback', height: 26, layout: 'side', states: fromStories(FreshnessIndicatorStories, ['Fresh', 'Stale']) },
   { component: 'BulletChart', group: 'Data display', height: 24, layout: 'side', states: fromStories(BulletChartStories, ['PrimaryBenchmark']) },
   { component: 'ActivityGrid', group: 'Data display', height: 133, layout: 'stack', states: fromStories(ActivityGridStories, ['Commits']) },
   { component: 'AsciiGauge', group: 'Data display', height: 23, layout: 'side', states: fromStories(AsciiGaugeStories, ['Default']) },

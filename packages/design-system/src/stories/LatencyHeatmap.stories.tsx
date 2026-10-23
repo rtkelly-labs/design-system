@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { variantAxes } from './chartLab/axes';
 import { useState } from 'react';
 import { LATENCY_HEATMAP_VARIANTS, LatencyHeatmap } from '../components/LatencyHeatmap';
 import { TimeRangePicker, TimeRangeProvider } from '../components/TimeRange';
@@ -132,7 +133,7 @@ export const SelectableCells: Story = {
   parameters: { docs: { description: { story: 'Clicking a cell, or Enter on the focused one, outlines it and passes it to `onCellSelect`; here the chosen bucket is printed below as a trace query would receive it.' } } },
 };
 
-const AXES = Object.entries(LATENCY_HEATMAP_VARIANTS) as Array<[keyof typeof LATENCY_HEATMAP_VARIANTS, readonly unknown[]]>;
+const AXES = variantAxes(LATENCY_HEATMAP_VARIANTS) as Array<[keyof typeof LATENCY_HEATMAP_VARIANTS, readonly unknown[]]>;
 const label = (value: unknown) => (Array.isArray(value) ? `[${value.join(', ')}]` : String(value));
 
 /** Every variant value as small multiples over one dataset. Not snapshotted: it is for evaluation. */

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { variantAxes } from './chartLab/axes';
 import { LATENCY_HISTOGRAM_VARIANTS, LatencyHistogram } from '../components/LatencyHistogram';
 
 /** A seeded PRNG (mulberry32): the same samples on every render. */
@@ -93,7 +94,7 @@ export const Empty: Story = {
   parameters: { docs: { description: { story: 'No samples renders "No samples." in place of the chart.' } } },
 };
 
-const AXES = Object.entries(LATENCY_HISTOGRAM_VARIANTS) as Array<[keyof typeof LATENCY_HISTOGRAM_VARIANTS, readonly (string | boolean)[]]>;
+const AXES = variantAxes(LATENCY_HISTOGRAM_VARIANTS) as Array<[keyof typeof LATENCY_HISTOGRAM_VARIANTS, readonly (string | boolean)[]]>;
 
 /** Every variant value as small multiples over one dataset. Not snapshotted: it is for evaluation. */
 export const VariationMatrix: Story = {

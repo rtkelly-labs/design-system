@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { LATENCY_HEATMAP_VARIANTS, LatencyHeatmap } from '../components/LatencyHeatmap';
 import { LATENCY_HISTOGRAM_VARIANTS, LatencyHistogram } from '../components/LatencyHistogram';
 import { TIME_SERIES_VARIANTS, TimeSeriesChart } from '../components/TimeSeriesChart';
+import { variantAxisNames } from './chartLab/axes';
 import { LAB_DATASETS, type LabDataset } from './chartLab/datasets';
 
 /**
@@ -123,7 +124,8 @@ export const ContactSheetStory: Story = {
 };
 
 function Sweep<T extends Record<string, readonly unknown[]>>({ variants, axis, dataset, render }: { variants: T; axis: string; dataset: LabDataset; render: (prop: Record<string, unknown>, value: unknown) => ReactNode }) {
-  const key = (axis in variants ? axis : Object.keys(variants)[0]!) as keyof T & string;
+  const names = variantAxisNames(variants);
+  const key = (names.includes(axis) ? axis : names[0]!) as keyof T & string;
   return (
     <div className="flex flex-col gap-2">
       <p className="font-mono text-xs text-content-muted">{dataset.label}: {dataset.stresses} Sweeping <code>{key}</code>.</p>
@@ -139,7 +141,7 @@ function Sweep<T extends Record<string, readonly unknown[]>>({ variants, axis, d
 /** Every value of one time-series choice, side by side on one dataset. */
 export const TimeSeriesSweep: Story = {
   args: { dataset: 'spike', axis: 'yScale' },
-  argTypes: { axis: { options: Object.keys(TIME_SERIES_VARIANTS) } },
+  argTypes: { axis: { options: variantAxisNames(TIME_SERIES_VARIANTS) } },
   render: (args) => {
     const dataset = datasetById(args.dataset);
     return <Sweep variants={TIME_SERIES_VARIANTS} axis={args.axis} dataset={dataset} render={(prop) => <TimeSeriesChart title={`${dataset.label} sweep`} series={dataset.series} height={180} {...seriesProps(args)} {...prop} />} />;
@@ -150,7 +152,7 @@ export const TimeSeriesSweep: Story = {
 /** Every value of one histogram choice, side by side on one dataset. */
 export const HistogramSweep: Story = {
   args: { dataset: 'bimodal', axis: 'bar' },
-  argTypes: { axis: { options: Object.keys(LATENCY_HISTOGRAM_VARIANTS) } },
+  argTypes: { axis: { options: variantAxisNames(LATENCY_HISTOGRAM_VARIANTS) } },
   render: (args) => {
     const dataset = datasetById(args.dataset);
     return <Sweep variants={LATENCY_HISTOGRAM_VARIANTS} axis={args.axis} dataset={dataset} render={(prop) => <LatencyHistogram title={`${dataset.label} histogram sweep`} samples={dataset.samples.map((sample) => sample.value)} bar={args.bar} markers={args.markers} cumulative={args.cumulative} slo={{ value: 300 }} {...prop} />} />;
@@ -161,7 +163,7 @@ export const HistogramSweep: Story = {
 /** Every value of one heatmap choice, side by side on one dataset. */
 export const HeatmapSweep: Story = {
   args: { dataset: 'spike', axis: 'colorScale' },
-  argTypes: { axis: { options: Object.keys(LATENCY_HEATMAP_VARIANTS) } },
+  argTypes: { axis: { options: variantAxisNames(LATENCY_HEATMAP_VARIANTS) } },
   render: (args) => {
     const dataset = datasetById(args.dataset);
     return <Sweep variants={LATENCY_HEATMAP_VARIANTS} axis={args.axis} dataset={dataset} render={(prop) => <LatencyHeatmap title={`${dataset.label} heatmap sweep`} points={dataset.samples} columns={30} rows={12} colorScale={args.colorScale} colorSteps={args.colorSteps} cellGap={args.cellGap} {...prop} />} />;
