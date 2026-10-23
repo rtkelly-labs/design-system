@@ -161,7 +161,7 @@ function Traces({ traceId, onOpenTrace }: { traceId: string | null; onOpenTrace:
           <IdChip label="trace" value={trace.traceId} />
           <span>{trace.failed ? 'failed at the payment acquirer' : 'completed'}</span>
         </div>
-        <TraceViewer key={trace.traceId} spans={trace.spans} title={`POST /checkout · ${trace.traceId.slice(0, 8)}`} replay defaultSelectedId={trace.spans.find((span) => span.status === 'error' && span.name.startsWith('POST'))?.id} />
+        <TraceViewer key={trace.traceId} spans={trace.spans} title={`POST /checkout · ${trace.traceId.slice(0, 8)}`} replay defaultSelectedId={trace.spans.find((span) => span.status === 'error' && span.name === 'POST /v1/charges')?.id} />
       </div>
     </div>
   );

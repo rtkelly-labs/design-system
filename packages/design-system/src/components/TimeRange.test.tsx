@@ -1,5 +1,5 @@
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
-import { createRef, type ReactNode } from 'react';
+import { createRef, useState, type ReactNode } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { TimeRangePicker, TimeRangeProvider, useTimeCursor, useTimeRange } from './TimeRange';
 
@@ -53,6 +53,18 @@ describe('TimeRangePicker', () => {
     expect(screen.getByRole('button', { name: '6h' }).getAttribute('aria-pressed')).toBe('false');
     fireEvent.click(screen.getByRole('button', { name: 'Reset to 6h' }));
     expect(screen.getByRole('button', { name: '6h' }).getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('shows a controlled preset as pressed when the parent stores what it was given', () => {
+    function Controlled() {
+      const [range, setRange] = useState({ from: NOW - HOUR, to: NOW });
+      return <TimeRangeProvider now={NOW} range={range} onRangeChange={(next) => setRange(next)}><TimeRangePicker /></TimeRangeProvider>;
+    }
+    render(<Controlled />);
+    expect(screen.getByRole('button', { name: '1h' }).getAttribute('aria-pressed')).toBe('true');
+    fireEvent.click(screen.getByRole('button', { name: '6h' }));
+    expect(screen.getByRole('button', { name: '6h' }).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.queryByText(/Zoomed/)).toBeNull();
   });
 
   it('renders nothing outside a provider', () => {

@@ -48,4 +48,17 @@ describe('useTraceReplay', () => {
     act(() => result.current.play());
     expect(result.current).toMatchObject({ elapsed: 0, playing: false });
   });
+
+  it('follows a trace that grows under it, and clamps one that shrinks', () => {
+    // Spans that load after mount: the player rests at the end of nothing, then of 400ms.
+    const { result, rerender } = renderHook(({ duration }) => useTraceReplay(duration), { initialProps: { duration: 0 } });
+    expect(result.current.elapsed).toBe(0);
+    rerender({ duration: 400 });
+    expect(result.current).toMatchObject({ elapsed: 400, playing: false });
+    act(() => result.current.seek(300));
+    rerender({ duration: 100 });
+    expect(result.current.elapsed).toBe(100);
+    rerender({ duration: 500 });
+    expect(result.current.elapsed).toBe(500);
+  });
 });

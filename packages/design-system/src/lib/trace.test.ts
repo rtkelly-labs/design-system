@@ -85,6 +85,10 @@ describe('visibleTraceSpans and matchTraceSpan', () => {
 });
 
 describe('formatting', () => {
+  it('carries rounding into the next unit instead of printing 60 of one', () => {
+    expect([999.6, 59_996, 119_600, 119_999, 3_599_700].map(formatTraceDuration)).toEqual(['1s', '1m 00s', '2m 00s', '2m 00s', '60m 00s']);
+  });
+
   it('formats durations across magnitudes', () => {
     expect([0, 0.42, 3, 3.25, 412, 1240, 125_000, -1].map(formatTraceDuration)).toEqual(['0ms', '0.42ms', '3ms', '3.3ms', '412ms', '1.24s', '2m 05s', '—']);
   });

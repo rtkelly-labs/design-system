@@ -298,6 +298,19 @@ describe('TimeSeriesChart', () => {
       expect(order).toEqual(['p50', 'p99']);
     });
 
+    it('reads every series at one sample time, so a sparse series is never shown under another series’ time', () => {
+      const uneven: TimeSeries[] = [
+        { id: 'sparse', label: 'sparse', unit: 'ms', points: [[t(50), 1], [t(10), 9]] },
+        { id: 'dense', label: 'dense', unit: 'ms', points: [[t(50), 2], [t(30), 5], [t(10), 8]] },
+      ];
+      render(<TimeSeriesChart series={uneven} range={range} />);
+      const slider = plot();
+      fireEvent.keyDown(slider, { key: 'ArrowRight' });
+      fireEvent.keyDown(slider, { key: 'ArrowRight' });
+      // At 13:30 only `dense` has a sample. `sparse` must say so, not lend its 13:10 value.
+      expect(slider.getAttribute('aria-valuetext')).toBe('Oct 22 13:30:00 UTC. sparse no data, dense 5 ms.');
+    });
+
     it('never paints a series in accent-tertiary', () => {
       const many: TimeSeries[] = Array.from({ length: 7 }, (_, index) => ({ id: `s${index}`, label: `s${index}`, points: [[t(30), index + 1], [t(10), index + 2]] }));
       const { container } = render(<TimeSeriesChart series={many} range={range} />);

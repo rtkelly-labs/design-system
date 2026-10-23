@@ -38,4 +38,11 @@ describe('ObservabilityConsole', () => {
     expect(screen.getByRole('region', { name: `POST /checkout · ${chosen.traceId.slice(0, 8)}` })).toBeTruthy();
     expect(screen.getByRole('group', { name: 'Replay' })).toBeTruthy();
   });
+
+  it('opens a failing trace on the timed-out acquirer call, not the root', () => {
+    render(<ObservabilityConsole defaultView="traces" />);
+    const details = screen.getByRole('complementary', { name: 'Span details' });
+    expect(within(details).getByText('POST /v1/charges')).toBeTruthy();
+    expect(within(details).getByText('acquirer')).toBeTruthy();
+  });
 });

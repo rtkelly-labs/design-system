@@ -108,4 +108,9 @@ describe('LatencyHistogram', () => {
     expect(LATENCY_HISTOGRAM_VARIANTS.markers[0]).toBe('lines');
     expect(LATENCY_HISTOGRAM_VARIANTS.cumulative[0]).toBe(false);
   });
+
+  it('bins a day of raw samples on a linear scale without overrunning the argument limit', () => {
+    const many = Array.from({ length: 300_000 }, (_, index) => 20 + (index % 500));
+    expect(() => render(<LatencyHistogram samples={many} scale="linear" binning="linear" title="a day" />)).not.toThrow();
+  });
 });

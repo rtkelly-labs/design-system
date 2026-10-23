@@ -130,7 +130,7 @@ export function buildTrace(input: readonly TraceSpanInput[] | TraceModel, option
   for (const span of valid) latest = Math.max(latest, knownEnd(span) ?? span.start);
   const now = finite(options.now) ? options.now : latest;
 
-  const start = valid.length ? Math.min(...valid.map((span) => span.start)) : 0;
+  const start = valid.reduce((min, span) => Math.min(min, span.start), valid.length ? Infinity : 0);
   const ids = new Set(valid.map((span) => span.id));
   const childrenOf = new Map<string | null, TraceSpanInput[]>();
   for (const span of valid) {
@@ -279,11 +279,12 @@ export function formatTraceDuration(ms: number): string {
   if (ms === 0) return '0ms';
   if (ms < 1) return `${ms.toFixed(2)}ms`;
   if (ms < 10) return `${ms.toFixed(1).replace(/\.0$/, '')}ms`;
-  if (ms < 1000) return `${Math.round(ms)}ms`;
-  if (ms < 60_000) return `${(ms / 1000).toFixed(2).replace(/\.?0+$/, '')}s`;
-  const minutes = Math.floor(ms / 60_000);
-  const seconds = Math.round((ms % 60_000) / 1000);
-  return `${minutes}m ${String(seconds).padStart(2, '0')}s`;
+  // Each threshold sits where the unit below would round up into it, so 999.6ms
+  // is 1s and 119.6s is 2m 00s — never `1000ms`, `60s` or `1m 60s`.
+  if (ms < 999.5) return `${Math.round(ms)}ms`;
+  if (ms < 59_995) return `${(ms / 1000).toFixed(2).replace(/\.?0+$/, '')}s`;
+  const total = Math.round(ms / 1000);
+  return `${Math.floor(total / 60)}m ${String(total % 60).padStart(2, '0')}s`;
 }
 
 // ---------------------------------------------------------------------------

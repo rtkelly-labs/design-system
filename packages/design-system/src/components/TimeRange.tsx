@@ -96,8 +96,14 @@ export function TimeRangeProvider({ now, defaultPresetId = '1h', range: rangePro
   const rangeValue = useMemo<TimeRangeState>(() => {
     // A relative preset follows `now`; a custom window stays where it was put.
     const active = owned.presetId ? presets.find((preset) => preset.id === owned.presetId) : undefined;
-    const range = normaliseRange(rangeProp) ?? (active ? presetRange(active, now) : owned.range);
-    return { now, range, presetId: rangeProp ? null : owned.presetId, presets, setRange, selectPreset };
+    const controlled = normaliseRange(rangeProp);
+    const range = controlled ?? (active ? presetRange(active, now) : owned.range);
+    // A controlled range that is exactly a preset ending at `now` is that preset,
+    // so a parent that stores what `onRangeChange` gave it still shows it pressed.
+    const presetId = controlled
+      ? presets.find((preset) => controlled.to === now && controlled.to - controlled.from === preset.duration)?.id ?? null
+      : owned.presetId;
+    return { now, range, presetId, presets, setRange, selectPreset };
   }, [now, rangeProp, owned, presets, setRange, selectPreset]);
   const cursorValue = useMemo<TimeCursorState>(() => ({ cursor, setCursor }), [cursor]);
 

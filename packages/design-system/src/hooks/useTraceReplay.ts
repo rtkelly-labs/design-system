@@ -41,8 +41,18 @@ export function useTraceReplay(duration: number, { autoPlay = false, loop = fals
   const [elapsed, setElapsed] = useState(() => (autoPlay ? 0 : total));
   const [playing, setPlaying] = useState(autoPlay && total > 0);
   const [speed, setSpeed] = useState(initialSpeed);
+  // The trace can change under a mounted player — spans that load after mount,
+  // a live trace that grows. Resting at the end, it follows the new end;
+  // anywhere else it stays put, clamped to the new length.
+  const [seenTotal, setSeenTotal] = useState(total);
+  if (seenTotal !== total) {
+    setSeenTotal(total);
+    const next = !playing && elapsed >= seenTotal ? total : Math.min(elapsed, total);
+    if (next !== elapsed) setElapsed(next);
+  }
   // The frame loop reads these through refs so changing speed never restarts it.
   const elapsedRef = useRef(elapsed);
+  useEffect(() => { elapsedRef.current = elapsed; }, [elapsed]);
   const speedRef = useRef(speed);
   useEffect(() => { speedRef.current = speed; }, [speed]);
 

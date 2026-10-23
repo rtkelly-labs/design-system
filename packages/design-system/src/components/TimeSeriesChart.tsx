@@ -479,12 +479,20 @@ export const TimeSeriesChart = forwardRef<HTMLDivElement, TimeSeriesChartProps>(
         }),
       };
     }
-    const rows = visible.map((entry) => {
+    // One sample time for the whole readout: the sample nearest the cursor in
+    // any series. Each row reads its value at exactly that time, or none, so a
+    // sparsely sampled series is never shown under another series' timestamp.
+    let at: number | null = null;
+    for (const entry of visible) {
       const index = nearestIndex(entry.inRange, cursor);
-      const point = index >= 0 ? entry.inRange[index] : undefined;
-      return { entry, time: point?.[0] ?? null, value: point?.[1] ?? null, y: point?.[1] ?? null };
+      const time = index >= 0 ? entry.inRange[index]![0] : null;
+      if (time !== null && (at === null || Math.abs(time - cursor) < Math.abs(at - cursor))) at = time;
+    }
+    if (at === null) return { time: cursor, rows: visible.map((entry) => ({ entry, time: null, value: null, y: null })) };
+    const rows = visible.map((entry) => {
+      const point = entry.inRange.find(([time]) => time === at);
+      return { entry, time: point ? at : null, value: point?.[1] ?? null, y: point?.[1] ?? null };
     });
-    const at = rows.find((row) => row.time !== null)?.time ?? cursor;
     return { time: at, rows };
   }, [cursorInDomain, cursor, stacked, stepTimes, visible]);
 
