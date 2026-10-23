@@ -1,5 +1,6 @@
 'use client';
 
+import { Copy } from 'lucide-react';
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 import { recipe } from '../lib/recipe';
@@ -94,7 +95,7 @@ export const IdChip = forwardRef<HTMLSpanElement, IdChipProps>(function IdChip(
           className={styles.copy()}
         >
           <span aria-hidden="true" className={copied ? styles.copied() : failed ? styles.failed() : undefined}>
-            {copied ? '✓ Copied' : failed ? '✕ Failed' : '⧉'}
+            {copied ? '✓ Copied' : failed ? '✕ Failed' : <Copy size={12} className="inline-block align-[-0.125em]" />}
           </span>
         </button>
       ) : null}
