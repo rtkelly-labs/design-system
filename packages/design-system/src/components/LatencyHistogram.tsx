@@ -166,8 +166,12 @@ export const LatencyHistogram = forwardRef<HTMLDivElement, LatencyHistogramProps
     if (!values.length) return [];
     if (bucketing === 'linear') {
       // A linear axis starts at zero; a log axis cannot, so linear bins on it start at the fastest sample.
-      const lo = min ?? (scale === 'linear' ? Math.min(0, ...values) : Math.min(...values));
-      const hi = max ?? Math.max(...values);
+      // A loop, not Math.min(...values): a day of raw samples overruns the argument limit.
+      let low = Infinity;
+      let high = -Infinity;
+      for (const value of values) { if (value < low) low = value; if (value > high) high = value; }
+      const lo = min ?? (scale === 'linear' ? Math.min(0, low) : low);
+      const hi = max ?? high;
       return histogram(values, linearBuckets(lo, hi, bins));
     }
     const extent = latencyExtent(values);
