@@ -1,5 +1,6 @@
 'use client';
 
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   forwardRef,
@@ -374,7 +375,7 @@ export const LogViewer = forwardRef<HTMLDivElement, LogViewerProps>(function Log
           }}
           onKeyDown={(event) => onRowKeyDown(event, index, entry)}
         >
-          <span aria-hidden="true" className={styles.toggle()}>{open ? '▾' : '▸'}</span>
+          <span aria-hidden="true" className={styles.toggle()}>{open ? <ChevronDown size={12} className="inline-block" /> : <ChevronRight size={12} className="inline-block" />}</span>
           <time dateTime={new Date(entry.time).toISOString()} className={styles.time()}>{stamp}</time>
           <span className={styles.severity()}><SeverityBadge severity={entry.severity} className="px-1 py-0 border" /></span>
           {hasServices ? <span className={styles.service()} title={entry.service}>{entry.service ?? ''}</span> : null}

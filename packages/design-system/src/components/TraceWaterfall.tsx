@@ -1,5 +1,6 @@
 'use client';
 
+import { ChevronDown, ChevronRight, Diamond } from 'lucide-react';
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent } from 'react';
 import { cn, recipe } from '../lib/recipe';
 import {
@@ -266,8 +267,8 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
             >
               <span className={styles.label()}>
                 {Array.from({ length: span.depth }, (_, index) => <span key={index} aria-hidden="true" className={styles.guide()} />)}
-                <span aria-hidden="true" data-part="toggle" className={styles.toggle()}>{hasChildren ? (open ? '▾' : '▸') : ''}</span>
-                {span.critical ? <span aria-hidden="true" className="text-accent-primary">◆</span> : null}
+                <span aria-hidden="true" data-part="toggle" className={styles.toggle()}>{hasChildren ? (open ? <ChevronDown size={12} className="inline-block" /> : <ChevronRight size={12} className="inline-block" />) : null}</span>
+                {span.critical ? <Diamond aria-hidden="true" size={10} className="shrink-0 fill-current text-accent-primary" /> : null}
                 <span className={styles.name({ critical: span.critical })} title={`${span.name} · ${span.service}`}>{span.name}</span>
               </span>
               <svg aria-hidden="true" viewBox={`0 0 ${SCALE} 12`} preserveAspectRatio="none" className={styles.bar()}>
