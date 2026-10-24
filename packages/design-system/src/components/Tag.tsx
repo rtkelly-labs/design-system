@@ -1,8 +1,12 @@
+'use client';
+
 import { forwardRef } from 'react';
 import type { Ref } from 'react';
 import type { ReactNode, MouseEventHandler } from 'react';
 import type { AccentToken } from '../lib/theme';
 import { cn } from '../lib/recipe';
+import { useLabelAppearance } from '../lib/labelAppearance';
+import type { LabelAppearance } from '../lib/labelAppearance';
 import { accentFillClass } from '../lib/accentClasses';
 
 
@@ -34,30 +38,55 @@ export interface TagProps {
    * is a consumer for it.
    */
   size?: 'sm' | 'md';
+  /**
+   * `default` is the filled tag. `hairline` is the quiet treatment for a label
+   * in a table (D11): a 1px `border.subtle` outline, no fill, `text.secondary`,
+   * the `sm` size, the label as written and no `#`. Under it `prefix` and
+   * `uppercase` default to off, and `accent` colours nothing; pass `prefix` or
+   * `uppercase` explicitly to restore either. Unset, it follows the nearest
+   * `Table` (hairline inside one, `default` elsewhere), so a tag on a kanban
+   * card keeps its look; pass a value to override. The border steps up to
+   * `border.default` under the contrast-more preference on its own.
+   */
+  appearance?: LabelAppearance;
   children?: ReactNode;
 }
 
 export const Tag = forwardRef<HTMLAnchorElement | HTMLSpanElement, TagProps>(function Tag(
-  { text, href, accent = 'secondary', onClick, className = '', prefix = '#', uppercase = true, size = 'md' },
+  { text, href, accent = 'secondary', onClick, className = '', prefix: prefixProp, uppercase: uppercaseProp, size = 'md', appearance },
   ref,
 ) {
-  const baseClasses =
-    'inline-block font-mono font-bold border-edge-strong hover:shadow-hard-sm transition-all focus-visible:ring-2 focus-visible:ring-accent-primary';
-  const sizeClasses = size === 'sm' ? 'border px-1.5 py-0 text-[0.65rem]' : 'border-2 px-2 py-1 text-xs';
-  const accentClass = accentFillClass(accent, 'secondary');
-  const combinedClasses = cn(baseClasses, sizeClasses, uppercase && 'uppercase', accentClass, className);
+  const hairline = useLabelAppearance(appearance) === 'hairline';
+  const prefix = prefixProp ?? (hairline ? '' : '#');
+  const uppercase = uppercaseProp ?? !hairline;
+  const focus = 'focus-visible:ring-2 focus-visible:ring-accent-primary';
+  const combinedClasses = hairline
+    ? cn(
+        'inline-block font-mono border border-edge-subtle bg-transparent px-1.5 py-0 text-[0.65rem] text-content-secondary',
+        focus,
+        uppercase && 'uppercase',
+        className,
+      )
+    : cn(
+        'inline-block font-mono font-bold border-edge-strong hover:shadow-hard-sm transition-all',
+        focus,
+        size === 'sm' ? 'border px-1.5 py-0 text-[0.65rem]' : 'border-2 px-2 py-1 text-xs',
+        uppercase && 'uppercase',
+        accentFillClass(accent, 'secondary'),
+        className,
+      );
   const label = text.startsWith(prefix) ? text : `${prefix}${text.split(' ').join('-')}`;
 
   if (href) {
     return (
-      <a data-slot="tag" ref={ref as Ref<HTMLAnchorElement>} href={href} className={combinedClasses} onClick={onClick}>
+      <a data-slot="tag" data-appearance={hairline ? 'hairline' : undefined} ref={ref as Ref<HTMLAnchorElement>} href={href} className={combinedClasses} onClick={onClick}>
         {label}
       </a>
     );
   }
 
   return (
-    <span data-slot="tag" ref={ref as Ref<HTMLSpanElement>} className={combinedClasses} onClick={onClick}>
+    <span data-slot="tag" data-appearance={hairline ? 'hairline' : undefined} ref={ref as Ref<HTMLSpanElement>} className={combinedClasses} onClick={onClick}>
       {label}
     </span>
   );

@@ -65,7 +65,11 @@ export const Default: Story = {
   },
 };
 
-/** An `accessor` function renders arbitrary nodes, not just field values. */
+/**
+ * An `accessor` function renders arbitrary nodes, not just field values. A
+ * `Badge` here is hairline without being asked (D11): the table provides it, and
+ * the state's word, written as it is, carries the meaning.
+ */
 export const WithRenderedCells: Story = {
   args: {
     data: rows,
@@ -74,7 +78,7 @@ export const WithRenderedCells: Story = {
       { header: 'BRANCH', accessor: 'branch' },
       {
         header: 'STATE',
-        accessor: (row) => <Badge accent={STATE_ACCENT[row.state]}>{row.state.toUpperCase()}</Badge>,
+        accessor: (row) => <Badge accent={STATE_ACCENT[row.state]}>{row.state}</Badge>,
       },
       { header: 'COMMITS', accessor: 'commits' },
       { header: 'DURATION', accessor: 'duration' },
@@ -159,7 +163,7 @@ export const HeadlessTanStackTable: Story = {
             header: 'STATUS',
             cell: (info) => {
               const state = info.getValue() as Deployment['state'];
-              return <Badge accent={STATE_ACCENT[state]}>{state.toUpperCase()}</Badge>;
+              return <Badge accent={STATE_ACCENT[state]}>{state}</Badge>;
             },
           },
           {

@@ -14,6 +14,8 @@ import {
   type ThHTMLAttributes,
 } from 'react';
 import { cn, recipe } from '../lib/recipe';
+import { LabelAppearanceContext } from '../lib/labelAppearance';
+import type { LabelAppearance } from '../lib/labelAppearance';
 
 /** The visual treatment of a table. `grid` preserves the original framed style. */
 export type TableAppearance = 'grid' | 'quiet' | 'index';
@@ -147,6 +149,7 @@ export function Table({
   label = 'Table',
   appearance = 'grid',
   density = 'comfortable',
+  labelAppearance = 'hairline',
   ...props
 }: TableHTMLAttributes<HTMLTableElement> & {
   containerClassName?: string;
@@ -166,6 +169,13 @@ export function Table({
    * for reference tables with many rows.
    */
   density?: TableDensity;
+  /**
+   * What a `Badge` or `Tag` inside the table draws unless it sets its own
+   * `appearance` (D11). `hairline` by default: a column of filled labels
+   * outweighs the data, and the label's word already carries its identity. Pass
+   * `default` to keep the filled look for every label in this table.
+   */
+  labelAppearance?: LabelAppearance;
 }) {
   const presentation = { appearance, density };
   const styles = tableStyles(presentation);
@@ -192,6 +202,7 @@ export function Table({
   */
   return (
     <TablePresentationContext.Provider value={presentation}>
+     <LabelAppearanceContext.Provider value={labelAppearance}>
       <div
         ref={containerRef}
         data-slot="table-container"
@@ -204,6 +215,7 @@ export function Table({
       >
         <table data-slot="table" className={styles.table({ class: className })} {...props} />
       </div>
+     </LabelAppearanceContext.Provider>
     </TablePresentationContext.Provider>
   );
 }
