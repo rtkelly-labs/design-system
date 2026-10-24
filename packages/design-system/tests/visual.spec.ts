@@ -321,6 +321,26 @@ const CASES: readonly VisualCase[] = [
   { id: 'docs-content-terminal--sketch-theme', snapshot: 'terminal-sketch.png' },
   { id: 'docs-content-steps--default', snapshot: 'steps-default.png' },
   { id: 'docs-content-steps--sketch-theme', snapshot: 'steps-sketch.png' },
+  // The review family. Each has its main story and its `sketch` twin, which is the level
+  // where tinted diff grounds and dashed could-not-tell marks are most likely to fade.
+  { id: 'components-reports-statusmark--all-vocabularies', snapshot: 'statusmark-all-vocabularies.png' },
+  { id: 'components-reports-statusmark--sketch-theme', snapshot: 'statusmark-sketch.png' },
+  { id: 'components-reports-verdictband--all-outcomes', snapshot: 'verdictband-all-outcomes.png' },
+  { id: 'components-reports-verdictband--sketch-theme', snapshot: 'verdictband-sketch.png' },
+  { id: 'components-reports-provenancestrip--default', snapshot: 'provenancestrip-default.png' },
+  { id: 'components-reports-provenancestrip--sketch-theme', snapshot: 'provenancestrip-sketch.png' },
+  { id: 'components-reports-deltavalue--states', snapshot: 'deltavalue-states.png' },
+  { id: 'components-reports-deltavalue--sketch-theme', snapshot: 'deltavalue-sketch.png' },
+  { id: 'components-reports-changecount--with-bar', snapshot: 'changecount-with-bar.png' },
+  { id: 'components-reports-changecount--sketch-theme', snapshot: 'changecount-sketch.png' },
+  { id: 'components-reports-changebar--shared-scale', snapshot: 'changebar-shared-scale.png' },
+  { id: 'components-reports-changebar--sketch-theme', snapshot: 'changebar-sketch.png' },
+  { id: 'components-reports-changeindex--default', snapshot: 'changeindex-default.png' },
+  { id: 'components-reports-changeindex--sketch-theme', snapshot: 'changeindex-sketch.png' },
+  { id: 'components-reports-diffview--default', snapshot: 'diffview-default.png' },
+  { id: 'components-reports-diffview--sketch-theme', snapshot: 'diffview-sketch.png' },
+  { id: 'components-reports-keyeddiff--default', snapshot: 'keyeddiff-default.png' },
+  { id: 'components-reports-keyeddiff--sketch-theme', snapshot: 'keyeddiff-sketch.png' },
 ];
 
 /**

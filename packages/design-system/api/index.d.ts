@@ -515,6 +515,254 @@ interface ReportDetailsProps extends HTMLAttributes<HTMLDetailsElement> {
 }
 declare const ReportDetails: react.ForwardRefExoticComponent<ReportDetailsProps & react.RefAttributes<HTMLDetailsElement>>;
 
+type AssessmentOutcome = 'pass' | 'warn' | 'fail' | 'needs-review' | 'inconclusive' | 'none';
+
+type DeltaStatus = 'unchanged' | 'changed' | 'unavailable' | 'invalid' | 'incompatible' | 'inconclusive' | 'unsupported';
+
+type EvidenceStatus = 'produced' | 'unavailable' | 'invalid' | 'inconclusive';
+
+type TrustStatus = 'trusted' | 'candidate' | 'untrusted' | 'missing' | 'corrupt' | 'incompatible';
+
+interface StatusVocabularies {
+    outcome: AssessmentOutcome;
+    delta: DeltaStatus;
+    evidence: EvidenceStatus;
+    trust: TrustStatus;
+}
+type StatusVocabulary = keyof StatusVocabularies;
+
+type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'hollow';
+interface StatusAppearance {
+    glyph: string;
+    tone: StatusTone;
+
+    word: string;
+}
+declare const STATUS_APPEARANCE: {
+    readonly [V in StatusVocabulary]: Readonly<Record<StatusVocabularies[V], StatusAppearance>>;
+};
+
+declare const STATUS_TONE_TEXT: Readonly<Record<StatusTone, string>>;
+
+declare function statusAppearance<V extends StatusVocabulary>(vocabulary: V, status: StatusVocabularies[V]): StatusAppearance;
+
+type DiffLineKind = 'added' | 'removed' | 'context';
+
+interface DiffLineComment {
+
+    author: string;
+
+    meta?: string;
+
+    body: ReactNode;
+}
+interface DiffLine {
+
+    kind: DiffLineKind;
+
+    oldNumber?: number;
+
+    newNumber?: number;
+
+    text: string;
+
+    comments?: readonly DiffLineComment[];
+}
+interface DiffHunk {
+
+    header: string;
+
+    lines: DiffLine[];
+}
+
+declare function parseUnifiedDiff(text: string): DiffHunk[];
+
+declare function countDiff(hunks: readonly DiffHunk[]): {
+    added: number;
+    removed: number;
+};
+
+declare function diffAnchor(path: string): string;
+
+type StatusMarkOwnProps = {
+    [V in StatusVocabulary]: {
+
+        vocabulary: V;
+
+        status: StatusVocabularies[V];
+    };
+}[StatusVocabulary];
+type StatusMarkProps = StatusMarkOwnProps & Omit<react.HTMLAttributes<HTMLSpanElement>, 'children'> & {
+
+    label?: string;
+
+    className?: string;
+};
+
+declare const StatusMark: react.ForwardRefExoticComponent<StatusMarkProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface VerdictBandProps extends Omit<react.HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    outcome: AssessmentOutcome;
+
+    title: ReactNode;
+
+    children?: ReactNode;
+
+    label?: string;
+
+    className?: string;
+}
+
+declare const VerdictBand: react.ForwardRefExoticComponent<VerdictBandProps & react.RefAttributes<HTMLDivElement>>;
+
+interface ProvenanceItem {
+
+    label: string;
+
+    value: ReactNode;
+
+    note?: ReactNode;
+}
+interface ProvenanceStripProps extends react.HTMLAttributes<HTMLElement> {
+
+    label?: string;
+
+    items: readonly ProvenanceItem[];
+
+    className?: string;
+}
+
+declare const ProvenanceStrip: react.ForwardRefExoticComponent<ProvenanceStripProps & react.RefAttributes<HTMLElement>>;
+
+type MetricDirection = 'higher-is-better' | 'lower-is-better';
+interface DeltaValueProps extends Omit<react.HTMLAttributes<HTMLSpanElement>, 'children'> {
+
+    before?: number | null;
+
+    after?: number | null;
+
+    unit?: string;
+
+    direction?: MetricDirection;
+
+    relative?: boolean;
+
+    format?: (value: number) => string;
+
+    className?: string;
+}
+
+declare function deltaTrend(change: number, direction?: MetricDirection): 'against' | 'with' | undefined;
+
+declare const DeltaValue: react.ForwardRefExoticComponent<DeltaValueProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface ChangeCountProps extends Omit<react.HTMLAttributes<HTMLSpanElement>, 'children'> {
+
+    added: number;
+
+    removed: number;
+
+    moved?: number;
+
+    noun?: readonly [one: string, other: string];
+
+    className?: string;
+}
+
+declare const ChangeCount: react.ForwardRefExoticComponent<ChangeCountProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface ChangeBarProps extends Omit<react.SVGAttributes<SVGSVGElement>, 'children'> {
+
+    added: number;
+
+    removed: number;
+
+    max?: number;
+
+    label?: string;
+
+    className?: string;
+}
+
+declare const ChangeBar: react.ForwardRefExoticComponent<ChangeBarProps & react.RefAttributes<SVGSVGElement>>;
+
+interface ChangeIndexFile {
+
+    path: string;
+
+    added: number;
+
+    removed: number;
+
+    href?: string;
+}
+interface ChangeIndexGroup {
+
+    title: string;
+
+    files: readonly ChangeIndexFile[];
+}
+interface ChangeIndexProps extends react.HTMLAttributes<HTMLElement> {
+
+    label?: string;
+
+    groups: readonly ChangeIndexGroup[];
+
+    emptyText?: react.ReactNode;
+
+    className?: string;
+}
+
+declare const ChangeIndex: react.ForwardRefExoticComponent<ChangeIndexProps & react.RefAttributes<HTMLElement>>;
+
+interface DiffViewProps extends Omit<react.HTMLAttributes<HTMLElement>, 'children'> {
+
+    path: string;
+
+    hunks: readonly DiffHunk[];
+
+    collapsible?: boolean;
+
+    defaultOpen?: boolean;
+
+    wrap?: boolean;
+
+    max?: number;
+
+    className?: string;
+}
+
+declare const DiffView: react.ForwardRefExoticComponent<DiffViewProps & react.RefAttributes<HTMLElement>>;
+
+type KeyedChange = 'added' | 'removed' | 'changed' | 'renamed' | 'unchanged';
+interface KeyedDiffRow {
+
+    identity: ReactNode;
+
+    change: KeyedChange;
+
+    cells?: readonly ReactNode[];
+}
+interface KeyedDiffProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    caption: ReactNode;
+
+    identityLabel?: string;
+
+    columns?: readonly string[];
+
+    rows: readonly KeyedDiffRow[];
+
+    emptyText?: ReactNode;
+
+    changeLabels?: Partial<Record<KeyedChange, string>>;
+
+    className?: string;
+}
+
+declare const KeyedDiff: react.ForwardRefExoticComponent<KeyedDiffProps & react.RefAttributes<HTMLDivElement>>;
+
 interface TokenRule {
     id: 'hex' | 'rawPalette' | 'legacyAlias' | 'darkVariant';
     label: string;
@@ -3054,6 +3302,7 @@ export {
   AsciiGauge,
   type AsciiGaugeProps,
   type AsciiGaugeVariant,
+  type AssessmentOutcome,
   Avatar,
   type AvatarProps,
   Badge,
@@ -3087,6 +3336,14 @@ export {
   Card,
   type CardProps,
   type CardVariant,
+  ChangeBar,
+  type ChangeBarProps,
+  ChangeCount,
+  type ChangeCountProps,
+  ChangeIndex,
+  type ChangeIndexFile,
+  type ChangeIndexGroup,
+  type ChangeIndexProps,
   ChangeSummary,
   type ChangeSummaryProps,
   ChartTooltip,
@@ -3122,10 +3379,19 @@ export {
   type DecisionProps,
   type Delta,
   type DeltaGround,
+  type DeltaStatus,
+  DeltaValue,
+  type DeltaValueProps,
   DesignSandbox,
+  type DiffHunk,
+  type DiffLine,
+  type DiffLineComment,
+  type DiffLineKind,
   type DiffLineProps,
   type DiffRow,
   type DiffSign,
+  DiffView,
+  type DiffViewProps,
   Divider,
   type DividerProps,
   type DividerVariant,
@@ -3156,6 +3422,7 @@ export {
   type ErrorSummaryError,
   type ErrorSummaryProps,
   Event,
+  type EvidenceStatus,
   type ExperimentItem,
   ExperimentsView,
   type ExperimentsViewProps,
@@ -3200,6 +3467,10 @@ export {
   Input,
   type InputProps,
   type Intent,
+  type KeyedChange,
+  KeyedDiff,
+  type KeyedDiffProps,
+  type KeyedDiffRow,
   LEVELS,
   Legend,
   type LegendProps,
@@ -3233,6 +3504,7 @@ export {
   type MetadataGridProps,
   type MetadataGridSeries,
   type Metric,
+  type MetricDirection,
   MetricStrip,
   type MetricStripProps,
   type MetricTone,
@@ -3275,6 +3547,9 @@ export {
   type ProgressProps,
   Prose,
   type ProseProps,
+  type ProvenanceItem,
+  ProvenanceStrip,
+  type ProvenanceStripProps,
   RECOMMENDED_COLOURS,
   RECOMMENDED_COLOUR_CLASSES,
   RECOMMENDED_COLOUR_NAMESPACES,
@@ -3299,6 +3574,8 @@ export {
   type Rgb,
   SLIDE_DECK_HOTKEYS,
   SLOTS,
+  STATUS_APPEARANCE,
+  STATUS_TONE_TEXT,
   SYSTEM_LEVEL,
   SaasLandingPage,
   type SaasLandingPageProps,
@@ -3347,8 +3624,14 @@ export {
   StatCard,
   type StatCardAccent,
   type StatCardProps,
+  type StatusAppearance,
+  StatusMark,
+  type StatusMarkProps,
   StatusPage,
   type StatusPageProps,
+  type StatusTone,
+  type StatusVocabularies,
+  type StatusVocabulary,
   Step,
   type StepProps,
   type StepState,
@@ -3439,6 +3722,7 @@ export {
   TreeDiagram,
   type TreeDiagramProps,
   type TreeNode,
+  type TrustStatus,
   type TypeStep,
   type TypeStepName,
   type UptimeStatus,
@@ -3446,6 +3730,8 @@ export {
   type UptimeStripProps,
   type UseActiveHeadingOptions,
   type UseCopyToClipboardResult,
+  VerdictBand,
+  type VerdictBandProps,
   type VerdictTone,
   WEB_FLOOR,
   XIcon,
@@ -3463,7 +3749,10 @@ export {
   collectHeadings,
   composite,
   contrastRatio,
+  countDiff,
   createAnchorHeading,
+  deltaTrend,
+  diffAnchor,
   fontVar,
   getRecommendedColours,
   getThemeInitScript,
@@ -3474,11 +3763,13 @@ export {
   mdxComponents,
   nextLevel,
   parseColor,
+  parseUnifiedDiff,
   relativeLuminance,
   scanRules,
   scanTokenRules,
   semanticTokens,
   slugify,
+  statusAppearance,
   surfaceVar,
   textVar,
   useActiveHeading,
