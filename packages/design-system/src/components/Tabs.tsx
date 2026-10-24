@@ -123,7 +123,9 @@ const tabs_ = recipe({
     orientation: {
       horizontal: {},
       vertical: {
-        root: 'flex items-start',
+        // `stretch`: the panel runs to the strip's height, so the two boxes
+        // share a bottom edge instead of the panel ending above the list.
+        root: 'flex items-stretch',
         strip: 'flex-col items-stretch self-stretch overflow-x-visible',
         list: 'flex-col items-stretch',
         tab: 'w-full text-left',

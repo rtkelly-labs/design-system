@@ -182,11 +182,11 @@ export const Pagination = forwardRef<HTMLDivElement, PaginationProps>(function P
       className={cn('pt-6 pb-8 space-y-2 md:space-y-5', className)}
       {...props}
     >
-      <nav data-slot="pagination-nav" className="flex justify-between items-center gap-4 font-mono" aria-label="Pagination Navigation">
+      <nav data-slot="pagination-nav" className="flex justify-between items-center gap-2 font-mono md:gap-4" aria-label="Pagination Navigation">
         {hasPrev
           ? renderEnd(prevPageNum, 'prev', 'Previous Page', <>&lt;&lt; PREV</>, 'bg-accent-primary')
           : renderDisabledEnd('Previous Page', <>&lt;&lt; PREV</>)}
-        <span data-slot="pagination-status" className="md:hidden whitespace-nowrap text-content-primary font-bold border-2 border-edge-strong px-3 py-3 bg-surface-base">
+        <span data-slot="pagination-status" className="md:hidden whitespace-nowrap text-content-primary font-bold border-2 border-edge-strong px-2 py-3 bg-surface-base">
           <BracketText>{current} / {totalPages}</BracketText>
         </span>
         <ul data-slot="pagination-list" className="hidden md:flex items-center gap-3">

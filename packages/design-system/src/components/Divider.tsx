@@ -52,6 +52,28 @@ export const DIVIDER_PATTERNS: Readonly<Record<Polarity, string>> = {
   light: '· ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ·',
 };
 
+/**
+ * The same two marks as an end cap and a unit that repeats. The component draws
+ * the caps at the ends of the box and fills the space between them with the
+ * unit, so a rule reaches the container's edge at any width instead of stopping
+ * at the length of one string. Each mark is {@link DIVIDER_PATTERNS} unrolled.
+ */
+const DIVIDER_PARTS: Readonly<Record<Polarity, { start: string; unit: string; end: string }>> = {
+  dark: { start: '//', unit: '=', end: '//' },
+  light: { start: '· ', unit: '─ ', end: '·' },
+};
+
+/**
+ * How many times a unit is written. Overflow is clipped, so this only has to
+ * outrun the widest container: 480 characters of the 0.2em-tracked mono face is
+ * more than 4000px.
+ */
+const FILL_CHARACTERS = 480;
+
+function fillOf(unit: string): string {
+  return unit.repeat(Math.ceil(FILL_CHARACTERS / Math.max(unit.length, 1)));
+}
+
 const VARIANT_POLARITY: Readonly<Record<Exclude<DividerVariant, 'auto'>, Polarity>> = {
   terminal: 'dark',
   pencil: 'light',
@@ -63,7 +85,10 @@ export interface DividerProps extends React.HTMLAttributes<HTMLDivElement> {
    * polarity — terminal on `midnight`/`dim`, pencil on `bright`/`white`.
    */
   variant?: DividerVariant;
-  /** An explicit mark, overriding both the variant and the level. */
+  /**
+   * An explicit mark, overriding both the variant and the level. It is the
+   * unit of a rule, repeated to fill the container's width.
+   */
   pattern?: string;
 }
 
@@ -82,10 +107,12 @@ export const Divider: React.FC<DividerProps> = ({
       ? (theme?.polarity ?? LEVELS[DEFAULT_LEVEL].polarity)
       : VARIANT_POLARITY[variant];
 
+  const parts = DIVIDER_PARTS[polarity];
+
   return (
     <div data-slot="divider"
       className={cn(
-        'font-mono text-accent-primary tracking-[0.2em] select-none my-6 overflow-hidden whitespace-nowrap',
+        'flex w-full min-w-0 font-mono text-accent-primary tracking-[0.2em] select-none my-6 overflow-hidden whitespace-nowrap',
         className
       )}
       // Clipped, not truncated: an ellipsis on a rule reads as a broken string.
@@ -94,7 +121,15 @@ export const Divider: React.FC<DividerProps> = ({
       aria-hidden="true"
       {...props}
     >
-      {pattern ?? DIVIDER_PATTERNS[polarity]}
+      {pattern === undefined ? (
+        <>
+          <span className="flex-none">{parts.start}</span>
+          <span className="min-w-0 flex-1 overflow-hidden">{fillOf(parts.unit)}</span>
+          <span className="flex-none">{parts.end}</span>
+        </>
+      ) : (
+        <span className="min-w-0 flex-1 overflow-hidden">{fillOf(pattern)}</span>
+      )}
     </div>
   );
 };

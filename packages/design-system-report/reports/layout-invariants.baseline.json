@@ -1,8 +1,7 @@
 [
-  "escape|AsciiDivider|divider",
-  "escape|Card|card",
-  "escape|Card|card > div",
-  "escape|Divider|divider",
+  "escape|AsciiDivider|divider > span",
+  "escape|BlogPost|divider > span",
+  "escape|Divider|divider > span",
   "escape|Pagination|pagination-list > li",
   "font|AsciiGauge|JetBrainsMono-Regular",
   "font|BeforeAfter|JetBrainsMono-Regular",
@@ -18,8 +17,7 @@
   "font|Timeline|JetBrainsMono-Regular",
   "font|TreeDiagram|JetBrainsMono-Regular",
   "font|UptimeStrip|JetBrainsMono-Regular",
-  "spill|AsciiDivider|divider",
-  "spill|CodeBlock|code-block > pre",
-  "spill|Divider|divider",
-  "truncation|TrackCard|track-card-item-row > p"
+  "spill|AsciiDivider|divider > span",
+  "spill|BlogPost|divider > span",
+  "spill|Divider|divider > span"
 ]
