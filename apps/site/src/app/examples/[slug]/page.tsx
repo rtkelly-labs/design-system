@@ -21,6 +21,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 /**
  * A sample project, full page. No `SiteChrome`: the point is to see the
  * package compose a whole product page, so the only site furniture is the bar.
+ *
+ * This route owns the page's one `<main id="main-content">`, for every sample.
+ * A document has exactly one, and a sample that rendered its own would make
+ * two. The `fullHeight` layout puts the landmark itself in the flex column, as
+ * the `flex-1` child under the bar, so the editor still fills the viewport.
  */
 export default async function Page({ params }: Params) {
   const { slug } = await params;
@@ -35,13 +40,9 @@ export default async function Page({ params }: Params) {
       }
     >
       <SampleBar title={sample.title} story={sample.story} />
-      {sample.fullHeight ? (
-        <div className="min-h-0 flex-1 print:block">
-          <SamplePage slug={sample.slug} />
-        </div>
-      ) : (
+      <main id="main-content" className={sample.fullHeight ? 'min-h-0 flex-1 print:block' : undefined}>
         <SamplePage slug={sample.slug} />
-      )}
+      </main>
     </div>
   );
 }

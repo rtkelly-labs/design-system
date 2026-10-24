@@ -36,6 +36,8 @@ import {
   TabsList,
   TabsPanel,
   TabsTab,
+  Toolbar,
+  ToolbarButton,
   useToast,
   BracketText,
 } from '@rtkelly13/design-system';
@@ -266,8 +268,9 @@ export default function InboxApp() {
     setPriorityFilter('any');
   };
 
-  const detail = open ? (
-    <IssueDetail issue={open} onArchive={() => archive([open.id])} onPatch={(c) => patch([open.id], c)} />
+  // `showId` is off in the Drawer, whose own title is already the id.
+  const detail = (showId: boolean) => open ? (
+    <IssueDetail issue={open} showId={showId} onArchive={() => archive([open.id])} onPatch={(c) => patch([open.id], c)} />
   ) : (
     <div className="flex h-full min-h-48 items-center justify-center p-6 text-center font-mono text-xs uppercase tracking-widest text-content-muted">
       <BracketText>NO ISSUE OPEN</BracketText>
@@ -295,37 +298,35 @@ export default function InboxApp() {
 
       {/* Toolbar: filters, or the bulk bar when something is selected */}
       {selectedRows.length > 0 ? (
-        <div
-          role="toolbar"
-          aria-label="Bulk actions"
-          className="flex min-h-14 flex-wrap items-center gap-3 border-2 border-edge-strong bg-surface-raised px-3 py-2 shadow-hard-sm"
-        >
+        // One tab stop, arrow keys between the controls (INB-15). The same
+        // `min-h-14` as the filter row it replaces, so the list does not jump.
+        <Toolbar label="Bulk actions" className="min-h-14">
           <span className="text-sm font-bold uppercase tracking-wider text-accent-primary">
             <BracketText>{selectedRows.length} SELECTED</BracketText>
           </span>
           <ButtonGroup aria-label="Apply to selection">
-          <Menu trigger={<Button size="xs">STATUS</Button>}>
+          <Menu trigger={<ToolbarButton size="xs">STATUS</ToolbarButton>}>
             {STATUSES.map((s) => (
               <MenuItem key={s} onClick={() => patch(selectedRows.map((r) => r.id), { status: s })}>
                 {s}
               </MenuItem>
             ))}
           </Menu>
-          <Menu trigger={<Button size="xs">PRIORITY</Button>}>
+          <Menu trigger={<ToolbarButton size="xs">PRIORITY</ToolbarButton>}>
             {PRIORITIES.map((p) => (
               <MenuItem key={p} onClick={() => patch(selectedRows.map((r) => r.id), { priority: p })}>
                 {p}
               </MenuItem>
             ))}
           </Menu>
-          <Button size="xs" variant="secondary" onClick={() => archive(selectedRows.map((r) => r.id))}>
+          <ToolbarButton size="xs" variant="secondary" onClick={() => archive(selectedRows.map((r) => r.id))}>
             ARCHIVE
-          </Button>
-          <Button size="xs" onClick={() => setSelected(new Set())}>
+          </ToolbarButton>
+          <ToolbarButton size="xs" onClick={() => setSelected(new Set())}>
             CLEAR
-          </Button>
+          </ToolbarButton>
           </ButtonGroup>
-        </div>
+        </Toolbar>
       ) : (
         <div className="grid min-h-14 grid-cols-2 items-center gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_12rem_auto_auto]">
           <div className="col-span-2 sm:col-span-1">
@@ -504,11 +505,11 @@ export default function InboxApp() {
             aria-label="Issue detail"
             className="sticky top-4 min-h-64 border-2 border-edge-strong bg-surface-raised shadow-hard-md"
           >
-            {detail}
+            {detail(true)}
           </aside>
         ) : (
           <Drawer isOpen={open !== null} onClose={() => setOpenId(null)} title={open ? open.id : 'ISSUE'}>
-            {detail}
+            {detail(false)}
           </Drawer>
         )}
       </div>
@@ -538,10 +539,12 @@ function ListSkeleton({ density }: { density: TableDensity }) {
 
 function IssueDetail({
   issue,
+  showId,
   onArchive,
   onPatch,
 }: {
   issue: Issue;
+  showId: boolean;
   onArchive: () => void;
   onPatch: (c: Partial<Pick<Issue, 'status' | 'priority'>>) => void;
 }) {
@@ -549,7 +552,7 @@ function IssueDetail({
     <div className="flex flex-col gap-3 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-widest text-content-muted">{issue.id}</p>
+          {showId ? <p className="text-xs uppercase tracking-widest text-content-muted">{issue.id}</p> : null}
           <h3 className="font-display text-lg font-bold uppercase leading-tight tracking-wide text-content-primary">
             {issue.title}
           </h3>

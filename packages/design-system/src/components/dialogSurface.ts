@@ -69,6 +69,12 @@ export const dialogSurface = recipe({
       'border-2 border-edge-strong bg-surface-raised px-2 font-mono text-lg font-bold '
       + 'text-content-primary transition-colors hover:bg-surface-base hover:text-accent-tertiary '
       + 'focus-visible:ring-2 focus-visible:ring-accent-primary',
+    // The close control of a headerless dialog: the same control, pinned to the
+    // corner of the popup instead of sitting in a header that is not there.
+    floatingClose:
+      'absolute right-3 top-3 z-10 border-2 border-edge-strong bg-surface-raised px-2 font-mono text-lg font-bold '
+      + 'text-content-primary transition-colors hover:bg-surface-base hover:text-accent-tertiary '
+      + 'focus-visible:ring-2 focus-visible:ring-accent-primary',
     body: 'p-6 font-sans text-sm leading-relaxed text-content-primary',
     footer:
       'flex justify-end gap-3 border-t-2 border-edge-strong bg-surface-base px-6 py-4',

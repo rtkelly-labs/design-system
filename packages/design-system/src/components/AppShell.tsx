@@ -131,6 +131,13 @@ export interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'cla
  *   a leading slot for a title or status, and an `actions` slot.
  * - `AppMain` — the single `<main>`.
  *
+ * **Who owns `<main>`.** A page has exactly one. By default the shell does,
+ * through `AppMain`. A host that already renders its own — a site route that
+ * wraps every sample in `<main id="main-content">` — passes `mainAs="div"` to
+ * the shell, and `AppMain` keeps its layout but stops being a landmark. The
+ * rule is: exactly one of the host and the shell renders `<main>`, never both
+ * and never neither.
+ *
  * The account area is a slot — `AppSidebar`'s `footer` — rather than a user
  * prop with a name and an avatar: what an application shows about who is
  * signed in, if anyone is, is the application's business. The shell makes no
@@ -225,7 +232,7 @@ const sidebarStyles = recipe({
     header: 'border-b-2 border-edge-strong px-6 py-5',
     body: 'flex-1 overflow-y-auto px-4 py-5',
     footer: 'border-t-2 border-edge-strong px-4 py-4',
-    drawerHeader: 'mb-5 border-b-2 border-edge-strong pb-4',
+    drawerHeader: '-mt-6 mb-5 border-b-2 border-edge-strong pb-4 pr-10',
   },
 });
 
@@ -287,6 +294,11 @@ export const AppSidebar = forwardRef<HTMLElement, AppSidebarProps>(function AppS
           onClose={() => context.setSidebarOpen(false)}
           placement="left"
           title={label}
+          // The application's own header is the drawer's heading: rendering the
+          // label above it as well said the same thing twice. `label` stays the
+          // accessible name, visually hidden, and the close control is pinned
+          // to the corner.
+          headerless={header != null}
           footer={footer ?? undefined}
         >
           {header != null && <div className={styles.drawerHeader()}>{header}</div>}

@@ -66,6 +66,8 @@ export * from './components/Pagination';
 export * from './components/Tabs';
 // A single-select view switcher — a radiogroup, not a tab pattern.
 export * from './components/SegmentedControl';
+// A bar of controls that is one tab stop, on Base UI's toolbar.
+export * from './components/Toolbar';
 export * from './components/SectionContainer';
 export * from './components/Divider';
 export * from './components/AsciiDivider';
