@@ -73,6 +73,39 @@ navigation* and *General site layout* with #246, *Long-form content* with #250, 
 | Application layout | `AppShell` + `AppSidebar` / `AppSidebarNav` / `AppTopbar` / `AppMain` — sidebar off-canvas in a `Drawer` below desktop width; `SaaS/AdminDashboard` composes two unrelated admins on it | `ready` | |
 | General site layout | `SiteHeader` (skip link, breakpoint swap to `MobileNav`) / `SiteFooter` | `ready` | |
 
+### Review a change
+
+Added with the `review/` family, for Diffra, the first consumer that reached for them: a report
+that compares a candidate with a trusted baseline and has to say what changed, by how much, from
+what, and — only when a policy ran — whether that is acceptable. Every row is static-safe, so a
+`ds-report` document can use all of them with no client script.
+
+| Capability | System answer | Status | Issue |
+|---|---|---|---|
+| State the outcome | `VerdictBand` — an Assessment outcome, or `none` for a report that carries no verdict | `ready` | |
+| Name a status | `StatusMark` — the outcome, Delta, Evidence and trust vocabularies; a fixed glyph and word, colour repeating them | `ready` | |
+| Show where it came from | `ProvenanceStrip` — subject, baseline role and commit, digest, trust, comparator | `ready` | |
+| Show a measured change | `DeltaValue` — before → after, signed change, unit, declared direction as emphasis, new / gone / ÷0 | `ready` | |
+| Count a change | `ChangeCount` + `ChangeBar` — `delta` roles, one shared scale | `ready` | |
+| Index changed files | `ChangeIndex` — groups, then files, each linking to its diff | `ready` | |
+| Read a line diff | `DiffView` + `parseUnifiedDiff` — hunks, two gutters, sign column, `delta` grounds, folds as `<details>` | `ready` | |
+| Compare keyed records | `KeyedDiff` — one row per stable identity, so a signature change is one change | `ready` | |
+| Comment on a line | `DiffView` line `comments` — pinned under the line, readable at phone width | `ready` | |
+| Move through a long review | none: filter and `j`/`k` need script, and a report has none | `absent` | not yet filed |
+| Show a trend against a baseline | `Sparkline`, with no baseline rule or candidate point | `partial` | not yet filed |
+| Compare images | `BeforeAfter` pairs measurements; no overlay, blink, wipe or heatmap | `partial` | not yet filed |
+
+Edges step down from the verdict, using the system's own lighter shapes rather than a 2px box on
+everything: the `VerdictBand` is the one object with a strong border and an offset shadow; a file's
+diff and a comment are 1px `border.default` frames; provenance, figures, tables, the file index and
+the checks list are ruled — one strong rule above, hairlines between — with no box, as `Table`'s
+`quiet` and `index` appearances are; a caveat is a left stripe on a sunken well; and a status mark
+is a hairline. Twenty bordered boxes in a column reads as noise; one reads as the point.
+
+The colours are the `delta` role group, not `intent`: an added line is not a success and a
+removed one is not a danger. `intent` appears only where a status is reported — `StatusMark`
+and `VerdictBand` — and of the comparison words only `invalid` takes it.
+
 Two rows are additions to the table #237 proposed, each because a landed component made the
 capability separable: *Group fields* (the half of #239 that is not radio-specific — a set of
 checkboxes or an address block wants the same group label, description and error) and *Show an
