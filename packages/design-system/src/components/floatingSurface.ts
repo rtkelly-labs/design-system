@@ -25,7 +25,7 @@ import { recipe } from '../lib/recipe';
 // ## Motion
 //
 // Enter and exit are `data-starting-style` / `data-ending-style`, the dialogs'
-// and the toast's attributes, over `--duration-quick` and `--ease-brutalist`.
+// and the toast's attributes, over `--transition-duration-quick` and `--ease-brutalist`.
 // Opacity only: a floating element that also scaled or slid would be a
 // second movement arriving at the pointer, and the hard shadow already says
 // which way is up. `motion-reduce:transition-none` drops the fade entirely.

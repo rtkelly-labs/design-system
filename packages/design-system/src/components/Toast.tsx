@@ -141,7 +141,7 @@ const toast = recipe({
       'fixed right-4 bottom-4 left-4 z-top flex flex-col gap-3 sm:left-auto sm:w-full sm:max-w-sm',
     /*
      * Enter and exit are `data-starting-style` / `data-ending-style`, as the
-     * dialogs' are: a short rise in, a short slide out, over `--duration-quick`
+     * dialogs' are: a short rise in, a short slide out, over `--transition-duration-quick`
      * and `--ease-brutalist`. The `motion-reduce` clause drops both — the
      * toast appears and disappears in place, and is announced exactly the same,
      * because the announcement belongs to the live region and not to the

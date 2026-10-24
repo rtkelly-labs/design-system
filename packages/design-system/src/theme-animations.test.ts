@@ -102,3 +102,40 @@ describe('theme.css alone generates the animations the components use', () => {
     );
   });
 });
+
+describe('reduced motion collapses every transition at the token', () => {
+  const theme = readFileSync(path.join(ROOT, 'src', 'theme.css'), 'utf8');
+
+  it('zeroes the quick and considered durations under the preference', () => {
+    expect(theme).toMatch(
+      /@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root\s*\{\s*--ds-duration-quick:\s*0ms;\s*--ds-duration-considered:\s*0ms;/,
+    );
+  });
+
+  it('keeps loops on a separate unit so a spinner is not stopped by it', () => {
+    expect(theme).toMatch(/--ds-loop-unit:\s*300ms/);
+    expect(theme).not.toMatch(/--animate-ds-[a-z-]+:[^;]*--ds-duration-/);
+  });
+
+  it('resolves a bare transition and a duration-quick utility through the collapsible token', async () => {
+    const css = await compileConsumer(['transition-colors', 'duration-quick']);
+    // Bare `transition-*` falls back on the theme default, which routes to quick.
+    expect(css).toMatch(/--default-transition-duration:\s*var\(--ds-duration-quick\)/);
+    expect(css).toMatch(/transition-duration:\s*var\(--tw-duration,\s*var\(--default-transition-duration\)\)/);
+    expect(css).toMatch(/transition-duration:\s*var\(--transition-duration-quick\)/);
+    expect(css).toMatch(/--transition-duration-quick:\s*var\(--ds-duration-quick\)/);
+  });
+
+  it('writes no wall-clock duration in a component or the prose stylesheet', () => {
+    const files = [
+      path.join(ROOT, 'src', 'prose.css'),
+      ...readdirSync(path.join(ROOT, 'src', 'components'), { recursive: true, encoding: 'utf8' })
+        .filter((f) => /\.tsx?$/.test(f) && !/\.(test|stories)\.tsx?$/.test(f))
+        .map((f) => path.join(ROOT, 'src', 'components', f)),
+    ];
+    const offenders = files.filter((file) =>
+      /transition[^;\n]*\b\d*\.?\d+m?s\b|\bduration-\d+\b/.test(readFileSync(file, 'utf8')),
+    );
+    expect(offenders.map((f) => path.relative(ROOT, f))).toEqual([]);
+  });
+});
