@@ -9,6 +9,10 @@ type Emphasis = 'primary' | 'secondary' | 'tertiary' | 'quiet';
 
 type Intent = 'info' | 'success' | 'warning' | 'danger';
 
+type Delta = 'added' | 'removed' | 'moved';
+
+type DeltaGround = 'added' | 'removed' | 'hunk';
+
 type Surface = 'base' | 'raised' | 'sunken' | 'overlay';
 
 type TextTone = 'primary' | 'secondary' | 'muted' | 'inverse';
@@ -40,6 +44,8 @@ declare const HEADING_EMPHASIS: Record<1 | 2 | 3 | 4 | 5 | 6, Emphasis>;
 declare const semanticTokens: {
     readonly accent: Record<Emphasis, string>;
     readonly intent: Record<Intent, string>;
+    readonly delta: Record<Delta, string>;
+    readonly deltaGround: Record<DeltaGround, string>;
     readonly surface: Record<Surface, string>;
     readonly text: Record<TextTone, string>;
     readonly border: Record<BorderTone, string>;
@@ -79,6 +85,10 @@ interface LevelDefinition {
     readonly accent: Readonly<Record<Emphasis, string>>;
     readonly intent: Readonly<Record<Intent, string>>;
 
+    readonly delta: Readonly<Record<Delta, string>>;
+
+    readonly deltaGround: Readonly<Record<DeltaGround, string>>;
+
     readonly palette: Readonly<Record<Hue, string>>;
 
     readonly paletteBright: Readonly<Record<Hue, string>>;
@@ -86,6 +96,8 @@ interface LevelDefinition {
     readonly accentHue: Readonly<Record<Emphasis, HueRef>>;
 
     readonly intentHue: Readonly<Record<Intent, HueRef>>;
+
+    readonly deltaHue: Readonly<Record<Delta, HueRef>>;
 
     readonly shadow: string;
 }
@@ -3108,6 +3120,8 @@ export {
   Decision,
   type DecisionOption,
   type DecisionProps,
+  type Delta,
+  type DeltaGround,
   DesignSandbox,
   type DiffLineProps,
   type DiffRow,
