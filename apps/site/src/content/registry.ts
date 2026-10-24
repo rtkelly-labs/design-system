@@ -69,13 +69,16 @@ export function buildNav(): DocsNavNode[] {
   const order = CATEGORIES.Components ?? [];
   const categories = [...byCategory.keys()].sort((a, b) => order.indexOf(a) - order.indexOf(b));
 
-  const posts = (group: string): DocsNavNode[] =>
-    POSTS.filter((p) => p.group === group).map((p) => ({ label: p.title, href: p.href }));
+  // Articles and MDX posts share the groups: each group lists its articles, then its posts.
+  const group = (name: string): DocsNavNode[] => [
+    ...ARTICLES.filter((a) => a.group === name).map((a) => ({ label: a.title, href: a.href })),
+    ...POSTS.filter((p) => p.group === name).map((p) => ({ label: p.title, href: p.href })),
+  ];
   // Order: Getting started, Foundations, Guides, Components. A group with no page is left out.
   const articleGroups: DocsNavNode[] = [
-    { label: 'Getting started', items: ARTICLES.map((a) => ({ label: a.title, href: a.href })) },
-    { label: 'Foundations', items: posts('Foundations') },
-    { label: 'Guides', items: posts('Guides') },
+    { label: 'Getting started', items: group('Getting started') },
+    { label: 'Foundations', items: group('Foundations') },
+    { label: 'Guides', items: group('Guides') },
   ].filter((g) => g.items.length > 0);
 
   return [
