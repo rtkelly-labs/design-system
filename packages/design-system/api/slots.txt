@@ -64,6 +64,7 @@ delta-value	DeltaValue
 delta-value-change	DeltaValue
 design-sandbox	DesignSandbox
 diff-view	DiffView
+diff-view-comment	DiffView
 diff-view-hunk	DiffView
 diff-view-path	DiffView
 diff-view-table	DiffView
@@ -167,11 +168,18 @@ progress-value	Progress
 prose	Prose
 provenance-strip	ProvenanceStrip
 provenance-strip-item	ProvenanceStrip
+pull-request-check	(shared)
+pull-request-page	PullRequestPage
+pull-request-state	(shared)
 radio	Radio
 radio-indicator	Radio
 report-details	ReportDetails
 report-document	ReportDocument
 report-section	ReportSection
+review-report-caveat	(shared)
+review-report-figures	(shared)
+review-report-measurements	(shared)
+review-report-page	ReviewReportPage
 saas-landing-page	SaasLandingPage
 section-container	SectionContainer
 select-icon	Select
