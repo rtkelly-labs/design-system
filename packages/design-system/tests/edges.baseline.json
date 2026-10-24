@@ -684,7 +684,7 @@
     "maxDepth": 1
   },
   "saas-landingpage--dark-mode": {
-    "heavyPanels": 3,
+    "heavyPanels": 2,
     "maxDepth": 1
   },
   "saas-landingpage--product-launch": {
@@ -696,7 +696,7 @@
     "maxDepth": 1
   },
   "saas-landingpage--sketch-mode": {
-    "heavyPanels": 3,
+    "heavyPanels": 2,
     "maxDepth": 1
   },
   "saas-pullrequest--default": {

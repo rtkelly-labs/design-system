@@ -150,6 +150,32 @@ not opt in renders exactly as before.
 | `SaasLandingPage` | features and the plans not recommended are `quiet`; the recommended plan stays `strong` | 8 → 3 |
 | `AccountFlows` | the form panel is `quiet`; the fields keep their heavy edge | 1–2 → 0–1 |
 
+### Proposal: the landing page's one object
+
+`SaasLandingPage` still has three heavy objects: the double-ruled headline, the shadowed
+terminal, and the recommended plan. Three ways to keep one, mocked by overriding styles in the
+browser and measured the same way — none is applied:
+
+| Option | What changes | Heavy panels | / screen | Heavy edge share |
+|---|---|---:|---:|---:|
+| as committed | — | 3 | 1.4 | 0.68 |
+| A — the terminal leads | headline unboxed, the secondary hero button loses its shadow | 2 | 1.0 | 0.63 |
+| B — the headline leads | terminal drawn as a 1px `border.default` frame with no shadow, secondary button flat | 2 | 1.0 | 0.53 |
+| C — the recommended plan leads | headline unboxed, terminal quiet, both hero buttons flat | 1 | 0.5 | 0.45 |
+
+C is the only one that reaches the benchmark's one heavy object a screen, and it puts the weight
+on the thing the page sells. A and B keep a heavy hero, which suits a page whose first job is the
+headline or the demo. Which job the page has is the brand decision; the numbers only say how far
+each option moves it.
+
+**A is applied** to `SaasLandingPage`: its hero passes `framed={false}`, so the deploy terminal is
+the hero's one heavy object. Both hero buttons keep their press shadow — mocked flat, the
+secondary action looked unlike every other button on the page, which reads as a defect rather
+than as hierarchy, and controls are not heavy panels anyway. The page carries two heavy
+objects — the terminal and the recommended plan — at 0.9 a screen. The right answer depends on
+the page: `Hero` and `PageTitle` keep the frame by default, and a page whose headline is the point
+leaves it on.
+
 ## The gate
 
 `pnpm test:edges` (`tests/edges.spec.ts`) measures every asserted story on `midnight` and holds

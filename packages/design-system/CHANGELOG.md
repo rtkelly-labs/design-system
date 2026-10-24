@@ -34,6 +34,13 @@ data (`DEFAULT_REVIEW_REPORT`, `DEFAULT_PULL_REQUEST`) and appear on the site's 
 are unchanged. `SaasLandingPage` now draws its features and non-recommended plans quiet:
 re-baseline its snapshots.
 
+`PageTitle` and `Hero` take `framed` (default `true`); `SaasLandingPage` passes `false`, so its
+deploy terminal leads. `BracketText` joins each bracket to its neighbouring word with a no-break
+space, so a wrapping title no longer strands a `]` on its own line, and `PageTitle` balances its
+lines. `Divider` now runs the full width of its container: a start cap, a fill sized to whole
+characters with CSS `round()`, and an end cap. An explicit `pattern` is drawn as before.
+Re-baseline anything showing a page title, a bracketed title or a divider.
+
 ## 0.16.0
 
 Five MDX figures: `SwatchCompare`, `MetricStrip`, `TokenTable`, `Decision` with `Option`, `TermGrid` with `Term`. Registered in `mdxComponents`.
