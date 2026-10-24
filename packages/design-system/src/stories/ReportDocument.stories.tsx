@@ -49,10 +49,11 @@ export const QualityGate: Story = {
     children: (
       <>
         <ReportSection title="Summary">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <StatCard title="Checks" value={11} />
-            <StatCard title="Passing" value={10} accent="success" />
-            <StatCard title="Failing" value={1} accent="danger" subtitle="check:css" />
+          {/* One strip of figures, not three boxes: see docs/edge-hierarchy.md. */}
+          <div className="grid grid-cols-1 border-y border-edge-subtle sm:grid-cols-3">
+            <StatCard appearance="quiet" title="Checks" value={11} />
+            <StatCard appearance="quiet" title="Passing" value={10} accent="success" />
+            <StatCard appearance="quiet" title="Failing" value={1} accent="danger" subtitle="check:css" />
           </div>
           <NoteBlock>
             check:css is a ratchet, so it fails on any rise. Lower the budget when you migrate a
@@ -70,6 +71,7 @@ export const QualityGate: Story = {
             </CodeBlock>
           </ReportDetails>
           <DataTable
+            appearance="quiet"
             columns={[
               { header: 'Check', accessor: 'check' },
               {

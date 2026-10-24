@@ -100,17 +100,15 @@ agrees with the eye, which is what makes it worth gating.
 
 ## Other elements
 
-Ranked by heavy panels a screen, the compositions furthest from the benchmark:
+Ranked by heavy panels a screen, the compositions furthest from the benchmark, as they stand after
+the changes below:
 
 | Story | Heavy panels | / screen | Depth | Why |
 |---|---:|---:|---:|---|
 | `Components/Marketing/PricingGrid` | 6 | 6.0 | 1 | three tiers, each a strong box; the story does not use `weight` |
 | `Docs/Figures/DrawingSheet` | 5–6 | 5.0–5.4 | **2** | the only story nested two deep: a sheet, a frame, a box |
-| `ReportDocument` — quality gate | 7 | 5.2 | 1 | four stat cards, each shadowed, over a grid table |
 | `Showcase/ExperimentsView` | 6 | 5.0 | 1 | a catalogue of boxed experiments |
 | `SaaS/LandingPage` — product launch, project site | 9–11 | 4.3–4.8 | 1 | marketing fixtures composed directly, not through `SaasLandingPage` |
-| `AdminDashboard` — finance console | 4 | 4.0 | 1 | a row of stat cards over a grid table |
-| `SaasLandingPage` | 8 | 3.8 | 1 | a boxed headline, a shadowed terminal, every feature and every plan a strong box |
 | `Docs/Layout/Portal` | 10 | 3.5 | 1 | cards for every section of the portal |
 | `Components/Content/NoteBlock` — all types | 4 | 4.0 | 0 | four notes stacked, each a strong box |
 | `Docs/Figures/IndexedSection` | 4 | 4.0 | 1 | sections as strong boxes with a strong header rule |
@@ -138,6 +136,19 @@ The same moves the review family made, applied where components compose:
    panel: the inner box takes `border.default` at 1px, as the review family's diff frames do.
 4. **Marketing keeps one hero object.** The landing page's highlighted plan or the hero, not both
    and every feature besides.
+
+Three of the four are now opt-in properties, applied to this package's own compositions:
+`StatCard appearance="quiet"` (no box, a dashed hairline between neighbours, for a row of
+figures), and `Card weight="quiet"` (a 1px `border.default` frame that keeps the accent stripe),
+which `Feature` and `PricingTier` pass through. Defaults are unchanged, so a consumer that does
+not opt in renders exactly as before.
+
+| Story | Change | Heavy panels |
+|---|---|---:|
+| `ReportDocument` — quality gate | stat cards as one ruled strip; `DataTable appearance="quiet"` | 7 → 3 |
+| `AdminDashboard` — finance console | stat cards as one ruled strip; the grid table stays, it is the page's data | 4 → 1 |
+| `SaasLandingPage` | features and the plans not recommended are `quiet`; the recommended plan stays `strong` | 8 → 3 |
+| `AccountFlows` | the form panel is `quiet`; the fields keep their heavy edge | 1–2 → 0–1 |
 
 ## The gate
 

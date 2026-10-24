@@ -3,7 +3,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { recipe } from '../../lib/recipe';
 import { accentTextClass } from '../../lib/accentClasses';
 import type { AccentToken } from '../../lib/theme';
-import { Card } from '../Card';
+import { Card, type CardWeight } from '../Card';
 import { SectionGrid } from './SectionGrid';
 import type { SectionAlign, SectionColumns } from './SectionGrid';
 
@@ -68,6 +68,8 @@ export interface FeatureProps extends Omit<HTMLAttributes<HTMLDivElement>, 'titl
   icon?: ReactNode;
   /** The semantic accent for the stripe, the title and the icon. None by default. */
   accent?: AccentToken;
+  /** The panel's weight. `quiet` for a grid of features beside a heavier object on the page. */
+  weight?: CardWeight;
   /** The description — a sentence or two. */
   children?: ReactNode;
   /** Merged into the cell's classes. */

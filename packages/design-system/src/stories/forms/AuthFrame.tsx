@@ -41,7 +41,7 @@ export const AuthFrame = forwardRef<HTMLHeadingElement, AuthFrameProps>(function
 ) {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6">
-      <Card variant="panel" className="flex flex-col gap-6">
+      <Card variant="panel" weight="quiet" className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1
             ref={ref}
