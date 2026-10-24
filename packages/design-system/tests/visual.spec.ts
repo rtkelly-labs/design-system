@@ -239,6 +239,11 @@ const CASES: readonly VisualCase[] = [
   // shipped, now a story fixture, and an unrelated CMS. Neither pins a Level,
   // so the a11y suite axes both on both, at both widths.
   { id: 'saas-admindashboard--finance-console', snapshot: 'admin-finance-console.png', fullPage: true },
+  // The developer-tooling pages: a comparison tool's report and a pull request under review.
+  { id: 'saas-reviewreport--default', snapshot: 'review-report-default.png', fullPage: true },
+  { id: 'saas-reviewreport--sketch-theme', snapshot: 'review-report-sketch.png', fullPage: true },
+  { id: 'saas-pullrequest--default', snapshot: 'pull-request-default.png', fullPage: true },
+  { id: 'saas-pullrequest--sketch-theme', snapshot: 'pull-request-sketch.png', fullPage: true },
   { id: 'saas-admindashboard--content-studio', snapshot: 'admin-content-studio.png', fullPage: true },
   { id: 'saas-landingpage--dark-mode', snapshot: 'saas-landing-midnight.png', fullPage: true },
   { id: 'saas-landingpage--sketch-mode', snapshot: 'saas-landing-sketch.png', fullPage: true },
