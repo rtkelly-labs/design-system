@@ -130,6 +130,9 @@ import { TreeDiagram, Node } from '../../design-system/src/components/docs/figur
 import { badgeStates, buttonStates, checkboxStates, inputStates, radioGroupStates, selectStates, switchStates } from './compendium.states';
 import { ReportDocument, ReportSection } from '../../design-system/src/components/ReportDocument';
 import { DrawingSheet } from '../../design-system/src/components/docs/figures/DrawingSheet';
+import { ReviewReportPage } from '../../design-system/src/components/review/ReviewReportPage';
+import { PullRequestPage } from '../../design-system/src/components/review/PullRequestPage';
+import { DEFAULT_PULL_REQUEST, DEFAULT_REVIEW_REPORT } from '../../design-system/src/components/review/samples';
 import { IndexedSection } from '../../design-system/src/components/docs/figures/IndexedSection';
 import { Glyph } from '../../design-system/src/components/Glyph';
 import { AsciiDivider } from '../../design-system/src/components/AsciiDivider';
@@ -402,6 +405,9 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'SlideDeck', clips: 'chrome badges straddle the slide frame', rungs: ['sketch'], group: 'Presentation', height: 129, layout: 'stack', states: fromStories(SlideDeckStories, ['DefaultDeck']) },
   { component: 'ReportDocument', rungs: ['sketch'], group: 'Content', height: 105, layout: 'side', states: [...fromStories(ReportDocumentStories, ['Minimal', 'Disclosure']), custom('section', () => (<ReportDocument title="Link Audit"><ReportSection title="Findings"><p>None.</p></ReportSection></ReportDocument>))] },
   // The review family — a report comparing a candidate with its baseline.
+  // The two whole pages, trimmed to one sheet: a page's parts each have their own plate above, so these show how they compose.
+  { component: 'ReviewReportPage', rungs: ['sketch'], group: 'Data display', height: 216, layout: 'stack', states: [custom('trimmed', () => <ReviewReportPage report={{ ...DEFAULT_REVIEW_REPORT, figures: undefined, measurements: undefined, records: undefined, files: DEFAULT_REVIEW_REPORT.files.slice(0, 1) }} />)] },
+  { component: 'PullRequestPage', rungs: ['sketch'], group: 'Data display', height: 220, layout: 'stack', states: [custom('trimmed', () => <PullRequestPage pullRequest={{ ...DEFAULT_PULL_REQUEST, conversation: undefined, verdict: undefined, description: DEFAULT_PULL_REQUEST.description.slice(0, 1), checks: DEFAULT_PULL_REQUEST.checks.slice(0, 1), labels: undefined, reviewers: DEFAULT_PULL_REQUEST.reviewers.slice(0, 2), files: DEFAULT_PULL_REQUEST.files.slice(1, 2).map((file) => ({ ...file, hunks: file.hunks.map((hunk) => ({ ...hunk, lines: hunk.lines.slice(3, 9) })) })) }} />)] },
   { component: 'StatusMark', group: 'Data display', height: 73, layout: 'side', states: fromStories(StatusMarkStories, ['AllVocabularies']) },
   { component: 'VerdictBand', group: 'Data display', height: 110, layout: 'stack', states: fromStories(VerdictBandStories, ['Default', 'Fail']) },
   { component: 'ProvenanceStrip', group: 'Data display', height: 86, layout: 'stack', states: fromStories(ProvenanceStripStories, ['Default']) },

@@ -763,6 +763,159 @@ interface KeyedDiffProps extends react.HTMLAttributes<HTMLDivElement> {
 
 declare const KeyedDiff: react.ForwardRefExoticComponent<KeyedDiffProps & react.RefAttributes<HTMLDivElement>>;
 
+interface ReviewValue {
+    before?: number | null;
+    after?: number | null;
+    direction?: MetricDirection;
+    unit?: string;
+}
+interface ReviewColumn {
+
+    label: string;
+    direction?: MetricDirection;
+    unit?: string;
+}
+
+interface ReviewMeasurementTable {
+    caption: string;
+
+    identityLabel: string;
+    columns: readonly ReviewColumn[];
+    rows: readonly {
+        identity: string;
+        values: readonly ReviewValue[];
+    }[];
+}
+
+interface ReviewRecordTable {
+    caption: string;
+    identityLabel: string;
+    columns: readonly ReviewColumn[];
+    rows: readonly {
+        identity: string;
+        change: KeyedChange;
+        values: readonly ReviewValue[];
+    }[];
+}
+
+interface ReviewFileGroup {
+    title: string;
+    files: readonly {
+        path: string;
+        hunks: readonly DiffHunk[];
+    }[];
+}
+
+interface ReviewReportData {
+    title: string;
+
+    subtitle?: string;
+
+    meta?: readonly ReportMetaItem[];
+
+    outcome: AssessmentOutcome;
+
+    verdict: string;
+
+    verdictContext?: string;
+
+    provenance: readonly ProvenanceItem[];
+
+    figures?: readonly {
+        label: string;
+        value: string;
+        note?: string;
+    }[];
+
+    measurements?: readonly ReviewMeasurementTable[];
+
+    records?: ReviewRecordTable;
+
+    caveats?: readonly {
+        title: string;
+        body: ReactNode;
+    }[];
+
+    files: readonly ReviewFileGroup[];
+}
+interface ReviewReportPageProps extends Omit<react.HTMLAttributes<HTMLElement>, 'title'> {
+
+    report: ReviewReportData;
+
+    className?: string;
+}
+
+declare const ReviewReportPage: react.ForwardRefExoticComponent<ReviewReportPageProps & react.RefAttributes<HTMLElement>>;
+
+type PullRequestState = 'open' | 'draft' | 'merged' | 'closed';
+type ReviewerState = 'approved' | 'changes-requested' | 'commented' | 'pending';
+
+interface PullRequestCheck {
+    name: string;
+    status: AssessmentOutcome;
+
+    label?: string;
+
+    summary?: string;
+
+    duration?: string;
+}
+
+interface PullRequestData {
+
+    repository: string;
+    number: number;
+    title: string;
+    state: PullRequestState;
+    author: string;
+
+    base: string;
+
+    head: string;
+
+    opened: string;
+    labels?: readonly string[];
+
+    description: readonly ReactNode[];
+    reviewers: readonly {
+        name: string;
+        state: ReviewerState;
+    }[];
+    checks: readonly PullRequestCheck[];
+
+    verdict?: {
+        outcome: AssessmentOutcome;
+        title: string;
+        context?: string;
+    };
+
+    conversation?: readonly {
+        author: string;
+        meta?: string;
+        body: ReactNode;
+    }[];
+
+    files: readonly {
+        path: string;
+        hunks: readonly DiffHunk[];
+    }[];
+}
+interface PullRequestPageProps extends react.HTMLAttributes<HTMLElement> {
+
+    pullRequest: PullRequestData;
+
+    className?: string;
+}
+
+declare const PullRequestPage: react.ForwardRefExoticComponent<PullRequestPageProps & react.RefAttributes<HTMLElement>>;
+
+declare const SAMPLE_BASELINE_COMMIT = "216f6fc28cec75077f5b8fa90cd3d7055e81db7b";
+declare const SAMPLE_DUPLICATION_HUNKS: DiffHunk[];
+declare const SAMPLE_METRICS_HUNKS: DiffHunk[];
+declare const SAMPLE_CALLGRAPH_HUNKS: DiffHunk[];
+declare const DEFAULT_REVIEW_REPORT: ReviewReportData;
+declare const DEFAULT_PULL_REQUEST: PullRequestData;
+
 interface TokenRule {
     id: 'hex' | 'rawPalette' | 'legacyAlias' | 'darkVariant';
     label: string;
@@ -3370,6 +3523,8 @@ export {
   DEFAULT_EXPERIMENTS,
   DEFAULT_LEVEL,
   DEFAULT_PRICING_TIERS,
+  DEFAULT_PULL_REQUEST,
+  DEFAULT_REVIEW_REPORT,
   DIVIDER_PATTERNS,
   DataTable,
   type DataTableProps,
@@ -3550,6 +3705,11 @@ export {
   type ProvenanceItem,
   ProvenanceStrip,
   type ProvenanceStripProps,
+  type PullRequestCheck,
+  type PullRequestData,
+  PullRequestPage,
+  type PullRequestPageProps,
+  type PullRequestState,
   RECOMMENDED_COLOURS,
   RECOMMENDED_COLOUR_CLASSES,
   RECOMMENDED_COLOUR_NAMESPACES,
@@ -3571,7 +3731,20 @@ export {
   type ReportMetaItem,
   ReportSection,
   type ReportSectionProps,
+  type ReviewColumn,
+  type ReviewFileGroup,
+  type ReviewMeasurementTable,
+  type ReviewRecordTable,
+  type ReviewReportData,
+  ReviewReportPage,
+  type ReviewReportPageProps,
+  type ReviewValue,
+  type ReviewerState,
   type Rgb,
+  SAMPLE_BASELINE_COMMIT,
+  SAMPLE_CALLGRAPH_HUNKS,
+  SAMPLE_DUPLICATION_HUNKS,
+  SAMPLE_METRICS_HUNKS,
   SLIDE_DECK_HOTKEYS,
   SLOTS,
   STATUS_APPEARANCE,
