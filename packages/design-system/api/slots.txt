@@ -159,6 +159,8 @@ report-document	ReportDocument
 report-section	ReportSection
 saas-landing-page	SaasLandingPage
 section-container	SectionContainer
+segmented-control	SegmentedControl
+segmented-control-item	SegmentedControlItem
 select-icon	Select
 select-trigger	Select
 select-value	Select

@@ -25,6 +25,7 @@ import * as InputStories from '../../design-system/src/stories/Input.stories';
 import * as FlowDiagramStories from '../../design-system/src/stories/FlowDiagram.stories';
 import * as TimelineStories from '../../design-system/src/stories/Timeline.stories';
 import * as TabsStories from '../../design-system/src/stories/Tabs.stories';
+import * as SegmentedControlStories from '../../design-system/src/stories/SegmentedControl.stories';
 import * as AppShellStories from '../../design-system/src/stories/AppShell.stories';
 import * as AvatarStories from '../../design-system/src/stories/Avatar.stories';
 import * as BracketTextStories from '../../design-system/src/stories/BracketText.stories';
@@ -406,6 +407,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'AppShell', rungs: ['sketch'], group: 'Layout', height: 135, layout: 'stack', states: fromStories(AppShellStories, ['Default']) },
 
   { component: 'Tabs', group: 'Navigation', height: 128, layout: 'stack', states: fromStories(TabsStories, ['Default', 'Underline']) },
+  { component: 'SegmentedControl', group: 'Navigation', height: 30, layout: 'side', states: fromStories(SegmentedControlStories, ['Default']) },
 ];
 
 /** Plates in the document's order: by group, then as listed. Stable, so the index is deterministic. */
