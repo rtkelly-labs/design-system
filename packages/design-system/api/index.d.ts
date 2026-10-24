@@ -23,6 +23,10 @@ type HueRef = Hue | 'neutral';
 
 type AccentToken = Emphasis | Intent;
 
+type SeriesIndex = 1 | 2 | 3 | 4 | 5 | 6;
+
+declare function seriesVar(series: SeriesIndex): string;
+
 declare function accentVar(token: AccentToken | undefined, fallback?: AccentToken): string;
 
 declare function tintVar(token: AccentToken | undefined, fallback?: AccentToken): string;
@@ -69,6 +73,10 @@ type FixedColour = keyof typeof FIXED_COLOURS;
 
 declare const PALETTE_HUES: readonly ["red", "orange", "yellow", "green", "teal", "cyan", "blue", "violet", "magenta", "pink"];
 
+declare const SERIES_COUNT = 6;
+
+type SeriesTuple<T> = readonly [T, T, T, T, T, T];
+
 interface LevelDefinition {
 
     readonly label: string;
@@ -88,6 +96,10 @@ interface LevelDefinition {
     readonly accentHue: Readonly<Record<Emphasis, HueRef>>;
 
     readonly intentHue: Readonly<Record<Intent, HueRef>>;
+
+    readonly seriesHue: SeriesTuple<Hue>;
+
+    readonly series: SeriesTuple<string>;
 
     readonly tintStrength: number;
 
@@ -271,6 +283,31 @@ interface SelectionDeviceCheck {
 }
 
 declare function auditSelectionDevices(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): SelectionDeviceCheck[];
+
+declare const CVD_SIMULATIONS: readonly ["deuteranopia", "protanopia"];
+type CvdSimulation = (typeof CVD_SIMULATIONS)[number];
+type Vision = 'normal' | CvdSimulation;
+
+declare function deltaE(a: string, b: string, vision?: Vision): number;
+
+declare const MINIMUM_SERIES_SEPARATION = 0.04;
+interface SeriesSeparation {
+    readonly level: ThemeLevel;
+    readonly vision: Vision;
+
+    readonly min: number;
+
+    readonly pair: readonly [number, number];
+
+    readonly gated: boolean;
+    readonly passes: boolean;
+}
+
+declare function auditSeriesSeparation(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): SeriesSeparation[];
+
+declare function applyContrastDelta(def: LevelDefinition): LevelDefinition;
+
+declare function contrastMoreLadder(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): Record<ThemeLevel, LevelDefinition>;
 
 declare const ANSI_SLOTS: readonly ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white", "brightBlack", "brightRed", "brightGreen", "brightYellow", "brightBlue", "brightMagenta", "brightCyan", "brightWhite"];
 type AnsiSlot = (typeof ANSI_SLOTS)[number];
@@ -578,6 +615,8 @@ interface BadgeProps extends react__default.HTMLAttributes<HTMLSpanElement> {
     children: react__default.ReactNode;
 
     accent?: AccentToken;
+
+    size?: 'sm' | 'md';
 }
 
 declare const Badge: react__default.ForwardRefExoticComponent<BadgeProps & react__default.RefAttributes<HTMLSpanElement>>;
@@ -700,6 +739,10 @@ interface TagProps {
     className?: string;
 
     prefix?: string;
+
+    uppercase?: boolean;
+
+    size?: 'sm' | 'md';
     children?: ReactNode;
 }
 declare const Tag: react.ForwardRefExoticComponent<TagProps & react.RefAttributes<HTMLSpanElement | HTMLAnchorElement>>;
@@ -929,6 +972,116 @@ declare function getThemeInitScript(options?: {
     defaultLevel?: ThemeLevel;
     followSystem?: boolean;
 }): string;
+
+declare const A11Y_AXES: readonly ["motion", "contrast", "cvd", "links"];
+type A11yAxis = (typeof A11Y_AXES)[number];
+
+type A11yChoice = 'system' | 'on' | 'off';
+
+type A11yState = Readonly<Record<A11yAxis, A11yChoice>>;
+
+declare const A11Y_DEFAULT: A11yState;
+
+declare const A11Y_STORAGE_KEY = "ds-a11y";
+
+declare const A11Y_ATTRIBUTES: Readonly<Record<A11yAxis, {
+    attribute: string;
+    on: string;
+    off: string | null;
+}>>;
+
+interface A11ySystemSignals {
+
+    readonly contrastMore: boolean;
+}
+
+declare const CONTRAST_MORE_QUERY = "(prefers-contrast: more)";
+declare function isA11yChoice(value: unknown): value is A11yChoice;
+
+declare function parseA11yState(raw: string | null | undefined): A11yState;
+
+declare function serialiseA11yState(state: A11yState): string | null;
+
+declare function resolveA11yAttributes(state: A11yState, system: A11ySystemSignals): Readonly<Record<A11yAxis, string | null>>;
+
+declare function getA11yInitScript(options?: {
+    followSystem?: boolean;
+}): string;
+
+interface A11yStorage {
+
+    read: () => Partial<A11yState> | undefined;
+
+    write: (state: A11yState) => void;
+}
+
+declare const localStorageA11yStorage: A11yStorage;
+interface A11yPreferencesContextValue extends A11yState {
+
+    set: (axis: A11yAxis, value: A11yChoice) => void;
+
+    reset: () => void;
+}
+interface A11yPreferencesProviderProps {
+    children: react__default.ReactNode;
+
+    persist?: boolean;
+
+    followSystem?: boolean;
+
+    storage?: A11yStorage;
+
+    onChange?: (state: A11yState) => void;
+
+    defaultValue?: Partial<A11yState>;
+}
+
+declare const A11yPreferencesProvider: react__default.FC<A11yPreferencesProviderProps>;
+
+declare const useA11yPreferences: () => A11yPreferencesContextValue;
+
+declare const useOptionalA11yPreferences: () => A11yPreferencesContextValue | undefined;
+
+interface A11yMenuProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'children' | 'type'> {
+
+    triggerClassName?: string;
+
+    align?: 'start' | 'center' | 'end';
+
+    defaultOpen?: boolean;
+}
+
+declare const A11yMenu: react.ForwardRefExoticComponent<A11yMenuProps & react.RefAttributes<HTMLButtonElement>>;
+
+declare const SERIES_SHAPES: readonly ["circle", "square", "triangle", "diamond", "cross", "ring"];
+type SeriesShapeName = (typeof SERIES_SHAPES)[number];
+
+declare const SERIES_LETTERS: readonly ["A", "B", "C", "D", "E", "F"];
+
+interface SeriesMarkProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
+
+    series: SeriesIndex;
+
+    swatch?: boolean;
+
+    letter?: string;
+}
+
+declare const SeriesMark: react.ForwardRefExoticComponent<SeriesMarkProps & react.RefAttributes<HTMLSpanElement>>;
+interface SeriesLegendItem {
+
+    label: string;
+
+    series: SeriesIndex;
+
+    letter?: string;
+}
+interface SeriesLegendProps extends Omit<HTMLAttributes<HTMLUListElement>, 'children'> {
+
+    items: readonly SeriesLegendItem[];
+}
+
+declare const SeriesLegend: react.ForwardRefExoticComponent<SeriesLegendProps & react.RefAttributes<HTMLUListElement>>;
 
 interface BracketTextProps extends HTMLAttributes<HTMLSpanElement> {
     children: ReactNode;
@@ -2147,6 +2300,8 @@ interface BarChartDatum {
     label: string;
     value: number;
     accent?: AccentToken;
+
+    series?: SeriesIndex;
 }
 interface BarChartProps extends Omit<SVGProps<SVGSVGElement>, 'data'> {
 
@@ -3250,6 +3405,20 @@ declare const mdxComponents: {
 type MdxComponents = typeof mdxComponents;
 
 export {
+  A11Y_ATTRIBUTES,
+  A11Y_AXES,
+  A11Y_DEFAULT,
+  A11Y_STORAGE_KEY,
+  type A11yAxis,
+  type A11yChoice,
+  A11yMenu,
+  type A11yMenuProps,
+  type A11yPreferencesContextValue,
+  A11yPreferencesProvider,
+  type A11yPreferencesProviderProps,
+  type A11yState,
+  type A11yStorage,
+  type A11ySystemSignals,
   ANSI_SLOTS,
   type AccentEmphasis,
   type AccentToken,
@@ -3315,10 +3484,12 @@ export {
   type ButtonLinkProps,
   type ButtonProps,
   type ButtonVariant,
+  CONTRAST_MORE_QUERY,
   CSS_MEDIUM,
   CTASection,
   type CTASectionAccent,
   type CTASectionProps,
+  CVD_SIMULATIONS,
   Card,
   type CardProps,
   type CardVariant,
@@ -3344,6 +3515,7 @@ export {
   type ContrastCheck,
   type ContrastFloor,
   type Crumb,
+  type CvdSimulation,
   DEFAULT_DEPLOY_LOG,
   DEFAULT_EXPERIMENTS,
   DEFAULT_LEVEL,
@@ -3449,6 +3621,7 @@ export {
   MEDIA,
   MEDIA_DEFINITIONS,
   MINIMUM_RATIO,
+  MINIMUM_SERIES_SEPARATION,
   MailIcon,
   type MdxComponents,
   type Medium,
@@ -3533,6 +3706,9 @@ export {
   ReportSection,
   type ReportSectionProps,
   type Rgb,
+  SERIES_COUNT,
+  SERIES_LETTERS,
+  SERIES_SHAPES,
   SLIDE_DECK_HOTKEYS,
   SLOTS,
   SYSTEM_LEVEL,
@@ -3552,6 +3728,15 @@ export {
   type SelectProps,
   type SelectionDevice,
   type SelectionDeviceCheck,
+  type SeriesIndex,
+  SeriesLegend,
+  type SeriesLegendItem,
+  type SeriesLegendProps,
+  SeriesMark,
+  type SeriesMarkProps,
+  type SeriesSeparation,
+  type SeriesShapeName,
+  type SeriesTuple,
   ServerErrorPage,
   type ServerErrorPageProps,
   SiteFooter,
@@ -3695,16 +3880,19 @@ export {
   type UseActiveHeadingOptions,
   type UseCopyToClipboardResult,
   type VerdictTone,
+  type Vision,
   WEB_FLOOR,
   XIcon,
   accentSurfaceClass,
   accentVar,
   ansiScheme,
   apcaContrast,
+  applyContrastDelta,
   assertNever,
   auditContrast,
   auditHueAgreement,
   auditSelectionDevices,
+  auditSeriesSeparation,
   auditTextHierarchy,
   borderVar,
   buttonGroupContext,
@@ -3712,33 +3900,44 @@ export {
   cn,
   collectHeadings,
   composite,
+  contrastMoreLadder,
   contrastRatio,
   createAnchorHeading,
+  deltaE,
   findHueCollisions,
   fontVar,
+  getA11yInitScript,
   getRecommendedColours,
   getThemeInitScript,
   hueOfRole,
+  isA11yChoice,
   isExternalHref,
   isMedium,
   isRecommendedColourClass,
   isThemeLevel,
+  localStorageA11yStorage,
   mdxComponents,
   nextLevel,
+  parseA11yState,
   parseColor,
   relativeLuminance,
+  resolveA11yAttributes,
   scanRules,
   scanTokenRules,
   semanticTokens,
+  serialiseA11yState,
+  seriesVar,
   slugify,
   surfaceVar,
   textVar,
   tintVar,
+  useA11yPreferences,
   useActiveHeading,
   useCopyToClipboard,
   useDocsLinkComponent,
   useIsCurrentHref,
   useLinkComponent,
+  useOptionalA11yPreferences,
   useOptionalTheme,
   useOptionalToast,
   useTheme,

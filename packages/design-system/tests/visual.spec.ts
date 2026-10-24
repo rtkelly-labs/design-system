@@ -65,6 +65,9 @@ const CASES: readonly VisualCase[] = [
   { id: 'foundations-swatch--group', snapshot: 'swatch-group.png' },
   { id: 'components-content-badge--intent', snapshot: 'badge-intent.png' },
   { id: 'components-content-tag--row', snapshot: 'tag-row.png' },
+  // Row 16: size="sm". Baselines come with `/update-snapshots`.
+  { id: 'components-content-badge--small', snapshot: 'badge-small.png' },
+  { id: 'components-content-tag--small-and-plain', snapshot: 'tag-small-and-plain.png' },
   { id: 'components-content-brackettext--emphasis', snapshot: 'brackettext-emphasis.png' },
   { id: 'components-layout-divider--patterns', snapshot: 'divider-patterns.png' },
   { id: 'components-layout-pagetitle--with-subtitle', snapshot: 'pagetitle-with-subtitle.png' },
@@ -91,6 +94,12 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-overlays-tooltip--on-an-icon-button', snapshot: 'tooltip-on-an-icon-button.png' },
   { id: 'components-overlays-popover--open', snapshot: 'popover-open.png' },
   { id: 'components-overlays-menu--actions', snapshot: 'menu-actions.png' },
+  // D9, the Preference axis. The menu open on load; the series marks with the
+  // `patterns` preference off and on; the bar chart under it. Baselines come with
+  // `/update-snapshots`.
+  { id: 'components-overlays-a11ymenu--open', snapshot: 'a11ymenu-open.png' },
+  { id: 'components-content-seriesmark--both-modes', snapshot: 'seriesmark-both-modes.png' },
+  { id: 'components-data-barchart--series-with-patterns', snapshot: 'barchart-series-with-patterns.png' },
   // `fullPage`: the report frame is a page, and the part most likely to drift
   // — the header strip against the body rhythm — is only visible whole.
   {

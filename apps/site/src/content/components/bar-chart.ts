@@ -30,6 +30,13 @@ export const barChart: ComponentPageDef = {
       file: 'bar-chart/per-bar-accent.tsx',
     },
     {
+      id: 'series',
+      title: 'Categorical series',
+      description:
+        'Give each datum a `series` from 1 to 6 to colour it from the series group, and put a `SeriesLegend` beside the chart. Every series is named in text: on the axis and in the legend. That text, not the colour, is the cue that is always there. Under the Patterns preference (the accessibility menu) each bar also gains a shape and a letter.',
+      file: 'bar-chart/series.tsx',
+    },
+    {
       id: 'responsive',
       title: 'Responsive, in tabs',
       description:
@@ -50,6 +57,7 @@ export const barChart: ComponentPageDef = {
       'The SVG is one `role="img"` with an accessible name. Screen readers read the `ariaLabel`, not the bars, so put the takeaway in the label or in nearby text.',
       'Next to a chart whose exact values matter, provide the same data as a `DataTable`. A chart shows the shape of the data. A table gives the numbers.',
       'The value labels on the bars (`showValues`) are the only non-colour encoding of each value. Keep them on unless the same values are printed nearby.',
+      'A `series` colours a bar from the categorical group and never stands alone: every bar keeps its category label on the axis, and a legend names each series in text. The Patterns preference adds a shape and a letter on top of that, as redundancy. Do not rely on it, because a reader has to find the menu first.',
       '`onBarClick` is pointer-only. The bars do not take focus and have no key handler, so do not make it the only way to reach information.',
     ],
   },

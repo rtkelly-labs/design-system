@@ -42,3 +42,17 @@ export const Intent: Story = {
     </div>
   ),
 };
+
+/**
+ * `size="sm"` for a badge inside a dense row — a table cell or list item. A 1px
+ * border, tighter padding and smaller type, beside the default for comparison.
+ */
+export const Small: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <Badge accent="success" size="sm">OPEN</Badge>
+      <Badge accent="quiet" size="sm">BUG</Badge>
+      <Badge accent="success">OPEN</Badge>
+    </div>
+  ),
+};

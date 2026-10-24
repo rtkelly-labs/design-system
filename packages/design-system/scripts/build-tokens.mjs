@@ -19,7 +19,8 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { LEVELS, THEME_LEVELS, FIXED_COLOURS, INK_WEIGHT, PRINT_LEVEL } from '../src/theme/levels.ts';
+import { LEVELS, THEME_LEVELS, FIXED_COLOURS, INK_WEIGHT, PRINT_LEVEL, SERIES_COUNT } from '../src/theme/levels.ts';
+import { applyContrastDelta } from '../src/theme/contrast.ts';
 import { CSS_MEDIUM, LOOPS, LOOP_KEYFRAMES, MEDIA_DEFINITIONS } from '../src/theme/media.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -71,6 +72,8 @@ function levelVariables(definition) {
   for (const [key, value] of Object.entries(definition.tint.intent)) push(`tint-intent-${key}`, value);
   // The selected-row fill for multi-select collections (D6-B).
   push('selection-multi', definition.selection.multi);
+  // The categorical series group (D9): six colours told apart, not ranked.
+  definition.series.forEach((value, i) => push(`series-${i + 1}`, value));
   // The Hue vocabulary, declared below the Roles above. A component may not
   // read these — see `docs/adr/0001-hues-declared-below-roles.md`. They exist
   // for Targets with no notion of jobs: ANSI's sixteen slots, a diagram
@@ -131,6 +134,11 @@ const ROLE_SHADOWS = ACCENT_ROLES.map(
   (role) => `  --shadow-hard-${role}: 4px 4px 0px 0px var(--ds-${role});`,
 ).join('\n');
 
+const SERIES_ALIASES = Array.from(
+  { length: SERIES_COUNT },
+  (_, i) => `  --color-series-${i + 1}: var(--ds-series-${i + 1});`,
+).join('\n');
+
 /**
  * The Tailwind-facing aliases and the shadow utilities, repeated per level so
  * that var() substitution re-runs at the themed element. See the banner.
@@ -183,6 +191,7 @@ const TAILWIND_ALIASES = `  --color-surface-base: var(--ds-surface-base);
   --color-palette-bright-violet: var(--ds-palette-bright-violet);
   --color-palette-bright-magenta: var(--ds-palette-bright-magenta);
   --color-palette-bright-pink: var(--ds-palette-bright-pink);
+${SERIES_ALIASES}
   --shadow-hard-sm: var(--ds-elev-sm) var(--ds-shadow-color);
   --shadow-hard-md: var(--ds-elev-md) var(--ds-shadow-color);
   --shadow-hard-lg: var(--ds-elev-lg) var(--ds-shadow-color);
@@ -362,6 +371,82 @@ function loopTheme() {
   return lines.join('\n');
 }
 
+/**
+ * The variables a Level's `contrast: more` delta changes, as declarations. A
+ * diff of two `levelVariables` renders rather than a second list, so a field
+ * the delta starts to touch is emitted without anyone remembering to add it.
+ */
+function contrastMoreVariables(definition) {
+  const base = new Set(levelVariables(definition).split('\n'));
+  return levelVariables(applyContrastDelta(definition))
+    .split('\n')
+    .filter((line) => !base.has(line))
+    .join('\n');
+}
+
+/**
+ * The runtime Preference axis (D9, ADR 0007): a delta over whatever Level is
+ * active, selected by a `data-a11y-*` attribute on the document. Set only when
+ * active, so the default is no attribute and no rule here matches it.
+ */
+function preferenceCss() {
+  const MORE = '[data-a11y-contrast="more"]';
+  const [firstLevel] = THEME_LEVELS;
+  const blocks = THEME_LEVELS.map((level) => {
+    // (0,2,0) beats the level block's (0,1,0). The nested form is a themed
+    // subtree inside a document that asked for more contrast; the compound form
+    // is the document element carrying both attributes.
+    const selector = [
+      ...(level === firstLevel ? [`:root${MORE}`] : []),
+      `${MORE}[data-theme="${level}"]`,
+      `${MORE} [data-theme="${level}"]`,
+    ].join(',\n');
+    return `${selector} {\n${contrastMoreVariables(LEVELS[level])}\n}`;
+  });
+  const paper = LEVELS[PRINT_LEVEL];
+  const printSelector = [`:root${MORE}`, `${MORE}[data-theme]`, `${MORE} [data-theme]`].join(',\n  ');
+  const glyph = '[data-slot="series-glyph"], [data-slot="intent-glyph"]';
+  const glyphOn = ['series-glyph', 'intent-glyph']
+    .map((slot) => `[data-a11y-cvd="patterns"] [data-slot="${slot}"]`)
+    .join(',\n');
+  // Two halves. The paper block must come after every level block, these
+  // included (the test that pins it matches on the selector text), and the
+  // print override of this axis must come after the paper block.
+  const contrast = `
+/* ==========================================================================
+   The Preference axis — a delta over the active Level (ADR 0007)
+   ========================================================================== */
+
+/* contrast: more. Literals from applyContrastDelta, per level. */
+${blocks.join('\n\n')}
+`;
+  const rest = `
+@media print {
+  ${printSelector} {
+${contrastMoreVariables(paper)
+  .split('\n')
+  .map((line) => `  ${line}`)
+  .join('\n')}
+  }
+}
+
+/* cvd: patterns. A series glyph is in the markup and hidden until an ancestor asks (the document, or a preview). */
+${glyph} {
+  display: none;
+}
+
+${glyphOn} {
+  display: inline;
+}
+
+/* links: underline. Unlayered, so it beats a layered \`no-underline\`. */
+:root[data-a11y-links="underline"] :is(.prose a:not(:where(.not-prose, .not-prose *)), a[data-slot="site-link"]) {
+  text-decoration-line: underline;
+}
+`;
+  return { contrast, rest };
+}
+
 function render() {
   const [firstLevel] = THEME_LEVELS;
   const byPolarity = (polarity) => THEME_LEVELS.filter((l) => LEVELS[l].polarity === polarity);
@@ -483,10 +568,30 @@ ${mediumTheme(CSS_MEDIUM)}
   --ds-loop-unit: ${MEDIA_DEFINITIONS[CSS_MEDIUM].motion.considered}ms;
 }
 
+/* D9: the OS asks for reduced motion, unless the user chose "full"; or the user
+ * chose "reduce" with the OS silent. \`data-a11y-motion\` is set by the init
+ * script, and only when a stored choice exists. */
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  :root:not([data-a11y-motion="full"]) {
     --ds-duration-quick: 0ms;
     --ds-duration-considered: 0ms;
+  }
+}
+
+:root[data-a11y-motion="reduce"] {
+  --ds-duration-quick: 0ms;
+  --ds-duration-considered: 0ms;
+}
+
+/* \`motion-reduce:\` answers the same question, so it follows the attribute too. */
+@custom-variant motion-reduce {
+  @media (prefers-reduced-motion: reduce) {
+    &:where(:root:not([data-a11y-motion="full"]) *) {
+      @slot;
+    }
+  }
+  &:where(:root[data-a11y-motion="reduce"] *) {
+    @slot;
   }
 }
 
@@ -552,6 +657,9 @@ ${TAILWIND_ALIASES}
   // (0,1,0) tie against the level blocks above. The Tailwind aliases are not
   // repeated: they read var(--ds-*) on the element that declares them, so they
   // resolve to these values there.
+  const preference = preferenceCss();
+  sections.push(preference.contrast);
+
   const paper = LEVELS[PRINT_LEVEL];
   sections.push(`/* Print — always ${paper.label}, whatever level is active on screen. */
 @media print {
@@ -563,6 +671,8 @@ ${levelVariables(paper)}
   }
 }
 `);
+
+  sections.push(preference.rest);
 
   sections.push(`/* Native form controls, scrollbars and the caret follow \`color-scheme\`, which
  * each level declares above. Without it a light level renders dark scrollbars

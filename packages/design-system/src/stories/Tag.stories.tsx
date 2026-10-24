@@ -34,3 +34,19 @@ export const Row: Story = {
     </div>
   ),
 };
+
+/**
+ * `size="sm"` for a tag in a dense row, and `prefix` and `uppercase` as props:
+ * `prefix=""` drops the `#`, `uppercase={false}` keeps the label's case. The
+ * defaults are today's look. There is no `onRemove`: the sources disagree on
+ * whether a tag may be interactive, so a removable chip is a separate component.
+ */
+export const SmallAndPlain: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      <Tag text="react" accent="primary" size="sm" />
+      <Tag text="Needs review" accent="secondary" size="sm" prefix="" uppercase={false} />
+      <Tag text="Needs review" accent="quiet" prefix="" uppercase={false} />
+    </div>
+  ),
+};
