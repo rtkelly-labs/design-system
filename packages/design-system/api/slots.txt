@@ -46,7 +46,15 @@ bullet-chart	BulletChart
 button	Button
 button-status	Button
 card	Card
+change-bar	ChangeBar
+change-bar-added	ChangeBar
+change-bar-removed	ChangeBar
+change-count	ChangeCount
+change-index	ChangeIndex
+change-index-file	ChangeIndex
+change-index-group	ChangeIndex
 change-summary	ChangeSummary
+change-summary-tally	ChangeSummary
 chart-tooltip	ChartTooltip
 chart-tooltip-body	ChartTooltip
 chart-tooltip-title	ChartTooltip
@@ -66,7 +74,13 @@ cta-section-body	CTASection
 datatable-paginated	(shared)
 decision	Decision
 decision-option	Decision
+delta-value	DeltaValue
+delta-value-change	DeltaValue
 design-sandbox	DesignSandbox
+diff-view	DiffView
+diff-view-hunk	DiffView
+diff-view-path	DiffView
+diff-view-table	DiffView
 divider	Divider
 doc-pager	DocPager
 docs-header	DocsHeader
@@ -150,6 +164,7 @@ indexed-section-body	IndexedSection
 indexed-section-header	IndexedSection
 indexed-section-index	IndexedSection
 indexed-section-title	IndexedSection
+keyed-diff	KeyedDiff
 latency-heatmap	LatencyHeatmap
 latency-histogram	LatencyHistogram
 log-viewer	LogViewer
@@ -190,6 +205,8 @@ progress-label	Progress
 progress-track	Progress
 progress-value	Progress
 prose	Prose
+provenance-strip	ProvenanceStrip
+provenance-strip-item	ProvenanceStrip
 radio	Radio
 radio-indicator	Radio
 report-details	ReportDetails
@@ -240,6 +257,7 @@ statcard-header	(shared)
 statcard-label	(shared)
 statcard-value	(shared)
 statcard-value-row	(shared)
+status-mark	StatusMark
 status-page	StatusPage
 status-page-code	StatusPage
 steps	Steps
@@ -300,3 +318,7 @@ track-card-summary	TrackCard
 track-card-title	TrackCard
 tree-diagram	TreeDiagram
 uptime-strip	UptimeStrip
+verdict-band	VerdictBand
+verdict-band-context	VerdictBand
+verdict-band-outcome	VerdictBand
+verdict-band-title	VerdictBand
