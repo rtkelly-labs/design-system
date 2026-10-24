@@ -13,3 +13,7 @@ export * from './ChangeBar';
 export * from './ChangeIndex';
 export * from './DiffView';
 export * from './KeyedDiff';
+// Whole pages, with sample data to start from.
+export * from './ReviewReportPage';
+export * from './PullRequestPage';
+export * from './samples';

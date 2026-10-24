@@ -95,6 +95,10 @@ what, and — only when a policy ran — whether that is acceptable. Every row i
 | Show a trend against a baseline | `Sparkline`, with no baseline rule or candidate point | `partial` | not yet filed |
 | Compare images | `BeforeAfter` pairs measurements; no overlay, blink, wipe or heatmap | `partial` | not yet filed |
 
+`ReviewReportPage` and `PullRequestPage` compose the rows above into the two pages a developer
+tool needs — the report a comparison emits, and a pull request under review — the way
+`SaasLandingPage` composes the marketing rows. They are compositions, not rows.
+
 Edges step down from the verdict, using the system's own lighter shapes rather than a 2px box on
 everything: the `VerdictBand` is the one object with a strong border and an offset shadow; a file's
 diff and a comment are 1px `border.default` frames; provenance, figures, tables, the file index and

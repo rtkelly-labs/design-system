@@ -70,6 +70,9 @@ Two files, with different jobs:
   every path the generator supports, and it is *also* the regression: the render
   test asserts it and `components-reports-reportdocument--sample` screenshots it.
   Adding a component to the report vocabulary means adding it there.
+- **`src/templates/review.tsx` is a review report to start from.** One `ReviewReportPage`
+  over the package's `DEFAULT_REVIEW_REPORT`: what a comparison tool such as Diffra emits for
+  a pull request. Replace the data, keep the page.
 
 Both ship to `dist/report/` so they are readable from an install.
 `reports/contrast.tsx` is a third kind — a repo-local report, rendered by
