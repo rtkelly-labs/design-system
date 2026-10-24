@@ -701,6 +701,8 @@ type TabsOrientation = 'horizontal' | 'vertical';
 type TabsFont = 'sans' | 'mono';
 
 type TabsVariant = 'merged' | 'underline' | 'segmented';
+
+type TabsTransform = 'uppercase' | 'none';
 interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
 
     value?: string;
@@ -714,6 +716,8 @@ interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
     variant?: TabsVariant;
 
     font?: TabsFont;
+
+    transform?: TabsTransform;
 
     accent?: AccentToken;
 
@@ -740,6 +744,12 @@ interface TabsTabProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'va
     value: string;
 
     children: ReactNode;
+
+    onClose?: () => void;
+
+    dirty?: boolean;
+
+    closeLabel?: string;
 
     className?: string;
 }
@@ -3529,6 +3539,7 @@ export {
   type TabsProps,
   TabsTab,
   type TabsTabProps,
+  type TabsTransform,
   type TabsVariant,
   Tag,
   type TagProps,
