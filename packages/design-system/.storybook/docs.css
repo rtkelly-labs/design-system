@@ -92,6 +92,20 @@
   border-radius: 0 !important;
 }
 
+/* Figures already provide their own framing, border and base surface.
+ * When rendered in autodocs, eliminate the outer raised card contrast so the
+ * figure sits directly on the page ground without a double border halo. */
+.sbdocs .docs-story:has([data-slot="figure-frame"]),
+.sbdocs .docs-story:has([data-slot="drawing-sheet"]) {
+  background-color: var(--ds-surface-base) !important;
+  border-color: var(--ds-border-subtle) !important;
+}
+
+.sbdocs .docs-story:has([data-slot="figure-frame"]) > div:first-child,
+.sbdocs .docs-story:has([data-slot="drawing-sheet"]) > div:first-child {
+  background-color: var(--ds-surface-base) !important;
+}
+
 /* Code & Syntax Blocks */
 .sbdocs pre,
 .sbdocs code,
