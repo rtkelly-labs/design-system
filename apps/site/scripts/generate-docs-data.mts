@@ -28,7 +28,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import docgen from 'react-docgen-typescript';
 
+import { slugify } from '@rtkelly13/design-system';
 import { CATEGORIES, GROUPS } from '../../../packages/design-system/.storybook/sidebar.ts';
+import { POSTS } from '../src/content/posts.ts';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE = path.resolve(HERE, '..');
@@ -194,6 +196,79 @@ const catalogue: CatalogueEntry[] = titled.map((entry) => ({
   description: lede(docs[entry.name]?.description ?? ''),
 }));
 
+/* ------------------------------------------------------------------ */
+/* 3. The posts                                                        */
+/* ------------------------------------------------------------------ */
+
+interface PostSection {
+  id: string;
+  title: string;
+  depth: 2 | 3;
+}
+
+/**
+ * Drops fenced code blocks, pairing markers as CommonMark (and so MDX) does. An opening fence is
+ * 0-3 spaces, then 3+ of one marker (backtick or tilde) and an info string, which for a backtick
+ * fence may not itself contain a backtick. It closes on 0-3 spaces, at least as many of the same
+ * marker, then only whitespace. An unclosed fence runs to the end of the file.
+ */
+function stripFences(source: string): string {
+  const kept: string[] = [];
+  let open: { marker: string; length: number } | null = null;
+  for (const line of source.split('\n')) {
+    if (open) {
+      const close = /^ {0,3}(`{3,}|~{3,})[ \t]*$/.exec(line);
+      if (close && close[1][0] === open.marker && close[1].length >= open.length) open = null;
+      continue;
+    }
+    const start = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
+    if (start && !(start[1][0] === '`' && start[2].includes('`'))) {
+      open = { marker: start[1][0], length: start[1].length };
+      continue;
+    }
+    kept.push(line);
+  }
+  return kept.join('\n');
+}
+
+/**
+ * A post's `##` and `###` headings, in file order. Frontmatter and fenced code
+ * are dropped first, so a `## ` inside an example is not a heading. Ids come from
+ * the package's `slugify`, the function `AnchorHeading` uses when it renders
+ * the heading, so the contents rail and the anchor cannot disagree.
+ */
+function postSections(file: string): PostSection[] {
+  const source = stripFences(
+    readFileSync(path.join(SITE, 'src/app', file), 'utf8')
+      // CRLF and lone CR become LF first, so a fence line ending in \r still closes.
+      .replace(/\r\n?/g, '\n')
+      .replace(/^---\n[\s\S]*?\n---\n/, ''),
+  );
+  const sections: PostSection[] = [];
+  const seen = new Set<string>();
+  for (const line of source.split('\n')) {
+    const match = /^ {0,3}(##|###)[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*$/.exec(line);
+    if (!match) continue;
+    // Heading text as rendered: links and emphasis contribute their words, not their markup.
+    const title = match[2]
+      .trim()
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/[`*]/g, '');
+    // Markup the title regex above does not strip would make the slug here differ from the one
+    // `AnchorHeading` computes from the rendered text, so the rail and the anchor would drift.
+    if (/[{<&_\\[\]]/.test(title)) {
+      throw new Error(`${file}: heading "${title}" contains markup (one of { < & _ [ ] or a backslash); headings are plain text`);
+    }
+    const id = slugify(title);
+    if (seen.has(id)) throw new Error(`${file}: two headings slug to ${id}`);
+    seen.add(id);
+    sections.push({ id, title, depth: match[1] === '##' ? 2 : 3 });
+  }
+  return sections;
+}
+
+const posts = Object.fromEntries(POSTS.map((post) => [post.href, postSections(post.file)]));
+
 mkdirSync(path.dirname(OUT), { recursive: true });
 writeFileSync(
   OUT,
@@ -202,6 +277,7 @@ writeFileSync(
       groups: GROUPS,
       categories: CATEGORIES,
       catalogue,
+      posts,
       components: Object.fromEntries(Object.entries(docs).sort(([a], [b]) => a.localeCompare(b))),
     },
     null,
