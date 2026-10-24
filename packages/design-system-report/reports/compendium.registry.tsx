@@ -93,6 +93,15 @@ import * as TrackCardStories from '../../design-system/src/stories/TrackCard.sto
 import * as SlideStories from '../../design-system/src/stories/Slide.stories';
 import * as SlideDeckStories from '../../design-system/src/stories/SlideDeck.stories';
 import * as ReportDocumentStories from '../../design-system/src/stories/ReportDocument.stories';
+import * as StatusMarkStories from '../../design-system/src/stories/StatusMark.stories';
+import * as VerdictBandStories from '../../design-system/src/stories/VerdictBand.stories';
+import * as ProvenanceStripStories from '../../design-system/src/stories/ProvenanceStrip.stories';
+import * as DeltaValueStories from '../../design-system/src/stories/DeltaValue.stories';
+import * as ChangeCountStories from '../../design-system/src/stories/ChangeCount.stories';
+import * as ChangeBarStories from '../../design-system/src/stories/ChangeBar.stories';
+import * as ChangeIndexStories from '../../design-system/src/stories/ChangeIndex.stories';
+import * as DiffViewStories from '../../design-system/src/stories/DiffView.stories';
+import * as KeyedDiffStories from '../../design-system/src/stories/KeyedDiff.stories';
 import {
   Table,
   TableBody,
@@ -392,6 +401,16 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'Slide', group: 'Presentation', height: 88, layout: 'side', states: fromStories(SlideStories, ['Default']) },
   { component: 'SlideDeck', clips: 'chrome badges straddle the slide frame', rungs: ['sketch'], group: 'Presentation', height: 129, layout: 'stack', states: fromStories(SlideDeckStories, ['DefaultDeck']) },
   { component: 'ReportDocument', rungs: ['sketch'], group: 'Content', height: 105, layout: 'side', states: [...fromStories(ReportDocumentStories, ['Minimal', 'Disclosure']), custom('section', () => (<ReportDocument title="Link Audit"><ReportSection title="Findings"><p>None.</p></ReportSection></ReportDocument>))] },
+  // The review family — a report comparing a candidate with its baseline.
+  { component: 'StatusMark', group: 'Data display', height: 73, layout: 'side', states: fromStories(StatusMarkStories, ['AllVocabularies']) },
+  { component: 'VerdictBand', group: 'Data display', height: 110, layout: 'stack', states: fromStories(VerdictBandStories, ['Default', 'Fail']) },
+  { component: 'ProvenanceStrip', group: 'Data display', height: 86, layout: 'stack', states: fromStories(ProvenanceStripStories, ['Default']) },
+  { component: 'DeltaValue', group: 'Data display', height: 61, layout: 'side', states: fromStories(DeltaValueStories, ['States']) },
+  { component: 'ChangeCount', group: 'Data display', height: 47, layout: 'side', states: fromStories(ChangeCountStories, ['Default', 'WithBar']) },
+  { component: 'ChangeBar', group: 'Data display', height: 27, layout: 'side', states: fromStories(ChangeBarStories, ['SharedScale']) },
+  { component: 'ChangeIndex', group: 'Data display', height: 148, layout: 'stack', states: fromStories(ChangeIndexStories, ['Default']) },
+  { component: 'DiffView', group: 'Data display', height: 163, layout: 'stack', states: fromStories(DiffViewStories, ['Default']) },
+  { component: 'KeyedDiff', group: 'Data display', height: 120, layout: 'stack', states: fromStories(KeyedDiffStories, ['Default']) },
 
   { component: 'Glyph', group: 'Icons', height: 38, layout: 'side', states: [custom('named', () => <Glyph name="git-branch" accent="primary" label="branch" />), custom('typographic', () => <Glyph bracketed accent="secondary">{'->'}</Glyph>)] },
   { component: 'AsciiDivider', group: 'Layout', height: 54, layout: 'stack', states: [custom('deprecated-alias', () => <AsciiDivider />)] },
