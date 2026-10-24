@@ -29,6 +29,11 @@ hairline-framed.
 comparison tool such as Diffra emits, and a pull request under review. Both ship with sample
 data (`DEFAULT_REVIEW_REPORT`, `DEFAULT_PULL_REQUEST`) and appear on the site's examples.
 
+`StatCard` takes `appearance="quiet"` and `Card` takes `weight="quiet"` (passed through by
+`Feature` and `PricingTier`), for figures in a row and panels beside a heavier object. Defaults
+are unchanged. `SaasLandingPage` now draws its features and non-recommended plans quiet:
+re-baseline its snapshots.
+
 ## 0.16.0
 
 Five MDX figures: `SwatchCompare`, `MetricStrip`, `TokenTable`, `Decision` with `Option`, `TermGrid` with `Term`. Registered in `mdxComponents`.
