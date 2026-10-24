@@ -1,4 +1,4 @@
-import { getThemeInitScript } from '@rtkelly13/design-system';
+import { getThemeInitScript } from '@rtkelly-labs/design-system';
 
 /** The theme flash guard runs before first paint, rendered on the server. */
 export function ThemeInitScript() {

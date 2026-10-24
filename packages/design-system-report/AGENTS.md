@@ -1,11 +1,11 @@
-# AGENTS.md — @rtkelly13/design-system-report
+# AGENTS.md — @rtkelly-labs/design-system-report
 
 Renders a `.tsx` file to one self-contained HTML report, styled by
-`@rtkelly13/design-system`. Published to public npm.
+`@rtkelly-labs/design-system`. Published to public npm.
 
 **The bin is `ds-report`, not the package name.** That asymmetry is deliberate: a
 package name is read, in a manifest and on npm, where
-`@rtkelly13/design-system-report` says exactly what it is and what it belongs to.
+`@rtkelly-labs/design-system-report` says exactly what it is and what it belongs to.
 A bin name is typed, every time, and `npx ds-report audit.tsx` is the thing
 somebody actually runs. `typescript` shipping `tsc` is the same trade.
 
@@ -18,12 +18,12 @@ every report is held to.
 
 ## 🛑 The one-way dependency
 
-`@rtkelly13/design-system-report` depends on `@rtkelly13/design-system`. The design system
+`@rtkelly-labs/design-system-report` depends on `@rtkelly-labs/design-system`. The design system
 must never depend on this package, and nothing there may import from here —
 that includes stories and tests. When a change seems to need it, the thing being
 reached for belongs on the design system's side of the line.
 
-`@rtkelly13/design-system` is a **peer**, resolved from the *report's* own
+`@rtkelly-labs/design-system` is a **peer**, resolved from the *report's* own
 directory rather than from this package. An author renders against the version
 they installed, the one their editor typechecks against; a fix here is not a
 release of the components.
@@ -320,7 +320,7 @@ against a generator that emitted all of Tailwind.
 | Interactivity | **None**, with one exception. There is no client JS, so an `onClick`, a `useState` or a `Modal` renders inert — the `inert` lint rule warns about exactly this. The exception is `<details>`, which the browser implements itself: use `ReportDetails`. |
 | Async | `renderToStaticMarkup` is synchronous. Do the fetching before the render and pass the data in as props. |
 | Resolution | Imports resolve from the report file's own directory, so a report can import the author's modules — but it has to sit inside a project where `react` resolves. |
-| Version skew | `@rtkelly13/design-system` is aliased to the copy of the package that owns the renderer, so the markup and the CSS can never come from two versions. |
+| Version skew | `@rtkelly-labs/design-system` is aliased to the copy of the package that owns the renderer, so the markup and the CSS can never come from two versions. |
 | PDF | `--pdf` prints the finished HTML through headless Chromium with print media emulated — it is not a second renderer, so the `@page` rule in `styles.css` owns the margin (`preferCSSPageSize`) and every `print:` utility applies. Chromium comes from the report's own project as an optional `playwright` peer; a missing one is an install instruction. `--pdf` also compares the page count Chromium produced with the pages the document's own `break-after: page` rules declare, measured at paper width: a sheet that outgrows the paper warns, and fails under `--strict`. Webfonts are inlined into the HTML as latin-subset data URIs, so the one file carries its own type. The HTML stays byte-deterministic; the PDF carries a `CreationDate`, so byte equality is never asserted on it. |
 
 ### Where it lives, and the optional peers
@@ -336,7 +336,7 @@ than a stack trace — see `explain()` in `src/cli.ts` and `resolvePlaywright()`
 `src/pdf.ts`, and keep that true.
 
 `ReportDocument`, `ReportSection` and `ReportDetails` ship from
-**`@rtkelly13/design-system`**, not from here: they are ordinary components with
+**`@rtkelly-labs/design-system`**, not from here: they are ordinary components with
 no Node imports, they have a story and a visual baseline there, and a report
 imports them by name like anything else. The dependency runs one way — this
 package depends on the design system, never the reverse.

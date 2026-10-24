@@ -1,7 +1,7 @@
 {
-  "name": "@rtkelly13/design-system-report",
+  "name": "@rtkelly-labs/design-system-report",
   "version": "0.1.1",
-  "description": "Render a TSX file to one self-contained HTML report, styled by @rtkelly13/design-system",
+  "description": "Render a TSX file to one self-contained HTML report, styled by @rtkelly-labs/design-system",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -38,7 +38,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rtkelly13/design-system.git",
+    "url": "https://github.com/rtkelly-labs/design-system.git",
     "directory": "packages/design-system-report"
   },
   "keywords": [
@@ -52,7 +52,7 @@
   "author": "Ryan Kelly",
   "license": "MIT",
   "peerDependencies": {
-    "@rtkelly13/design-system": "^0.16.0 || ^0.15.0 || ^0.14.0 || ^0.13.0 || ^0.12.0",
+    "@rtkelly-labs/design-system": "^0.16.0 || ^0.15.0 || ^0.14.0 || ^0.13.0 || ^0.12.0",
     "@tailwindcss/typography": "^0.5.16",
     "esbuild": "^0.25.0 || ^0.26.0 || ^0.27.0 || ^0.28.0",
     "playwright": "^1.62.1",
@@ -73,7 +73,7 @@
     }
   },
   "devDependencies": {
-    "@rtkelly13/design-system": "workspace:*",
+    "@rtkelly-labs/design-system": "workspace:*",
     "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",

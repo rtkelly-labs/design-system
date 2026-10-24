@@ -36,7 +36,7 @@ const BANNER = `/* GENERATED FILE — DO NOT EDIT.
  * Import order in a consumer's entrypoint:
  *
  *   @import "tailwindcss";
- *   @import "@rtkelly13/design-system/theme.css";
+ *   @import "@rtkelly-labs/design-system/theme.css";
  *
  * ============================================================================
  * How the cascade works here, because it is not obvious

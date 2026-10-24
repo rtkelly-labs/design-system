@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertDialog, Button } from '@rtkelly13/design-system';
+import { AlertDialog, Button } from '@rtkelly-labs/design-system';
 
 export default function DeleteProject() {
   const [isOpen, setOpen] = useState(false);

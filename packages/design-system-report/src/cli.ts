@@ -8,7 +8,7 @@
  */
 
 import process from 'node:process';
-import { THEME_LEVELS, type ThemeLevel } from '@rtkelly13/design-system';
+import { THEME_LEVELS, type ThemeLevel } from '@rtkelly-labs/design-system';
 import { formatProblems } from './lint';
 import path from 'node:path';
 import { describeOverflow, htmlToPdf, type PaperSize } from './pdf';
@@ -41,7 +41,7 @@ The report is linted against this system's own rules and then typechecked with
 your own TypeScript before it renders. See AGENTS.md.
 
 The report must default-export a React component. Compose it from
-@rtkelly13/design-system — ReportDocument and ReportSection are the frame.
+@rtkelly-labs/design-system — ReportDocument and ReportSection are the frame.
 `;
 
 interface Parsed {
