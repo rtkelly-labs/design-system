@@ -13,7 +13,7 @@ describe('Tooltip', () => {
   it('opens on keyboard focus of its trigger, and closes on blur', async () => {
     render(
       <Tooltip content="Speaker notes (N)">
-        <Button aria-label="Show speaker notes">N</Button>
+        <Button appearance="raised" aria-label="Show speaker notes">N</Button>
       </Tooltip>,
     );
 
@@ -30,7 +30,7 @@ describe('Tooltip', () => {
   it('keeps the trigger’s own accessible name, and never becomes its only one', async () => {
     render(
       <Tooltip content="Fullscreen (F)" defaultOpen>
-        <Button aria-label="Enter fullscreen">F</Button>
+        <Button appearance="raised" aria-label="Enter fullscreen">F</Button>
       </Tooltip>,
     );
 
@@ -45,7 +45,7 @@ describe('Tooltip', () => {
     const onOpenChange = vi.fn();
     render(
       <Tooltip content="Copy link" onOpenChange={onOpenChange}>
-        <Button aria-label="Copy link">⧉</Button>
+        <Button appearance="raised" aria-label="Copy link">⧉</Button>
       </Tooltip>,
     );
 
@@ -67,10 +67,10 @@ describe('Tooltip', () => {
         defaultOpen
         onOpenChange={onPopoverChange}
         title="Build 1482"
-        trigger={<Button>DETAILS</Button>}
+        trigger={<Button appearance="raised">DETAILS</Button>}
       >
         <Tooltip content="Re-run the failed gate">
-          <Button aria-label="Re-run">↻</Button>
+          <Button appearance="raised" aria-label="Re-run">↻</Button>
         </Tooltip>
       </Popover>,
     );
@@ -89,7 +89,7 @@ describe('Tooltip', () => {
   it('renders nothing while disabled', async () => {
     render(
       <Tooltip content="Hidden" disabled>
-        <Button aria-label="Quiet">Q</Button>
+        <Button appearance="raised" aria-label="Quiet">Q</Button>
       </Tooltip>,
     );
     act(() => screen.getByRole('button', { name: 'Quiet' }).focus());
@@ -108,7 +108,7 @@ describe('Tooltip', () => {
         className="max-w-none"
         style={{ letterSpacing: '0.2em' }}
       >
-        <Button aria-label="Label">L</Button>
+        <Button appearance="raised" aria-label="Label">L</Button>
       </Tooltip>,
     );
 
@@ -124,7 +124,7 @@ describe('Tooltip', () => {
   it('sits on the top layer, fades on the motion tokens, and drops the fade under reduced motion', async () => {
     render(
       <Tooltip content="Label" defaultOpen>
-        <Button aria-label="Label">L</Button>
+        <Button appearance="raised" aria-label="Label">L</Button>
       </Tooltip>,
     );
 

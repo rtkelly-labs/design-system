@@ -26,7 +26,7 @@ function press(target: HTMLElement) {
 describe('Popover', () => {
   it('opens from its trigger, names the dialog by its title, and moves focus inside', async () => {
     render(
-      <Popover title="Build 1482" trigger={<Button>DETAILS</Button>}>
+      <Popover title="Build 1482" trigger={<Button appearance="raised">DETAILS</Button>}>
         <p>Passed 41 of 42 gates.</p>
       </Popover>,
     );
@@ -49,7 +49,7 @@ describe('Popover', () => {
   it('closes on Escape and returns focus to the trigger', async () => {
     const onOpenChange = vi.fn();
     render(
-      <Popover title="Build 1482" trigger={<Button>DETAILS</Button>} onOpenChange={onOpenChange}>
+      <Popover title="Build 1482" trigger={<Button appearance="raised">DETAILS</Button>} onOpenChange={onOpenChange}>
         Detail
       </Popover>,
     );
@@ -71,7 +71,7 @@ describe('Popover', () => {
     render(
       <>
         <p data-testid="outside">Page</p>
-        <Popover title="Filters" trigger={<Button>FILTERS</Button>}>
+        <Popover title="Filters" trigger={<Button appearance="raised">FILTERS</Button>}>
           Detail
         </Popover>
       </>,
@@ -92,7 +92,7 @@ describe('Popover', () => {
   it('is non-modal: nothing outside it is hidden, and nothing inside it is either', async () => {
     render(
       <main data-testid="page">
-        <Popover defaultOpen title="Build 1482" trigger={<Button>DETAILS</Button>}>
+        <Popover defaultOpen title="Build 1482" trigger={<Button appearance="raised">DETAILS</Button>}>
           <a href="#log">Open the log</a>
         </Popover>
       </main>,
@@ -109,7 +109,7 @@ describe('Popover', () => {
     function Stacked({ onModalClose }: { onModalClose: () => void }) {
       return (
         <Modal isOpen onClose={onModalClose} title="Settings">
-          <Popover title="About levels" trigger={<Button>WHAT IS A LEVEL?</Button>}>
+          <Popover title="About levels" trigger={<Button appearance="raised">WHAT IS A LEVEL?</Button>}>
             <a href="#levels">Read the ladder</a>
           </Popover>
         </Modal>
@@ -161,7 +161,7 @@ describe('Popover', () => {
         ref={ref}
         defaultOpen
         title="Wide"
-        trigger={<Button>OPEN</Button>}
+        trigger={<Button appearance="raised">OPEN</Button>}
         data-testid="pop"
         className="w-96"
         style={{ minHeight: '4rem' }}

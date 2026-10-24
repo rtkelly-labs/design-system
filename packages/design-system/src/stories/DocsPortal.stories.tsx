@@ -117,8 +117,8 @@ function SampleBody() {
       </NoteBlock>
       <MountedApp>
         <div style={{ display: 'flex', gap: '0.75rem', padding: '1rem' }}>
-          <Button variant="primary">EXECUTE</Button>
-          <Button variant="tertiary" bracketed>
+          <Button appearance="raised" variant="primary">EXECUTE</Button>
+          <Button appearance="raised" variant="tertiary" bracketed>
             CANCEL
           </Button>
         </div>

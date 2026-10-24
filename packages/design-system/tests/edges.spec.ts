@@ -16,6 +16,10 @@ import { waitForStoryRendered } from './story-ready';
  *     shadow. The brand's emphasis device; it reads as emphasis only while it is rare;
  *   - **depth** — boxes inside boxes. Each level is a frame the eye has to resolve.
  *
+ * And one absolute rule, with no baseline: **sibling buttons share an appearance.** `Button`'s
+ * `appearance` has no default, so every call site chooses; this is what stops two choices beside
+ * each other disagreeing.
+ *
  * A story may not rise above its recorded numbers. A story with no record is held to the
  * absolute limits below, which come from the benchmark in `docs/edge-hierarchy.md`: GOV.UK
  * Frontend, Primer and Carbon, measured with this same function.
@@ -63,6 +67,8 @@ test.describe('Edge hierarchy', () => {
       const where = baseline[id] ? 'its recorded baseline' : 'the limit for a new story';
       expect(census.heavyPanels, `${id}: heavy panels above ${where}`).toBeLessThanOrEqual(limit.heavyPanels);
       expect(census.maxDepth, `${id}: boxes nested deeper than ${where}`).toBeLessThanOrEqual(limit.maxDepth);
+      // Not a ratchet: no story may mix button appearances within one group, whatever it did before.
+      expect(census.mixedButtonGroups, `${id}: sibling buttons mix appearances (raised / flat / outline)`).toBe(0);
     });
   }
 });

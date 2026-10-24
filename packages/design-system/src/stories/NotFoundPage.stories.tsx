@@ -56,10 +56,10 @@ export const WithSearch: Story = {
         description="This page is not in the current docs. Pages from before 0.9 moved when the components were filed into categories."
         action={
           <>
-            <Button href="/search" variant="primary" bracketed>
+            <Button appearance="raised" href="/search" variant="primary" bracketed>
               SEARCH THE DOCS
             </Button>
-            <Button href="/docs" variant="inverse">
+            <Button appearance="raised" href="/docs" variant="inverse">
               DOCS INDEX
             </Button>
           </>

@@ -90,19 +90,19 @@ export const DesignSandbox: React.FC = () => {
 
       {/* Navigation Sub-Tabs */}
       <div className="flex gap-2 mb-8 border-b-2 border-edge-strong pb-4 overflow-x-auto">
-        <Button onClick={() => setActiveTab('components')} variant={activeTab === 'components' ? 'tertiary' : 'default'} bracketed size="sm">
+        <Button appearance="raised" onClick={() => setActiveTab('components')} variant={activeTab === 'components' ? 'tertiary' : 'default'} bracketed size="sm">
           COMPONENTS & THEMES
         </Button>
-        <Button onClick={() => setActiveTab('saas')} variant={activeTab === 'saas' ? 'tertiary' : 'default'} bracketed size="sm">
+        <Button appearance="raised" onClick={() => setActiveTab('saas')} variant={activeTab === 'saas' ? 'tertiary' : 'default'} bracketed size="sm">
           SAAS DASHBOARD
         </Button>
-        <Button onClick={() => setActiveTab('ecommerce')} variant={activeTab === 'ecommerce' ? 'tertiary' : 'default'} bracketed size="sm">
+        <Button appearance="raised" onClick={() => setActiveTab('ecommerce')} variant={activeTab === 'ecommerce' ? 'tertiary' : 'default'} bracketed size="sm">
           E-COMMERCE SHOWCASE
         </Button>
-        <Button onClick={() => setActiveTab('slides')} variant={activeTab === 'slides' ? 'tertiary' : 'default'} bracketed size="sm">
+        <Button appearance="raised" onClick={() => setActiveTab('slides')} variant={activeTab === 'slides' ? 'tertiary' : 'default'} bracketed size="sm">
           PRESENTATION DECK
         </Button>
-        <Button onClick={() => setActiveTab('post')} variant={activeTab === 'post' ? 'tertiary' : 'default'} bracketed size="sm">
+        <Button appearance="raised" onClick={() => setActiveTab('post')} variant={activeTab === 'post' ? 'tertiary' : 'default'} bracketed size="sm">
           EDITORIAL BLOG
         </Button>
       </div>
@@ -134,10 +134,10 @@ export const DesignSandbox: React.FC = () => {
               <Badge accent="success">NEON GREEN</Badge>
             </div>
             <div className="flex gap-3 flex-wrap">
-              <Button variant="primary" bracketed>PRIMARY CYAN</Button>
-              <Button variant="tertiary" bracketed>ACCENT PINK</Button>
-              <Button variant="secondary" bracketed>WARNING YELLOW</Button>
-              <Button onClick={cycleLevel} bracketed>CYCLE LEVEL: {LEVELS[level].label.toUpperCase()}</Button>
+              <Button appearance="raised" variant="primary" bracketed>PRIMARY CYAN</Button>
+              <Button appearance="raised" variant="tertiary" bracketed>ACCENT PINK</Button>
+              <Button appearance="raised" variant="secondary" bracketed>WARNING YELLOW</Button>
+              <Button appearance="raised" onClick={cycleLevel} bracketed>CYCLE LEVEL: {LEVELS[level].label.toUpperCase()}</Button>
             </div>
           </Card>
 
@@ -157,7 +157,7 @@ export const DesignSandbox: React.FC = () => {
                 ]}
               />
             </div>
-            <Button onClick={() => setIsModalOpen(true)} variant="secondary" bracketed size="sm">
+            <Button appearance="raised" onClick={() => setIsModalOpen(true)} variant="secondary" bracketed size="sm">
               TRIGGER ACTION DIALOG
             </Button>
           </div>
@@ -236,19 +236,19 @@ export const DesignSandbox: React.FC = () => {
             <Card title="NEON TERMINAL DISPLAY" description="Ultra-wide 4K brutalist developer monitor with anti-glare matte coating." filename="hardware_display.spec">
               <div className="mt-4 flex justify-between items-center">
                 <span className="font-display text-2xl font-bold text-accent-primary">$899.00</span>
-                <Button variant="primary" size="sm" bracketed>ADD TO CART</Button>
+                <Button appearance="raised" variant="primary" size="sm" bracketed>ADD TO CART</Button>
               </div>
             </Card>
             <Card title="CYBERDECK MECHANICAL" description="Hotswappable mechanical keyboard with custom laser-engraved keycaps." filename="keyboard_v2.spec">
               <div className="mt-4 flex justify-between items-center">
                 <span className="font-display text-2xl font-bold text-accent-tertiary">$349.00</span>
-                <Button variant="tertiary" size="sm" bracketed>ADD TO CART</Button>
+                <Button appearance="raised" variant="tertiary" size="sm" bracketed>ADD TO CART</Button>
               </div>
             </Card>
             <Card title="HSM HARDWARE TOKEN" description="FIPS 140-3 Level 4 physical cryptographic key with hardware destruction." filename="hsm_security.spec">
               <div className="mt-4 flex justify-between items-center">
                 <span className="font-display text-2xl font-bold text-accent-secondary">$199.00</span>
-                <Button variant="secondary" size="sm" bracketed>ADD TO CART</Button>
+                <Button appearance="raised" variant="secondary" size="sm" bracketed>ADD TO CART</Button>
               </div>
             </Card>
           </div>

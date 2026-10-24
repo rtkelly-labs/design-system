@@ -204,10 +204,10 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
         framed={false}
         actions={
           <>
-            <Button variant="tertiary" bracketed size="lg">
+            <Button appearance="raised" variant="tertiary" bracketed size="lg">
               LAUNCH APPLICATION <ArrowRight size={18} />
             </Button>
-            <Button variant="default" bracketed size="lg">
+            <Button appearance="raised" variant="default" bracketed size="lg">
               EXPLORE ARCHITECTURE
             </Button>
           </>
@@ -241,7 +241,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
             weight={tier.highlighted ? 'strong' : 'quiet'}
             badge={tier.highlighted ? 'POPULAR' : undefined}
             action={
-              <Button
+              <Button appearance="raised"
                 variant={tier.accent}
                 bracketed
                 style={{ width: '100%', justifyContent: 'center', display: 'flex' }}

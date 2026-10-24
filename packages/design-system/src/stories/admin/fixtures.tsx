@@ -76,7 +76,7 @@ function FinanceAccount() {
   return (
     <div className="flex flex-col gap-3">
       {theme && (
-        <Button size="sm" bracketed onClick={theme.cycleLevel}>
+        <Button appearance="raised" size="sm" bracketed onClick={theme.cycleLevel}>
           LEVEL: {LEVELS[theme.level].label.toUpperCase()}
         </Button>
       )}
@@ -99,7 +99,7 @@ function FinanceAccount() {
 function SyncButton({ onSync }: { onSync?: () => void }) {
   const toast = useOptionalToast();
   return (
-    <Button
+    <Button appearance="raised"
       size="sm"
       variant="tertiary"
       bracketed
@@ -142,7 +142,7 @@ function FinanceOverview() {
           {
             header: 'ACTION',
             accessor: (row) => (
-              <Button size="sm" bracketed aria-label={`View ${row.source}`}>
+              <Button appearance="raised" size="sm" bracketed aria-label={`View ${row.source}`}>
                 VIEW
               </Button>
             ),
@@ -252,7 +252,7 @@ function StudioAccount() {
     <Menu
       side="top"
       trigger={
-        <Button size="sm" variant="secondary">
+        <Button appearance="raised" size="sm" variant="secondary">
           M. HOPPER · EDITOR
         </Button>
       }
@@ -269,7 +269,7 @@ function StudioPosts() {
   return (
     <>
       <PageHeader title="Posts" subtitle="Twelve posts, three drafts waiting on review." icon={FileText}>
-        <Button size="sm" bracketed>
+        <Button appearance="raised" size="sm" bracketed>
           NEW POST
         </Button>
       </PageHeader>
@@ -313,10 +313,10 @@ export function ContentStudio() {
           label="Content studio"
           actions={
             <>
-              <Button size="sm" variant="secondary">
+              <Button appearance="raised" size="sm" variant="secondary">
                 PREVIEW SITE
               </Button>
-              <Button size="sm" bracketed>
+              <Button appearance="raised" size="sm" bracketed>
                 PUBLISH
               </Button>
             </>

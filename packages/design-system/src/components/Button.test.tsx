@@ -13,12 +13,12 @@ import { Button } from './Button';
  */
 describe('Button', () => {
   it('renders a button by default', () => {
-    render(<Button>SAVE</Button>);
+    render(<Button appearance="raised">SAVE</Button>);
     expect(screen.getByRole('button', { name: 'SAVE' })).toBeDefined();
   });
 
   it('renders an anchor when given an href, because navigation is a link', () => {
-    render(<Button href="/pricing">SEE PRICING</Button>);
+    render(<Button appearance="raised" href="/pricing">SEE PRICING</Button>);
     const link = screen.getByRole('link', { name: 'SEE PRICING' });
     expect(link.tagName).toBe('A');
     expect(link.getAttribute('href')).toBe('/pricing');
@@ -31,7 +31,7 @@ describe('Button', () => {
    */
   it('adds rel=noopener noreferrer to a new-tab link', () => {
     render(
-      <Button href="https://example.com" target="_blank">
+      <Button appearance="raised" href="https://example.com" target="_blank">
         EXTERNAL
       </Button>,
     );
@@ -40,7 +40,7 @@ describe('Button', () => {
 
   it("lets a caller's explicit rel win", () => {
     render(
-      <Button href="https://example.com" target="_blank" rel="me">
+      <Button appearance="raised" href="https://example.com" target="_blank" rel="me">
         MINE
       </Button>,
     );
@@ -48,32 +48,32 @@ describe('Button', () => {
   });
 
   it('does not add a rel to a same-tab link', () => {
-    render(<Button href="/docs">DOCS</Button>);
+    render(<Button appearance="raised" href="/docs">DOCS</Button>);
     expect(screen.getByRole('link').getAttribute('rel')).toBeNull();
   });
 
   it('merges a caller className rather than appending it', () => {
-    render(<Button className="mt-4">SAVE</Button>);
+    render(<Button appearance="raised" className="mt-4">SAVE</Button>);
     const cls = screen.getByRole('button').className;
     expect(cls).toContain('mt-4');
     expect(cls).toContain('border-2');
   });
 
   it('brackets its label without changing the accessible name', () => {
-    render(<Button bracketed>SUBMIT</Button>);
+    render(<Button appearance="raised" bracketed>SUBMIT</Button>);
     expect(screen.getByRole('button', { name: 'SUBMIT' })).toBeDefined();
   });
 
   it('forwards its ref to the button', () => {
     const ref = createRef<HTMLButtonElement | HTMLAnchorElement>();
-    render(<Button ref={ref}>SAVE</Button>);
+    render(<Button appearance="raised" ref={ref}>SAVE</Button>);
     expect(ref.current?.tagName).toBe('BUTTON');
   });
 
   it('forwards its ref to the anchor when it renders one', () => {
     const ref = createRef<HTMLButtonElement | HTMLAnchorElement>();
     render(
-      <Button ref={ref} href="/x">
+      <Button appearance="raised" ref={ref} href="/x">
         GO
       </Button>,
     );
@@ -82,7 +82,7 @@ describe('Button', () => {
 
   it('forwards arbitrary button attributes', () => {
     render(
-      <Button type="submit" disabled>
+      <Button appearance="raised" type="submit" disabled>
         SAVE
       </Button>,
     );
@@ -93,7 +93,7 @@ describe('Button', () => {
 
   // #252: a pending submit rendered exactly like a pressable one.
   it('carries a disabled treatment, and gates the press affordance on being enabled', () => {
-    render(<Button disabled>SAVE</Button>);
+    render(<Button appearance="raised" disabled>SAVE</Button>);
     const cls = screen.getByRole('button').className;
     expect(cls).toContain('disabled:bg-surface-sunken');
     expect(cls).toContain('disabled:text-content-muted');
@@ -114,7 +114,7 @@ describe('Button', () => {
  */
 describe('Button — pending', () => {
   it('reports aria-disabled rather than the disabled attribute, and keeps its tab stop', () => {
-    render(<Button pending>SAVE</Button>);
+    render(<Button appearance="raised" pending>SAVE</Button>);
     const button = screen.getByRole('button', { name: 'SAVE' }) as HTMLButtonElement;
     expect(button.getAttribute('aria-disabled')).toBe('true');
     expect(button.disabled).toBe(false);
@@ -124,10 +124,10 @@ describe('Button — pending', () => {
   });
 
   it('keeps focus when it turns pending', () => {
-    const { rerender } = render(<Button pending={false}>SAVE</Button>);
+    const { rerender } = render(<Button appearance="raised" pending={false}>SAVE</Button>);
     const button = screen.getByRole('button', { name: 'SAVE' });
     button.focus();
-    rerender(<Button pending>SAVE</Button>);
+    rerender(<Button appearance="raised" pending>SAVE</Button>);
     expect(screen.getByRole('button', { name: 'SAVE' })).toBe(button);
     expect(document.activeElement).toBe(button);
   });
@@ -135,7 +135,7 @@ describe('Button — pending', () => {
   it('does not run onClick while pending, and does again once it is not', () => {
     const onClick = vi.fn();
     const { rerender } = render(
-      <Button pending onClick={onClick}>
+      <Button appearance="raised" pending onClick={onClick}>
         SAVE
       </Button>,
     );
@@ -143,7 +143,7 @@ describe('Button — pending', () => {
     expect(onClick).not.toHaveBeenCalled();
 
     rerender(
-      <Button pending={false} onClick={onClick}>
+      <Button appearance="raised" pending={false} onClick={onClick}>
         SAVE
       </Button>,
     );
@@ -155,7 +155,7 @@ describe('Button — pending', () => {
     const onSubmit = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
     const { rerender } = render(
       <form onSubmit={onSubmit}>
-        <Button type="submit" pending={false}>
+        <Button appearance="raised" type="submit" pending={false}>
           SAVE
         </Button>
       </form>,
@@ -165,7 +165,7 @@ describe('Button — pending', () => {
 
     rerender(
       <form onSubmit={onSubmit}>
-        <Button type="submit" pending>
+        <Button appearance="raised" type="submit" pending>
           SAVE
         </Button>
       </form>,
@@ -177,7 +177,7 @@ describe('Button — pending', () => {
 
   it('keeps its accessible name, with the spinner hidden from assistive technology', () => {
     render(
-      <Button pending bracketed>
+      <Button appearance="raised" pending bracketed>
         SAVE
       </Button>,
     );
@@ -189,7 +189,7 @@ describe('Button — pending', () => {
 
   it('announces pendingLabel through a status region that exists before it is filled', () => {
     const { rerender } = render(
-      <Button pending={false} pendingLabel="Saving your changes">
+      <Button appearance="raised" pending={false} pendingLabel="Saving your changes">
         SAVE
       </Button>,
     );
@@ -198,7 +198,7 @@ describe('Button — pending', () => {
     expect(status.className).toContain('sr-only');
 
     rerender(
-      <Button pending pendingLabel="Saving your changes">
+      <Button appearance="raised" pending pendingLabel="Saving your changes">
         SAVE
       </Button>,
     );
@@ -207,13 +207,13 @@ describe('Button — pending', () => {
   });
 
   it('adds no status region to a button that never passes pending', () => {
-    render(<Button>SAVE</Button>);
+    render(<Button appearance="raised">SAVE</Button>);
     expect(screen.queryByRole('status')).toBeNull();
   });
 
   it('lets disabled win when both are set', () => {
     render(
-      <Button disabled pending>
+      <Button appearance="raised" disabled pending>
         SAVE
       </Button>,
     );
@@ -225,9 +225,45 @@ describe('Button — pending', () => {
 
   it('is not offered on the anchor form', () => {
     // @ts-expect-error `pending` is `never` when `href` is given.
-    render(<Button href="/x" pending>GO</Button>);
+    render(<Button appearance="raised" href="/x" pending>GO</Button>);
     const link = screen.getByRole('link');
     expect(link.hasAttribute('pending')).toBe(false);
     expect(link.hasAttribute('aria-disabled')).toBe(false);
+  });
+});
+
+describe('Button appearance', () => {
+  it('has no default: a missing appearance throws', () => {
+    const missing = { children: 'SAVE' } as unknown as React.ComponentProps<typeof Button>;
+    expect(() => render(<Button {...missing} />)).toThrow(/needs an appearance/);
+  });
+
+  it('raises, flattens or outlines, and says which', () => {
+    const { rerender } = render(<Button appearance="raised">SAVE</Button>);
+    const el = () => screen.getByRole('button');
+    expect(el().getAttribute('data-appearance')).toBe('raised');
+    expect(el().className).toContain('shadow-hard-md');
+
+    rerender(<Button appearance="flat">SAVE</Button>);
+    expect(el().className).not.toContain('shadow-hard-md');
+    expect(el().className).toContain('bg-accent-tertiary');
+    expect(el().className).toContain('hover:brightness-110');
+
+    rerender(<Button appearance="outline">SAVE</Button>);
+    expect(el().className).toContain('bg-transparent');
+    expect(el().className).toContain('border-accent-tertiary');
+    expect(el().className).not.toContain('shadow-hard-md');
+  });
+
+  it('holds only a raised button in its press while pending', () => {
+    const { rerender } = render(<Button appearance="raised" pending>SAVE</Button>);
+    expect(screen.getByRole('button').className).toContain('translate-x-1');
+    rerender(<Button appearance="flat" pending>SAVE</Button>);
+    expect(screen.getByRole('button').className).not.toContain('translate-x-1');
+  });
+
+  it('carries the appearance on the anchor form too', () => {
+    render(<Button appearance="outline" href="/docs">DOCS</Button>);
+    expect(screen.getByRole('link').getAttribute('data-appearance')).toBe('outline');
   });
 });

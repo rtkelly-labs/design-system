@@ -16,7 +16,7 @@ export default function PendingButton() {
 
   return (
     <div className="flex flex-wrap items-center gap-4">
-      <Button
+      <Button appearance="raised"
         variant="primary"
         bracketed
         pending={phase === 'publishing'}
