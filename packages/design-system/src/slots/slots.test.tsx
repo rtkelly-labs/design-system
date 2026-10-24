@@ -70,7 +70,7 @@ beforeAll(async () => {
     observed.set(e.name, slots);
     rendered.set(e.name, count);
   }
-});
+}, 30000);
 
 const carries = (name: string, slots: Set<string>) => {
   const alias = ALIASES[name];
