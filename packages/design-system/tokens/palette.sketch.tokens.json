@@ -459,6 +459,56 @@
       "$value": "{palette.red}"
     }
   },
+  "delta": {
+    "$type": "color",
+    "$description": "Change Roles, aliased onto Hues by the declared `deltaHue` map. Not meaning: an added line is not a success.",
+    "added": {
+      "$value": "{palette.green}"
+    },
+    "removed": {
+      "$value": "{palette.red}"
+    },
+    "moved": {
+      "$value": "{palette.violet}"
+    }
+  },
+  "deltaGround": {
+    "$type": "color",
+    "$description": "The grounds a diff paints behind changed rows and hunk headers.",
+    "added": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.9329,
+          0.0323,
+          145.31
+        ],
+        "hex": "#dcefdc"
+      }
+    },
+    "removed": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.9147,
+          0.0294,
+          28.13
+        ],
+        "hex": "#f6dcd8"
+      }
+    },
+    "hunk": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.9129,
+          0.0195,
+          90.55
+        ],
+        "hex": "#e7e2d4"
+      }
+    }
+  },
   "shadow": {
     "$type": "color",
     "color": {
