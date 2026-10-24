@@ -1,0 +1,722 @@
+{
+  "blog-blogpost--custom-author-card": {
+    "heavyPanels": 2,
+    "maxDepth": 0
+  },
+  "blog-blogpost--full-metadata": {
+    "heavyPanels": 2,
+    "maxDepth": 0
+  },
+  "blog-blogpost--guest-author": {
+    "heavyPanels": 2,
+    "maxDepth": 0
+  },
+  "blog-blogpost--with-avatar": {
+    "heavyPanels": 2,
+    "maxDepth": 1
+  },
+  "blog-colophoncard--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "blog-loremipsumpost--foundational-blog-post": {
+    "heavyPanels": 6,
+    "maxDepth": 0
+  },
+  "blog-metadatagrid--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "blog-trackcard--default": {
+    "heavyPanels": 1,
+    "maxDepth": 2
+  },
+  "components-actions-forms-button--bracketed": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-button--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-button--disabled": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-button--pending": {
+    "heavyPanels": 0,
+    "maxDepth": 1
+  },
+  "components-actions-forms-checkbox--all-states": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-errorsummary--account-settings": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "components-actions-forms-fieldset--all-states": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-input--default-input": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-radiogroup--all-states": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-select--all-states": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-select--disabled-option": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-switch--all-states": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-content-avatar--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-content-badge--emphasis": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-content-badge--intent": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-content-brackettext--emphasis": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-content-card--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-content-noteblock--all-types": {
+    "heavyPanels": 4,
+    "maxDepth": 0
+  },
+  "components-content-tag--row": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-content-tldr--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "components-data-barchart--vertical": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "components-data-bulletchart--primary-benchmark": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-data-charttooltip--primary": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-data-datatable--paginated": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "components-data-datatable--sorted-with-caption": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "components-data-datatable--virtualized": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-data-sparkline--primary-trend": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-data-statcard--system-health": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "components-feedback-emptystate--first-run": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-feedback-notfoundpage--in-site-chrome": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-feedback-progress--accents": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-feedback-servererrorpage--standalone": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-feedback-skeleton--loading-card": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-feedback-spinner--sizes": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-feedback-statuspage--maintenance": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-feedback-statuspage--offline": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-feedback-statuspage--unauthorized": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-feedback-toast--all-intents": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-icons-socialicon--brand-marks": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "components-layout-appshell--default": {
+    "heavyPanels": 2,
+    "maxDepth": 1
+  },
+  "components-layout-appshell--sidebar-open": {
+    "heavyPanels": 2,
+    "maxDepth": 1
+  },
+  "components-layout-divider--patterns": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-layout-pageheader--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-layout-pageheader--with-children": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-layout-pagetitle--with-subtitle": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "components-layout-sectioncontainer--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-marketing-ctasection--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-marketing-featuregrid--default": {
+    "heavyPanels": 3,
+    "maxDepth": 0
+  },
+  "components-marketing-hero--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "components-marketing-pricinggrid--default": {
+    "heavyPanels": 6,
+    "maxDepth": 1
+  },
+  "components-navigation-mobilenav--open": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-mobilenav--with-group": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-pagination--as-links-many-pages": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-pagination--many-pages": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-pagination--middle-page": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-sitefooter--columns": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-siteheader--blog": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-siteheader--marketing": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-siteheader--portfolio": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-siteheader--project-site": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-siteheader--sticky-tabs": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "components-navigation-sitenav--with-children": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-navigation-tabs--default": {
+    "heavyPanels": 2,
+    "maxDepth": 1
+  },
+  "components-overlays-alertdialog--destructive": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-overlays-drawer--from-the-left": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-overlays-drawer--from-the-right": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-overlays-menu--actions": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-overlays-menu--at-the-viewport-edge": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-overlays-modal--with-footer": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-overlays-popover--at-the-viewport-edge": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-overlays-popover--open": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-overlays-tooltip--at-the-viewport-edge": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-overlays-tooltip--on-an-icon-button": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-changebar--shared-scale": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-changebar--sketch-theme": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-changecount--sketch-theme": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-changecount--with-bar": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-changeindex--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-changeindex--sketch-theme": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-deltavalue--sketch-theme": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-deltavalue--states": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-diffview--default": {
+    "heavyPanels": 0,
+    "maxDepth": 1
+  },
+  "components-reports-diffview--sketch-theme": {
+    "heavyPanels": 0,
+    "maxDepth": 1
+  },
+  "components-reports-keyeddiff--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-keyeddiff--sketch-theme": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-provenancestrip--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-provenancestrip--sketch-theme": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-reportdocument--quality-gate": {
+    "heavyPanels": 7,
+    "maxDepth": 1
+  },
+  "components-reports-statusmark--all-vocabularies": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-statusmark--sketch-theme": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-reports-verdictband--all-outcomes": {
+    "heavyPanels": 6,
+    "maxDepth": 1
+  },
+  "components-reports-verdictband--sketch-theme": {
+    "heavyPanels": 6,
+    "maxDepth": 1
+  },
+  "docs-content-anchorheading--levels": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "docs-content-codeblock--with-title-and-language": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-content-codetabs--merged": {
+    "heavyPanels": 2,
+    "maxDepth": 1
+  },
+  "docs-content-prose--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "docs-content-steps--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-content-steps--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-content-terminal--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-content-terminal--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-activitygrid--blog-posting-cadence": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-activitygrid--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-beforeafter--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-beforeafter--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-changesummary--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-changesummary--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-decision--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "docs-figures-decision--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "docs-figures-drawingsheet--change-review": {
+    "heavyPanels": 6,
+    "maxDepth": 2
+  },
+  "docs-figures-drawingsheet--sketch-theme": {
+    "heavyPanels": 5,
+    "maxDepth": 2
+  },
+  "docs-figures-figurecompositions--editorial-plan": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-figurecompositions--incident-report": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-figureframe--editorial-figure": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-figureframe--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-filechangetree--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "docs-figures-filechangetree--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "docs-figures-flowdiagram--optimistic-ui": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-flowdiagram--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-ganttchart--editorial-calendar": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-ganttchart--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-indexedsection--default": {
+    "heavyPanels": 4,
+    "maxDepth": 1
+  },
+  "docs-figures-indexedsection--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "docs-figures-metricstrip--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-metricstrip--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-swatchcompare--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "docs-figures-swatchcompare--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "docs-figures-termgrid--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-termgrid--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-timeline--shipped": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-timeline--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-tokentable--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "docs-figures-tokentable--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "docs-figures-treediagram--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-treediagram--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-uptimestrip--default": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-figures-uptimestrip--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "docs-layout-breadcrumbs--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "docs-layout-docpager--both": {
+    "heavyPanels": 2,
+    "maxDepth": 0
+  },
+  "docs-layout-docsheader--with-search": {
+    "heavyPanels": 0,
+    "maxDepth": 1
+  },
+  "docs-layout-docslayout--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "docs-layout-docslayout--mobile-drawer": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "docs-layout-docssidebar--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "docs-layout-portal--full-portal": {
+    "heavyPanels": 10,
+    "maxDepth": 1
+  },
+  "docs-layout-tableofcontents--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "foundations-asciigauge--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "foundations-semantic-tokens--roles": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "foundations-swatch--group": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "foundations-telemetrygauge--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "foundations-theme-ladder--all-levels": {
+    "heavyPanels": 3,
+    "maxDepth": 1
+  },
+  "foundations-tickertape--default": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "presentation-slide--with-subtitle": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "presentation-slidedeck--default-deck": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "saas-account-flows--account-settings": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "saas-account-flows--account-settings-failed": {
+    "heavyPanels": 1,
+    "maxDepth": 0
+  },
+  "saas-account-flows--create-account": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "saas-account-flows--create-account-failed": {
+    "heavyPanels": 2,
+    "maxDepth": 1
+  },
+  "saas-account-flows--reset-password": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "saas-account-flows--reset-password-mismatch": {
+    "heavyPanels": 2,
+    "maxDepth": 1
+  },
+  "saas-account-flows--reset-password-sent": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "saas-account-flows--sign-in": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "saas-account-flows--sign-in-rejected": {
+    "heavyPanels": 2,
+    "maxDepth": 1
+  },
+  "saas-admindashboard--content-studio": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "saas-admindashboard--finance-console": {
+    "heavyPanels": 4,
+    "maxDepth": 1
+  },
+  "saas-landingpage--dark-mode": {
+    "heavyPanels": 8,
+    "maxDepth": 1
+  },
+  "saas-landingpage--product-launch": {
+    "heavyPanels": 11,
+    "maxDepth": 1
+  },
+  "saas-landingpage--project-site": {
+    "heavyPanels": 9,
+    "maxDepth": 1
+  },
+  "saas-landingpage--sketch-mode": {
+    "heavyPanels": 8,
+    "maxDepth": 1
+  },
+  "saas-pullrequest--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "saas-pullrequest--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "saas-reviewreport--default": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "saas-reviewreport--sketch-theme": {
+    "heavyPanels": 1,
+    "maxDepth": 1
+  },
+  "showcase-experimentsview--default": {
+    "heavyPanels": 6,
+    "maxDepth": 1
+  }
+}
