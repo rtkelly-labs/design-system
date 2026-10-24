@@ -162,6 +162,6 @@ describe('Pagination', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Previous Page' }));
     expect(onPageChange).toHaveBeenCalledWith(2);
     expect(screen.getByRole('button', { name: 'Next Page' }).getAttribute('aria-disabled')).toBe('true');
-    expect(screen.getByText('[ 3 / 3 ]')).toBeTruthy();
+    expect(screen.getByText('3 / 3', { selector: '[data-slot="bracket-text"]' })).toBeTruthy();
   });
 });

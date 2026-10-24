@@ -3,6 +3,7 @@ import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { Glyph } from '../components/Glyph';
 import { NERD_GLYPHS, NerdIcon, type NerdIconName } from '../components/NerdIcon';
+import { BracketText } from '../components/BracketText';
 
 const meta: Meta<typeof NerdIcon> = {
   title: 'Components/Icons/NerdIcon',
@@ -34,7 +35,7 @@ export const DeveloperGlyphs: Story = {
     return (
       <div className="p-8 space-y-6 max-w-2xl font-mono">
         <h3 className="font-display text-sm font-bold uppercase tracking-wider text-accent-primary">
-          [ NERD FONTS DEVELOPER GLYPHS ]
+          <BracketText>NERD FONTS DEVELOPER GLYPHS</BracketText>
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {devIcons.map((name) => (
@@ -56,7 +57,7 @@ export const BracketedInUI: Story = {
   render: () => (
     <div className="p-8 space-y-6 max-w-2xl font-mono">
       <h3 className="font-display text-sm font-bold uppercase tracking-wider text-accent-primary">
-        [ BRACKETED UI INTEGRATION ]
+        <BracketText>BRACKETED UI INTEGRATION</BracketText>
       </h3>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -92,20 +93,20 @@ export const TableSortDemo: Story = {
   render: () => (
     <div className="p-8 max-w-xl font-mono">
       <h3 className="font-display text-sm font-bold uppercase tracking-wider text-accent-primary mb-4">
-        [ MONOSPACE TABLE SORT HEADERS ]
+        <BracketText>MONOSPACE TABLE SORT HEADERS</BracketText>
       </h3>
       <div className="border-2 border-edge-strong bg-surface-base">
         <div className="flex border-b-2 border-edge-strong bg-surface-raised text-xs font-bold uppercase">
           <div className="px-4 py-2.5 flex-1 border-r-2 border-edge-strong flex items-center justify-between">
-            <span>[ REPOSITORY ]</span>
+            <span><BracketText>REPOSITORY</BracketText></span>
             <NerdIcon name="sort" accent="muted" size="sm" />
           </div>
           <div className="px-4 py-2.5 w-32 border-r-2 border-edge-strong flex items-center justify-between text-accent-primary">
-            <span>[ COMMITS ]</span>
+            <span><BracketText>COMMITS</BracketText></span>
             <NerdIcon name="sort-asc" accent="primary" size="sm" />
           </div>
           <div className="px-4 py-2.5 w-32 flex items-center justify-between">
-            <span>[ LATENCY ]</span>
+            <span><BracketText>LATENCY</BracketText></span>
             <NerdIcon name="sort" accent="muted" size="sm" />
           </div>
         </div>
@@ -130,7 +131,7 @@ export const TypographicAsciiMix: Story = {
   render: () => (
     <div className="p-8 space-y-4 font-mono">
       <h3 className="font-display text-sm font-bold uppercase tracking-wider text-accent-primary">
-        [ UNIFIED GLYPH HYBRID MIX ]
+        <BracketText>UNIFIED GLYPH HYBRID MIX</BracketText>
       </h3>
       <div className="flex flex-wrap items-center gap-3">
         <Glyph bracketed accent="primary">-&gt;</Glyph>

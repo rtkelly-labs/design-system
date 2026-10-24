@@ -224,7 +224,7 @@ describe('AppShell', () => {
       toggle.focus();
       fireEvent.click(toggle);
 
-      const drawer = await screen.findByRole('dialog', { name: '[ Workspace ]' });
+      const drawer = await screen.findByRole('dialog', { name: 'Workspace' });
       expect(drawer.getAttribute('data-placement')).toBe('left');
       await waitFor(() => expect(drawer.contains(document.activeElement)).toBe(true));
       expect(toggle.getAttribute('aria-expanded')).toBe('true');

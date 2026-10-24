@@ -14,13 +14,13 @@ describe('MetadataGrid', () => {
       />,
     );
 
-    expect(screen.getByText('[ PUBLISHED ]')).toBeDefined();
+    expect(screen.getByText('PUBLISHED', { selector: '[data-slot="bracket-text"]' })).toBeDefined();
     expect(screen.getByText('2026-09-16')).toBeDefined();
-    expect(screen.getByText('[ READ TIME ]')).toBeDefined();
+    expect(screen.getByText('READ TIME', { selector: '[data-slot="bracket-text"]' })).toBeDefined();
     expect(screen.getByText('10 MIN READ')).toBeDefined();
-    expect(screen.getByText('[ SERIES TRACK ]')).toBeDefined();
+    expect(screen.getByText('SERIES TRACK', { selector: '[data-slot="bracket-text"]' })).toBeDefined();
     expect(screen.getByText(/DISTRIBUTED ARCHITECTURES/)).toBeDefined();
-    expect(screen.getByText('[ TOPICS ]')).toBeDefined();
+    expect(screen.getByText('TOPICS', { selector: '[data-slot="bracket-text"]' })).toBeDefined();
     expect(screen.getByText('#KAFKA')).toBeDefined();
   });
 
@@ -45,9 +45,9 @@ describe('MetadataGrid', () => {
       />,
     );
 
-    expect(screen.getByText('[ STATUS ]')).toBeDefined();
+    expect(screen.getByText('STATUS', { selector: '[data-slot="bracket-text"]' })).toBeDefined();
     expect(screen.getByText('PRODUCTION')).toBeDefined();
-    expect(screen.getByText('[ REVISION ]')).toBeDefined();
+    expect(screen.getByText('REVISION', { selector: '[data-slot="bracket-text"]' })).toBeDefined();
     expect(screen.getByText('v2.4.1')).toBeDefined();
   });
 

@@ -1,4 +1,5 @@
 import type React from 'react';
+import { BracketText } from '../BracketText';
 
 export interface SlideProps {
   title?: string;
@@ -50,7 +51,7 @@ export const Slide: React.FC<SlideProps> = ({
               margin: 0,
             }}
           >
-            {`[\u00a0${title}\u00a0]`}
+            <BracketText>{title}</BracketText>
           </h2>
           {subtitle && (
             <p

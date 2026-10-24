@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
-import { Input, Modal } from '@rtkelly13/design-system';
+import { Input, Modal, BracketText } from '@rtkelly13/design-system';
 import { searchEntries } from '@/lib/search';
 import type { SearchEntry } from '@/lib/search';
 
@@ -165,9 +165,9 @@ function SearchDialog({
       <p className="mt-4 mb-2 font-mono text-xs font-bold uppercase tracking-wider text-content-muted" aria-live="polite">
         {query.trim()
           ? results.length
-            ? `[ ${results.length} RESULT${results.length === 1 ? '' : 'S'} ]`
-            : `[ NO MATCHES FOR “${query.trim()}” ]`
-          : '[ PAGES ]'}
+            ? <BracketText>{`${results.length} RESULT${results.length === 1 ? '' : 'S'}`}</BracketText>
+            : <BracketText>{`NO MATCHES FOR “${query.trim()}”`}</BracketText>
+          : <BracketText>PAGES</BracketText>}
       </p>
 
       <ul id={listId} role="listbox" aria-label="Results" className="m-0 max-h-[50vh] list-none overflow-y-auto p-0">

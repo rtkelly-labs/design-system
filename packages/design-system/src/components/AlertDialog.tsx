@@ -7,6 +7,7 @@ import { cn } from '../lib/recipe';
 import { usePortalThemeAttribute } from './portalTheme';
 import { dialogSurface } from './dialogSurface';
 import { Button } from './Button';
+import { BracketText } from './BracketText';
 
 export interface AlertDialogProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
@@ -108,7 +109,7 @@ export const AlertDialog = forwardRef<HTMLDivElement, AlertDialogProps>(function
               <BaseAlertDialog.Title
                 data-slot="alert-dialog-title"
                 className={slots.title()}
-                render={<h3>[ {title} ]</h3>}
+                render={<h3><BracketText>{title}</BracketText></h3>}
               />
             </div>
 

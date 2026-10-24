@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { EmptyState } from '../components/EmptyState';
 import { Button } from '../components/Button';
 import { Card } from '../components/Card';
+import { BracketText } from '../components/BracketText';
 
 const meta: Meta<typeof EmptyState> = {
   title: 'Components/Feedback/EmptyState',
@@ -25,7 +26,7 @@ export const EmptySearchResult: Story = {
   render: () => (
     <div className="w-full max-w-xl">
       <EmptyState
-        icon={<span className="font-mono text-2xl">[ ? ]</span>}
+        icon={<span className="font-mono text-2xl"><BracketText>?</BracketText></span>}
         title="No matches"
         description={
           <>
@@ -61,7 +62,7 @@ export const FirstRun: Story = {
   render: () => (
     <div className="w-full max-w-xl">
       <EmptyState
-        icon={<span className="font-mono text-2xl">[ /// ]</span>}
+        icon={<span className="font-mono text-2xl"><BracketText>///</BracketText></span>}
         title="No rules yet"
         description="A rule matches incoming statements and files them against a contract. Create one to see it run against the last 30 days."
         action={

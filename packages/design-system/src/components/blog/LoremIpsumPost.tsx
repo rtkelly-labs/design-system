@@ -21,20 +21,20 @@ export const LoremIpsumPost: React.FC = () => {
       </TLDR>
 
       <h2 style={{ fontFamily: 'var(--ds-font-display)', fontSize: '1.75rem', fontWeight: 800, textTransform: 'uppercase', marginTop: '2.5rem', color: 'var(--ds-accent-primary)' }}>
-        [ 01. The Problem with Generic Web UI ]
+        <BracketText>01. The Problem with Generic Web UI</BracketText>
       </h2>
       <p style={{ marginTop: '1rem' }}>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.
         Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta.
       </p>
 
-      <NoteBlock type="important" title="SYSTEM RULE ENFORCEMENT">
+      <NoteBlock type="warning" title="SYSTEM RULE ENFORCEMENT">
         Never hardcode pixel border radii or hex literals inside downstream component code.
         All colors must resolve through standard CSS tokens (<code style={{ color: 'var(--ds-accent-primary)' }}>--ds-accent-primary</code>, <code style={{ color: 'var(--ds-accent-tertiary)' }}>--ds-accent-tertiary</code>) to preserve paper-and-ink theme remapping.
       </NoteBlock>
 
       <h2 style={{ fontFamily: 'var(--ds-font-display)', fontSize: '1.75rem', fontWeight: 800, textTransform: 'uppercase', marginTop: '2.5rem', color: 'var(--ds-accent-tertiary)' }}>
-        [ 02. Executable Design Tokens ]
+        <BracketText>02. Executable Design Tokens</BracketText>
       </h2>
       <p style={{ marginTop: '1rem' }}>
         Below is an example of code block rendering within the design system:

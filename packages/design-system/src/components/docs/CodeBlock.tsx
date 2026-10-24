@@ -101,7 +101,7 @@ export function CodeBlock({
           `scrollable-region-focusable`, and a real trap rather than a technicality:
           the content is simply unreachable without a pointer.
         */}
-        <pre ref={preRef} tabIndex={0} role="region" aria-label={title ?? 'Code'} {...rest}>
+        <pre ref={preRef} className="rounded-none!" tabIndex={0} role="region" aria-label={title ?? 'Code'} {...rest}>
           {children}
         </pre>
       </div>

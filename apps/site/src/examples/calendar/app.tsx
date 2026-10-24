@@ -29,6 +29,7 @@ import {
   Tabs,
   TabsList,
   TabsTab,
+  BracketText,
 } from '@rtkelly13/design-system';
 import {
   CALENDARS,
@@ -246,7 +247,7 @@ function MiniMonth({ anchor, shown, onShown, onPick, weekMode }: { anchor: numbe
     <div className="border-2 border-edge-strong bg-surface-raised p-2">
       <div className="mb-2 flex items-center justify-between font-mono text-xs font-bold">
         <button type="button" aria-label="Previous month" className="size-8 cursor-pointer border-2 border-edge-strong hover:bg-surface-sunken" onClick={() => onShown(addMonths(shown, -1))}>&lt;</button>
-        <span aria-live="polite">[ {monthLabel(shown)} ]</span>
+        <span aria-live="polite"><BracketText>{monthLabel(shown)}</BracketText></span>
         <button type="button" aria-label="Next month" className="size-8 cursor-pointer border-2 border-edge-strong hover:bg-surface-sunken" onClick={() => onShown(addMonths(shown, 1))}>&gt;</button>
       </div>
       <div ref={ref} role="grid" aria-label={`Date picker, ${monthLabel(shown)}`} className="font-mono text-xs">
@@ -810,7 +811,7 @@ export default function CalendarApp() {
             />
           </div>
           <fieldset className="m-0 border-2 border-edge-strong bg-surface-raised p-2">
-            <legend className="px-1 font-mono text-xs font-bold">[ CALENDARS ]</legend>
+            <legend className="px-1 font-mono text-xs font-bold"><BracketText>CALENDARS</BracketText></legend>
             <div className="flex flex-wrap gap-x-4 gap-y-1 lg:flex-col">
               {CALENDARS.map((c) => (
                 <Checkbox

@@ -2,6 +2,7 @@ import type { ElementType } from 'react';
 import { accentHoverEdgeClass, accentTextClass } from '../lib/accentClasses';
 import { cn } from '../lib/recipe';
 import type { AccentToken } from '../lib/theme';
+import { BracketText } from './BracketText';
 
 /**
  * Accepted accents. Widened from the four palette names to the full role set;
@@ -52,7 +53,7 @@ export function StatCard({
     >
       <div data-slot="statcard-header" className="flex justify-between items-start mb-2">
         <span data-slot="statcard-label" className="font-mono text-xs font-bold uppercase tracking-wider text-content-muted">
-          [ {title} ]
+          <BracketText>{title}</BracketText>
         </span>
         {Icon && <Icon className={cn('h-6 w-6', accentTextClass(accent))} />}
       </div>

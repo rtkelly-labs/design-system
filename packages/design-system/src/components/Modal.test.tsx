@@ -39,7 +39,7 @@ describe('Modal', () => {
       </main>,
     );
 
-    const dialog = await screen.findByRole('dialog', { name: '[ Settings ]' });
+    const dialog = await screen.findByRole('dialog', { name: 'Settings' });
 
     expect(document.querySelector('[data-slot="modal-backdrop"]')).not.toBeNull();
     expect(dialog.parentElement?.getAttribute('data-slot')).toBe('modal-viewport');
