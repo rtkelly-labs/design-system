@@ -155,10 +155,10 @@ export const Monospace: Story = {
 
 /**
  * Labels as written, for filenames and other identifiers where case means
- * something: `transform="none"` turns off the house all-caps for the whole set.
+ * something: `transform="none"` keeps the case on a mono strip, which would otherwise set it in capitals.
  */
 export const CasePreserved: Story = {
-  args: { defaultValue: 'readme', variant: 'underline', transform: 'none' },
+  args: { defaultValue: 'readme', variant: 'underline', font: 'mono', transform: 'none' },
   render: (args) => (
     <Tabs {...args}>
       <TabsList label="Project files">
@@ -196,7 +196,7 @@ export const ClosableAndDirty: Story = {
     ]);
     const [active, setActive] = useState('paginate.ts');
     return (
-      <Tabs value={active} onValueChange={setActive} variant="underline" transform="none">
+      <Tabs value={active} onValueChange={setActive} variant="underline" font="mono" transform="none">
         <TabsList label="Open editors">
           {files.map((f) => (
             <TabsTab

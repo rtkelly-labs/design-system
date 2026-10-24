@@ -60,9 +60,9 @@ export type TabsFont = 'sans' | 'mono';
 export type TabsVariant = 'merged' | 'underline' | 'segmented';
 
 /**
- * How tab labels are cased. `uppercase` is the house look; `none` preserves
- * the label as written, which a filename needs: `README.md` and `readme.md`
- * are different files.
+ * How tab labels are cased, overriding the font's own casing: sans tabs keep a
+ * label as written and mono tabs set it in capitals. `none` matters for
+ * filenames on a mono strip — `README.md` and `readme.md` are different files.
  */
 export type TabsTransform = 'uppercase' | 'none';
 
@@ -133,10 +133,10 @@ const tabs_ = recipe({
       true: {},
       false: {},
     },
-    // Case. `uppercase` is the house look and adds nothing; `none` hands the
-    // label back as written, for a filename or any case-sensitive identifier.
+    // Case, when the caller says so. Unset, the font decides: sans as written,
+    // mono in capitals. Declared after `font` so an explicit choice wins the merge.
     transform: {
-      uppercase: {},
+      uppercase: { tab: 'uppercase tracking-widest' },
       none: { tab: 'normal-case tracking-normal' },
     },
   },
@@ -145,7 +145,6 @@ const tabs_ = recipe({
     variant: 'merged',
     orientation: 'horizontal',
     selected: false,
-    transform: 'uppercase',
   },
   compoundVariants: [
     {
@@ -228,7 +227,7 @@ interface TabsContextValue {
   orientation: TabsOrientation;
   variant: TabsVariant;
   font: TabsFont;
-  transform: TabsTransform;
+  transform: TabsTransform | undefined;
   tabId: (value: string) => string;
   panelId: (value: string) => string;
 }
@@ -297,10 +296,10 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChang
    */
   font?: TabsFont;
   /**
-   * Label casing for every tab in the set. `uppercase` by default; `none`
-   * keeps the case the label was written in, for filenames, branch names and
-   * any identifier where case carries meaning. All-caps is also harder to read
-   * in long labels, which is the other reason to turn it off.
+   * Label casing for every tab in the set. Unset, it follows `font`: sans
+   * keeps the label as written, mono sets it in capitals. `none` keeps the case
+   * on a mono strip, for filenames, branch names and any identifier where case
+   * carries meaning; `uppercase` sets a sans strip in capitals.
    */
   transform?: TabsTransform;
   /**
@@ -355,7 +354,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
     orientation = 'horizontal',
     variant = 'merged',
     font = 'sans',
-    transform = 'uppercase',
+    transform,
     accent = 'primary',
     children,
     className,
