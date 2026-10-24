@@ -83,6 +83,7 @@ diff-view-hunk	DiffView
 diff-view-path	DiffView
 diff-view-table	DiffView
 divider	Divider
+divider-fill	Divider
 doc-pager	DocPager
 docs-header	DocsHeader
 docs-layout	DocsLayout

@@ -132,6 +132,12 @@ function DeployPreview({ log }: { log: string }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          // Narrow screens: the status drops below the filename as a unit, rather than each
+          // breaking mid-word into a stack of fragments.
+          flexWrap: 'wrap',
+          columnGap: '1rem',
+          rowGap: '0.25rem',
+          whiteSpace: 'nowrap',
         }}
       >
         <span>// TERMINAL_ENGINE_DEMO.sh</span>
@@ -192,6 +198,10 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
         eyebrow={<Badge accent="primary">⚡ NEXT-GEN SAAS INFRASTRUCTURE</Badge>}
         title={title}
         subtitle={subtitle}
+        // The deploy terminal is this hero's one heavy object, so the title is not boxed. The
+        // buttons keep their press shadow: it is every button's affordance, and a hero whose two
+        // actions differ reads as one of them broken. See docs/edge-hierarchy.md, option A.
+        framed={false}
         actions={
           <>
             <Button variant="tertiary" bracketed size="lg">
