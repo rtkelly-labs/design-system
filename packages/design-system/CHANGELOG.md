@@ -25,6 +25,10 @@ The review family: `VerdictBand`, `StatusMark`, `ProvenanceStrip`, `DeltaValue`,
 Only the verdict carries a strong border and shadow; the rest of the family is ruled or
 hairline-framed.
 
+`ReviewReportPage` and `PullRequestPage` compose the family into whole pages: the report a
+comparison tool such as Diffra emits, and a pull request under review. Both ship with sample
+data (`DEFAULT_REVIEW_REPORT`, `DEFAULT_PULL_REQUEST`) and appear on the site's examples.
+
 ## 0.16.0
 
 Five MDX figures: `SwatchCompare`, `MetricStrip`, `TokenTable`, `Decision` with `Option`, `TermGrid` with `Term`. Registered in `mdxComponents`.
