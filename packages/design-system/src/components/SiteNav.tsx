@@ -36,10 +36,8 @@ export interface SiteNavProps
 
 // The two layouts, and the item each one wears.
 //
-// A row's current item is marked by an accent edge under it; a column's by an
-// accent edge beside it and the page ground behind it — the tab and sidebar
-// selection devices `check:contrast` already audits, so the current item is
-// told apart by a shape as well as a colour. Both are keyed off
+// D6-C: the current item is the solid accent fill with inverse ink, in a row and
+// a column alike. `check:contrast` audits the fill. It is keyed off
 // `aria-current`, so the styling and the announcement read one attribute.
 //
 // A column's items are `min-h-11`, 44px at the `web` Medium: in a drawer they
@@ -49,8 +47,8 @@ const siteNav = recipe({
     root: 'font-mono',
     list: 'm-0 flex list-none p-0',
     link: 'border-transparent font-bold uppercase text-content-secondary no-underline '
-      + 'hover:text-accent-primary aria-[current=page]:border-accent-primary '
-      + 'aria-[current=page]:text-accent-primary',
+      + 'hover:text-accent-primary aria-[current=page]:border-accent-primary aria-[current=page]:bg-accent-primary '
+      + 'aria-[current=page]:text-content-inverse aria-[current=page]:hover:text-content-inverse',
     trigger: 'inline-flex cursor-pointer items-center gap-1 border-transparent bg-transparent '
       + 'font-mono font-bold uppercase text-content-secondary hover:text-accent-primary '
       + 'data-[popup-open]:text-accent-primary',
@@ -59,12 +57,12 @@ const siteNav = recipe({
     orientation: {
       horizontal: {
         list: 'flex-wrap items-center gap-x-6 gap-y-2',
-        link: 'inline-block border-b-2 py-1 text-sm tracking-wide',
+        link: 'inline-block border-b-2 px-2 py-1 text-sm tracking-wide',
         trigger: 'border-b-2 py-1 text-sm tracking-wide',
       },
       vertical: {
         list: 'flex-col gap-1',
-        link: 'block min-h-11 border-l-4 px-3 py-3 text-sm aria-[current=page]:bg-surface-base',
+        link: 'block min-h-11 border-l-4 px-3 py-3 text-sm',
         trigger: 'min-h-11 w-full border-l-4 px-3 py-3 text-left text-sm',
       },
     },

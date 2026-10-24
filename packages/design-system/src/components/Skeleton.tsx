@@ -3,7 +3,9 @@ import type { HTMLAttributes } from 'react';
 import { recipe } from '../lib/recipe';
 
 /**
- * A sunken box with a hard edge, in the shape of the thing that is coming.
+ * A sunken box with a hard edge and a diagonal hatch (D7-B), in the shape of the
+ * thing that is coming. The hatch reads as a drawn placeholder rather than a
+ * grey pill, and survives `prefers-reduced-motion`, where the pulse stops.
  *
  * `bg-surface-sunken` inside `border-edge-subtle`, and no radius: a skeleton
  * that does not look like this system's boxes is a grey pill borrowed from
@@ -23,7 +25,11 @@ const skeleton = recipe({
      * `Spinner` slows instead of stopping, because there the motion *is* the
      * message.
      */
-    root: 'block animate-ds-pulse border border-edge-subtle bg-surface-sunken motion-reduce:animate-none',
+    root:
+      'block animate-ds-pulse border border-edge-subtle bg-surface-sunken motion-reduce:animate-none '
+      // D7-B: a diagonal // hatch, 2px strokes every 6px, drawn in `text.muted` on the
+      // sunken ground (7.64:1 on Midnight, 6.16:1 on Sketch). Hard stops, no blur.
+      + 'bg-[image:repeating-linear-gradient(135deg,var(--ds-text-muted)_0_2px,var(--ds-surface-sunken)_2px_6px)]',
   },
   variants: {
     /**
@@ -37,6 +43,7 @@ const skeleton = recipe({
       heading: { root: 'h-7 w-2/3' },
       block: { root: 'h-24 w-full' },
       avatar: { root: 'size-12' },
+      row: { root: 'h-10 w-full' },
     },
   },
   defaultVariants: {
@@ -47,11 +54,12 @@ const skeleton = recipe({
 export interface SkeletonProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
   /**
    * Which piece of content this stands in for — a line of prose, a heading, a
-   * block of media, an avatar. It sets the default height and width only;
+   * block of media, an avatar, a table row (`row`: a full-width 40px band, for a
+   * loading table or list). It sets the default height and width only;
    * `className` overrides either, and is how a skeleton is fitted to the
    * layout it is holding open.
    */
-  shape?: 'text' | 'heading' | 'block' | 'avatar';
+  shape?: 'text' | 'heading' | 'block' | 'avatar' | 'row';
   /**
    * Merged onto the box. Sizing belongs here — `w-40`, `h-64` — because the
    * measurement that matters is the one the real content will have.

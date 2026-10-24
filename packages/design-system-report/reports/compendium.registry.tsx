@@ -348,7 +348,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'SiteNav', group: 'Navigation', height: 32, layout: 'side', states: fromStories(SiteNavStories, ['Default']) },
   { component: 'SiteFooter', group: 'Navigation', height: 110, layout: 'stack', states: fromStories(SiteFooterStories, ['Columns']) },
   { component: 'SiteHeader', group: 'Navigation', height: 126, layout: 'stack', states: fromStories(SiteHeaderStories, ['Portfolio']) },
-  { component: 'MobileNav', group: 'Navigation', height: 71, layout: 'side', states: fromStories(MobileNavStories, ['Open']) },
+  { component: 'MobileNav', group: 'Navigation', height: 78, layout: 'side', states: fromStories(MobileNavStories, ['Open']) },
   { component: 'DocsHeader', group: 'Navigation', height: 49, layout: 'stack', states: fromStories(DocsHeaderStories, ['WithSearch']) },
   { component: 'DocsSidebar', group: 'Navigation', height: 66, layout: 'side', states: fromStories(DocsSidebarStories, ['Default']) },
   { component: 'TableOfContents', group: 'Navigation', height: 49, layout: 'side', states: fromStories(TableOfContentsStories, ['Default']) },

@@ -24,6 +24,8 @@ type HueRef = Hue | 'neutral';
 type AccentToken = Emphasis | Intent;
 
 declare function accentVar(token: AccentToken | undefined, fallback?: AccentToken): string;
+
+declare function tintVar(token: AccentToken | undefined, fallback?: AccentToken): string;
 declare function surfaceVar(token?: Surface): string;
 declare function textVar(token?: TextTone): string;
 declare function borderVar(token?: BorderTone): string;
@@ -86,6 +88,19 @@ interface LevelDefinition {
     readonly accentHue: Readonly<Record<Emphasis, HueRef>>;
 
     readonly intentHue: Readonly<Record<Intent, HueRef>>;
+
+    readonly tintStrength: number;
+
+    readonly tint: Readonly<{
+        accent: Readonly<Record<Emphasis, string>>;
+        intent: Readonly<Record<Intent, string>>;
+    }>;
+
+    readonly selectionStrength: number;
+
+    readonly selection: Readonly<{
+        multi: string;
+    }>;
 
     readonly shadow: string;
 }
@@ -239,7 +254,7 @@ interface TextHierarchyStep {
 }
 declare function auditTextHierarchy(ladder: Readonly<Record<ThemeLevel, LevelDefinition>>): TextHierarchyStep[];
 
-type SelectionDevice = 'fill' | 'edge' | 'surface pair';
+type SelectionDevice = 'fill' | 'edge' | 'tint' | 'outline' | 'surface pair';
 interface SelectionDeviceCheck {
     level: ThemeLevel;
     device: SelectionDevice;
@@ -354,6 +369,10 @@ declare function isRecommendedColourClass(className: string): boolean;
 type ClassInput = string | number | null | undefined | false | ClassInput[];
 
 declare function cn(...inputs: ClassInput[]): string;
+
+type AccentEmphasis = 'tint' | 'tentative';
+
+declare function accentSurfaceClass(token: AccentToken | undefined, emphasis?: AccentEmphasis, fallback?: AccentToken): string;
 
 declare function slugify(value: string): string;
 
@@ -540,6 +559,8 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
     className?: string;
 
     accent?: AccentToken;
+
+    emphasis?: AccentEmphasis;
 
     badge?: string;
 
@@ -1170,6 +1191,7 @@ declare function Table({ className, containerClassName, label, appearance, densi
 declare function TableHeader({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
 declare function TableBody({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
 declare function TableFooter({ className, ...props }: HTMLAttributes<HTMLTableSectionElement>): react.JSX.Element;
+
 declare function TableRow({ className, ...props }: HTMLAttributes<HTMLTableRowElement>): react.JSX.Element;
 
 declare function TableHead({ className, scope, ...props }: ThHTMLAttributes<HTMLTableCellElement>): react.JSX.Element;
@@ -1408,7 +1430,7 @@ declare const Spinner: react.ForwardRefExoticComponent<SpinnerProps & react.RefA
 
 interface SkeletonProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
 
-    shape?: 'text' | 'heading' | 'block' | 'avatar';
+    shape?: 'text' | 'heading' | 'block' | 'avatar' | 'row';
 
     className?: string;
 }
@@ -3227,6 +3249,7 @@ type MdxComponents = typeof mdxComponents;
 
 export {
   ANSI_SLOTS,
+  type AccentEmphasis,
   type AccentToken,
   type ActivityDay,
   ActivityGrid,
@@ -3671,6 +3694,7 @@ export {
   type VerdictTone,
   WEB_FLOOR,
   XIcon,
+  accentSurfaceClass,
   accentVar,
   ansiScheme,
   apcaContrast,
@@ -3706,6 +3730,7 @@ export {
   slugify,
   surfaceVar,
   textVar,
+  tintVar,
   useActiveHeading,
   useCopyToClipboard,
   useDocsLinkComponent,
