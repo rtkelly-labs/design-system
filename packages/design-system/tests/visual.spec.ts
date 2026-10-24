@@ -531,6 +531,12 @@ const MOBILE_CASES: readonly VisualCase[] = [
   { id: 'components-feedback-notfoundpage--in-site-chrome', snapshot: 'notfoundpage-in-site-chrome-mobile.png', fullPage: true },
   { id: 'components-feedback-servererrorpage--standalone', snapshot: 'servererrorpage-standalone-mobile.png' },
   { id: 'components-feedback-statuspage--unauthorized', snapshot: 'statuspage-unauthorized-mobile.png', fullPage: true },
+  // The figures that overflow into a horizontal scroll at this width and at no
+  // other. Listing them here is also what puts them in the pull-request a11y
+  // scan at this width (`scannedIn` in a11y.spec.ts): left out, their missing
+  // keyboard access to that scroll failed only on `main`, nine days running.
+  { id: 'docs-figures-swatchcompare--default', snapshot: 'swatchcompare-default-mobile.png' },
+  { id: 'docs-figures-tokentable--default', snapshot: 'tokentable-default-mobile.png' },
 ];
 
 test.describe('Design System Visual Regression - Narrow viewport', () => {
