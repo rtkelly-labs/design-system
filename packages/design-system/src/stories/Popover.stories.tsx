@@ -56,7 +56,7 @@ export const Open: Story = {
   args: { title: 'Build 1482', defaultOpen: true },
   render: (args) => (
     <Stage>
-      <Popover {...args} trigger={<Button size="sm" bracketed>BUILD 1482</Button>}>
+      <Popover {...args} trigger={<Button appearance="raised" size="sm" bracketed>BUILD 1482</Button>}>
         <BuildDetail />
       </Popover>
     </Stage>
@@ -72,7 +72,7 @@ export const Open: Story = {
 export const AtTheViewportEdge: Story = {
   render: () => (
     <Stage className="justify-end px-2">
-      <Popover defaultOpen title="Build 1482" trigger={<Button size="sm">DETAILS</Button>}>
+      <Popover defaultOpen title="Build 1482" trigger={<Button appearance="raised" size="sm">DETAILS</Button>}>
         <BuildDetail />
       </Popover>
     </Stage>
@@ -88,7 +88,7 @@ export const InsideAModal: Story = {
   render: () => (
     <Modal isOpen onClose={() => {}} title="Deployments">
       <p className="mb-4">Twelve deployments in the last seven days.</p>
-      <Popover defaultOpen title="Build 1482" trigger={<Button size="sm">WHY DID 1482 FAIL?</Button>}>
+      <Popover defaultOpen title="Build 1482" trigger={<Button appearance="raised" size="sm">WHY DID 1482 FAIL?</Button>}>
         <BuildDetail />
       </Popover>
     </Modal>
@@ -102,7 +102,7 @@ export const InsideAModal: Story = {
 export const Interactive: Story = {
   render: () => (
     <Stage>
-      <Popover title="About levels" trigger={<Button size="sm">WHAT IS A LEVEL?</Button>}>
+      <Popover title="About levels" trigger={<Button appearance="raised" size="sm">WHAT IS A LEVEL?</Button>}>
         A Level is a whole colour world — ground, ink, accents — chosen at runtime.
       </Popover>
     </Stage>

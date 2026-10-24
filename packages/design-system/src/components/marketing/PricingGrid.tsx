@@ -154,7 +154,7 @@ const pricingTier = recipe({
  *   features={['Shared workspaces', 'Audit log']}
  *   accent="tertiary"
  *   badge="POPULAR"
- *   action={<Button variant="tertiary" bracketed className="w-full justify-center">START</Button>}
+ *   action={<Button appearance="raised" variant="tertiary" bracketed className="w-full justify-center">START</Button>}
  * />
  * ```
  */

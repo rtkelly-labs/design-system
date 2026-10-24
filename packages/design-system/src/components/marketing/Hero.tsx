@@ -66,7 +66,7 @@ const hero = recipe({
  *   eyebrow={<Badge accent="primary">NEW</Badge>}
  *   title="Ship the thing"
  *   subtitle="One line on why."
- *   actions={<Button href="/start" variant="tertiary" bracketed size="lg">START</Button>}
+ *   actions={<Button appearance="raised" href="/start" variant="tertiary" bracketed size="lg">START</Button>}
  * />
  * ```
  */

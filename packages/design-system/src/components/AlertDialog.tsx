@@ -130,17 +130,17 @@ export const AlertDialog = forwardRef<HTMLDivElement, AlertDialogProps>(function
                   {/*
                     * The label goes on the render element rather than on
                     * `Close`: `Button`'s props are a union whose link arm
-                    * requires `children` and `href`, so an empty `<Button />`
+                    * requires `children` and `href`, so an empty `<Button appearance="raised" />`
                     * does not typecheck even though Base UI would fill it in.
                     */}
                   <BaseAlertDialog.Close
                     render={
-                      <Button variant="default" size="sm">
+                      <Button appearance="raised" variant="default" size="sm">
                         {cancelLabel}
                       </Button>
                     }
                   />
-                  <Button onClick={onConfirm} variant="tertiary" bracketed size="sm">
+                  <Button appearance="raised" onClick={onConfirm} variant="tertiary" bracketed size="sm">
                     {confirmLabel}
                   </Button>
                 </>

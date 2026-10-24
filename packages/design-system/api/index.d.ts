@@ -440,6 +440,8 @@ interface ButtonOwnProps {
 
     variant?: ButtonVariant;
 
+    appearance: ButtonAppearance;
+
     size?: 'sm' | 'md' | 'lg';
 
     bracketed?: boolean;
@@ -448,6 +450,10 @@ interface ButtonOwnProps {
 }
 
 type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'default';
+
+type ButtonAppearance = 'raised' | 'flat' | 'outline';
+
+declare const BUTTON_APPEARANCES: readonly ButtonAppearance[];
 
 type ButtonElementProps = ButtonOwnProps & DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & {
     href?: never;
@@ -4533,6 +4539,7 @@ export {
   type AssessmentOutcome,
   Avatar,
   type AvatarProps,
+  BUTTON_APPEARANCES,
   Badge,
   type BadgeProps,
   BarChart,
@@ -4554,6 +4561,7 @@ export {
   BulletChart,
   type BulletChartProps,
   Button,
+  type ButtonAppearance,
   type ButtonElementProps,
   type ButtonLinkProps,
   type ButtonProps,

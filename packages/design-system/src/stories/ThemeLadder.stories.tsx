@@ -53,7 +53,7 @@ function LevelPanel({ level }: { level: ThemeLevel }) {
 
       <div className="flex gap-2 flex-wrap">
         <Badge>v1.1.0</Badge>
-        <Button size="sm" bracketed>
+        <Button appearance="raised" size="sm" bracketed>
           ACTION
         </Button>
       </div>

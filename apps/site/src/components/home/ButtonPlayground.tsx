@@ -44,7 +44,7 @@ export function ButtonPlayground() {
       </div>
       <div className="flex min-w-0 flex-col gap-4">
         <div className="flex min-h-48 flex-1 items-center justify-center border-2 border-dashed border-edge-default bg-surface-base p-6">
-          <Button variant={variant} size={size} bracketed={bracketed}>
+          <Button appearance="raised" variant={variant} size={size} bracketed={bracketed}>
             {label}
           </Button>
         </div>

@@ -266,7 +266,7 @@ function ToastItem({ item }: { item: BaseToast.Root.ToastObject<ToastData> }) {
             <BaseToast.Action
               data-slot="toast-action"
               render={
-                <Button size="sm" bracketed>
+                <Button appearance="raised" size="sm" bracketed>
                   {action.label}
                 </Button>
               }

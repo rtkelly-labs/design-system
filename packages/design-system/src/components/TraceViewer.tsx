@@ -122,10 +122,10 @@ export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function Tr
       ) : null}
       {replay ? (
         <div role="group" aria-label="Replay" data-part="transport" className={styles.transport()}>
-          <Button size="sm" variant="primary" onClick={player.toggle} disabled={!full.duration}>
+          <Button appearance="raised" size="sm" variant="primary" onClick={player.toggle} disabled={!full.duration}>
             {player.playing ? 'Pause' : player.elapsed >= full.duration ? 'Replay' : 'Play'}
           </Button>
-          <Button size="sm" variant="secondary" onClick={player.restart} disabled={!full.duration}>Restart</Button>
+          <Button appearance="raised" size="sm" variant="secondary" onClick={player.restart} disabled={!full.duration}>Restart</Button>
           <div role="group" aria-label="Speed" className={styles.speeds()}>
             {TRACE_REPLAY_SPEEDS.map((rate) => (
               <button key={rate} type="button" aria-pressed={player.speed === rate} onClick={() => player.setSpeed(rate)} className={styles.speed()}>
