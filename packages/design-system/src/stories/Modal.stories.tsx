@@ -31,8 +31,8 @@ export const WithFooter: Story = {
     children: 'Removing this domain unhosts the site immediately. There is no undo.',
     footer: (
       <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-        <Button variant="default">CANCEL</Button>
-        <Button bracketed variant="tertiary">DELETE</Button>
+        <Button appearance="raised" variant="default">CANCEL</Button>
+        <Button appearance="raised" bracketed variant="tertiary">DELETE</Button>
       </div>
     ),
   },
@@ -44,7 +44,7 @@ export const Toggleable: Story = {
     const [isOpen, setIsOpen] = useState(false);
     return (
       <div style={{ padding: '2rem' }}>
-        <Button bracketed onClick={() => setIsOpen(true)}>OPEN MODAL</Button>
+        <Button appearance="raised" bracketed onClick={() => setIsOpen(true)}>OPEN MODAL</Button>
         <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Session expired">
           Re-authenticate to continue. Unsaved changes are kept.
         </Modal>

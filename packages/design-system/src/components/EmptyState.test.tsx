@@ -28,7 +28,7 @@ describe('EmptyState', () => {
         icon={<span data-testid="glyph">[/]</span>}
         title="Nothing here yet"
         description="Create a rule to see it listed."
-        action={<Button variant="primary">NEW RULE</Button>}
+        action={<Button appearance="raised" variant="primary">NEW RULE</Button>}
       >
         <p data-testid="hint">Or import an existing set.</p>
       </EmptyState>,

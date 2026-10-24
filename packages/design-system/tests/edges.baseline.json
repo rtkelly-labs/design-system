@@ -31,6 +31,14 @@
     "heavyPanels": 1,
     "maxDepth": 2
   },
+  "components-actions-forms-button--appearances": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
+  "components-actions-forms-button--appearances-sketch": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
   "components-actions-forms-button--bracketed": {
     "heavyPanels": 0,
     "maxDepth": 0

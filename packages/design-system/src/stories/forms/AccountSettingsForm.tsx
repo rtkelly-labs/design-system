@@ -243,10 +243,10 @@ export function AccountSettingsForm({
         />
 
         <div className="flex flex-wrap items-center gap-4">
-          <Button type="submit" variant="primary" bracketed>
+          <Button appearance="raised" type="submit" variant="primary" bracketed>
             SAVE CHANGES
           </Button>
-          <Button type="button" variant="inverse" onClick={discard}>
+          <Button appearance="raised" type="button" variant="inverse" onClick={discard}>
             DISCARD CHANGES
           </Button>
           <p role="status" className="font-mono text-sm font-bold text-intent-success">

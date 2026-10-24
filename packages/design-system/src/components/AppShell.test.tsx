@@ -59,7 +59,7 @@ function Shell({
           <AppSidebarNav label="Primary" items={NAV} activeId="active" />
         </AppSidebar>
       }
-      topbar={<AppTopbar actions={<Button size="sm">NEW</Button>}>Projects</AppTopbar>}
+      topbar={<AppTopbar actions={<Button appearance="raised" size="sm">NEW</Button>}>Projects</AppTopbar>}
       {...props}
     >
       {children ?? <AppMain>Page body</AppMain>}
@@ -368,7 +368,7 @@ describe('AppShell', () => {
               <AppSidebar
                 label="Workspace"
                 footer={
-                  <Menu defaultOpen trigger={<Button size="sm">ACCOUNT</Button>}>
+                  <Menu defaultOpen trigger={<Button appearance="raised" size="sm">ACCOUNT</Button>}>
                     <MenuItem>Sign out</MenuItem>
                   </Menu>
                 }

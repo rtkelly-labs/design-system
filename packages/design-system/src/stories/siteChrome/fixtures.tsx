@@ -97,7 +97,7 @@ export const marketing: SiteFixture = {
     { label: 'Company', href: '/company' },
   ],
   actions: (
-    <Button href="/signup" size="sm" variant="primary">
+    <Button appearance="raised" href="/signup" size="sm" variant="primary">
       START FREE
     </Button>
   ),
@@ -141,7 +141,7 @@ export const projectSite: SiteFixture = {
     { label: 'GitHub', href: 'https://github.com/rtkelly13/design-system' },
   ],
   actions: (
-    <Button href="/docs/install" size="sm" variant="inverse" className="hidden sm:inline-flex">
+    <Button appearance="raised" href="/docs/install" size="sm" variant="inverse" className="hidden sm:inline-flex">
       INSTALL
     </Button>
   ),

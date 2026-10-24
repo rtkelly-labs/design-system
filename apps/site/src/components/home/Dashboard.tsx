@@ -67,7 +67,7 @@ export function Dashboard() {
       enableSorting: false,
       accessor: (row) =>
         row.environment === 'preview' && row.status === 'LIVE' && !promoted.has(row.id) ? (
-          <Button size="sm" variant="primary" onClick={() => setPromoting(row)}>
+          <Button appearance="raised" size="sm" variant="primary" onClick={() => setPromoting(row)}>
             PROMOTE<span className="sr-only"> {row.service} {row.commit}</span>
           </Button>
         ) : (
@@ -146,10 +146,10 @@ export function Dashboard() {
         title={promoting ? `Promote ${promoting.service}` : 'Promote'}
         footer={
           <div className="flex flex-wrap justify-end gap-3">
-            <Button size="sm" variant="inverse" onClick={() => setPromoting(null)}>
+            <Button appearance="raised" size="sm" variant="inverse" onClick={() => setPromoting(null)}>
               CANCEL
             </Button>
-            <Button
+            <Button appearance="raised"
               size="sm"
               variant="primary"
               bracketed
