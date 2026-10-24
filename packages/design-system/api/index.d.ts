@@ -1,5 +1,5 @@
 import * as react from 'react';
-import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps } from 'react';
+import react__default, { ReactNode, ButtonHTMLAttributes, AnchorHTMLAttributes, DetailedHTMLProps, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps } from 'react';
 import { Table as Table$1, ColumnDef } from '@tanstack/react-table';
 import { RegisterableHotkey } from '@tanstack/react-hotkeys';
 export { ParentSize as ResponsiveChartContainer } from '@visx/responsive';
@@ -384,20 +384,31 @@ interface UseActiveHeadingOptions {
 
 declare function useActiveHeading(ids: readonly string[], { offset, enabled }?: UseActiveHeadingOptions): string | null;
 
-interface ButtonOwnProps {
+interface ButtonBaseProps {
 
     children: ReactNode;
 
     variant?: ButtonVariant;
-
-    size?: 'sm' | 'md' | 'lg';
 
     bracketed?: boolean;
 
     className?: string;
 }
 
-type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'default';
+interface ButtonLabelledSize {
+
+    size?: 'xs' | 'sm' | 'md' | 'lg';
+}
+
+interface ButtonIconSize {
+
+    size: 'icon' | 'icon-touch';
+
+    'aria-label': string;
+}
+type ButtonOwnProps = ButtonBaseProps & (ButtonLabelledSize | ButtonIconSize);
+
+type ButtonVariant = 'quiet' | 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'danger' | 'default';
 
 type ButtonElementProps = ButtonOwnProps & DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & {
     href?: never;
@@ -417,7 +428,97 @@ type ButtonLinkProps = ButtonOwnProps & DetailedHTMLProps<AnchorHTMLAttributes<H
 };
 type ButtonProps = ButtonElementProps | ButtonLinkProps;
 
-declare const Button: react.ForwardRefExoticComponent<(Omit<ButtonElementProps, "ref"> | Omit<ButtonLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
+declare const Button: react.ForwardRefExoticComponent<(Omit<ButtonBaseProps & ButtonLabelledSize & react.ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+
+    pending?: boolean;
+
+    pendingLabel?: string;
+}, "ref"> | Omit<ButtonBaseProps & ButtonIconSize & react.ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+
+    pending?: boolean;
+
+    pendingLabel?: string;
+}, "ref"> | Omit<ButtonBaseProps & ButtonLabelledSize & react.ClassAttributes<HTMLAnchorElement> & AnchorHTMLAttributes<HTMLAnchorElement> & {
+
+    href: string;
+
+    pending?: never;
+
+    pendingLabel?: never;
+}, "ref"> | Omit<ButtonBaseProps & ButtonIconSize & react.ClassAttributes<HTMLAnchorElement> & AnchorHTMLAttributes<HTMLAnchorElement> & {
+
+    href: string;
+
+    pending?: never;
+
+    pendingLabel?: never;
+}, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
+
+type ButtonColourRole = {
+    readonly kind: 'accent';
+    readonly role: Emphasis;
+} | {
+    readonly kind: 'intent';
+    readonly role: Intent;
+} | {
+    readonly kind: 'neutral';
+};
+
+interface HueCollision {
+    readonly level: ThemeLevel;
+
+    readonly hue: HueRef;
+
+    readonly danger: readonly number[];
+
+    readonly others: readonly number[];
+}
+
+declare function hueOfRole(level: ThemeLevel, role: ButtonColourRole): HueRef;
+
+declare function findHueCollisions(roles: readonly ButtonColourRole[], levels?: readonly ThemeLevel[]): HueCollision[];
+
+declare const BUTTON_COLOUR_ROLE: {
+    readonly primary: {
+        readonly kind: "accent";
+        readonly role: "primary";
+    };
+    readonly default: {
+        readonly kind: "accent";
+        readonly role: "primary";
+    };
+    readonly tertiary: {
+        readonly kind: "accent";
+        readonly role: "tertiary";
+    };
+    readonly danger: {
+        readonly kind: "intent";
+        readonly role: "danger";
+    };
+    readonly secondary: {
+        readonly kind: "neutral";
+    };
+    readonly quiet: {
+        readonly kind: "neutral";
+    };
+    readonly inverse: {
+        readonly kind: "neutral";
+    };
+};
+
+interface ButtonGroupContextValue {
+    register: (id: string, role: ButtonColourRole) => () => void;
+}
+
+declare const buttonGroupContext: react.Context<ButtonGroupContextValue | null>;
+interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
+
+    children: ReactNode;
+}
+
+declare const ButtonGroup: react.ForwardRefExoticComponent<ButtonGroupProps & react.RefAttributes<HTMLDivElement>>;
 
 type CardVariant = 'panel' | 'card';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
@@ -3044,6 +3145,7 @@ export {
   type AsciiGaugeVariant,
   Avatar,
   type AvatarProps,
+  BUTTON_COLOUR_ROLE,
   Badge,
   type BadgeProps,
   BarChart,
@@ -3064,7 +3166,11 @@ export {
   BulletChart,
   type BulletChartProps,
   Button,
+  type ButtonColourRole,
   type ButtonElementProps,
+  ButtonGroup,
+  type ButtonGroupContextValue,
+  type ButtonGroupProps,
   type ButtonLinkProps,
   type ButtonProps,
   type ButtonVariant,
@@ -3179,6 +3285,7 @@ export {
   type HeroProps,
   type Hue,
   type HueAgreementCheck,
+  type HueCollision,
   type HueRef,
   INK_WEIGHT,
   IndexedSection,
@@ -3444,15 +3551,18 @@ export {
   auditSelectionDevices,
   auditTextHierarchy,
   borderVar,
+  buttonGroupContext,
   childrenToText,
   cn,
   collectHeadings,
   composite,
   contrastRatio,
   createAnchorHeading,
+  findHueCollisions,
   fontVar,
   getRecommendedColours,
   getThemeInitScript,
+  hueOfRole,
   isExternalHref,
   isMedium,
   isRecommendedColourClass,

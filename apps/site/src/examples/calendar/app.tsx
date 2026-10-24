@@ -16,6 +16,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'r
 import type { ButtonHTMLAttributes, CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import {
   Button,
+  ButtonGroup,
   Checkbox,
   Input,
   Menu,
@@ -204,7 +205,7 @@ function EventPopover({
         {ev.note ? (<><dt className="text-content-muted">NOTES</dt><dd className="m-0">{ev.note}</dd></>) : null}
       </dl>
       <div className="mt-4">
-        <Menu trigger={<Button size="sm">ACTIONS</Button>}>
+        <Menu trigger={<Button size="xs">ACTIONS</Button>}>
           <MenuItem onClick={() => onDuplicate(ev)}>Duplicate to next day</MenuItem>
           <MenuSeparator />
           <MenuItem intent="danger" onClick={() => onDelete(ev.id)}>Delete</MenuItem>
@@ -604,7 +605,7 @@ function MonthGrid({ events, anchor, setAnchor, actions, openDay }: { events: Ca
                           </li>
                         ))}
                       </ul>
-                      <div className="mt-3"><Button size="sm" onClick={() => openDay(wk + c)}>OPEN DAY</Button></div>
+                      <div className="mt-3"><Button size="xs" onClick={() => openDay(wk + c)}>OPEN DAY</Button></div>
                     </Popover>
                   </div>
                 ) : null,
@@ -658,7 +659,7 @@ function CreateModal({ draft, setDraft, errors, onClose, onSave }: { draft: Draf
       title="New event"
       footer={
         <div className="flex justify-end gap-3">
-          <Button variant="tertiary" onClick={onClose}>CANCEL</Button>
+          <Button onClick={onClose}>CANCEL</Button>
           <Button variant="primary" bracketed onClick={onSave}>SAVE</Button>
         </div>
       }
@@ -773,10 +774,12 @@ export default function CalendarApp() {
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div className="bg-surface-base text-content-primary" onKeyDown={onRootKey}>
       <div className="flex flex-wrap items-center gap-2 border-b-2 border-edge-strong p-2 print:hidden">
-        <Button variant="primary" size="sm" bracketed onClick={() => create(anchor, null)}>CREATE</Button>
-        <Button size="sm" onClick={() => setAnchor(TODAY)}>TODAY</Button>
-        <Button size="sm" aria-label="Previous" onClick={() => step(-1)}>&lt;</Button>
-        <Button size="sm" aria-label="Next" onClick={() => step(1)}>&gt;</Button>
+        <ButtonGroup aria-label="Calendar navigation" className="gap-2">
+          <Button variant="primary" size="sm" bracketed onClick={() => create(anchor, null)}>CREATE</Button>
+          <Button size="xs" onClick={() => setAnchor(TODAY)}>TODAY</Button>
+          <Button size="icon" aria-label="Previous" onClick={() => step(-1)}>&lt;</Button>
+          <Button size="icon" aria-label="Next" onClick={() => step(1)}>&gt;</Button>
+        </ButtonGroup>
         <h2 className="m-0 min-w-0 flex-1 max-sm:order-last max-sm:basis-full font-display text-xl font-bold uppercase tracking-tight sm:text-2xl" aria-live="polite">{title}</h2>
         <Tabs value={view} onValueChange={(v) => setView(v as View)} accent="primary">
           <TabsList label="Calendar view">
@@ -786,7 +789,7 @@ export default function CalendarApp() {
             <TabsTab value="agenda">AGENDA</TabsTab>
           </TabsList>
         </Tabs>
-        <Menu trigger={<Button size="sm">OPTIONS</Button>} align="end">
+        <Menu trigger={<Button size="xs">OPTIONS</Button>} align="end">
           <MenuRadioGroup label="DENSITY" value={density} onValueChange={(v) => setDensity(v as Density)}>
             <MenuRadioItem value="compact">Compact (36px / hour)</MenuRadioItem>
             <MenuRadioItem value="cozy">Cozy (52px / hour)</MenuRadioItem>
