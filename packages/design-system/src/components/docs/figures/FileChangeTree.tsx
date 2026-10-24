@@ -50,12 +50,17 @@ const DEFAULT_CHANGE_LABELS: Record<FileChange, string> = { add: 'added', modify
 
 const GLYPH: Record<FileChange, string> = { add: '+', modify: '~', rename: '→', remove: '−' };
 
-/** A change is meaning, so it is addressed through intent roles, never accents. */
+/**
+ * A change is a change, so it is addressed through the `delta` roles — not `intent`, which would
+ * call an added file a success and a removed one a danger, and not accents, which carry nothing.
+ * A modification has no delta role of its own: it is neither an addition nor a removal, so it
+ * takes the secondary ink and is told apart by its `~` mark.
+ */
 const TONE: Record<FileChange, { text: string; fill: string }> = {
-  add: { text: 'text-intent-success', fill: 'bg-intent-success' },
-  modify: { text: 'text-intent-warning', fill: 'bg-intent-warning' },
-  rename: { text: 'text-intent-info', fill: 'bg-intent-info' },
-  remove: { text: 'text-intent-danger', fill: 'bg-intent-danger' },
+  add: { text: 'text-delta-added', fill: 'bg-delta-added' },
+  modify: { text: 'text-content-secondary', fill: 'bg-content-secondary' },
+  rename: { text: 'text-delta-moved', fill: 'bg-delta-moved' },
+  remove: { text: 'text-delta-removed', fill: 'bg-delta-removed' },
 };
 
 function isDirectory(node: FileChangeNode): boolean {
