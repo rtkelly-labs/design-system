@@ -56,9 +56,11 @@ function plateStates<P extends object>(Component: ComponentType<P>, m: Matrix<P>
 
 type ButtonP = ComponentProps<typeof Button>;
 export const BUTTON: Matrix<ButtonP> = {
-  base: { children: 'SAVE CHANGES' },
+  base: { children: 'SAVE CHANGES', appearance: 'raised' },
   states: {
     default: {},
+    flat: { appearance: 'flat' },
+    outline: { appearance: 'outline' },
     secondary: { variant: 'secondary' },
     primary: { variant: 'primary' },
     inverse: { variant: 'inverse' },

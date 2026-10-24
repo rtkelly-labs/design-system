@@ -70,10 +70,10 @@ export function SaveBar({
       <p role="status" className="m-0 mr-auto font-mono text-sm text-content-secondary">
         {dirtyCount > 0 ? `> ${dirtyCount} unsaved ${dirtyCount === 1 ? 'change' : 'changes'}` : '> all changes saved'}
       </p>
-      <Button type="button" variant="inverse" size="sm" onClick={onDiscard} disabled={dirtyCount === 0 || saving}>
+      <Button appearance="raised" type="button" variant="inverse" size="sm" onClick={onDiscard} disabled={dirtyCount === 0 || saving}>
         DISCARD
       </Button>
-      <Button type="submit" variant="primary" size="sm" bracketed disabled={dirtyCount === 0 || saving}>
+      <Button appearance="raised" type="submit" variant="primary" size="sm" bracketed disabled={dirtyCount === 0 || saving}>
         {saving ? 'SAVING' : 'SAVE CHANGES'}
       </Button>
     </div>
@@ -103,7 +103,7 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
     }
   }
   return (
-    <Button type="button" size="sm" variant="secondary" onClick={copy} aria-label={`Copy ${label}`}>
+    <Button appearance="raised" type="button" size="sm" variant="secondary" onClick={copy} aria-label={`Copy ${label}`}>
       {copied ? 'COPIED' : 'COPY'}
     </Button>
   );

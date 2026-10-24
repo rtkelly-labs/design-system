@@ -193,7 +193,7 @@ export function tiers(items: readonly TierFixture[]) {
       accent={tier.accent}
       badge={tier.badge}
       action={
-        <Button href={tier.href} variant={tier.accent} bracketed className="flex w-full">
+        <Button appearance="raised" href={tier.href} variant={tier.accent} bracketed className="flex w-full">
           {tier.action}
         </Button>
       }
@@ -204,11 +204,11 @@ export function tiers(items: readonly TierFixture[]) {
 export function ctaActions(cta: CtaFixture) {
   return (
     <>
-      <Button href={cta.primary.href} variant={cta.accent ?? 'primary'} bracketed>
+      <Button appearance="raised" href={cta.primary.href} variant={cta.accent ?? 'primary'} bracketed>
         {cta.primary.label}
       </Button>
       {cta.secondary ? (
-        <Button href={cta.secondary.href} variant="inverse" bracketed>
+        <Button appearance="raised" href={cta.secondary.href} variant="inverse" bracketed>
           {cta.secondary.label}
         </Button>
       ) : null}
@@ -269,10 +269,10 @@ export function ProductLaunchPage() {
         subtitle="A contrast-checked palette, two levels and every export, from one source file."
         actions={
           <>
-            <Button href="/signup" variant="tertiary" bracketed size="lg">
+            <Button appearance="raised" href="/signup" variant="tertiary" bracketed size="lg">
               START FREE
             </Button>
-            <Button href="/features" variant="inverse" bracketed size="lg">
+            <Button appearance="raised" href="/features" variant="inverse" bracketed size="lg">
               TOUR
             </Button>
           </>
@@ -303,7 +303,7 @@ export function ProjectSitePage() {
         title="A brutalist design system"
         subtitle="Tokens, components and the gates that hold them."
         actions={
-          <Button href="/docs" variant="primary" bracketed>
+          <Button appearance="raised" href="/docs" variant="primary" bracketed>
             READ THE DOCS
           </Button>
         }

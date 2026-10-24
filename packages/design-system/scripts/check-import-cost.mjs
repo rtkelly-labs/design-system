@@ -132,7 +132,8 @@ const CASES = [
     imports: ['Button'],
     // #320 adds pending activation guards and Spinner. Measured at 44,394 B
     // minified with the per-module build; retain about 2% headroom.
-    maxBytes: 45_300,
+    // +900 B: `appearance` — the flat and outline treatments and their compound variants, per accent.
+    maxBytes: 46_200,
     forbid: [...HEAVY, 'lucide-react'],
   },
   {
@@ -167,7 +168,9 @@ const CASES = [
     // Pagination current-page chip fix. Both are intended.
     // +600 B: LEVELS carries the `delta` role group (see the `tokens` case).
     // +100 B: `Card`'s `weight` prop — the quiet frame's border string.
-    maxBytes: 63_900,
+    // +1,700 B: `Button`'s `appearance` (see the `button` case), and `PageTitle`'s `framed`
+    // with `BracketText`'s no-break joins.
+    maxBytes: 65_600,
     forbid: HEAVY,
   },
 ];

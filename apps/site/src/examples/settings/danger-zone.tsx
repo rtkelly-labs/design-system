@@ -55,7 +55,7 @@ export function DangerZone() {
               <p className="m-0 font-mono text-sm font-bold text-content-primary">{r.title}</p>
               <p className="m-0 mt-1 font-sans text-sm text-content-secondary">{r.body}</p>
             </div>
-            <Button
+            <Button appearance="raised"
               type="button"
               variant="tertiary"
               bracketed
@@ -75,10 +75,10 @@ export function DangerZone() {
         title={row ? `${row.title}?` : ''}
         footer={
           <>
-            <Button type="button" variant="inverse" onClick={close}>
+            <Button appearance="raised" type="button" variant="inverse" onClick={close}>
               KEEP IT
             </Button>
-            <Button type="button" variant="tertiary" bracketed disabled={!ready} onClick={confirm}>
+            <Button appearance="raised" type="button" variant="tertiary" bracketed disabled={!ready} onClick={confirm}>
               {row?.label ?? ''} {REPO.split('/')[1]}
             </Button>
           </>

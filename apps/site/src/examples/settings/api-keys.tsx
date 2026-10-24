@@ -139,12 +139,12 @@ export function ApiKeys() {
                       <TableCell>
                         <div className="flex flex-wrap justify-end gap-2">
                           {k.kind !== 'publishable' ? (
-                            <Button type="button" size="sm" variant="inverse" aria-label={`Reveal ${k.name} key`} aria-pressed={shown} onClick={() => toggle(k.id)}>
+                            <Button appearance="raised" type="button" size="sm" variant="inverse" aria-label={`Reveal ${k.name} key`} aria-pressed={shown} onClick={() => toggle(k.id)}>
                               {shown ? 'HIDE' : 'REVEAL'}
                             </Button>
                           ) : null}
                           <CopyButton value={k.value} label={`${k.name} key`} />
-                          <Button type="button" size="sm" variant="tertiary" onClick={() => setRolling(k)} aria-label={`Roll ${k.name}`}>
+                          <Button appearance="raised" type="button" size="sm" variant="tertiary" onClick={() => setRolling(k)} aria-label={`Roll ${k.name}`}>
                             ROLL
                           </Button>
                         </div>
@@ -163,7 +163,7 @@ export function ApiKeys() {
               <Input id={NAME_ID} name="name" label="Name" placeholder="Nightly export" error={errorFor(NAME_ID)} helperText="Shown in the key list and in audit logs" />
               <Select id={KIND_ID} name="kind" label="Access" placeholder="Choose access" options={KINDS} error={errorFor(KIND_ID)} />
               <div>
-                <Button type="submit" variant="primary" bracketed>
+                <Button appearance="raised" type="submit" variant="primary" bracketed>
                   CREATE KEY
                 </Button>
               </div>

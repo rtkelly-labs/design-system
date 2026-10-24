@@ -128,7 +128,7 @@ export function LevelDiptych() {
           <div className="flex flex-wrap items-center gap-2">
             <Badge>ROLES</Badge>
             <Tag text="tokens" accent="secondary" />
-            <Button size="sm" bracketed>
+            <Button appearance="raised" size="sm" bracketed>
               ACTION
             </Button>
           </div>
@@ -345,12 +345,12 @@ export function FormSpecimen() {
         utility.
       </p>
       <div className="flex flex-wrap items-center gap-4">
-        <Button variant="primary" bracketed>
+        <Button appearance="raised" variant="primary" bracketed>
           PUBLISH
         </Button>
-        <Button variant="secondary">SECONDARY</Button>
-        <Button variant="tertiary">TERTIARY</Button>
-        <Button variant="inverse">INVERSE</Button>
+        <Button appearance="raised" variant="secondary">SECONDARY</Button>
+        <Button appearance="raised" variant="tertiary">TERTIARY</Button>
+        <Button appearance="raised" variant="inverse">INVERSE</Button>
       </div>
     </div>
   );
@@ -786,7 +786,7 @@ export function MotionSpecimen() {
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        <Button size="sm" bracketed onClick={() => setShifted((previous) => !previous)}>
+        <Button appearance="raised" size="sm" bracketed onClick={() => setShifted((previous) => !previous)}>
           {shifted ? 'RETURN' : 'RUN'}
         </Button>
         <span className="text-caption text-content-secondary" style={MONO}>

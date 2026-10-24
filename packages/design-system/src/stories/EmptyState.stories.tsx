@@ -35,10 +35,10 @@ export const EmptySearchResult: Story = {
         }
         action={
           <>
-            <Button variant="default" size="sm">
+            <Button appearance="raised" variant="default" size="sm">
               CLEAR FILTERS
             </Button>
-            <Button variant="primary" bracketed size="sm">
+            <Button appearance="raised" variant="primary" bracketed size="sm">
               EDIT QUERY
             </Button>
           </>
@@ -66,10 +66,10 @@ export const FirstRun: Story = {
         description="A rule matches incoming statements and files them against a contract. Create one to see it run against the last 30 days."
         action={
           <>
-            <Button variant="primary" bracketed size="sm">
+            <Button appearance="raised" variant="primary" bracketed size="sm">
               NEW RULE
             </Button>
-            <Button variant="tertiary" size="sm">
+            <Button appearance="raised" variant="tertiary" size="sm">
               IMPORT A SET
             </Button>
           </>
@@ -121,7 +121,7 @@ export const InATable: Story = {
           title="No statements in this period"
           description="Change the period, or upload one."
           action={
-            <Button variant="primary" bracketed size="sm">
+            <Button appearance="raised" variant="primary" bracketed size="sm">
               UPLOAD
             </Button>
           }

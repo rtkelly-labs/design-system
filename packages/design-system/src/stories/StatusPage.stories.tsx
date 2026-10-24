@@ -52,7 +52,7 @@ export const Maintenance: Story = {
     title: 'Down for maintenance',
     description: 'We are moving the database to new hardware. Everything is expected back by 09:00 UTC, and nothing you saved will be lost.',
     action: (
-      <Button href="https://status.example.com" variant="primary" bracketed>
+      <Button appearance="raised" href="https://status.example.com" variant="primary" bracketed>
         STATUS PAGE
       </Button>
     ),
@@ -76,7 +76,7 @@ export const Offline: Story = {
     title: 'You are offline',
     description: 'This page needs a connection and there is none. Pages you have already opened are still available.',
     action: (
-      <Button href="" variant="primary" bracketed>
+      <Button appearance="raised" href="" variant="primary" bracketed>
         TRY AGAIN
       </Button>
     ),
@@ -98,10 +98,10 @@ export const Unauthorized: Story = {
     description: 'This page is for members of the team workspace. Sign in with your work account, or ask a workspace admin to invite you.',
     action: (
       <>
-        <Button href="/login?next=/workspace" variant="primary" bracketed>
+        <Button appearance="raised" href="/login?next=/workspace" variant="primary" bracketed>
           SIGN IN
         </Button>
-        <Button href="/request-access" variant="inverse">
+        <Button appearance="raised" href="/request-access" variant="inverse">
           REQUEST ACCESS
         </Button>
       </>

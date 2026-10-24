@@ -188,7 +188,7 @@ export function SignInForm({
           onCheckedChange={(remember) => setValues({ ...values, remember })}
         />
         <div className="flex">
-          <Button type="submit" variant="primary" bracketed pending={pending} pendingLabel="Signing in">
+          <Button appearance="raised" type="submit" variant="primary" bracketed pending={pending} pendingLabel="Signing in">
             SIGN IN
           </Button>
         </div>

@@ -19,10 +19,10 @@ function Specimen({ level }: { level: ThemeLevel }) {
         </div>
         <Input label="Release note" defaultValue="Retries 409s instead of dropping them" />
         <div className="flex flex-wrap gap-3">
-          <Button size="sm" variant="primary" bracketed>
+          <Button appearance="raised" size="sm" variant="primary" bracketed>
             PROMOTE
           </Button>
-          <Button size="sm" variant="tertiary">
+          <Button appearance="raised" size="sm" variant="tertiary">
             ROLL BACK
           </Button>
         </div>

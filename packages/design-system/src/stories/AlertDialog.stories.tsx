@@ -61,7 +61,7 @@ function StackedExample() {
   return (
     <Modal isOpen onClose={() => {}} title="Domain settings">
       <p style={{ marginBottom: '1rem' }}>ryankelly.dev is serving the production build.</p>
-      <Button bracketed variant="tertiary" onClick={() => setConfirming(true)}>
+      <Button appearance="raised" bracketed variant="tertiary" onClick={() => setConfirming(true)}>
         DELETE DOMAIN
       </Button>
       <AlertDialog

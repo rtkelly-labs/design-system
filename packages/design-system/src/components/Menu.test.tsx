@@ -15,7 +15,7 @@ function Actions({
   onOpenChange?: (open: boolean) => void;
 }) {
   return (
-    <Menu trigger={<Button>ACTIONS</Button>} onOpenChange={onOpenChange}>
+    <Menu trigger={<Button appearance="raised">ACTIONS</Button>} onOpenChange={onOpenChange}>
       <MenuItem onClick={onRename}>Rename</MenuItem>
       <MenuItem disabled>Move</MenuItem>
       <MenuItem>Duplicate</MenuItem>
@@ -119,7 +119,7 @@ describe('Menu', () => {
   it('never activates a disabled item, from the pointer or the keyboard', async () => {
     const onMove = vi.fn();
     render(
-      <Menu trigger={<Button>ACTIONS</Button>}>
+      <Menu trigger={<Button appearance="raised">ACTIONS</Button>}>
         <MenuItem>Rename</MenuItem>
         <MenuItem disabled onClick={onMove}>
           Move
@@ -186,7 +186,7 @@ describe('Menu', () => {
     function LevelPicker({ onChange }: { onChange?: (value: string) => void }) {
       const [value, setValue] = useState('midnight');
       return (
-        <Menu trigger={<Button>LEVEL</Button>}>
+        <Menu trigger={<Button appearance="raised">LEVEL</Button>}>
           <MenuRadioGroup
             label="Level"
             value={value}
@@ -275,7 +275,7 @@ describe('Menu', () => {
       <Menu
         ref={menuRef}
         defaultOpen
-        trigger={<Button>ACTIONS</Button>}
+        trigger={<Button appearance="raised">ACTIONS</Button>}
         data-testid="menu"
         className="min-w-64"
         style={{ maxWidth: '20rem' }}

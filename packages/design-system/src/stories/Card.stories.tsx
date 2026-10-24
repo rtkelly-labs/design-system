@@ -29,7 +29,7 @@ export const Default: Story = {
       <p style={{ fontFamily: 'var(--ds-font-mono)', fontSize: '0.875rem', marginBottom: '1.25rem' }}>
         Zero border-radius with 4px hard offset shadow.
       </p>
-      <Button bracketed variant="primary">DETAILS</Button>
+      <Button appearance="raised" bracketed variant="primary">DETAILS</Button>
     </Card>
   ),
 };

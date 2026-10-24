@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Button } from '../components/Button';
+import { BUTTON_APPEARANCES, Button } from '../components/Button';
 
 const meta: Meta<typeof Button> = {
   title: 'Components/Actions & Forms/Button',
@@ -18,6 +18,7 @@ type Story = StoryObj<typeof Button>;
  */
 export const Default: Story = {
   args: {
+    appearance: 'raised',
     children: 'EXECUTE ACTION',
     bracketed: false,
     variant: 'default',
@@ -31,6 +32,7 @@ export const Default: Story = {
  */
 export const Bracketed: Story = {
   args: {
+    appearance: 'raised',
     children: 'SUBMIT FORM',
     bracketed: true,
     variant: 'default',
@@ -45,6 +47,7 @@ export const Bracketed: Story = {
  */
 export const PinkAccent: Story = {
   args: {
+    appearance: 'raised',
     children: 'DELETE RECORD',
     bracketed: true,
     variant: 'tertiary',
@@ -62,13 +65,13 @@ export const PinkAccent: Story = {
 export const Disabled: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-4">
-      <Button variant="primary" bracketed>
+      <Button appearance="raised" variant="primary" bracketed>
         SAVE CHANGES
       </Button>
-      <Button variant="primary" bracketed disabled>
+      <Button appearance="raised" variant="primary" bracketed disabled>
         SAVE CHANGES
       </Button>
-      <Button variant="inverse" disabled>
+      <Button appearance="raised" variant="inverse" disabled>
         DISCARD
       </Button>
     </div>
@@ -87,18 +90,66 @@ export const Disabled: Story = {
 export const Pending: Story = {
   render: () => (
     <div className="flex flex-wrap items-center gap-4">
-      <Button variant="primary" bracketed>
+      <Button appearance="raised" variant="primary" bracketed>
         SAVE CHANGES
       </Button>
-      <Button variant="primary" bracketed pending pendingLabel="Saving your changes">
+      <Button appearance="raised" variant="primary" bracketed pending pendingLabel="Saving your changes">
         SAVE CHANGES
       </Button>
-      <Button variant="primary" bracketed disabled>
+      <Button appearance="raised" variant="primary" bracketed disabled>
         SAVE CHANGES
       </Button>
-      <Button variant="inverse" pending pendingLabel="Discarding">
+      <Button appearance="raised" variant="inverse" pending pendingLabel="Discarding">
         DISCARD
       </Button>
     </div>
   ),
 };
+
+/**
+ * The three appearances, each in every accent. `appearance` has no default: a button's mode is
+ * a choice about the surface around it, so every call site makes it. `raised` presses into the
+ * page on a hard shadow, `flat` keeps the fill and drops the shadow, `outline` is the accent's
+ * line and ink until the pointer fills it.
+ */
+export const Appearances: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      {BUTTON_APPEARANCES.map((appearance) => (
+        <div key={appearance} className="flex flex-col gap-2">
+          <span className="font-mono text-xs font-bold uppercase tracking-wider text-content-muted">{appearance}</span>
+          <div className="flex flex-wrap gap-4">
+            <Button appearance={appearance} variant="primary">PRIMARY</Button>
+            <Button appearance={appearance} variant="secondary">SECONDARY</Button>
+            <Button appearance={appearance} variant="tertiary">TERTIARY</Button>
+            <Button appearance={appearance} variant="inverse">INVERSE</Button>
+            <Button appearance={appearance} variant="primary" disabled>DISABLED</Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+/**
+ * One group, one appearance. Two actions that sit together share a mode and differ by accent
+ * and brackets; a raised button beside a flat one reads as one of them broken, and
+ * `pnpm test:edges` fails a story that mixes them in one group.
+ */
+export const ConsistentGroups: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap gap-4">
+        <Button appearance="raised" variant="tertiary" bracketed>LAUNCH APPLICATION</Button>
+        <Button appearance="raised" variant="default" bracketed>EXPLORE ARCHITECTURE</Button>
+      </div>
+      <div className="flex flex-wrap gap-4">
+        <Button appearance="outline" variant="primary" size="sm">CANCEL</Button>
+        <Button appearance="outline" variant="tertiary" size="sm">DELETE</Button>
+      </div>
+    </div>
+  ),
+};
+
+/** The appearances on `sketch`, where `outline`'s ink on paper is the pair to check. */
+export const AppearancesSketch: Story = { ...Appearances, globals: { level: 'sketch' } };

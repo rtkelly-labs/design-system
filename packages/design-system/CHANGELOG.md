@@ -9,7 +9,14 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
-## Unreleased
+## 0.18.0
+
+**Breaking:** `Button` takes a required `appearance` — `raised`, `flat` or `outline` — with no
+default. `raised` is the button as it was (filled, hard offset shadow, presses in); `flat` keeps
+the fill and drops the shadow and the movement; `outline` is the accent's border and ink, filling
+on hover. Add `appearance="raised"` to every existing `<Button>` to keep today's rendering; a
+`Button` without one throws. The rendered element carries `data-appearance`, and
+`pnpm test:edges` fails a story whose sibling buttons mix appearances.
 
 A `delta` role group — `added`, `removed`, `moved`, and `deltaGround` `added`, `removed`,
 `hunk` for diff rows — as `text-delta-*`, `bg-delta-*`, `fill-delta-*` and

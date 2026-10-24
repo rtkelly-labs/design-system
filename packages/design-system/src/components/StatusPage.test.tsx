@@ -38,7 +38,7 @@ describe('StatusPage', () => {
       <StatusPage
         title="Sign in to continue"
         description="This page is for signed-in members."
-        action={<Button href="/login">SIGN IN</Button>}
+        action={<Button appearance="raised" href="/login">SIGN IN</Button>}
       >
         <p>Reference: abc123</p>
       </StatusPage>,
@@ -77,7 +77,7 @@ describe('NotFoundPage', () => {
     const { rerender } = render(<NotFoundPage homeHref="/docs" homeLabel="BACK TO DOCS" />);
     expect(screen.getByRole('link', { name: /BACK TO DOCS/ }).getAttribute('href')).toBe('/docs');
 
-    rerender(<NotFoundPage action={<Button href="/search">SEARCH</Button>} />);
+    rerender(<NotFoundPage action={<Button appearance="raised" href="/search">SEARCH</Button>} />);
     expect(screen.queryByRole('link', { name: /GO HOME/ })).toBeNull();
     expect(screen.getByRole('link', { name: 'SEARCH' })).toBeDefined();
   });

@@ -58,7 +58,7 @@ export const Minimal: Story = {
           period="/month"
           accent="tertiary"
           action={
-            <Button href="/sponsor" variant="tertiary" bracketed className="flex w-full">
+            <Button appearance="raised" href="/sponsor" variant="tertiary" bracketed className="flex w-full">
               SPONSOR
             </Button>
           }

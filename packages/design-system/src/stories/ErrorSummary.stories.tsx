@@ -105,7 +105,7 @@ function SubmitDemo() {
           error={errors[0]?.message}
         />
         <div>
-          <Button type="submit" variant="primary" bracketed>
+          <Button appearance="raised" type="submit" variant="primary" bracketed>
             SEND
           </Button>
         </div>

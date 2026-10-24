@@ -24,20 +24,20 @@ describe('portalled overlays keep a scoped Level', () => {
     [
       'Tooltip',
       <Tooltip key="t" content="Tip text" defaultOpen>
-        <Button aria-label="Info">i</Button>
+        <Button appearance="raised" aria-label="Info">i</Button>
       </Tooltip>,
       'Tip text',
     ],
     [
       'Popover',
-      <Popover key="p" defaultOpen title="Build" trigger={<Button>DETAILS</Button>}>
+      <Popover key="p" defaultOpen title="Build" trigger={<Button appearance="raised">DETAILS</Button>}>
         Popover body
       </Popover>,
       'Popover body',
     ],
     [
       'Menu',
-      <Menu key="m" defaultOpen trigger={<Button>ACTIONS</Button>}>
+      <Menu key="m" defaultOpen trigger={<Button appearance="raised">ACTIONS</Button>}>
         <MenuItem>Rename</MenuItem>
       </Menu>,
       'Rename',

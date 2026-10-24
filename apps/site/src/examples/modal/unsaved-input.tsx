@@ -8,7 +8,7 @@ export default function IncidentNote() {
 
   return (
     <>
-      <Button variant="secondary" onClick={() => setOpen(true)}>
+      <Button appearance="raised" variant="secondary" onClick={() => setOpen(true)}>
         LOG INCIDENT NOTE
       </Button>
       {/* A stray click outside must not throw away what someone typed. */}
@@ -19,10 +19,10 @@ export default function IncidentNote() {
         title="Incident INC-2291"
         footer={
           <div className="flex justify-end gap-3">
-            <Button size="sm" variant="inverse" onClick={() => setOpen(false)}>
+            <Button appearance="raised" size="sm" variant="inverse" onClick={() => setOpen(false)}>
               DISCARD
             </Button>
-            <Button size="sm" variant="primary" onClick={() => setOpen(false)}>
+            <Button appearance="raised" size="sm" variant="primary" onClick={() => setOpen(false)}>
               SAVE NOTE
             </Button>
           </div>
