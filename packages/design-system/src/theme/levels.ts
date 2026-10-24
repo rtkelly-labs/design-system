@@ -38,7 +38,7 @@
  * hold at the light end — `border-subtle` at 28% is a visible hairline on
  * black and invisible on paper. Literals also make the ladder *checkable*:
  * `pnpm check:contrast` can compute every text-on-surface ratio without a
- * browser — 260 pairs, 130 per Level, including every Hue against every
+ * browser — 296 pairs, 148 per Level, including every Hue against every
  * ground, which is what makes hand-tuned literals sustainable rather than
  * twenty times the manual review. Stated per Level deliberately: 440 was
  * written here in the commit that collapsed four Levels to two, so the total
@@ -47,7 +47,7 @@
  * The one exception is `surface.overlay`, which is a scrim and needs alpha.
  */
 
-import type { BorderTone, Emphasis, Hue, HueRef, Intent, Surface, TextTone } from '../lib/theme';
+import type { BorderTone, Delta, DeltaGround, Emphasis, Hue, HueRef, Intent, Surface, TextTone } from '../lib/theme';
 
 /**
  * The ladder, ordered from darkest to lightest. Order is meaningful: it is what
@@ -128,6 +128,23 @@ export interface LevelDefinition {
   readonly accent: Readonly<Record<Emphasis, string>>;
   readonly intent: Readonly<Record<Intent, string>>;
   /**
+   * Change, as a comparison reports it: a line or record added, removed, or
+   * moved. Separate from `intent` on purpose. An added line is not a success
+   * and a removed one is not a danger; whether a change is acceptable is a
+   * policy's call, and a renderer that paints it green or red has made that
+   * call for the reader. The two groups may share a Hue, as `added` and
+   * `intent.success` do, and still diverge where the meanings would clash:
+   * `midnight`'s `removed` is red while its `danger` is pink.
+   */
+  readonly delta: Readonly<Record<Delta, string>>;
+  /**
+   * The grounds a diff paints behind changed rows, and behind a hunk header.
+   * Literal tints rather than `color-mix()` for the reason given in the
+   * module header. `text.primary` and the matching `delta` role must both
+   * clear the text floor on each, which `check:contrast` asserts.
+   */
+  readonly deltaGround: Readonly<Record<DeltaGround, string>>;
+  /**
    * The Hue vocabulary — appearance, not job. Declared *below* the Roles above
    * and referenced by them, never derived from them. Only a Target with no
    * notion of jobs addresses these: a terminal's sixteen ANSI slots, half a
@@ -155,6 +172,8 @@ export interface LevelDefinition {
   readonly accentHue: Readonly<Record<Emphasis, HueRef>>;
   /** As `accentHue`, for the meaning Roles. */
   readonly intentHue: Readonly<Record<Intent, HueRef>>;
+  /** As `accentHue`, for the change Roles. */
+  readonly deltaHue: Readonly<Record<Delta, HueRef>>;
   /** Colour of the hard offset shadows. Normally tracks `border.strong`. */
   readonly shadow: string;
 }
@@ -212,6 +231,16 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       warning: '#facc15',
       danger: '#f955a4',
     },
+    delta: {
+      added: '#39ff14',
+      removed: '#ff586e', // red, not intent.danger's pink: a removal is not an alarm
+      moved: '#c3afff',
+    },
+    deltaGround: {
+      added: '#0f2a17',
+      removed: '#2e1020',
+      hunk: '#1c1c38',
+    },
     accentHue: {
       primary: 'cyan',
       secondary: 'yellow',
@@ -223,6 +252,11 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       success: 'green',
       warning: 'yellow',
       danger: 'pink',
+    },
+    deltaHue: {
+      added: 'green',
+      removed: 'red',
+      moved: 'violet',
     },
     palette: {
       red: '#ff586e', // 16deg — lifted from #f43f5e (dim accent.tertiary), 4.59:1
@@ -288,6 +322,16 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       warning: '#974503',
       danger: '#bd0010',
     },
+    delta: {
+      added: '#006b2e',
+      removed: '#bd0010',
+      moved: '#7d00f4',
+    },
+    deltaGround: {
+      added: '#dcefdc',
+      removed: '#f6dcd8',
+      hunk: '#e7e2d4',
+    },
     accentHue: {
       primary: 'blue',
       secondary: 'green',
@@ -299,6 +343,11 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       success: 'green',
       warning: 'orange',
       danger: 'red',
+    },
+    deltaHue: {
+      added: 'green',
+      removed: 'red',
+      moved: 'violet',
     },
     palette: {
       red: '#bd0010', // 16deg — was #dc2626, 4.03:1 — failed WCAG AA

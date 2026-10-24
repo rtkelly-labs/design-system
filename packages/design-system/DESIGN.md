@@ -76,9 +76,17 @@ than skipped.
 | `border` | `strong` `default` `subtle` | edges |
 | `accent` | `primary` `secondary` `tertiary` `quiet` | emphasis, carrying no meaning |
 | `intent` | `info` `success` `warning` `danger` | meaning |
+| `delta` | `added` `removed` `moved` | change, as a comparison reports it |
+| `deltaGround` | `added` `removed` `hunk` | the grounds behind diff rows |
 
 `accent` and `intent` are deliberately separate. Emphasis is not meaning: a red *accent* is a
 visual choice, a red *intent* says something is wrong.
+
+`delta` is separate from both. An added line is not a success and a removed one is not a
+danger: whether a change is acceptable is a policy's decision, and a diff painted in `intent`
+has made it for the reader. The groups may share a Hue (`delta.added` and `intent.success`
+are both green) and still diverge where the meanings clash: on `midnight`, `delta.removed`
+is red and `intent.danger` is pink.
 
 ### Hues — what a Target addresses when it has no notion of jobs
 
@@ -122,7 +130,7 @@ alias is still the wrong shape.
 ## 4. Contrast is arithmetic, and it is a gate
 
 Colour is the one axis with a machine-checkable definition of correct, so it is checked.
-`pnpm check:contrast` audits **260 pairs — 130 per theme** on every build and fails CI, plus 24 selection devices and 16 Role→Hue agreement checks. The per-theme figure is the one to reason from: it is what a third theme would add.
+`pnpm check:contrast` audits **296 pairs — 148 per theme** on every build and fails CI, plus 24 selection devices and 22 Role→Hue agreement checks. The per-theme figure is the one to reason from: it is what a third theme would add.
 
 | | Floor | Why |
 |---|---|---|
@@ -210,9 +218,9 @@ whole frames because a fractional frame lands a render mid-transition. See
 **The contrast floor is Medium-keyed too**, which is the part most easily got wrong: colour
 values do not vary by Medium, but the floors they must clear do. `pnpm check:contrast` defaults
 to the web floors; `--medium=video` and `--medium=graphic` enforce the stricter 7:1 frame floors
-and report **45 of 260 pairs below minimum**. That is deliberate, not a regression — no video or
+and report **46 of 296 pairs below minimum**. That is deliberate, not a regression — no video or
 graphic artifact is emitted yet, and only the `web` run gates CI. If palette values ever move,
-those 45 are the number that moves first.
+those 46 are the number that moves first.
 
 ## 8. Voice
 
