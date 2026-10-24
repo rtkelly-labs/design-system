@@ -52,10 +52,10 @@ export const WithReference: Story = {
     id: 'main-content',
     action: (
       <>
-        <Button href="" variant="primary" bracketed>
+        <Button appearance="raised" href="" variant="primary" bracketed>
           TRY AGAIN
         </Button>
-        <Button href="https://status.example.com" variant="inverse">
+        <Button appearance="raised" href="https://status.example.com" variant="inverse">
           STATUS PAGE
         </Button>
       </>

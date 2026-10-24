@@ -56,7 +56,7 @@ const NAV: AppNavItem[] = [
 /** The account area: a slot, filled here with a `Menu`. */
 function Account() {
   return (
-    <Menu side="top" trigger={<Button size="sm" variant="secondary">A. LOVELACE</Button>}>
+    <Menu side="top" trigger={<Button appearance="raised" size="sm" variant="secondary">A. LOVELACE</Button>}>
       <MenuItem>Profile</MenuItem>
       <MenuItem>Preferences</MenuItem>
       <MenuSeparator />
@@ -77,7 +77,7 @@ function Topbar() {
   return (
     <AppTopbar
       actions={
-        <Button size="sm" bracketed>
+        <Button appearance="raised" size="sm" bracketed>
           NEW PROJECT
         </Button>
       }
@@ -146,7 +146,7 @@ export const Navigating: Story = {
  */
 export const WithoutSidebar: Story = {
   render: (args) => (
-    <AppShell {...args} topbar={<AppTopbar actions={<Button size="sm">HELP</Button>}>SETUP</AppTopbar>}>
+    <AppShell {...args} topbar={<AppTopbar actions={<Button appearance="raised" size="sm">HELP</Button>}>SETUP</AppTopbar>}>
       <AppMain label="Setup">
         <EmptyState title="No workspace yet" description="Create one to start adding projects." />
       </AppMain>

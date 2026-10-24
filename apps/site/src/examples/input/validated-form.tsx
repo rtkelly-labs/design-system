@@ -68,7 +68,7 @@ export default function CreateTokenForm() {
         </div>
       </Fieldset>
       <div className="flex items-center gap-4">
-        <Button type="submit" variant="primary" bracketed>
+        <Button appearance="raised" type="submit" variant="primary" bracketed>
           CREATE TOKEN
         </Button>
         {created ? (

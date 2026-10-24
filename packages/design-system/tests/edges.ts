@@ -42,6 +42,12 @@ export interface EdgeCensus {
   inkPermille: number;
   framesPerScreen: number;
   heavyPanelsPerScreen: number;
+  /**
+   * Groups of sibling buttons — two or more under one parent — whose `data-appearance` differs:
+   * a raised button beside a flat one. Elevation is the button's mode, and a group that mixes
+   * modes reads as one button broken rather than as two actions.
+   */
+  mixedButtonGroups: number;
 }
 
 export function measureEdges(rootSelector: string): EdgeCensus {
@@ -149,6 +155,18 @@ export function measureEdges(rootSelector: string): EdgeCensus {
     if (depth > maxDepth) maxDepth = depth;
   }
 
+  let mixedButtonGroups = 0;
+  const parents = new Set<Element>();
+  for (const b of Array.from(root.querySelectorAll('[data-slot="button"][data-appearance]'))) if (b.parentElement) parents.add(b.parentElement);
+  for (const parent of parents) {
+    const modes = new Set(
+      Array.from(parent.children)
+        .filter((child) => child.matches('[data-slot="button"][data-appearance]'))
+        .map((child) => child.getAttribute('data-appearance')),
+    );
+    if (modes.size > 1) mixedButtonGroups += 1;
+  }
+
   const screens = Math.max(1, height / 900);
   return {
     width,
@@ -162,5 +180,6 @@ export function measureEdges(rootSelector: string): EdgeCensus {
     inkPermille: Math.round((ink / (width * height)) * 10000) / 10,
     framesPerScreen: Math.round((frames.length / screens) * 10) / 10,
     heavyPanelsPerScreen: Math.round((heavyPanels / screens) * 10) / 10,
+    mixedButtonGroups,
   };
 }

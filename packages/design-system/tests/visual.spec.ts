@@ -56,6 +56,8 @@ interface VisualCase {
  */
 const CASES: readonly VisualCase[] = [
   { id: 'components-actions-forms-button--default', snapshot: 'button-default.png' },
+  { id: 'components-actions-forms-button--appearances', snapshot: 'button-appearances.png' },
+  { id: 'components-actions-forms-button--appearances-sketch', snapshot: 'button-appearances-sketch.png' },
   { id: 'components-actions-forms-button--bracketed', snapshot: 'button-bracketed.png' },
   { id: 'components-content-card--default', snapshot: 'card-default.png' },
   { id: 'presentation-slidedeck--default-deck', snapshot: 'slidedeck-default.png' },

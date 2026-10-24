@@ -164,7 +164,7 @@ export function ResetPasswordFlow({
           The link in the email opens the next step. In this example, the button stands in for it.
         </p>
         <div>
-          <Button type="button" variant="primary" bracketed onClick={() => go('choose')}>
+          <Button appearance="raised" type="button" variant="primary" bracketed onClick={() => go('choose')}>
             OPEN THE RESET LINK
           </Button>
         </div>
@@ -176,7 +176,7 @@ export function ResetPasswordFlow({
     return (
       <AuthFrame ref={heading} title="Password changed" lede="Your other devices have been signed out.">
         <div>
-          <Button href="#sign-in" variant="primary" bracketed>
+          <Button appearance="raised" href="#sign-in" variant="primary" bracketed>
             SIGN IN
           </Button>
         </div>
@@ -217,7 +217,7 @@ export function ResetPasswordFlow({
             error={errors.confirm}
           />
           <div className="flex">
-            <Button
+            <Button appearance="raised"
               type="submit"
               variant="primary"
               bracketed
@@ -260,7 +260,7 @@ export function ResetPasswordFlow({
           error={errors.email}
         />
         <div className="flex">
-          <Button
+          <Button appearance="raised"
             type="submit"
             variant="primary"
             bracketed

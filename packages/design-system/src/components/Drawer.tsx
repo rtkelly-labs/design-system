@@ -114,7 +114,7 @@ export interface DrawerProps
  * ```tsx
  * const [open, setOpen] = useState(false);
  *
- * <Button onClick={() => setOpen(true)}>MENU</Button>
+ * <Button appearance="raised" onClick={() => setOpen(true)}>MENU</Button>
  * <Drawer isOpen={open} onClose={() => setOpen(false)} placement="left" title="Navigation">
  *   <nav>…</nav>
  * </Drawer>
@@ -198,7 +198,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
 
             <div data-slot="drawer-footer" className={slots.footer()}>
               {footer || (
-                <Button onClick={onClose} variant="tertiary" bracketed size="sm">
+                <Button appearance="raised" onClick={onClose} variant="tertiary" bracketed size="sm">
                   CLOSE
                 </Button>
               )}

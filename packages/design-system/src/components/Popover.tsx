@@ -67,7 +67,7 @@ const popover = recipe({
  *
  * @example
  * ```tsx
- * <Popover trigger={<Button size="sm">DETAILS</Button>} title="Build 1482">
+ * <Popover trigger={<Button appearance="raised" size="sm">DETAILS</Button>} title="Build 1482">
  *   Passed 41 of 42 gates. `check:visual` is still running.
  * </Popover>
  * ```

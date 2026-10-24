@@ -122,7 +122,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         code={`import { Card, Button } from '@rtkelly13/design-system';
 
 export default function Page() {
-  return <Card><Button href="/docs">READ THE DOCS</Button></Card>;
+  return <Card><Button appearance="raised" href="/docs">READ THE DOCS</Button></Card>;
 }`}
       />
       <p>
@@ -179,7 +179,7 @@ export function DeployButton() {
   return (
     <div className="border-2 border-edge-strong bg-surface-raised p-6 shadow-hard-md">
       <p className="mb-4 font-mono text-sm text-content-secondary">&gt; billing-api 3f9c2e1 is ready</p>
-      <Button variant="primary" bracketed onClick={() => console.log('deploy')}>
+      <Button appearance="raised" variant="primary" bracketed onClick={() => console.log('deploy')}>
         DEPLOY
       </Button>
     </div>
