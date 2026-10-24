@@ -380,7 +380,7 @@
     "maxDepth": 0
   },
   "components-reports-reportdocument--quality-gate": {
-    "heavyPanels": 7,
+    "heavyPanels": 3,
     "maxDepth": 1
   },
   "components-reports-statusmark--all-vocabularies": {
@@ -648,31 +648,31 @@
     "maxDepth": 0
   },
   "saas-account-flows--create-account": {
-    "heavyPanels": 1,
+    "heavyPanels": 0,
     "maxDepth": 1
   },
   "saas-account-flows--create-account-failed": {
-    "heavyPanels": 2,
+    "heavyPanels": 1,
     "maxDepth": 1
   },
   "saas-account-flows--reset-password": {
-    "heavyPanels": 1,
+    "heavyPanels": 0,
     "maxDepth": 1
   },
   "saas-account-flows--reset-password-mismatch": {
-    "heavyPanels": 2,
+    "heavyPanels": 1,
     "maxDepth": 1
   },
   "saas-account-flows--reset-password-sent": {
-    "heavyPanels": 1,
+    "heavyPanels": 0,
     "maxDepth": 1
   },
   "saas-account-flows--sign-in": {
-    "heavyPanels": 1,
+    "heavyPanels": 0,
     "maxDepth": 1
   },
   "saas-account-flows--sign-in-rejected": {
-    "heavyPanels": 2,
+    "heavyPanels": 1,
     "maxDepth": 1
   },
   "saas-admindashboard--content-studio": {
@@ -680,11 +680,11 @@
     "maxDepth": 1
   },
   "saas-admindashboard--finance-console": {
-    "heavyPanels": 4,
+    "heavyPanels": 1,
     "maxDepth": 1
   },
   "saas-landingpage--dark-mode": {
-    "heavyPanels": 8,
+    "heavyPanels": 3,
     "maxDepth": 1
   },
   "saas-landingpage--product-launch": {
@@ -696,7 +696,7 @@
     "maxDepth": 1
   },
   "saas-landingpage--sketch-mode": {
-    "heavyPanels": 8,
+    "heavyPanels": 3,
     "maxDepth": 1
   },
   "saas-pullrequest--default": {
