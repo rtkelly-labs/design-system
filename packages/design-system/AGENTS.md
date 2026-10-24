@@ -42,6 +42,7 @@ Everything is a `pnpm` script; these are the ones whose names do not give them a
 | `pnpm test:leaks` | the unit suite shuffled with no per-file isolation, N times — the detector `isolate: false` stands on; not a gate |
 | `pnpm test:visual` | Playwright snapshots — **in the pinned image only**, see [`docs/visual-regression.md`](./docs/visual-regression.md) |
 | `pnpm test:a11y` | axe over every asserted story, on both Levels |
+| `pnpm test:edges` | heavy panels and box nesting per asserted story, against `tests/edges.baseline.json` — see [`docs/edge-hierarchy.md`](./docs/edge-hierarchy.md) |
 | `pnpm walkthrough` | screenshot every story on every level, for review rather than assertion |
 
 `pnpm lint` reports colour literals at the site that wrote them; in CI its errors are read out of `check:lint-budget`'s pass rather than a second one. `pnpm check:deps`,
@@ -115,6 +116,7 @@ Load these when the task is in them, not before.
 | Retired colours, and the five design eras | [`docs/colour-heritage.md`](./docs/colour-heritage.md) |
 | Styling in TSX, the CSS ratchet, and the `data-slot` contract (every component and part carries one; `pnpm check:slots`, `api/slots.txt`) | [`docs/styling.md`](./docs/styling.md) |
 | Rendering deterministically — for capture, print, video | [`docs/deterministic-rendering.md`](./docs/deterministic-rendering.md); `ds-report --pdf` in the report package applies all three switches for paper |
+| Edge hierarchy — the census, the gate, and the GOV.UK / Primer / Carbon benchmark | [`docs/edge-hierarchy.md`](./docs/edge-hierarchy.md) |
 | Visual regression — determinism contract, operating instructions | [`docs/visual-regression.md`](./docs/visual-regression.md) |
 | CI shape, and the screenshot walkthrough | [`docs/ci.md`](./docs/ci.md) |
 | Evidence on a PR — design, not yet built | [`docs/evidence-pipeline.md`](./docs/evidence-pipeline.md) |
