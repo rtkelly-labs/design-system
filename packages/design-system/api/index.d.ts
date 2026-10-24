@@ -109,6 +109,8 @@ declare const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>>;
 
 declare const DEFAULT_LEVEL: ThemeLevel;
 
+declare const PRINT_LEVEL: ThemeLevel;
+
 declare const SYSTEM_LEVEL: Readonly<Record<Polarity, ThemeLevel>>;
 
 declare const INK_WEIGHT: Readonly<Record<Polarity, number>>;
@@ -3489,6 +3491,7 @@ export {
   type OverlayAlign,
   type OverlaySide,
   PALETTE_HUES,
+  PRINT_LEVEL,
   PageHeader,
   type PageHeaderProps,
   PageTitle,
