@@ -122,10 +122,10 @@ function FinanceOverview() {
   return (
     <>
       <PageHeader title="System overview" subtitle="Statements, reconciliation and backups at a glance." icon={LayoutDashboard} />
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <StatCard title="Net cashflow" value="+$4,280.00" change="+12.4%" changeType="positive" subtitle="vs last month" accent="primary" />
-        <StatCard title="Unreconciled audits" value="3 variances" subtitle="Action required" accent="tertiary" />
-        <StatCard title="Drive backup" value="Synced 10m ago" subtitle="~/Google Drive/Backup/" accent="secondary" />
+      <div className="grid grid-cols-1 border-y border-edge-subtle md:grid-cols-3">
+        <StatCard appearance="quiet" title="Net cashflow" value="+$4,280.00" change="+12.4%" changeType="positive" subtitle="vs last month" accent="primary" />
+        <StatCard appearance="quiet" title="Unreconciled audits" value="3 variances" subtitle="Action required" accent="tertiary" />
+        <StatCard appearance="quiet" title="Drive backup" value="Synced 10m ago" subtitle="~/Google Drive/Backup/" accent="secondary" />
       </div>
       <DataTable
         caption="Recent bank statement ingestions"

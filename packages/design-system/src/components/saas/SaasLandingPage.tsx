@@ -210,7 +210,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
 
       <FeatureGrid title="[ BUILT FOR EXTREME PERFORMANCE & CONTROL ]">
         {FEATURES.map((feature) => (
-          <Feature key={feature.title} title={feature.title} accent={feature.accent} icon={feature.icon}>
+          <Feature key={feature.title} title={feature.title} accent={feature.accent} icon={feature.icon} weight="quiet">
             {feature.desc}
           </Feature>
         ))}
@@ -228,6 +228,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
             description={tier.description}
             features={tier.features}
             accent={tier.accent}
+            weight={tier.highlighted ? 'strong' : 'quiet'}
             badge={tier.highlighted ? 'POPULAR' : undefined}
             action={
               <Button

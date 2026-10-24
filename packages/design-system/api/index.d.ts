@@ -432,6 +432,8 @@ type ButtonProps = ButtonElementProps | ButtonLinkProps;
 declare const Button: react.ForwardRefExoticComponent<(Omit<ButtonElementProps, "ref"> | Omit<ButtonLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
 
 type CardVariant = 'panel' | 'card';
+
+type CardWeight = 'strong' | 'quiet';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
     title?: string;
@@ -457,6 +459,8 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
     panel?: boolean;
 
     variant?: CardVariant;
+
+    weight?: CardWeight;
 }
 
 declare const Card: react.ForwardRefExoticComponent<CardProps & react.RefAttributes<HTMLDivElement>>;
@@ -1363,6 +1367,8 @@ interface SwatchGroupProps extends HTMLAttributes<HTMLElement> {
 declare const SwatchGroup: react.ForwardRefExoticComponent<SwatchGroupProps & react.RefAttributes<HTMLElement>>;
 
 type StatCardAccent = AccentToken;
+
+type StatCardAppearance = 'boxed' | 'quiet';
 interface StatCardProps {
     title: string;
     value: string | number;
@@ -1373,9 +1379,11 @@ interface StatCardProps {
         className?: string;
     }>;
     accent?: StatCardAccent;
+
+    appearance?: StatCardAppearance;
     className?: string;
 }
-declare function StatCard({ title, value, change, changeType, subtitle, icon: Icon, accent, className, }: StatCardProps): react.JSX.Element;
+declare function StatCard({ title, value, change, changeType, subtitle, icon: Icon, accent, appearance, className, }: StatCardProps): react.JSX.Element;
 
 type TableAppearance = 'grid' | 'quiet' | 'index';
 
@@ -1994,6 +2002,8 @@ interface FeatureProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
 
     accent?: AccentToken;
 
+    weight?: CardWeight;
+
     children?: ReactNode;
 
     className?: string;
@@ -2022,6 +2032,8 @@ type PricingTierAccent = 'primary' | 'secondary' | 'tertiary';
 interface PricingTierProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
 
     name: ReactNode;
+
+    weight?: CardWeight;
 
     price: ReactNode;
 
@@ -3489,6 +3501,7 @@ export {
   Card,
   type CardProps,
   type CardVariant,
+  type CardWeight,
   ChangeBar,
   type ChangeBarProps,
   ChangeCount,
@@ -3796,6 +3809,7 @@ export {
   type SpinnerProps,
   StatCard,
   type StatCardAccent,
+  type StatCardAppearance,
   type StatCardProps,
   type StatusAppearance,
   StatusMark,
