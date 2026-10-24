@@ -44,3 +44,35 @@ describe('pre radius', () => {
     expect(css).toMatch(/:is\(h1, h2, h3\)\s*\{\s*text-wrap:\s*balance/);
   });
 });
+
+describe('code metrics (Round 6)', () => {
+  /** The declarations of the first rule whose selector is exactly `selector`. */
+  const rule = (css: string, selector: string) => {
+    const at = css.indexOf(`${selector} {`);
+    expect(at, `no rule for ${selector}`).toBeGreaterThan(-1);
+    return css.slice(css.indexOf('{', at) + 1, css.indexOf('}', at));
+  };
+
+  it('CodeBlock sets tab-size: 2 and 14px on 21px, instead of the browser tab of 8', async () => {
+    render(<CodeBlock title="x">{'\tcode'}</CodeBlock>);
+    const css = await compileWith(['prose-ladder']);
+    const body = rule(css, '.docs-codeblock-body pre');
+    // The tab lives on the body as a utility, so prose.css stays inside its ratchet.
+    expect(document.querySelector('.docs-codeblock-body')?.className).toContain('[&_pre]:[tab-size:2]');
+    expect(body).toMatch(/font-size:\s*0\.875rem\s*;/);
+    expect(body).toMatch(/line-height:\s*1\.5\s*;/);
+    // 0.875rem is 14px at the 16px root, and 1.5 of it is 21px.
+    expect(0.875 * 16 * 1.5).toBe(21);
+  });
+
+  it('colours the plain code ink by the syntax role, not text.primary', async () => {
+    const css = await compileWith(['prose-ladder']);
+    expect(rule(css, '.docs-codeblock-body pre')).toMatch(/color:\s*var\(--ds-syntax-plain\)/);
+    expect(css).toMatch(/--tw-prose-pre-code:\s*var\(--ds-syntax-plain\)/);
+  });
+
+  it('a bare prose pre gets the same tab and leading', async () => {
+    const css = await compileWith(['prose-ladder']);
+    expect(css).toMatch(/\.prose-ladder\s*\{[\s\S]*?pre\s*\{[^}]*tab-size:\s*2[^}]*line-height:\s*1\.5/);
+  });
+});

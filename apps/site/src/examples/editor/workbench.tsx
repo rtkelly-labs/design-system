@@ -48,44 +48,49 @@ import type { Command, Decoration, DecorationKind, TokenKind, TreeEntry } from '
 
 /* ── colour, by role ─────────────────────────────────────────────────────── */
 
-/** Syntax colour. Four hue-bearing roles are the whole vocabulary: the ladder has no `syntax` group. */
+/** Syntax colour, by the package's `syntax` roles (#148). The colour class stays first: the minimap reads it. */
 const SYNTAX: Record<TokenKind, string> = {
-  keyword: 'text-accent-tertiary',
-  string: 'text-intent-success',
-  number: 'text-intent-warning',
-  comment: 'text-content-muted italic',
-  function: 'text-accent-primary',
-  type: 'text-content-primary font-bold',
-  punct: 'text-content-secondary',
-  plain: 'text-content-primary',
+  keyword: 'text-syntax-keyword',
+  string: 'text-syntax-string',
+  number: 'text-syntax-number',
+  comment: 'text-syntax-comment italic',
+  function: 'text-syntax-function',
+  type: 'text-syntax-type',
+  punct: 'text-syntax-punctuation',
+  plain: 'text-syntax-plain',
 };
 
 /**
- * Editor chrome. There are no `editor.*` roles, so every band is a role colour
- * at an alpha: Tailwind compiles `/25` to `color-mix()`, which is the thing the
- * ladder's own rules say cannot hold on both grounds.
+ * Editor chrome, by the package's `editor` roles (#80, Round 6). The translucent
+ * ones (selection, the bracket wash) are literal #rrggbbaa fitted per level, so
+ * there is no `/25` and no `color-mix()` here. Find is a border, never a fill;
+ * the current match is told from the others by 2px, bold and a gutter marker.
+ * The squiggle shape tells severity: wavy error, dashed warning, dotted info.
  */
 const DECORATION: Record<DecorationKind, string> = {
-  selection: 'bg-accent-primary/25',
-  find: 'bg-intent-warning/25 outline outline-1 -outline-offset-1 outline-intent-warning',
-  findCurrent: 'bg-intent-warning/50 outline outline-2 -outline-offset-2 outline-intent-warning',
-  bracket: 'bg-content-primary/15 outline outline-1 -outline-offset-1 outline-edge-strong',
-  error: 'underline decoration-wavy decoration-2 decoration-intent-danger underline-offset-4',
-  warning: 'underline decoration-wavy decoration-intent-warning underline-offset-4',
-  info: 'underline decoration-dotted decoration-intent-info underline-offset-4',
+  selection: 'bg-editor-selection text-editor-selection-ink!',
+  find: 'outline outline-1 -outline-offset-1 outline-editor-find',
+  findCurrent: 'font-bold outline outline-2 -outline-offset-2 outline-editor-find-current',
+  bracket: 'bg-editor-bracket-wash outline outline-1 -outline-offset-1 outline-editor-bracket',
+  error: 'underline decoration-wavy decoration-2 decoration-editor-error underline-offset-4',
+  warning: 'underline decoration-dashed decoration-2 decoration-editor-warning underline-offset-4',
+  info: 'underline decoration-dotted decoration-2 decoration-editor-info underline-offset-4',
 };
 
 const SEVERITY_ICON: Record<'error' | 'warning' | 'info', { icon: NerdIconName; cls: string }> = {
-  error: { icon: 'close', cls: 'text-intent-danger' },
-  warning: { icon: 'alert', cls: 'text-intent-warning' },
-  info: { icon: 'info', cls: 'text-intent-info' },
+  error: { icon: 'close', cls: 'text-editor-error' },
+  warning: { icon: 'alert', cls: 'text-editor-warning' },
+  info: { icon: 'info', cls: 'text-editor-info' },
 };
 
 const GIT_BAR: Record<'added' | 'modified' | 'removed', string> = {
-  added: 'bg-intent-success',
-  modified: 'bg-intent-warning',
-  removed: 'bg-intent-danger',
+  added: 'bg-editor-diff-added',
+  modified: 'bg-editor-warning',
+  removed: 'bg-editor-diff-removed',
 };
+
+/** The current line is a hairline above and below, and nothing else: no fill. */
+const CURRENT_LINE = 'shadow-[inset_0_1px_0_0_var(--ds-editor-line),inset_0_-1px_0_0_var(--ds-editor-line)]';
 
 /* ── the editing surface ─────────────────────────────────────────────────── */
 
@@ -149,18 +154,20 @@ function CodeLine({
   const pieces = piecesOf(body, lineNo, decorations.map((d) => ({ ...d, from: d.from - indent * 2, to: d.to - indent * 2 })));
   const foldable = /[{(]$/.test(text.trimEnd());
   const git = GIT_GUTTER[lineNo];
+  // The current find match carries a ▸ in the gutter as well as its heavier border.
+  const hasCurrentMatch = decorations.some((d) => d.line === lineNo && d.kind === 'findCurrent');
   return (
     <div
       data-line={lineNo}
-      className={`grid grid-cols-[0.25rem_1rem_2.5rem_minmax(0,1fr)] ${current ? 'bg-accent-primary/10' : ''}`}
+      className={`grid grid-cols-[0.25rem_1rem_2.5rem_minmax(0,1fr)] ${current ? CURRENT_LINE : ''}`}
     >
       <span aria-hidden="true" className={git ? GIT_BAR[git] : ''} />
-      <span aria-hidden="true" className="select-none text-center text-content-muted">
-        {foldable ? '▾' : ''}
+      <span aria-hidden="true" className="select-none text-center text-editor-line-number">
+        {hasCurrentMatch ? '▸' : foldable ? '▾' : ''}
       </span>
       <span
         aria-hidden="true"
-        className={`select-none pr-3 text-right tabular-nums print:text-content-secondary ${current ? 'text-content-primary' : 'text-content-muted'}`}
+        className={`select-none pr-3 text-right tabular-nums print:text-content-secondary ${current ? 'text-editor-line-number-active' : 'text-editor-line-number'}`}
       >
         {lineNo}
       </span>
@@ -186,7 +193,7 @@ function Minimap({ source, currentLine }: { source: string; currentLine: number 
   return (
     <div aria-hidden="true" className="hidden w-20 shrink-0 select-none overflow-hidden border-l-2 border-edge-subtle bg-surface-sunken py-2 lg:block print:hidden">
       {rows.map((row, i) => (
-        <div key={i} className={`flex h-[3px] items-center pl-2 ${i + 1 === currentLine ? 'bg-accent-primary/20' : ''}`}>
+        <div key={i} className={`flex h-[3px] items-center pl-2 ${i + 1 === currentLine ? 'bg-editor-line' : ''}`}>
           {tokenizeLine(row).map((t, j) => (
             <span
               key={j}
@@ -229,7 +236,7 @@ function EditorPane({ file, wrap, findOn }: { file: 'paginate.ts' | 'math.ts'; w
         // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a scrollable region must be focusable (axe scrollable-region-focusable)
         tabIndex={0}
         aria-label={`${file} source, ${lines.length} lines`}
-        className="min-w-0 flex-1 overflow-auto py-2 font-mono text-[13px] leading-5 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-primary print:overflow-visible"
+        className="min-w-0 flex-1 overflow-auto py-2 font-mono text-[14px] leading-[21px] [tab-size:2] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-primary print:overflow-visible"
       >
         <div className={wrap ? '' : 'w-max min-w-full pr-4'}>
           {lines.map((text, i) => (
@@ -252,19 +259,19 @@ function DiffPane() {
         // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- a scrollable region must be focusable (axe scrollable-region-focusable)
         tabIndex={0}
         aria-label="Unified diff of paginate.ts"
-        className="min-w-0 flex-1 overflow-auto py-2 font-mono text-[13px] leading-5 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-primary">
+        className="min-w-0 flex-1 overflow-auto py-2 font-mono text-[14px] leading-[21px] [tab-size:2] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-primary">
         <div className="w-max min-w-full">
           {DIFF_LINES.map((l, i) => (
             <div
               key={i}
               className={`grid grid-cols-[2.5rem_2.5rem_1.5rem_minmax(0,1fr)] ${
-                l.sign === 'add' ? 'bg-intent-success/15' : l.sign === 'remove' ? 'bg-intent-danger/15' : ''
+                l.sign === 'add' ? 'border-l-4 border-editor-diff-added bg-editor-diff-added-wash' : l.sign === 'remove' ? 'border-l-4 border-editor-diff-removed bg-editor-diff-removed-wash' : 'border-l-4 border-transparent'
               }`}
             >
               <span aria-hidden="true" className="select-none pr-2 text-right text-content-muted">{l.oldNo ?? ''}</span>
               <span aria-hidden="true" className="select-none pr-2 text-right text-content-muted">{l.newNo ?? ''}</span>
               <span
-                className={`select-none text-center font-bold ${l.sign === 'add' ? 'text-intent-success' : l.sign === 'remove' ? 'text-intent-danger' : 'text-transparent'}`}
+                className={`select-none text-center font-bold ${l.sign === 'add' ? 'text-editor-diff-added' : l.sign === 'remove' ? 'text-editor-diff-removed' : 'text-transparent'}`}
               >
                 <span className="sr-only">{l.sign === 'add' ? 'added: ' : l.sign === 'remove' ? 'removed: ' : 'unchanged: '}</span>
                 <span aria-hidden="true">{l.sign === 'add' ? '+' : l.sign === 'remove' ? '−' : ' '}</span>

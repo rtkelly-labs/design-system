@@ -14,6 +14,8 @@
 
 import {
   auditContrast,
+  auditEditor,
+  auditEditorAgreement,
   auditHueAgreement,
   auditSelectionDevices,
   auditSeriesSeparation,
@@ -70,6 +72,19 @@ const lc = (r) => (r.apca == null ? '       ' : `Lc ${r.apca.toFixed(0).padStart
 const fmt = (r) =>
   `${r.ratio.toFixed(2).padStart(5)}:1  ${lc(r)}  (min ${r.minimum})  ${r.pair}  ${r.foreground} on ${r.background}`;
 
+// #148 / #80: the code Groups. Syntax tokens at 4.5:1 on every ground and on every
+// editor band they can sit on, the selection ink composited, and the find, bracket
+// and diff edges at 3:1. Held to the same arithmetic on the contrast: more ladder.
+const editorChecks = auditEditor(LEVELS);
+const editorMoreChecks = auditEditor(moreLadder);
+const editorFailures = [...editorChecks, ...editorMoreChecks].filter((r) => !r.passes);
+const editorAgreement = auditEditorAgreement(LEVELS);
+const editorAgreementFailures = editorAgreement.filter((r) => !r.passes);
+const editorFmt = (r) => `${r.ratio.toFixed(2).padStart(5)}:1  (min ${r.minimum})  ${r.pair}  ${r.foreground} on ${r.background}`;
+// Recorded, not gated: on Sketch the keyword and the error are both palette.red, by
+// design. The error is a wavy line and a gutter x, so shape carries it, not hue.
+const sharedHue = THEME_LEVELS.filter((l) => LEVELS[l].syntax.keyword === LEVELS[l].editor.error);
+
 const hierarchy = auditTextHierarchy(LEVELS);
 const textPairs = results.filter((r) => r.apca != null && r.pair.startsWith('text.'));
 const weakestText = textPairs.reduce((a, b) => (Math.abs(b.apca) < Math.abs(a.apca) ? b : a));
@@ -106,6 +121,15 @@ if (report) {
     const shown = r.expected === null ? r.detail : `${r.value} vs ${r.expected}`;
     console.log(`  ${r.passes ? ' ' : '!'} ${r.level.padEnd(9)} ${r.role.padEnd(18)} -> ${String(r.declared).padEnd(8)} ${shown}`);
   }
+  console.log('\nsyntax and editor — tokens at 4.5:1 on every ground and band, edges at 3:1');
+  for (const level of THEME_LEVELS) {
+    const forLevel = editorChecks.filter((r) => r.level === level);
+    const worst = Math.min(...forLevel.map((r) => r.ratio));
+    console.log(`  ${level}  ${forLevel.length} pairs, worst ${worst.toFixed(2)}:1`);
+    for (const r of [...forLevel].sort((a, b) => a.ratio - b.ratio).slice(0, 6)) console.log(`    ${r.passes ? ' ' : '!'} ${editorFmt(r)}`);
+  }
+  for (const level of THEME_LEVELS) console.log(`  ${level} editorAlpha ${JSON.stringify(LEVELS[level].editorAlpha)}`);
+  if (sharedHue.length) console.log(`  by design: keyword and error share a hue on ${sharedHue.join(', ')} (shape carries the error)`);
   console.log('\ntext hierarchy — APCA Lc of each tone, and the step from secondary down to muted (reported)');
   for (const s of hierarchy) {
     const { primary, secondary, muted } = s.lc;
@@ -162,6 +186,20 @@ if (agreementFailures.length > 0) {
   process.exit(1);
 }
 
+if (editorAgreementFailures.length > 0) {
+  console.error(`Syntax / editor agreement failed — ${editorAgreementFailures.length} literals disagree with their declared source:\n`);
+  for (const r of editorAgreementFailures) console.error(`  ${r.level.padEnd(9)} ${r.role.padEnd(26)} is ${r.value}, but ${r.source} derives ${r.expected}`);
+  console.error('\nA literal and its declared source must be the same colour. Fix `syntax`/`editor` or the `*Source` map in src/theme/levels.ts.');
+  process.exit(1);
+}
+
+if (editorFailures.length > 0) {
+  console.error(`Syntax / editor contrast failed — ${editorFailures.length} pairs below minimum:\n`);
+  for (const r of editorFailures.sort((a, b) => a.ratio - b.ratio)) console.error(`  ${r.level.padEnd(9)} ${editorFmt(r)}`);
+  console.error('\nLower the wash (`editorAlpha`) or change the role in src/theme/levels.ts, then run `pnpm tokens:build`.');
+  process.exit(1);
+}
+
 if (separationFailures.length > 0) {
   console.error(`Series separation failed — ${separationFailures.length} level(s) with a pair under 0.04 deltaE:\n`);
   for (const r of separationFailures) {
@@ -205,6 +243,11 @@ const normalSep = separation.filter((r) => r.gated).map((r) => `${r.level} ${r.m
 console.log(
   `contrast: more — ${moreResults.length} pairs and ${moreDevices.length} devices clear the same floors on the delta ladder. ` +
     `Series (${LEVELS[THEME_LEVELS[0]].series.length}) closest pair under normal vision: ${normalSep} (floor 0.04).`,
+);
+console.log(
+  `syntax and editor — ${editorChecks.length} pairs, and the same ${editorMoreChecks.length} on the contrast: more ladder, clear their floors: tokens and the selection ink at 4.5:1 on every ground and band, edges at 3:1; ` +
+    `${editorAgreement.length} literals agree with their declared source.` +
+    (sharedHue.length ? ` Keyword and error share a hue on ${sharedHue.join(', ')} by design: shape carries the error.` : ''),
 );
 console.log(
   `APCA (reported, not gated) — weakest text pair Lc ${weakestText.apca.toFixed(0)}: ` +

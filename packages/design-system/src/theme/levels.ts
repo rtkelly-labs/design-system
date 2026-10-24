@@ -47,7 +47,7 @@
  * The one exception is `surface.overlay`, which is a scrim and needs alpha.
  */
 
-import type { BorderTone, Emphasis, Hue, HueRef, Intent, Surface, TextTone } from '../lib/theme';
+import type { BorderTone, Emphasis, Hue, HueRef, Intent, RoleRef, Surface, TextTone } from '../lib/theme';
 
 /**
  * The ladder, ordered from darkest to lightest. Order is meaningful: it is what
@@ -230,7 +230,77 @@ export interface LevelDefinition {
   readonly selection: Readonly<{ multi: string }>;
   /** Colour of the hard offset shadows. Normally tracks `border.strong`. */
   readonly shadow: string;
+  /**
+   * Which Role or Hue each code token is (#148, Round 6). **Declared by name, not
+   * inferred from hex**, for the reason `accentHue` is: `check:contrast` asserts
+   * each `syntax` literal equals what its source resolves to, so the two cannot
+   * drift. Colour is by job, never by hue: a keyword reads `accent.tertiary` on
+   * both levels, which is pink on Midnight and red on Sketch.
+   */
+  readonly syntaxSource: Readonly<Record<SyntaxRole, RoleRef>>;
+  /**
+   * The code token colours, literal per level. Each clears 4.5:1 on `base`,
+   * `raised` and `sunken`, and on every editor band a token can sit on
+   * (`auditEditor`).
+   */
+  readonly syntax: Readonly<Record<SyntaxRole, string>>;
+  /** As `syntaxSource`, for the editor chrome (#80). A wash names the role it tints. */
+  readonly editorSource: Readonly<Record<EditorRole, RoleRef>>;
+  /**
+   * Percent of its source each translucent editor role carries. **Fitted, not
+   * chosen** (levels.ts rule 4: `color-mix()` cannot hold on both grounds): the
+   * largest value at or below the target (selection 30, diff 12, bracket 10)
+   * for which the ink or the text still reads at 4.5:1 composited on every
+   * ground. `editor.test.ts` re-derives each and asserts none can go one step
+   * higher.
+   */
+  readonly editorAlpha: Readonly<{ selection: number; bracket: number; diff: number }>;
+  /**
+   * The editor chrome. Four are translucent literals (`#rrggbbaa`, see
+   * `EDITOR_TRANSLUCENT` in `contrast.ts`), each its source at `editorAlpha`; the rest are opaque.
+   * `find`, `bracket`, and the diff bars are borders and bars, 3:1 on the ground.
+   */
+  readonly editor: Readonly<Record<EditorRole, string>>;
 }
+
+/** The code token roles. Colour by what the token is, not by hue. */
+export const SYNTAX_ROLES = [
+  'keyword',
+  'function',
+  'string',
+  'number',
+  'type',
+  'constant',
+  'comment',
+  'punctuation',
+  'operator',
+  'property',
+  'plain',
+] as const;
+
+export type SyntaxRole = (typeof SYNTAX_ROLES)[number];
+
+/** The editor chrome roles. */
+export const EDITOR_ROLES = [
+  'selection',
+  'selectionInk',
+  'find',
+  'findCurrent',
+  'line',
+  'lineNumber',
+  'lineNumberActive',
+  'bracket',
+  'bracketWash',
+  'error',
+  'warning',
+  'info',
+  'diffAdded',
+  'diffRemoved',
+  'diffAddedWash',
+  'diffRemovedWash',
+] as const;
+
+export type EditorRole = (typeof EDITOR_ROLES)[number];
 
 /**
  * Surfaces do not move in the same direction on every level, and that is the
@@ -331,6 +401,73 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
     selectionStrength: 53,
     selection: { multi: '#236b82' },
     shadow: '#ffffff',
+    // Round 6, Midnight. Keywords are pink (accent.tertiary), functions cyan,
+    // strings green, and the yellow carries numbers, types and constants. The
+    // error is the RED hue, not intent.danger, which is pink here and so would be
+    // the keyword colour.
+    syntaxSource: {
+      keyword: 'accent.tertiary',
+      function: 'accent.primary',
+      string: 'intent.success',
+      number: 'accent.secondary',
+      type: 'accent.secondary',
+      constant: 'accent.secondary',
+      comment: 'text.muted',
+      punctuation: 'text.secondary',
+      operator: 'text.secondary',
+      property: 'text.primary',
+      plain: 'text.primary',
+    },
+    syntax: {
+      keyword: '#f955a4',
+      function: '#22d3ee',
+      string: '#39ff14',
+      number: '#facc15',
+      type: '#facc15',
+      constant: '#facc15',
+      comment: '#9d9db4',
+      punctuation: '#c3c3d4',
+      operator: '#c3c3d4',
+      property: '#ffffff',
+      plain: '#ffffff',
+    },
+    editorSource: {
+      selection: 'accent.primary',
+      selectionInk: 'text.primary',
+      find: 'accent.secondary',
+      findCurrent: 'accent.secondary',
+      line: 'border.subtle',
+      lineNumber: 'text.muted',
+      lineNumberActive: 'accent.primary',
+      bracket: 'accent.tertiary',
+      bracketWash: 'accent.tertiary',
+      error: 'palette.red',
+      warning: 'intent.warning',
+      info: 'intent.info',
+      diffAdded: 'intent.success',
+      diffRemoved: 'palette.red',
+      diffAddedWash: 'intent.success',
+      diffRemovedWash: 'palette.red',
+    },
+    editorAlpha: { selection: 30, bracket: 10, diff: 12 },
+    editor: {
+      selection: '#22d3ee4d',
+      selectionInk: '#ffffff',
+      find: '#facc15',
+      findCurrent: '#facc15',
+      line: '#33334d',
+      lineNumber: '#9d9db4',
+      lineNumberActive: '#22d3ee',
+      bracket: '#f955a4',
+      bracketWash: '#f955a41a',
+      error: '#ff586e',
+      warning: '#facc15',
+      info: '#22d3ee',
+      diffAdded: '#39ff14',
+      diffRemoved: '#ff586e',
+      diffAddedWash: '#39ff141f',
+      diffRemovedWash: '#ff586e1f',
+    },
   },
 
   sketch: {
@@ -416,6 +553,76 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
     selectionStrength: 67,
     selection: { multi: '#5f8be3' },
     shadow: '#23262e',
+    // Round 6, Sketch. Keyword and error share a hue (accent.tertiary and
+    // intent.danger are both palette.red) on purpose: the error is a wavy line and
+    // a gutter x, never a token colour, so shape carries it. Violet is Sketch's
+    // number / type / constant, since its yellow is olive and its orange is
+    // a squiggle colour only.
+    syntaxSource: {
+      keyword: 'accent.tertiary',
+      function: 'accent.primary',
+      string: 'accent.secondary',
+      number: 'palette.violet',
+      type: 'palette.violet',
+      constant: 'palette.violet',
+      comment: 'text.muted',
+      punctuation: 'text.secondary',
+      operator: 'text.secondary',
+      property: 'text.primary',
+      plain: 'text.primary',
+    },
+    syntax: {
+      keyword: '#bd0010',
+      function: '#1450d7',
+      string: '#006b2e',
+      number: '#7d00f4',
+      type: '#7d00f4',
+      constant: '#7d00f4',
+      comment: '#5c5546',
+      punctuation: '#33373f',
+      operator: '#33373f',
+      property: '#23262e',
+      plain: '#23262e',
+    },
+    editorSource: {
+      selection: 'accent.primary',
+      selectionInk: 'text.primary',
+      find: 'accent.secondary',
+      findCurrent: 'accent.secondary',
+      line: 'border.subtle',
+      lineNumber: 'text.muted',
+      lineNumberActive: 'accent.primary',
+      bracket: 'accent.tertiary',
+      bracketWash: 'accent.tertiary',
+      error: 'intent.danger',
+      warning: 'intent.warning',
+      info: 'intent.info',
+      diffAdded: 'intent.success',
+      diffRemoved: 'intent.danger',
+      diffAddedWash: 'intent.success',
+      diffRemovedWash: 'intent.danger',
+    },
+    // Diff is 11, not the 12 target: at 12 the violet and the active line number fall to 4.44:1 on a
+    // red wash over `sunken`, the ground the editor actually sits on.
+    editorAlpha: { selection: 30, bracket: 10, diff: 11 },
+    editor: {
+      selection: '#1450d74d',
+      selectionInk: '#23262e',
+      find: '#006b2e',
+      findCurrent: '#006b2e',
+      line: '#c8c3b4',
+      lineNumber: '#5c5546',
+      lineNumberActive: '#1450d7',
+      bracket: '#bd0010',
+      bracketWash: '#bd00101a',
+      error: '#bd0010',
+      warning: '#974503',
+      info: '#1450d7',
+      diffAdded: '#006b2e',
+      diffRemoved: '#bd0010',
+      diffAddedWash: '#006b2e1c',
+      diffRemovedWash: '#bd00101c',
+    },
   },
 };
 

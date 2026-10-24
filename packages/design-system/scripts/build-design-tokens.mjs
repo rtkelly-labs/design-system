@@ -31,7 +31,7 @@ import { mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { FIXED_COLOURS, LEVELS, PALETTE_HUES, THEME_LEVELS } from '../src/theme/levels.ts';
+import { EDITOR_ROLES, FIXED_COLOURS, LEVELS, PALETTE_HUES, SYNTAX_ROLES, THEME_LEVELS } from '../src/theme/levels.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OUT_DIR = path.join(ROOT, 'tokens');
@@ -89,6 +89,16 @@ function colour(value, description) {
     };
   }
 
+  // #rrggbbaa: the translucent editor roles. sRGB with an explicit alpha, as for rgba().
+  const hex8 = /^#([0-9a-f]{6})([0-9a-f]{2})$/i.exec(value);
+  if (hex8) {
+    const rgb = srgb(`#${hex8[1]}`);
+    return {
+      $value: { colorSpace: 'srgb', components: rgb.map((c) => round(c, 4)), alpha: round(Number.parseInt(hex8[2], 16) / 255, 4) },
+      ...desc(description),
+    };
+  }
+
   if (!/^#[0-9a-f]{6}$/i.test(value)) {
     throw new Error(
       `Cannot emit \`${value}\` as a DTCG colour. Expected #rrggbb, rgba(), or transparent.`,
@@ -118,6 +128,9 @@ const desc = (description) => (description ? { $description: description } : {})
  * point at — `accent.quiet` is a grey by design.
  */
 const alias = (hue) => ({ $value: `{palette.${hue}}` });
+
+/** A Role or Hue named by its dotted path, as the format's own alias: `{accent.tertiary}`. */
+const ref = (path) => ({ $value: `{${path}}` });
 
 const HUE_NOTES = {
   red: 'Danger and ANSI red.',
@@ -222,6 +235,26 @@ function levelDocument(level) {
         '3:1 against base and raised. A single current item takes a solid accent.primary fill instead.',
       $extensions: { 'dev.ryankelly.design-system': { selectionStrength: def.selectionStrength } },
       multi: colour(def.selection.multi),
+    },
+    syntax: {
+      $type: 'color',
+      $description:
+        'Code token roles (#148, Round 6), aliased onto the Role or Hue each declares in `syntaxSource`. ' +
+        'Colour is by what the token is, never by hue: a keyword is accent.tertiary on every level.',
+      ...Object.fromEntries(SYNTAX_ROLES.map((role) => [role, ref(def.syntaxSource[role])])),
+    },
+    editor: {
+      $type: 'color',
+      $description:
+        'Editor chrome (#80, Round 6). Opaque roles alias their source. The four translucent ones (selection, bracketWash, ' +
+        'diffAddedWash, diffRemovedWash) are literals: the source at the fitted `editorAlpha`, since color-mix cannot hold on both grounds.',
+      $extensions: { 'dev.ryankelly.design-system': { editorAlpha: def.editorAlpha } },
+      ...Object.fromEntries(
+        EDITOR_ROLES.map((role) => {
+          const translucent = /^#[0-9a-f]{8}$/i.test(def.editor[role]);
+          return [role, translucent ? { ...colour(def.editor[role]), $extensions: { 'dev.ryankelly.design-system': { source: def.editorSource[role] } } } : ref(def.editorSource[role])];
+        }),
+      ),
     },
     shadow: { $type: 'color', color: colour(def.shadow, 'Colour of the hard offset shadows.') },
   };
