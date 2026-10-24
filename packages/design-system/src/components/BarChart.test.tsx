@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { createRef } from 'react';
 import { BarChart, type BarChartDatum } from './BarChart';
@@ -17,10 +17,13 @@ describe('BarChart', () => {
     expect(svg).toBeDefined();
     expect(svg?.getAttribute('data-slot')).toBe('barchart');
 
-    // Categorical labels on the axis
-    expect(screen.getByText('ALPHA')).toBeDefined();
-    expect(screen.getByText('BETA')).toBeDefined();
-    expect(screen.getByText('GAMMA')).toBeDefined();
+    // Categorical labels on the axis. Queried inside the chart: visx measures
+    // label widths in a hidden <text> it appends to <body> and never removes,
+    // so with `isolate: false` a document-wide query can find a label twice.
+    const chart = within(screen.getByRole('img', { name: 'Bar chart with 3 categories' }));
+    expect(chart.getByText('ALPHA')).toBeDefined();
+    expect(chart.getByText('BETA')).toBeDefined();
+    expect(chart.getByText('GAMMA')).toBeDefined();
 
     // Values rendered
     expect(screen.getAllByText('45').length).toBeGreaterThanOrEqual(1);
