@@ -33,7 +33,9 @@ describe('githubRunToSpans', () => {
   it('adds a queue span only for a wait of a second or more', () => {
     expect(byId.get('job-10-queue')?.end).toBe(Date.parse('2026-10-24T08:47:00Z'));
     expect(byId.has('job-11-queue')).toBe(true);
-    expect(githubRunToSpans(run, jobs, { queue: false }).some((span) => span.id.endsWith('-queue'))).toBe(false);
+    const unqueued = githubRunToSpans(run, jobs, { queue: false });
+    expect(unqueued.some((span) => span.id.endsWith('-queue'))).toBe(false);
+    expect(unqueued.find((span) => span.id === 'job-10')?.attributes?.['ci.queue.ms']).toBe(3000);
   });
 
   it('keeps a skipped job as an instant and drops a job that never started', () => {
