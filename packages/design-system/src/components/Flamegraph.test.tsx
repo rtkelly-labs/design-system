@@ -27,12 +27,15 @@ describe('Flamegraph', () => {
     expect(html).not.toContain('data-slot="flamegraph-tooltip"');
   });
 
-  it('zooms on click and on Enter, and back out from the breadcrumb and Escape', () => {
+  it('fits a frame on Enter, and back out from the breadcrumb and Escape', () => {
     const onZoomedChange = vi.fn();
-    render(<Flamegraph profile={profile} onZoomedChange={onZoomedChange} />);
-    fireEvent.click(frame(/^handle,/));
+    const onWindowChange = vi.fn();
+    render(<Flamegraph profile={profile} onZoomedChange={onZoomedChange} onWindowChange={onWindowChange} />);
+    fireEvent.keyDown(frame(/^handle,/), { key: 'Enter' });
     expect(onZoomedChange).toHaveBeenLastCalledWith('main;handle');
+    expect(onWindowChange.mock.lastCall?.[0]).toMatchObject({ start: 0.2, end: 1 });
     expect(screen.queryByRole('treeitem', { name: /^gc,/ })).toBeNull();
+    expect(frame(/^handle,/).getAttribute('aria-selected')).toBe('true');
     const crumbs = screen.getByRole('navigation', { name: 'Zoom path' });
     fireEvent.click(within(crumbs).getByRole('button', { name: 'main' }));
     expect(onZoomedChange).toHaveBeenLastCalledWith('main');
@@ -40,6 +43,67 @@ describe('Flamegraph', () => {
     expect(onZoomedChange).toHaveBeenLastCalledWith(null);
     fireEvent.keyDown(frame(/^gc,/), { key: 'Enter' });
     expect(onZoomedChange).toHaveBeenLastCalledWith('main;gc');
+  });
+
+  it('selects on click — the frame outlined and its stack kept, the rest dimmed — and clears on a second click', () => {
+    const onSelectedChange = vi.fn();
+    render(<Flamegraph profile={profile} onSelectedChange={onSelectedChange} />);
+    fireEvent.click(frame(/^parse,/));
+    expect(onSelectedChange).toHaveBeenLastCalledWith('main;handle;parse');
+    expect(frame(/^parse,/).getAttribute('aria-selected')).toBe('true');
+    expect(frame(/^handle,/).getAttribute('class')).not.toContain('opacity-30');
+    expect(frame(/^render,/).getAttribute('class')).toContain('opacity-30');
+    expect(frame(/^gc,/).getAttribute('class')).toContain('opacity-30');
+    const details = screen.getByRole('region', { name: 'Frame details' });
+    expect(details.getAttribute('aria-live')).toBe('polite');
+    expect(details.textContent).toContain('self 30 samples · 30%');
+    // Selecting does not zoom; the panel offers it.
+    expect(screen.queryByRole('navigation', { name: 'Zoom path' })).toBeNull();
+    fireEvent.click(within(details).getByRole('button', { name: 'Zoom to frame' }));
+    expect(screen.getByRole('navigation', { name: 'Zoom path' })).toBeTruthy();
+    fireEvent.click(frame(/^parse,/));
+    expect(onSelectedChange).toHaveBeenLastCalledWith(null);
+    expect(screen.queryByRole('region', { name: 'Frame details' })).toBeNull();
+  });
+
+  it('zooms and resets from the controls and keys, back to the default window rather than the whole profile', () => {
+    const { container } = render(<Flamegraph profile={profile} defaultWindow={[0.2, 0.6]} />);
+    const root = container.querySelector('[data-slot="flamegraph"]')!;
+    expect(root.getAttribute('data-window')).toBe('0.2000 0.6000');
+    expect(container.querySelector('[data-slot="flamegraph-minimap"]')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }));
+    expect(root.getAttribute('data-window')).toBe('0.3000 0.5000');
+    fireEvent.click(screen.getByRole('button', { name: 'Fit all' }));
+    expect(root.getAttribute('data-window')).toBe('0.0000 1.0000');
+    expect(container.querySelector('[data-slot="flamegraph-minimap"]')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Reset' }));
+    expect(root.getAttribute('data-window')).toBe('0.2000 0.6000');
+    fireEvent.keyDown(frame(/^all,/), { key: '-' });
+    expect(root.getAttribute('data-window')).toBe('0.0000 0.8000');
+    fireEvent.keyDown(frame(/^all,/), { key: '0' });
+    expect(root.getAttribute('data-window')).toBe('0.2000 0.6000');
+  });
+
+  it('hides levels outside the depth window behind markers that pan to them', () => {
+    const { container } = render(<Flamegraph profile={profile} orientation="flame" defaultDepth={[1, 2]} />);
+    expect(screen.queryByRole('treeitem', { name: /^all,/ })).toBeNull();
+    expect(screen.queryByRole('treeitem', { name: /^parse,/ })).toBeNull();
+    const deeper = screen.getByRole('button', { name: /1 level hidden deeper/ });
+    expect(deeper.textContent).toBe('▲ 1 level');
+    expect(screen.getByRole('button', { name: /1 level hidden shallower/ }).textContent).toBe('▼ 1 level');
+    fireEvent.click(deeper);
+    expect(container.querySelector('[data-slot="flamegraph"]')!.getAttribute('data-depth')).toBe('2 3');
+    expect(frame(/^parse,/)).toBeTruthy();
+    fireEvent.click(screen.getAllByRole('button', { name: 'More levels' })[0]);
+    expect(container.querySelector('[data-slot="flamegraph"]')!.getAttribute('data-depth')).toBe('0 3');
+  });
+
+  it('renders a pre-zoomed, clipped window statically', () => {
+    const html = renderToStaticMarkup(<Flamegraph profile={profile} defaultWindow={[0.1, 0.6]} defaultSelectedId="main;handle;parse" />);
+    expect(html).toMatch(/data-frame-id="main;gc"[^>]*data-clipped="true"/);
+    expect(html).toContain('data-slot="flamegraph-minimap"');
+    expect(html).toContain('aria-selected="true"');
+    expect(html).not.toContain('data-slot="flamegraph-controls"');
   });
 
   it('moves a single tab stop with the arrow keys, following the orientation', () => {
@@ -78,24 +142,24 @@ describe('Flamegraph', () => {
     expect(frame(/^parse,/).getAttribute('aria-label')).toContain('self +10 samples (+33.3%) against the baseline');
     expect(frame(/^audit,/).getAttribute('data-tone')).toBe('new');
     expect(frame(/^render,/).getAttribute('data-tone')).toBe('same');
-    expect(screen.getByRole('list', { name: 'Colour key' })).toBeTruthy();
+    expect(screen.getAllByRole('list', { name: 'Colour key' }).length).toBeGreaterThan(0);
     expect(screen.getByText(/gone from the candidate/).textContent).toContain('legacy (5 samples)');
     unmount();
     render(<Flamegraph profile={buildFlame('a 1', { unit: 'ms' })} baseline={baseline} mode="diff" />);
     expect(screen.getByText(/cannot be compared/)).toBeTruthy();
   });
 
-  it('lists the hottest frames, and a row zooms the graph and opens the details panel', () => {
-    const onZoomedChange = vi.fn();
-    render(<Flamegraph profile={profile} list="always" onZoomedChange={onZoomedChange} />);
+  it('lists the hottest frames, and a row selects its frame and opens the details panel', () => {
+    const onSelectedChange = vi.fn();
+    render(<Flamegraph profile={profile} list="always" onSelectedChange={onSelectedChange} />);
     const list = screen.getByRole('region', { name: 'Hottest frames' });
     const rows = within(list).getAllByRole('button');
     expect(rows.map((row) => row.textContent?.split('self')[0])).toEqual(['render', 'parse', 'gc']);
     fireEvent.click(rows[1]);
-    expect(onZoomedChange).toHaveBeenLastCalledWith('main;handle;parse');
+    expect(onSelectedChange).toHaveBeenLastCalledWith('main;handle;parse');
     expect(rows[1].getAttribute('aria-current')).toBe('true');
+    expect(frame(/^parse,/).getAttribute('aria-selected')).toBe('true');
     expect(screen.getByRole('region', { name: 'Frame details' }).textContent).toContain('self 30 samples · 30%');
-    expect(screen.getByRole('navigation', { name: 'Zoom path' })).toBeTruthy();
   });
 
   it('keeps the list in the markup for a narrow container by default, and leaves it out with never', () => {
@@ -120,9 +184,9 @@ describe('Flamegraph', () => {
     const wide = buildFlame('main;Microsoft.AspNetCore.Routing.EndpointMiddleware.Invoke 90\nmain;gc 10');
     const html = renderToStaticMarkup(<Flamegraph profile={wide} />);
     expect(html).toContain('@max-[560px]:-scale-y-100');
-    // A label that fits at 960px but not on a phone gets a narrow stand-in.
-    expect(html).toContain('>Microsoft.AspNetCore.Routing.EndpointMiddleware.Invoke</text>');
-    expect(html).toMatch(/hidden @max-\[560px\]:inline[^>]*>Microsoft\.AspNetCore\.Routing\.EndpointMid[^<]*…<\/text>/);
+    // Narrow, the overview is bars only: every label is hidden by the container query.
+    expect(html).toMatch(/@max-\[560px\]:hidden[^>]*>Microsoft\.AspNetCore\.Routing\.EndpointMiddleware\.Invoke<\/text>/);
+    expect(html).not.toMatch(/<text(?![^>]*@max-\[560px\]:hidden)[^>]*>(?!total|self|Δ)/);
     expect(renderToStaticMarkup(<Flamegraph profile={wide} orientation="flame" />)).not.toContain('-scale-y-100');
   });
 
