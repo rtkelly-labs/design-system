@@ -10,26 +10,45 @@ import {
   useSyncExternalStore,
   type HTMLAttributes,
   type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
   type ReactNode,
 } from 'react';
 import { cn, recipe } from '../lib/recipe';
 import {
+  clampFlameDepth,
+  clampFlameWindow,
   diffFlame,
+  fitFlameDepth,
+  fitFlameWindow,
   fitFlameLabel,
+  FLAME_FULL_WINDOW,
   flameDeltaTone,
   flamePath,
+  flameWindowFrame,
   formatFlameDelta,
   formatFlameShare,
   formatFlameValue,
+  panFlameDepth,
+  panFlameWindow,
   rankFlameFrames,
+  resolveFlameDepth,
+  resolveFlameWindow,
+  sameFlameWindow,
   searchFlame,
-  zoomFlame,
+  windowFlame,
+  zoomFlameDepth,
+  zoomFlameWindow,
   type FlameDeltaTone,
+  type FlameDepthSpec,
+  type FlameDepthWindow,
   type FlameFrame,
   type FlameFrameDelta,
   type FlameRankedFrame,
   type FlameTree,
-  type FlameViewFrame,
+  type FlameWindow,
+  type FlameWindowFrame,
+  type FlameWindowSpec,
 } from '../lib/flame';
 
 /** Pixels per character of the `text-xs` monospace label, rounded up so an estimate never overflows. */
@@ -42,15 +61,24 @@ const MIN_FRAME_PX = 0.5;
 const TIP_LINE = 16;
 const TIP_PAD = 6;
 /**
- * Below this container width the graph becomes an overview and the frame list
- * carries the detail. Must match the `@max-[560px]` / `@min-[560px]` variants
- * below — Tailwind reads those as source text, so they cannot be built from it.
+ * Below this container width the graph becomes a label-free overview and the
+ * frame list carries the detail. Must match the `@max-[560px]` / `@min-[560px]`
+ * variants below — Tailwind reads those as source text, so they cannot be built from it.
  */
 const NARROW = 560;
-/** Row height of the overview in a measured narrow container. */
-const NARROW_ROW = 16;
-/** The width labels are fitted to for a narrow container before it can be measured: a 390px phone less two 16px gutters. */
-const NARROW_ASSUMED = 358;
+/** Row height of the label-free overview in a measured narrow container: tall enough to tap. */
+const NARROW_ROW = 22;
+/** Levels a phone shows by default; a desktop shows every level the window reaches. */
+const NARROW_DEPTH_CAP = 12;
+/** How far, in pixels, a tap in a row's empty space may land from a frame and still pick it. */
+const TAP_SLOP = 12;
+/** Two taps closer than this, in milliseconds and pixels, are a double tap. */
+const DOUBLE_TAP_MS = 300;
+const DOUBLE_TAP_PX = 30;
+/** A touch that moves this far is a drag, not a tap. */
+const DRAG_PX = 8;
+/** Height of the minimap strip, in pixels. */
+const MINIMAP_HEIGHT = 40;
 /** Rows of the frame list shown before "show all". */
 const LIST_TOP = 10;
 
@@ -60,13 +88,19 @@ const flamegraph = recipe({
     breadcrumb: 'm-0 flex list-none flex-wrap items-center gap-1 p-0 text-content-secondary',
     crumb: 'cursor-pointer border border-transparent px-1 hover:border-edge-default hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary @max-[560px]:min-h-11 @max-[560px]:max-w-40 @max-[560px]:truncate',
     current: 'px-1 font-bold break-all text-content-primary',
+    controls: 'flex items-center gap-1 @min-[560px]:flex-wrap',
+    menu: 'absolute right-0 top-full z-10 mt-1 flex gap-1 border border-edge-strong bg-surface-base p-1 shadow-hard-sm',
+    control: 'h-7 min-w-7 cursor-pointer border border-edge-default px-2 text-content-secondary hover:border-edge-strong hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary disabled:cursor-default disabled:opacity-40 @max-[560px]:min-h-11 @max-[560px]:min-w-11',
+    minimap: 'block w-full cursor-grab touch-none select-none border border-edge-subtle',
+    marker: 'flex h-6 w-full cursor-pointer items-center justify-center border border-dashed border-edge-default text-content-secondary hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary @max-[560px]:min-h-11',
     frame: 'w-full min-w-0',
-    chart: 'block w-full select-none overflow-visible',
+    chart: 'block w-full touch-pan-y select-none overflow-visible',
     status: 'text-content-secondary',
     details: 'flex flex-col gap-0.5 border border-edge-default bg-surface-raised px-2 py-1.5',
+    action: 'min-h-7 cursor-pointer self-start border border-edge-default px-2 text-content-primary hover:border-edge-strong focus-visible:outline-2 focus-visible:outline-accent-primary @max-[560px]:min-h-11',
     list: 'flex-col gap-0',
     rows: 'm-0 flex list-none flex-col p-0',
-    row: 'flex min-h-11 w-full cursor-pointer flex-col justify-center gap-1 border-b border-edge-subtle px-1 py-1.5 text-left hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-accent-primary aria-[current=true]:bg-surface-raised',
+    row: 'flex min-h-11 w-full cursor-pointer flex-col justify-center gap-1 border-b border-edge-subtle px-1 py-1.5 text-left @max-[560px]:gap-2 @max-[560px]:p-3 hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-accent-primary aria-[current=true]:bg-surface-raised aria-[current=true]:outline-2 aria-[current=true]:outline-accent-primary',
     more: 'flex min-h-11 cursor-pointer items-center text-content-secondary hover:text-content-primary',
     legend: 'm-0 grid list-none grid-cols-2 items-center gap-x-3 gap-y-1 p-0 text-content-secondary @min-[560px]:flex @min-[560px]:flex-wrap @min-[560px]:gap-x-4',
     removed: 'text-content-secondary',
@@ -95,6 +129,25 @@ function useControllable<T>(value: T | undefined, initial: T, onChange?: (next: 
     onChange?.(next);
   }, [value, onChange]);
   return [current, set];
+}
+
+/**
+ * As `useControllable`, but an uncontrolled value that has never been set
+ * follows `fallback` — so a default that depends on the measured width (the
+ * phone's depth cap) keeps tracking it until someone pans or zooms.
+ */
+function useWindowState<T>(value: T | undefined, fallback: T, onChange?: (next: T) => void): [T, (next: T) => void, () => void] {
+  const [owned, setOwned] = useState<T | null>(null);
+  const current = value !== undefined ? value : (owned ?? fallback);
+  const set = useCallback((next: T) => {
+    if (value === undefined) setOwned(next);
+    onChange?.(next);
+  }, [value, onChange]);
+  const reset = useCallback(() => {
+    if (value === undefined) setOwned(null);
+    onChange?.(fallback);
+  }, [value, onChange, fallback]);
+  return [current, set, reset];
 }
 
 const noSubscribe = () => () => {};
@@ -164,26 +217,60 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
    * The frame list: the hottest frames by self time — or, in a diff, by the
    * size of their change — one per row with the full name, shares, a bar and
    * the delta. `auto` shows it only in a container narrower than 560px, where
-   * frame labels cannot be read; `always` and `never` do what they say.
+   * the overview draws no labels; `always` and `never` do what they say.
    * Default `auto`.
    */
   list?: 'auto' | 'always' | 'never';
-  /** The frame id zoomed into. Controlled when defined; `null` is the whole profile. */
+  /**
+   * Where the horizontal window opens, and where Reset returns: `[start, end]`
+   * as fractions of the root; `{ frameId }` to fit a frame; `'hottest'` to fit
+   * the grandparent of the hottest leaf — in a diff, the leaf that changed most
+   * (see `hottestFlameFrame`); `'all'`.
+   * Default: `defaultZoomedId`'s frame when given, else the whole profile.
+   */
+  defaultWindow?: FlameWindowSpec;
+  /** The horizontal window, as fractions of the root. Controlled when defined. */
+  window?: FlameWindow;
+  /** Called with the new horizontal window after a pinch, drag, wheel, button, fit or reset. */
+  onWindowChange?: (window: FlameWindow) => void;
+  /**
+   * Where the depth window opens, and where Reset returns: `[min, max]`
+   * levels, or a number of levels from the root. Default: the stack of the
+   * selected frame, or of the frame the window fits; otherwise every level the
+   * window reaches — capped at 12 levels in a narrow container, uncapped wide.
+   */
+  defaultDepth?: FlameDepthSpec;
+  /** The depth window, in levels (the root is 0). Controlled when defined. */
+  depth?: FlameDepthWindow;
+  /** Called with the new depth window after a pinch, wheel, marker, button, fit or reset. */
+  onDepthChange?: (depth: FlameDepthWindow) => void;
+  /** The frame last fitted — what the breadcrumb leads to. Controlled when defined; `null` is the root. */
   zoomedId?: string | null;
-  /** The frame zoomed into on mount when uncontrolled — and the zoom a static render shows. */
+  /** The frame fitted on mount when uncontrolled — and the fit a static render shows. */
   defaultZoomedId?: string | null;
-  /** Called with the frame id a click, tap, Enter or Space zooms into, or the breadcrumb zooms out to. */
+  /** Called with the frame id Enter, "Zoom to frame", Escape or the breadcrumb fits. */
   onZoomedChange?: (id: string | null) => void;
+  /**
+   * The selected frame: outlined in the accent, its stack (ancestors and
+   * descendants) at full strength and everything else dimmed, its row
+   * highlighted in the list and its numbers in the details panel. Controlled
+   * when defined; `null` selects nothing.
+   */
+  selectedId?: string | null;
+  /** The frame selected on mount when uncontrolled — and the selection a static render shows. */
+  defaultSelectedId?: string | null;
+  /** Called with the frame id a tap, click, Space or list row selects, or `null` when the selection clears. */
+  onSelectedChange?: (id: string | null) => void;
   /** Highlight frames whose name contains this text, and report the share of the profile beneath them. */
   search?: string;
   /**
    * The width, in pixels, labels are fitted to before the component can
-   * measure itself — and for good in a static render, where a narrow container
-   * is fitted to a 358px phone instead. The graph always fills its container;
-   * this only decides how much of each label is printed. Default 960.
+   * measure itself — and for good in a static render. The graph always fills
+   * its container; this only decides how much of each label is printed.
+   * Default 960.
    */
   width?: number;
-  /** Height of one frame row, in pixels. Default 20; a measured narrow container caps it at 16. */
+  /** Height of one frame row, in pixels. Default 20; a measured narrow container uses 22, a tap target. */
   rowHeight?: number;
   /** Accessible name for the frame tree. Default `Flame graph`. */
   label?: string;
@@ -194,34 +281,40 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
  * as wide as the time beneath it. Reads Brendan Gregg's folded stacks, or a
  * trace weighted by self time, through `lib/flame`.
  *
- * **Static first.** The frames, their labels and a native `<title>` tooltip are
- * plain SVG, positioned in percentages, so a report rendered to HTML with no
- * script still draws and explains itself. Labels are truncated by a monospace
- * character-width estimate rather than measured — measuring needs a browser.
- * With script, the component measures its width, swaps the native tooltip for
- * one drawn in the SVG on mouse hover, and adds click-to-zoom with a
- * breadcrumb back out. A click or tap also opens the frame's numbers in a
- * details panel under the graph — the touch equivalent of the tooltip.
+ * **Static first.** Frames, labels and a native `<title>` tooltip are plain SVG
+ * computed from the opening window, so a report rendered with no script still
+ * draws — pre-zoomed, clipped and explained. Labels are fitted by a monospace
+ * estimate rather than measured. With script it measures itself, draws a mouse
+ * tooltip, and adds selection, zoom and pan.
  *
- * **Narrow.** Below 560px of *container* width (a container query, so it
- * works without script and inside any column) the graph becomes an overview:
- * root on top unless `orientation` is set, labels only where they fit. A frame
- * list beneath carries the detail — the ten hottest frames, the rest behind a
- * `<details>` disclosure, each row a 44px tap target that zooms the graph.
+ * **Two windows.** The view is a horizontal window over the root and a depth
+ * window over the levels. Frames crossing a side edge are clipped, labels
+ * pinned to the visible part; hidden levels are counted on `▲`/`▼` markers that
+ * pan when pressed. When zoomed, a minimap shows the whole profile with the
+ * window marked, and dragging it pans both axes. Reset returns to the default
+ * windows, Fit all shows everything.
  *
- * **Keyboard.** The frames are a tree with one roving tab stop. Up and Down
- * move toward the leaves or the root *as drawn* (so they flip with
- * orientation), Left and Right move between neighbours on the same row,
- * Home returns to the root, Enter or Space zooms into a frame and Escape zooms
- * back out one level. Every frame's accessible name carries its numbers.
+ * **Gestures.** Tap or click selects a frame (again, or empty space, clears);
+ * a tap a few pixels from a thin frame still finds it. Double-tap or
+ * double-click zooms in ×2 about the point. On touch: pinch zooms about its
+ * centre — horizontally or in depth, whichever axis the fingers spread along
+ * — and a horizontal drag pans; vertical drags scroll the page. With a mouse:
+ * Ctrl/⌘+wheel (or a trackpad pinch) zooms, Shift+wheel or a horizontal wheel
+ * pans, Alt+wheel changes depth.
  *
- * **Diff.** With `mode="diff"` each frame is painted on the delta roles by the
- * sign and size of its change against `baseline`: `delta-added` where the
- * candidate spent more, `delta-removed` where it spent less — change, not
- * verdict. New frames are the solid added fill with a dashed edge; frames the
- * candidate no longer has cannot be drawn at candidate widths, so they are
- * listed under the legend and ranked in the frame list. A change against a
- * zero baseline is coloured by sign only, and its ratio reads `n/a`.
+ * **Keyboard.** One roving tab stop over the frame tree. Up and Down move
+ * toward the leaves or the root as drawn, Left and Right along the row, Home
+ * to the root. Space selects, Enter fits the frame, Escape fits its parent;
+ * `+`, `-` and `0` zoom in, out and reset.
+ *
+ * **Narrow.** Below 560px of *container* width (a container query, so it works
+ * without script) the graph is a label-free overview of 22px tap rows, root on
+ * top unless `orientation` is set, and a frame list beneath carries the names.
+ *
+ * **Diff.** With `mode="diff"` frames are painted on the delta roles by the
+ * sign and size of their change against `baseline` — change, not verdict. New
+ * frames have a dashed edge; removed frames cannot be drawn at candidate
+ * widths, so the legend and the list name them. A zero baseline reads `n/a`.
  */
 export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function Flamegraph(
   {
@@ -234,9 +327,18 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     normalize = false,
     orientation: orientationProp,
     list = 'auto',
+    defaultWindow,
+    window: windowProp,
+    onWindowChange,
+    defaultDepth,
+    depth: depthProp,
+    onDepthChange,
     zoomedId: zoomedProp,
-    defaultZoomedId = null,
+    defaultZoomedId,
     onZoomedChange,
+    selectedId: selectedProp,
+    defaultSelectedId = null,
+    onSelectedChange,
     search,
     width: assumedWidth = 960,
     rowHeight: rowHeightProp = 20,
@@ -256,15 +358,40 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   // measured, the orientation is chosen here and drawn directly.
   const cssFlip = orientationProp === undefined && measured === 0;
   const orientation = orientationProp ?? (narrow ? 'icicle' : 'flame');
-  const rowHeight = narrow ? Math.min(rowHeightProp, NARROW_ROW) : rowHeightProp;
-  const [zoomedId, setZoomedId] = useControllable<string | null>(zoomedProp, defaultZoomedId, onZoomedChange);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const rowHeight = narrow ? NARROW_ROW : rowHeightProp;
+  const depthCap = narrow ? NARROW_DEPTH_CAP : Infinity;
 
+  // The opening windows. A spec array is compared by value, so a literal in JSX does not reset the view each render.
+  const windowSpec: FlameWindowSpec | undefined = defaultWindow ?? (defaultZoomedId ? { frameId: defaultZoomedId } : undefined);
+  const specKey = JSON.stringify(windowSpec ?? null);
+  const depthKey = JSON.stringify(defaultDepth ?? null);
   const diff = useMemo(() => (mode === 'diff' && baseline ? diffFlame(baseline, profile, { normalize }) : null), [mode, baseline, profile, normalize]);
-  const changes = diff?.compatible ? diff.frames : null;
-  const focus = (zoomedId ? profile.byId.get(zoomedId) : undefined) ?? profile.root;
-  const view = useMemo(() => zoomFlame(profile, focus.id).filter((entry) => entry.width * width >= MIN_FRAME_PX), [profile, focus.id, width]);
+  const comparable = diff?.compatible ? diff : null;
+  const windowFrame = useMemo(() => flameWindowFrame(profile, JSON.parse(specKey) as FlameWindowSpec | null, comparable, diffMetric), [profile, specKey, comparable, diffMetric]);
+  const initialZoom = defaultZoomedId !== undefined ? defaultZoomedId : (windowFrame?.id ?? null);
+  const defaultWin = useMemo(() => resolveFlameWindow(profile, JSON.parse(specKey) as FlameWindowSpec | null, comparable, diffMetric), [profile, specKey, comparable, diffMetric]);
+  const defaultDepthWin = useMemo(
+    () => resolveFlameDepth(profile, JSON.parse(depthKey) as FlameDepthSpec | null, { window: defaultWin, anchorId: defaultSelectedId ?? windowFrame?.id ?? null, cap: depthCap }),
+    [profile, depthKey, defaultWin, defaultSelectedId, windowFrame, depthCap],
+  );
+
+  const [zoomedId, setZoomedId] = useControllable<string | null>(zoomedProp, initialZoom, onZoomedChange);
+  const [selectedId, setSelectedId] = useControllable<string | null>(selectedProp, defaultSelectedId, onSelectedChange);
+  const [rawWindow, setRawWindow, resetWindow] = useWindowState<FlameWindow>(windowProp, defaultWin, onWindowChange);
+  const [rawDepth, setRawDepth, resetDepth] = useWindowState<FlameDepthWindow>(depthProp, defaultDepthWin, onDepthChange);
+  const win = useMemo(() => clampFlameWindow(rawWindow), [rawWindow]);
+  const depth = useMemo(() => clampFlameDepth(profile, rawDepth), [profile, rawDepth]);
+  const setWindow = (next: FlameWindow) => setRawWindow(clampFlameWindow(next));
+  const setDepth = (next: FlameDepthWindow) => setRawDepth(clampFlameDepth(profile, next));
+  const span = win.end - win.start;
+  const fullDepth = depth.min === 0 && depth.max === profile.maxDepth;
+  const zoomed = !sameFlameWindow(win, FLAME_FULL_WINDOW) || !fullDepth;
+
+  const changes = comparable ? comparable.frames : null;
+  const fitted = (zoomedId ? profile.byId.get(zoomedId) : undefined) ?? profile.root;
+  const view = useMemo(() => windowFlame(profile, win, depth).filter((entry) => entry.width * width >= MIN_FRAME_PX), [profile, win, depth, width]);
   const viewById = useMemo(() => new Map(view.map((entry) => [entry.frame.id, entry])), [view]);
+  const contextIds = useMemo(() => new Set(flamePath(profile, fitted.id).slice(0, -1).map((frame) => frame.id)), [profile, fitted.id]);
   const found = useMemo(() => searchFlame(profile, search ?? ''), [profile, search]);
   const searching = !!search?.trim();
   const ranked = useMemo(
@@ -272,13 +399,24 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     [list, profile, diff, diffMetric],
   );
 
-  const rows = profile.maxDepth + 1;
-  const height = rows * rowHeight;
-  const yOf = (depth: number) => (orientation === 'flame' ? (rows - 1 - depth) * rowHeight : depth * rowHeight);
+  const levels = depth.max - depth.min + 1;
+  const height = levels * rowHeight;
+  const yOf = (level: number) => (orientation === 'flame' ? (depth.max - level) * rowHeight : (level - depth.min) * rowHeight);
+
+  // The stack of the selected frame — itself, its ancestors, its descendants — stays at full strength.
+  const stack = useMemo(() => {
+    const frame = selectedId !== null ? profile.byId.get(selectedId) : undefined;
+    if (!frame) return null;
+    const ids = new Set<string>();
+    for (let at: FlameFrame | undefined = frame; at; at = at.parentId !== null ? profile.byId.get(at.parentId) : undefined) ids.add(at.id);
+    const down = (f: FlameFrame) => { ids.add(f.id); f.children.forEach(down); };
+    down(frame);
+    return ids;
+  }, [selectedId, profile]);
 
   // Roving tabindex: one frame is in the tab order, and the arrow keys move it.
   const [activeId, setActiveId] = useState<string | null>(null);
-  const tabId = activeId !== null && viewById.has(activeId) ? activeId : focus.id;
+  const tabId = activeId !== null && viewById.has(activeId) ? activeId : viewById.has(fitted.id) ? fitted.id : (view[0]?.frame.id ?? '');
   const frameRefs = useRef(new Map<string, SVGGElement>());
   const pendingFocus = useRef(false);
   useEffect(() => {
@@ -296,22 +434,185 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const tipId = hoverId ?? focusedId;
 
-  /** Zoom into a frame and open its details — what a click, a tap, Enter and a list row all do. */
-  const zoomTo = (id: string) => {
+  /** Fit both windows to a frame — its extent across, its stack down — and lead the breadcrumb to it. */
+  const fitTo = (id: string) => {
     const frame = profile.byId.get(id);
     if (!frame) return;
     setZoomedId(frame.parentId === null ? null : frame.id);
-    setSelectedId(frame.id);
+    setWindow(fitFlameWindow(profile, frame.id));
+    setDepth(frame.parentId === null ? { min: 0, max: profile.maxDepth } : fitFlameDepth(profile, frame.id, depthCap));
+  };
+  const reset = () => {
+    resetWindow();
+    resetDepth();
+    setZoomedId(initialZoom);
+  };
+  const fitAll = () => {
+    setZoomedId(null);
+    setWindow(FLAME_FULL_WINDOW);
+    setDepth({ min: 0, max: profile.maxDepth });
+  };
+  /** Select a frame, or clear the selection when it is already selected. */
+  const toggleSelect = (id: string) => setSelectedId(selectedId === id ? null : id);
+
+  // A selection made in the graph brings its list row into view — opening "show all" if it is behind it.
+  const listRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (selectedId === null || !listRef.current) return;
+    const row = [...listRef.current.querySelectorAll<HTMLElement>('li[data-frame-id]')].find((item) => item.dataset.frameId === selectedId);
+    if (!row) return;
+    const details = row.closest('details');
+    if (details && !details.open) details.open = true;
+    row.scrollIntoView?.({ block: 'nearest' });
+  }, [selectedId]);
+
+  // ---- Gestures -----------------------------------------------------------
+  const chartRef = useRef<SVGSVGElement | null>(null);
+  const suppressClick = useRef(false);
+  type Pinch = { axis: 'x' | 'y' | null; dx: number; dy: number; window: FlameWindow; depth: FlameDepthWindow; anchor: number };
+  type Drag = { x: number; y: number; window: FlameWindow; panning: boolean };
+  const gesture = useRef<{ pointers: Map<number, { x: number; y: number }>; pinch: Pinch | null; drag: Drag | null; moved: boolean; lastTap: { t: number; x: number; y: number } | null; lastType: string }>({
+    pointers: new Map(), pinch: null, drag: null, moved: false, lastTap: null, lastType: 'mouse',
+  });
+  /** The fraction of the root under a client x. */
+  const rootFractionAt = (clientX: number): number => {
+    const box = chartRef.current?.getBoundingClientRect();
+    if (!box || box.width <= 0) return (win.start + win.end) / 2;
+    return win.start + ((clientX - box.left) / box.width) * span;
+  };
+  const zoomAt = (factor: number, clientX?: number) => setWindow(zoomFlameWindow(win, factor, clientX === undefined ? undefined : rootFractionAt(clientX)));
+
+  const onPointerDown = (event: PointerEvent<SVGSVGElement>) => {
+    const g = gesture.current;
+    g.lastType = event.pointerType;
+    if (event.pointerType === 'mouse') return;
+    if (g.pointers.size === 0) { g.moved = false; suppressClick.current = false; }
+    g.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (g.pointers.size === 2) {
+      const [a, b] = [...g.pointers.values()];
+      g.pinch = { axis: null, dx: Math.abs(a.x - b.x), dy: Math.abs(a.y - b.y), window: win, depth, anchor: rootFractionAt((a.x + b.x) / 2) };
+      g.drag = null;
+    } else if (g.pointers.size === 1) {
+      g.drag = { x: event.clientX, y: event.clientY, window: win, panning: false };
+    }
+  };
+  const onPointerMove = (event: PointerEvent<SVGSVGElement>) => {
+    const g = gesture.current;
+    if (!g.pointers.has(event.pointerId)) return;
+    g.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    if (g.pinch && g.pointers.size >= 2) {
+      const [a, b] = [...g.pointers.values()];
+      const dx = Math.abs(a.x - b.x);
+      const dy = Math.abs(a.y - b.y);
+      // The axis the fingers spread along decides what the pinch zooms, once, for the whole gesture.
+      if (!g.pinch.axis && Math.max(Math.abs(dx - g.pinch.dx), Math.abs(dy - g.pinch.dy)) > DRAG_PX) g.pinch.axis = Math.abs(dx - g.pinch.dx) >= Math.abs(dy - g.pinch.dy) ? 'x' : 'y';
+      if (g.pinch.axis === 'x' && g.pinch.dx > 0) setWindow(zoomFlameWindow(g.pinch.window, dx / g.pinch.dx, g.pinch.anchor));
+      if (g.pinch.axis === 'y' && g.pinch.dy > 0) setDepth(zoomFlameDepth(profile, g.pinch.depth, dy / g.pinch.dy));
+      if (g.pinch.axis) g.moved = true;
+      return;
+    }
+    const drag = g.drag;
+    if (!drag) return;
+    const dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    if (!drag.panning && Math.abs(dx) > DRAG_PX && Math.abs(dx) > Math.abs(dy) && !sameFlameWindow(drag.window, FLAME_FULL_WINDOW)) drag.panning = true;
+    if (Math.abs(dx) > DRAG_PX || Math.abs(dy) > DRAG_PX) g.moved = true;
+    if (drag.panning) {
+      const box = chartRef.current?.getBoundingClientRect();
+      if (box && box.width > 0) setWindow(panFlameWindow(drag.window, (-dx / box.width) * (drag.window.end - drag.window.start)));
+    }
+  };
+  const onPointerEnd = (event: PointerEvent<SVGSVGElement>) => {
+    const g = gesture.current;
+    if (!g.pointers.has(event.pointerId)) return;
+    const wasSingle = g.pointers.size === 1 && !g.pinch;
+    g.pointers.delete(event.pointerId);
+    if (g.pointers.size < 2) g.pinch = null;
+    if (g.pointers.size === 0) g.drag = null;
+    if (g.moved) {
+      suppressClick.current = true;
+      g.lastTap = null;
+      return;
+    }
+    if (!wasSingle || event.type === 'pointercancel') return;
+    const last = g.lastTap;
+    if (last && event.timeStamp - last.t < DOUBLE_TAP_MS && Math.hypot(event.clientX - last.x, event.clientY - last.y) < DOUBLE_TAP_PX) {
+      zoomAt(2, event.clientX);
+      suppressClick.current = true;
+      g.lastTap = null;
+    } else {
+      g.lastTap = { t: event.timeStamp, x: event.clientX, y: event.clientY };
+    }
+  };
+  const onDoubleClick = (event: MouseEvent<SVGSVGElement>) => {
+    if (gesture.current.lastType !== 'mouse') return;
+    zoomAt(2, event.clientX);
   };
 
-  const neighbour = (entry: FlameViewFrame, step: 1 | -1) => {
+  // Wheel needs a non-passive listener to stop the page scrolling under a zoom. Plain vertical wheel is left to the page.
+  const latest = useRef({ win, depth, span, profile, setWindow, setDepth });
+  useEffect(() => {
+    latest.current = { win, depth, span, profile, setWindow, setDepth };
+  });
+  useEffect(() => {
+    const svg = chartRef.current;
+    if (!svg) return undefined;
+    const onWheel = (event: WheelEvent) => {
+      const now = latest.current;
+      const box = svg.getBoundingClientRect();
+      if (box.width <= 0) return;
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+        const anchor = now.win.start + ((event.clientX - box.left) / box.width) * now.span;
+        now.setWindow(zoomFlameWindow(now.win, Math.exp(-event.deltaY * 0.01), anchor));
+      } else if (event.altKey) {
+        event.preventDefault();
+        now.setDepth(zoomFlameDepth(now.profile, now.depth, event.deltaY < 0 ? 1.25 : 0.8));
+      } else if (event.shiftKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) {
+        if (sameFlameWindow(now.win, FLAME_FULL_WINDOW)) return;
+        event.preventDefault();
+        const delta = event.shiftKey && !event.deltaX ? event.deltaY : event.deltaX;
+        now.setWindow(panFlameWindow(now.win, (delta / box.width) * now.span));
+      }
+    };
+    svg.addEventListener('wheel', onWheel, { passive: false });
+    return () => svg.removeEventListener('wheel', onWheel);
+  }, [measured]);
+
+  /** A click that hit no frame: take the nearest frame in that row within `TAP_SLOP`, or clear the selection. */
+  const onChartClick = (event: MouseEvent<SVGSVGElement>) => {
+    if (suppressClick.current) { suppressClick.current = false; return; }
+    if ((event.target as Element).closest('[data-slot="flamegraph-frame"]')) return;
+    const box = event.currentTarget.getBoundingClientRect();
+    if (box.width <= 0) return;
+    const row = Math.floor((event.clientY - box.top) / rowHeight);
+    const level = orientation === 'flame' ? depth.max - row : depth.min + row;
+    const px = event.clientX - box.left;
+    let best: { id: string; distance: number } | null = null;
+    for (const entry of view) {
+      if (entry.frame.depth !== level) continue;
+      const left = entry.x * box.width;
+      const right = left + entry.width * box.width;
+      const distance = px < left ? left - px : px > right ? px - right : 0;
+      if (distance <= TAP_SLOP && (!best || distance < best.distance)) best = { id: entry.frame.id, distance };
+    }
+    if (best) toggleSelect(best.id);
+    else setSelectedId(null);
+  };
+  const onFrameClick = (event: MouseEvent<SVGGElement>, id: string) => {
+    event.stopPropagation();
+    if (suppressClick.current) { suppressClick.current = false; return; }
+    toggleSelect(id);
+  };
+
+  const neighbour = (entry: FlameWindowFrame, step: 1 | -1) => {
     const row = view.filter((other) => other.frame.depth === entry.frame.depth).sort((a, b) => a.x - b.x);
     const index = row.findIndex((other) => other.frame.id === entry.frame.id);
     return row[index + step]?.frame.id;
   };
   const towardLeaves = (frame: FlameFrame) => frame.children.find((child) => viewById.has(child.id))?.id;
 
-  const onKeyDown = (event: KeyboardEvent<SVGGElement>, entry: FlameViewFrame) => {
+  const onKeyDown = (event: KeyboardEvent<SVGGElement>, entry: FlameWindowFrame) => {
     const { frame } = entry;
     const up = orientation === 'flame' ? towardLeaves(frame) : frame.parentId;
     const down = orientation === 'flame' ? frame.parentId : towardLeaves(frame);
@@ -321,14 +622,23 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
       case 'ArrowLeft': moveTo(neighbour(entry, -1)); break;
       case 'ArrowRight': moveTo(neighbour(entry, 1)); break;
       case 'Home': moveTo(profile.root.id); break;
+      case ' ': toggleSelect(frame.id); break;
       case 'Enter':
-      case ' ':
-        zoomTo(frame.id);
+        fitTo(frame.id);
+        setSelectedId(frame.id);
         break;
       case 'Escape':
-        if (focus.parentId === null) return;
-        setZoomedId(focus.parentId === '' ? null : focus.parentId);
+        if (fitted.parentId === null) return;
+        fitTo(fitted.parentId);
         break;
+      case '+':
+      case '=':
+        setWindow(zoomFlameWindow(win, 2, frame.x + frame.width / 2));
+        break;
+      case '-':
+        setWindow(zoomFlameWindow(win, 0.5, frame.x + frame.width / 2));
+        break;
+      case '0': reset(); break;
       default:
         return;
     }
@@ -340,7 +650,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
 
   const unit = profile.unit;
   const basis = diff?.compatible ? diff.basis : 'absolute';
-  const summary = `${profile.frames.length - 1} frames, ${formatFlameValue(profile.total, unit)} in all, ${rows - 1} deep.`;
+  const summary = `${profile.frames.length - 1} frames, ${formatFlameValue(profile.total, unit)} in all, ${profile.maxDepth} deep.`;
 
   if (mode === 'diff' && (!baseline || (diff && !diff.compatible))) {
     return (
@@ -359,15 +669,78 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     );
   }
 
-  const path = flamePath(profile, focus.id);
+  const path = flamePath(profile, fitted.id);
   const tipEntry = tipId !== null && enhanced && !narrow ? viewById.get(tipId) : undefined;
   const selected = selectedId !== null ? profile.byId.get(selectedId) : undefined;
   const share = (value: number) => formatFlameShare(profile.total > 0 ? value / profile.total : null);
   // Ranked largest first, so the first row is the peak every bar is scaled to.
   const peak = ranked.length ? rankedSize(ranked[0], diffMetric) : 0;
+  const hiddenDeeper = profile.maxDepth - depth.max;
+  const hiddenShallower = depth.min;
+  const step = Math.max(1, Math.ceil(levels / 2));
+  const deeper = () => setDepth(panFlameDepth(profile, depth, step));
+  const shallower = () => setDepth(panFlameDepth(profile, depth, -step));
+  const levelsText = (count: number) => `${count} ${count === 1 ? 'level' : 'levels'}`;
+
+  const depthButtons = (
+    <>
+      <button type="button" aria-label="Fewer levels" className={styles.control()} disabled={levels <= 1} onClick={() => setDepth(zoomFlameDepth(profile, depth, 2))}>levels −</button>
+      <button type="button" aria-label="More levels" className={styles.control()} disabled={fullDepth} onClick={() => setDepth(zoomFlameDepth(profile, depth, 0.5))}>levels +</button>
+    </>
+  );
+
+  const legend = diff?.compatible ? (
+    <ul aria-label="Colour key" className={styles.legend()}>
+      <li className="col-span-2 text-content-muted">
+        {diffMetric} {diff.basis === 'share' ? 'share' : 'time'} vs baseline, ±{formatFlameShare(threshold)} unchanged, ≥{formatFlameShare(large)} large:
+      </li>
+      {LEGEND_ORDER.map((tone) => (
+        <li key={tone} className="flex items-center gap-1.5">
+          <svg aria-hidden="true" width="14" height="10" className="shrink-0">
+            <rect x="0.5" y="0.5" width="13" height="9" className={cn(TONE[tone].rect, 'stroke-edge-strong', tone === 'new' && '[stroke-dasharray:3_2]')} />
+          </svg>
+          {TONE[tone].label}
+        </li>
+      ))}
+    </ul>
+  ) : null;
+
+  /** A ▲/▼ marker for hidden levels. Unmeasured with a default orientation, it says both answers and the container query picks one. */
+  const marker = (edge: 'top' | 'bottom') => {
+    const glyph = edge === 'top' ? '▲' : '▼';
+    // Flame: deeper levels sit above. Icicle: shallower levels do.
+    const wide = edge === 'top' ? hiddenDeeper : hiddenShallower;
+    const tall = edge === 'top' ? hiddenShallower : hiddenDeeper;
+    const count = orientation === 'flame' ? wide : tall;
+    const go = (orientation === 'flame') === (edge === 'top') ? deeper : shallower;
+    if (cssFlip) {
+      if (!wide && !tall) return null;
+      return (
+        <button type="button" data-slot="flamegraph-marker" data-edge={edge} className={cn(styles.marker(), !wide && '@min-[560px]:hidden', !tall && '@max-[560px]:hidden')} onClick={go}>
+          <span className="@max-[560px]:hidden">{glyph} {levelsText(wide)}</span>
+          <span className="hidden @max-[560px]:inline">{glyph} {levelsText(tall)}</span>
+        </button>
+      );
+    }
+    if (!count) return null;
+    return (
+      <button type="button" data-slot="flamegraph-marker" data-edge={edge} aria-label={`${levelsText(count)} hidden ${go === deeper ? 'deeper' : 'shallower'}; show them`} className={styles.marker()} onClick={go}>
+        {glyph} {levelsText(count)}
+      </button>
+    );
+  };
 
   return (
-    <div ref={ref} data-slot="flamegraph" data-mode={mode} data-orientation={orientationProp ?? (measured ? orientation : undefined)} {...props} className={styles.root({ className })}>
+    <div
+      ref={ref}
+      data-slot="flamegraph"
+      data-mode={mode}
+      data-orientation={orientationProp ?? (measured ? orientation : undefined)}
+      data-window={`${win.start.toFixed(4)} ${win.end.toFixed(4)}`}
+      data-depth={`${depth.min} ${depth.max}`}
+      {...props}
+      className={styles.root({ className })}
+    >
       <p className="sr-only">{summary}</p>
       {path.length > 1 ? (
         <nav aria-label="Zoom path" data-slot="flamegraph-breadcrumb">
@@ -380,7 +753,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
                 {index === path.length - 1 ? (
                   <span aria-current="location" className={styles.current()}>{frame.name}</span>
                 ) : (
-                  <button type="button" title={frame.name} className={styles.crumb()} onClick={() => setZoomedId(frame.parentId === null ? null : frame.id)}>
+                  <button type="button" title={frame.name} className={styles.crumb()} onClick={() => fitTo(frame.id)}>
                     {frame.name}
                   </button>
                 )}
@@ -390,6 +763,20 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
           </ol>
         </nav>
       ) : null}
+      {enhanced ? (
+        <div role="toolbar" aria-label="Zoom" data-slot="flamegraph-controls" className={styles.controls()}>
+          <button type="button" aria-label="Zoom out" className={styles.control()} disabled={sameFlameWindow(win, FLAME_FULL_WINDOW)} onClick={() => zoomAt(0.5)}>−</button>
+          <button type="button" aria-label="Zoom in" className={styles.control()} disabled={span <= 0.0011} onClick={() => zoomAt(2)}>+</button>
+          <button type="button" className={styles.control()} onClick={reset}>Reset</button>
+          <button type="button" className={styles.control()} disabled={!zoomed} onClick={fitAll}>Fit all</button>
+          {/* Wide, the depth controls sit in the row; narrow, they fold into a menu so the row stays one line at 390px. */}
+          <span className="contents @max-[560px]:hidden">{depthButtons}</span>
+          <details className="relative hidden @max-[560px]:block">
+            <summary className={cn(styles.control(), 'flex list-none items-center')}>Levels ▾</summary>
+            <div className={styles.menu()}>{depthButtons}</div>
+          </details>
+        </div>
+      ) : null}
       {searching ? (
         <p role="status" data-slot="flamegraph-status" className={styles.status()}>
           {found.ids.size
@@ -397,8 +784,23 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
             : `“${search!.trim()}” matches no frames.`}
         </p>
       ) : null}
+      {zoomed ? (
+        <FlameMinimap
+          profile={profile}
+          window={win}
+          depth={depth}
+          orientation={orientation}
+          cssFlip={cssFlip}
+          width={width}
+          tone={changes ? (frame) => toneOf(changes.get(frame.id)) : null}
+          className={styles.minimap()}
+          onMove={(next, nextDepth) => { setWindow(next); setDepth(nextDepth); }}
+        />
+      ) : null}
+      {marker('top')}
       <div ref={measure} className={styles.frame()}>
         <svg
+          ref={chartRef}
           role="tree"
           aria-label={label}
           data-slot="flamegraph-chart"
@@ -406,21 +808,28 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
           height={height}
           className={cn(styles.chart(), cssFlip && '@max-[560px]:-scale-y-100')}
           onMouseLeave={() => setHoverId(null)}
+          onClick={onChartClick}
+          onDoubleClick={onDoubleClick}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerEnd}
+          onPointerCancel={onPointerEnd}
         >
           {view.map((entry) => {
-            const { frame, context } = entry;
+            const { frame } = entry;
+            const context = contextIds.has(frame.id);
             const y = yOf(frame.depth);
             const text = fitFlameLabel(frame.name, entry.width * width - LABEL_PAD * 2, CHAR_WIDTH);
-            // Unmeasured, a second label fitted to a phone stands in when the container is narrow.
-            const narrowText = measured ? text : fitFlameLabel(frame.name, entry.width * NARROW_ASSUMED - LABEL_PAD * 2, CHAR_WIDTH);
+            // Narrow, the overview is bars only — the frame list carries the names. Unmeasured, the container query hides them.
+            const shown = narrow ? '' : text;
             const change = changes?.get(frame.id);
             const tone = toneOf(change);
             const matched = searching && found.ids.has(frame.id);
-            const dimmed = searching && !matched;
+            const isSelected = frame.id === selectedId;
+            const dimmed = (searching && !matched) || (stack !== null && !stack.has(frame.id));
             const look = tone ? TONE[tone] : matched ? { rect: 'fill-accent-primary', text: 'fill-content-inverse' } : context || frame.parentId === null ? { rect: 'fill-surface-sunken', text: 'fill-content-secondary' } : { rect: 'fill-surface-raised', text: 'fill-content-primary' };
             const x = `${entry.x * 100}%`;
             const w = `${entry.width * 100}%`;
-            const textClass = cn(look.text, 'text-xs', cssFlip && 'origin-center [transform-box:fill-box] @max-[560px]:-scale-y-100');
             return (
               <g
                 key={frame.id}
@@ -428,20 +837,21 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
                 role="treeitem"
                 aria-level={frame.depth + 1}
                 aria-label={describeFlameFrame(frame, profile, change, diffMetric)}
-                aria-selected={frame.id === focus.id}
+                aria-selected={isSelected}
                 tabIndex={frame.id === tabId ? 0 : -1}
                 data-slot="flamegraph-frame"
                 data-frame-id={frame.id}
                 data-tone={tone ?? undefined}
                 data-match={matched || undefined}
                 data-context={context || undefined}
-                className={cn('group cursor-pointer outline-none!', dimmed && 'opacity-35')}
-                onClick={() => zoomTo(frame.id)}
+                data-selected={isSelected || undefined}
+                data-clipped={entry.clipped || undefined}
+                className={cn('group cursor-pointer outline-none!', dimmed && 'opacity-30')}
+                onClick={(event) => onFrameClick(event, frame.id)}
                 onKeyDown={(event) => onKeyDown(event, entry)}
                 onFocus={() => { setActiveId(frame.id); setFocusedId(frame.id); }}
                 onBlur={() => setFocusedId((current) => (current === frame.id ? null : current))}
-                // Mouse only: a tap fires pointerenter too, and a touch reader
-                // gets the details panel instead of a tooltip over the rows.
+                // Mouse only: a tap fires pointerenter too, and a touch reader gets the details panel instead.
                 onPointerEnter={(event) => { if (event.pointerType === 'mouse') setHoverId(frame.id); }}
               >
                 {enhanced ? null : <title>{describeFlameFrame(frame, profile, change, diffMetric)}</title>}
@@ -454,18 +864,19 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
                     look.rect,
                     'stroke-surface-base group-hover:stroke-content-primary group-focus-visible:stroke-content-primary group-focus-visible:stroke-2',
                     tone === 'new' && 'stroke-content-primary [stroke-dasharray:4_2]',
+                    isSelected && 'stroke-accent-primary stroke-[3] [stroke-dasharray:none] group-hover:stroke-accent-primary group-focus-visible:stroke-accent-primary',
                   )}
                 />
-                {text || narrowText ? (
+                {shown ? (
                   <svg x={x} y={y} width={w} height={rowHeight} overflow="hidden" aria-hidden="true">
-                    {text === narrowText ? (
-                      <text x={LABEL_PAD} y={rowHeight / 2} dominantBaseline="central" className={textClass}>{text}</text>
-                    ) : (
-                      <>
-                        {text ? <text x={LABEL_PAD} y={rowHeight / 2} dominantBaseline="central" className={cn(textClass, '@max-[560px]:hidden')}>{text}</text> : null}
-                        {narrowText ? <text x={LABEL_PAD} y={rowHeight / 2} dominantBaseline="central" className={cn(textClass, 'hidden @max-[560px]:inline')}>{narrowText}</text> : null}
-                      </>
-                    )}
+                    <text
+                      x={LABEL_PAD}
+                      y={rowHeight / 2}
+                      dominantBaseline="central"
+                      className={cn(look.text, 'text-xs', !measured && '@max-[560px]:hidden', cssFlip && 'origin-center [transform-box:fill-box] @max-[560px]:-scale-y-100')}
+                    >
+                      {shown}
+                    </text>
                   </svg>
                 ) : null}
               </g>
@@ -474,6 +885,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
           {tipEntry ? <FlameTooltip entry={tipEntry} profile={profile} change={changes?.get(tipEntry.frame.id)} metric={diffMetric} basis={basis} y={yOf(tipEntry.frame.depth)} rowHeight={rowHeight} height={height} /> : null}
         </svg>
       </div>
+      {marker('bottom')}
       {selected ? (
         <section aria-label="Frame details" aria-live="polite" data-slot="flamegraph-details" className={styles.details()}>
           <span className="font-bold break-words">{breakable(selected.name)}</span>
@@ -483,10 +895,17 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
           {changes?.get(selected.id) ? (
             <span className="text-content-secondary tabular-nums">Δ {diffMetric} {formatFlameDelta(changes.get(selected.id)!, diffMetric, unit, basis)}</span>
           ) : null}
+          {enhanced ? (
+            <span className="flex flex-wrap gap-1 pt-1">
+              <button type="button" className={styles.action()} onClick={() => fitTo(selected.id)}>Zoom to frame</button>
+              <button type="button" className={styles.action()} onClick={() => setSelectedId(null)}>Clear</button>
+            </span>
+          ) : null}
         </section>
       ) : null}
       {list !== 'never' && ranked.length ? (
         <section
+          ref={listRef}
           aria-label={mode === 'diff' ? 'Largest changes' : 'Hottest frames'}
           data-slot="flamegraph-list"
           className={cn(styles.list(), list === 'always' ? 'flex' : 'hidden @max-[560px]:flex')}
@@ -494,30 +913,22 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
           <p className="m-0 pb-1 text-content-muted">
             {mode === 'diff' ? `Largest changes in ${diffMetric} time` : 'Hottest frames by self time'}
           </p>
-          <FrameRows rows={ranked.slice(0, LIST_TOP)} peak={peak} profile={profile} focusId={focus.id} metric={diffMetric} basis={basis} tone={toneOf} onPick={zoomTo} className={styles.rows()} rowClass={styles.row()} />
+          <FrameRows rows={ranked.slice(0, LIST_TOP)} peak={peak} profile={profile} selectedId={selectedId} metric={diffMetric} basis={basis} tone={toneOf} onPick={toggleSelect} className={styles.rows()} rowClass={styles.row()} />
           {ranked.length > LIST_TOP ? (
             <details>
               <summary className={styles.more()}>Show all {ranked.length}</summary>
-              <FrameRows rows={ranked.slice(LIST_TOP)} start={LIST_TOP + 1} peak={peak} profile={profile} focusId={focus.id} metric={diffMetric} basis={basis} tone={toneOf} onPick={zoomTo} className={styles.rows()} rowClass={styles.row()} />
+              <FrameRows rows={ranked.slice(LIST_TOP)} start={LIST_TOP + 1} peak={peak} profile={profile} selectedId={selectedId} metric={diffMetric} basis={basis} tone={toneOf} onPick={toggleSelect} className={styles.rows()} rowClass={styles.row()} />
             </details>
           ) : null}
         </section>
       ) : null}
       {mode === 'diff' && diff?.compatible ? (
         <div data-slot="flamegraph-legend" className="flex flex-col gap-1">
-          <ul aria-label="Colour key" className={styles.legend()}>
-            <li className="col-span-2 text-content-muted">
-              {diffMetric} {diff.basis === 'share' ? 'share' : 'time'} vs baseline, ±{formatFlameShare(threshold)} unchanged, ≥{formatFlameShare(large)} large:
-            </li>
-            {LEGEND_ORDER.map((tone) => (
-              <li key={tone} className="flex items-center gap-1.5">
-                <svg aria-hidden="true" width="14" height="10" className="shrink-0">
-                  <rect x="0.5" y="0.5" width="13" height="9" className={cn(TONE[tone].rect, 'stroke-edge-strong', tone === 'new' && '[stroke-dasharray:3_2]')} />
-                </svg>
-                {TONE[tone].label}
-              </li>
-            ))}
-          </ul>
+          <div className="@max-[560px]:hidden">{legend}</div>
+          <details className="hidden @max-[560px]:block">
+            <summary className={styles.more()}>Key</summary>
+            {legend}
+          </details>
           {diff.removed.length ? (
             <p className={styles.removed()}>
               Not drawn — gone from the candidate:{' '}
@@ -537,6 +948,70 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
 
 Flamegraph.displayName = 'Flamegraph';
 
+interface FlameMinimapProps {
+  profile: FlameTree;
+  window: FlameWindow;
+  depth: FlameDepthWindow;
+  orientation: 'flame' | 'icicle';
+  cssFlip: boolean;
+  width: number;
+  tone: ((frame: FlameFrame) => FlameDeltaTone | null) | null;
+  className: string;
+  onMove: (window: FlameWindow, depth: FlameDepthWindow) => void;
+}
+
+/**
+ * The whole profile in a strip, with the current window drawn over it on both
+ * axes. Dragging it (or pressing anywhere on it) centres the window there —
+ * across and down — which is how a phone pans depth without taking over the
+ * page's vertical scroll.
+ */
+function FlameMinimap({ profile, window: win, depth, orientation, cssFlip, width, tone, className, onMove }: FlameMinimapProps) {
+  const rows = profile.maxDepth + 1;
+  const row = MINIMAP_HEIGHT / rows;
+  const yOf = (level: number) => (orientation === 'flame' ? (profile.maxDepth - level) * row : level * row);
+  const top = orientation === 'flame' ? yOf(depth.max) : yOf(depth.min);
+  const dragging = useRef(false);
+  const moveTo = (event: PointerEvent<SVGSVGElement>) => {
+    const box = event.currentTarget.getBoundingClientRect();
+    if (box.width <= 0 || box.height <= 0) return;
+    const fx = (event.clientX - box.left) / box.width;
+    const fy = (event.clientY - box.top) / box.height;
+    const half = (win.end - win.start) / 2;
+    const level = orientation === 'flame' ? profile.maxDepth - fy * rows : fy * rows;
+    const span = depth.max - depth.min;
+    const min = Math.round(level - span / 2);
+    onMove(clampFlameWindow({ start: fx - half, end: fx + half }), clampFlameDepth(profile, { min, max: min + span }));
+  };
+  return (
+    <svg
+      aria-hidden="true"
+      data-slot="flamegraph-minimap"
+      width="100%"
+      height={MINIMAP_HEIGHT}
+      className={cn(className, cssFlip && '@max-[560px]:-scale-y-100')}
+      onPointerDown={(event) => { dragging.current = true; event.currentTarget.setPointerCapture?.(event.pointerId); moveTo(event); }}
+      onPointerMove={(event) => { if (dragging.current) moveTo(event); }}
+      onPointerUp={() => { dragging.current = false; }}
+      onPointerCancel={() => { dragging.current = false; }}
+    >
+      {profile.frames.map((frame) => {
+        if (frame.width * width < 1) return null;
+        const t = tone?.(frame);
+        return <rect key={frame.id} x={`${frame.x * 100}%`} y={yOf(frame.depth)} width={`${frame.width * 100}%`} height={Math.max(0.5, row - 0.5)} className={t ? TONE[t].rect : 'fill-surface-raised'} />;
+      })}
+      <rect
+        data-slot="flamegraph-minimap-window"
+        x={`${win.start * 100}%`}
+        y={top}
+        width={`${(win.end - win.start) * 100}%`}
+        height={(depth.max - depth.min + 1) * row}
+        className="fill-accent-primary/15 stroke-accent-primary stroke-2"
+      />
+    </svg>
+  );
+}
+
 /** What a frame-list row's bar measures: self time, or the size of the change in a diff. */
 function rankedSize(row: FlameRankedFrame, metric: 'self' | 'total'): number {
   return row.change ? Math.abs(row.change[metric].absolute ?? 0) : row.self;
@@ -548,7 +1023,7 @@ interface FrameRowsProps {
   /** The largest size in the whole list, so bars scale alike above and below "show all". */
   peak: number;
   profile: FlameTree;
-  focusId: string;
+  selectedId: string | null;
   metric: 'self' | 'total';
   basis: 'absolute' | 'share';
   tone: (change: FlameFrameDelta | undefined) => FlameDeltaTone | null;
@@ -557,11 +1032,10 @@ interface FrameRowsProps {
   rowClass: string;
 }
 
-/** Rows of the frame list. Each is a 44px tap target that zooms the graph; a removed frame has nothing to zoom to. */
-function FrameRows({ rows, start = 1, peak, profile, focusId, metric, basis, tone, onPick, className, rowClass }: FrameRowsProps) {
+/** Rows of the frame list. Each is a 44px tap target that selects its frame; a removed frame has nothing to select. */
+function FrameRows({ rows, start = 1, peak, profile, selectedId, metric, basis, tone, onPick, className, rowClass }: FrameRowsProps) {
   const unit = profile.unit;
   const share = (value: number) => formatFlameShare(profile.total > 0 ? value / profile.total : null);
-  const sizeOf = (row: FlameRankedFrame) => rankedSize(row, metric);
   return (
     <ol start={start} className={className}>
       {rows.map((row) => {
@@ -572,9 +1046,16 @@ function FrameRows({ rows, start = 1, peak, profile, focusId, metric, basis, ton
           <>
             <span className="break-words text-content-primary">{breakable(row.name)}</span>
             <span className="flex items-center gap-2 text-content-secondary tabular-nums">
-              {removed ? <span>removed · was {formatFlameValue(row.change!.total.baseline ?? 0, unit)}</span> : <span className="shrink-0">self {share(row.self)} · total {share(row.total)}</span>}
+              {removed ? (
+                <span>removed · was {formatFlameValue(row.change!.total.baseline ?? 0, unit)}</span>
+              ) : (
+                // Narrow, one headline number: self share, or — in a diff — the delta below. The rest is in the details panel.
+                <span className={cn('shrink-0', row.change && '@max-[560px]:hidden')}>
+                  self {share(row.self)}<span className="@max-[560px]:hidden"> · total {share(row.total)}</span>
+                </span>
+              )}
               <svg aria-hidden="true" height="6" className="h-1.5 min-w-8 flex-1">
-                <rect x="0" y="0" height="6" width={`${peak > 0 ? (sizeOf(row) / peak) * 100 : 0}%`} className={bar} />
+                <rect x="0" y="0" height="6" width={`${peak > 0 ? (rankedSize(row, metric) / peak) * 100 : 0}%`} className={bar} />
               </svg>
             </span>
             {row.change && !removed ? (
@@ -592,7 +1073,7 @@ function FrameRows({ rows, start = 1, peak, profile, focusId, metric, basis, ton
             {removed ? (
               <div className={cn(rowClass, 'cursor-default hover:bg-transparent')}>{body}</div>
             ) : (
-              <button type="button" aria-current={row.id === focusId || undefined} className={rowClass} onClick={() => onPick(row.id)}>
+              <button type="button" aria-current={row.id === selectedId || undefined} className={rowClass} onClick={() => onPick(row.id)}>
                 {body}
               </button>
             )}
@@ -604,7 +1085,7 @@ function FrameRows({ rows, start = 1, peak, profile, focusId, metric, basis, ton
 }
 
 interface FlameTooltipProps {
-  entry: FlameViewFrame;
+  entry: FlameWindowFrame;
   profile: FlameTree;
   change?: FlameFrameDelta;
   metric: 'self' | 'total';

@@ -576,3 +576,226 @@ export function rankFlameFrames(tree: FlameTree, diff?: FlameDiff | null, metric
   for (const change of diff.removed) if (change[metric].absolute) rows.push({ id: change.id, name: change.name, depth: change.depth, total: 0, self: 0, change });
   return rows.sort((a, b) => size(b) - size(a) || byId(a, b));
 }
+
+// ---------------------------------------------------------------------------
+// Windows: what part of the profile a view shows, on both axes
+// ---------------------------------------------------------------------------
+
+/** A horizontal window, as fractions of the root: `0 ≤ start < end ≤ 1`. */
+export interface FlameWindow {
+  start: number;
+  end: number;
+}
+
+/** A depth window: the shallowest and deepest levels drawn, inclusive. The root is level 0. */
+export interface FlameDepthWindow {
+  min: number;
+  max: number;
+}
+
+/** The narrowest horizontal window: a thousandth of the root. */
+export const FLAME_MIN_WINDOW = 0.001;
+
+/** The whole profile. */
+export const FLAME_FULL_WINDOW: FlameWindow = Object.freeze({ start: 0, end: 1 });
+
+/**
+ * Keep a window inside the root and at least `FLAME_MIN_WINDOW` wide. A window
+ * pushed past an edge slides back rather than shrinking, so a pan never zooms.
+ */
+export function clampFlameWindow(window: FlameWindow): FlameWindow {
+  const start = finite(window.start) ? window.start : 0;
+  const end = finite(window.end) ? window.end : 1;
+  const width = Math.min(1, Math.max(FLAME_MIN_WINDOW, Math.abs(end - start)));
+  let from = Math.min(start, end);
+  if (from < 0) from = 0;
+  if (from + width > 1) from = 1 - width;
+  return { start: from, end: from + width };
+}
+
+/**
+ * Zoom by `factor` (2 is in ×2, 0.5 is out) about `anchor`, a fraction of the
+ * root that stays put on screen — the pinch centre, the pointer, the tap.
+ */
+export function zoomFlameWindow(window: FlameWindow, factor: number, anchor = (window.start + window.end) / 2): FlameWindow {
+  if (!(factor > 0)) return clampFlameWindow(window);
+  const width = window.end - window.start;
+  const next = Math.min(1, Math.max(FLAME_MIN_WINDOW, width / factor));
+  const at = width > 0 ? (anchor - window.start) / width : 0.5;
+  const start = anchor - at * next;
+  return clampFlameWindow({ start, end: start + next });
+}
+
+/** Slide a window by `delta`, a fraction of the root. */
+export function panFlameWindow(window: FlameWindow, delta: number): FlameWindow {
+  return clampFlameWindow({ start: window.start + delta, end: window.end + delta });
+}
+
+/** The window that frames `id` exactly; the whole profile for an unknown id or the root. */
+export function fitFlameWindow(tree: FlameTree, id?: string | null): FlameWindow {
+  const frame = id ? tree.byId.get(id) : undefined;
+  if (!frame || frame.parentId === null || !(frame.width > 0)) return FLAME_FULL_WINDOW;
+  return clampFlameWindow({ start: frame.x, end: frame.x + frame.width });
+}
+
+/** The deepest level beneath a frame (its own when it has no children). */
+export function flameSubtreeDepth(frame: FlameFrame): number {
+  let deepest = frame.depth;
+  for (const child of frame.children) deepest = Math.max(deepest, flameSubtreeDepth(child));
+  return deepest;
+}
+
+/** Keep a depth window inside `[0, tree.maxDepth]`, at least one level, sliding rather than shrinking at an edge. */
+export function clampFlameDepth(tree: FlameTree, depth: FlameDepthWindow): FlameDepthWindow {
+  const top = tree.maxDepth;
+  const lo = finite(depth.min) ? Math.round(depth.min) : 0;
+  const hi = finite(depth.max) ? Math.round(depth.max) : top;
+  const span = Math.min(top, Math.max(0, Math.abs(hi - lo)));
+  let min = Math.min(lo, hi);
+  if (min < 0) min = 0;
+  if (min + span > top) min = top - span;
+  return { min, max: min + span };
+}
+
+/** Show `factor` times fewer levels (2) or more (0.5), about the middle of the current range. */
+export function zoomFlameDepth(tree: FlameTree, depth: FlameDepthWindow, factor: number): FlameDepthWindow {
+  if (!(factor > 0)) return clampFlameDepth(tree, depth);
+  const levels = depth.max - depth.min + 1;
+  let next = Math.round(levels / factor);
+  // Always move at least one level, or a small range could never change.
+  if (next === levels) next += factor > 1 ? -1 : 1;
+  next = Math.max(1, Math.min(tree.maxDepth + 1, next));
+  const centre = (depth.min + depth.max) / 2;
+  const min = Math.round(centre - (next - 1) / 2);
+  return clampFlameDepth(tree, { min, max: min + next - 1 });
+}
+
+/** Move a depth window by `delta` levels; positive is deeper. */
+export function panFlameDepth(tree: FlameTree, depth: FlameDepthWindow, delta: number): FlameDepthWindow {
+  return clampFlameDepth(tree, { min: depth.min + delta, max: depth.max + delta });
+}
+
+/**
+ * The levels that fit a frame's stack: from the root down to its deepest
+ * descendant. With `cap`, at most that many levels — anchored so the frame and
+ * its parent stay in view, and as much of the stack beneath as fits.
+ */
+export function fitFlameDepth(tree: FlameTree, id?: string | null, cap = Infinity): FlameDepthWindow {
+  const frame = (id ? tree.byId.get(id) : undefined) ?? tree.root;
+  const deepest = flameSubtreeDepth(frame);
+  return capDepth(tree, deepest, frame.depth, cap);
+}
+
+function capDepth(tree: FlameTree, deepest: number, anchor: number, cap: number): FlameDepthWindow {
+  const levels = Number.isFinite(cap) ? Math.max(1, Math.floor(cap)) : Infinity;
+  if (deepest + 1 <= levels) return clampFlameDepth(tree, { min: 0, max: deepest });
+  const min = Math.min(Math.max(0, anchor - 1), deepest - levels + 1);
+  return clampFlameDepth(tree, { min: Math.max(0, min), max: Math.max(0, min) + levels - 1 });
+}
+
+/**
+ * Where a view opens: a `[start, end]` range; `{ frameId }` to fit a frame;
+ * `'hottest'` to fit the hottest leaf's grandparent; `'all'` for everything.
+ */
+export type FlameWindowSpec = readonly [number, number] | { frameId: string } | 'hottest' | 'all';
+
+/**
+ * The frame `'hottest'` fits: the leaf with the most self time — or, given a
+ * diff, the leaf whose `metric` moved most in either direction — ties to the
+ * smaller id, then two levels up, never past the root's children. A hot leaf
+ * on its own is a sliver with no context; its grandparent is usually the
+ * function a reader recognises (`SerializeAsync` rather than
+ * `WriteStringValue`), and still narrow enough to read the leaf.
+ */
+export function hottestFlameFrame(tree: FlameTree, diff?: FlameDiff | null, metric: 'self' | 'total' = 'self'): FlameFrame | null {
+  const heat = (frame: FlameFrame) => (diff ? Math.abs(diff.frames.get(frame.id)?.[metric].absolute ?? 0) : frame.self);
+  let hottest: FlameFrame | null = null;
+  for (const frame of tree.frames) {
+    if (frame.parentId === null || frame.children.length) continue;
+    if (!hottest || heat(frame) > heat(hottest) || (heat(frame) === heat(hottest) && frame.id < hottest.id)) hottest = frame;
+  }
+  let at = hottest;
+  for (let step = 0; at && step < 2; step += 1) {
+    const parent: FlameFrame | undefined = at.parentId !== null ? tree.byId.get(at.parentId) : undefined;
+    if (!parent || parent.parentId === null) break;
+    at = parent;
+  }
+  return at;
+}
+
+/** The frame a window spec is anchored on, when it names or implies one. */
+export function flameWindowFrame(tree: FlameTree, spec?: FlameWindowSpec | null, diff?: FlameDiff | null, metric: 'self' | 'total' = 'self'): FlameFrame | null {
+  if (spec === 'hottest') return hottestFlameFrame(tree, diff, metric);
+  if (spec && typeof spec === 'object' && 'frameId' in spec) return tree.byId.get(spec.frameId) ?? null;
+  return null;
+}
+
+/** Resolve a window spec against a profile — and, for `'hottest'`, a diff. Omitted is the whole profile. */
+export function resolveFlameWindow(tree: FlameTree, spec?: FlameWindowSpec | null, diff?: FlameDiff | null, metric: 'self' | 'total' = 'self'): FlameWindow {
+  if (!spec || spec === 'all') return FLAME_FULL_WINDOW;
+  if (Array.isArray(spec)) return clampFlameWindow({ start: spec[0], end: spec[1] });
+  const frame = flameWindowFrame(tree, spec, diff, metric);
+  return frame ? fitFlameWindow(tree, frame.id) : FLAME_FULL_WINDOW;
+}
+
+/** Where the depth window opens: a `[min, max]` range, or a number of levels from the root. */
+export type FlameDepthSpec = readonly [number, number] | number;
+
+/**
+ * Resolve the opening depth window. An explicit spec wins. Otherwise, fit the
+ * stack of `anchorId` (the selected frame, or the one the window fits);
+ * failing that, every level reached inside `window` — in both cases at most
+ * `cap` levels (a phone caps at 12; a desktop does not cap).
+ */
+export function resolveFlameDepth(
+  tree: FlameTree,
+  spec: FlameDepthSpec | null | undefined,
+  options: { window?: FlameWindow; anchorId?: string | null; cap?: number } = {},
+): FlameDepthWindow {
+  if (typeof spec === 'number') return clampFlameDepth(tree, { min: 0, max: Math.max(1, Math.floor(spec)) - 1 });
+  if (Array.isArray(spec)) return clampFlameDepth(tree, { min: spec[0], max: spec[1] });
+  const cap = options.cap ?? Infinity;
+  const anchor = options.anchorId ? tree.byId.get(options.anchorId) : undefined;
+  if (anchor) return fitFlameDepth(tree, anchor.id, cap);
+  const window = options.window ?? FLAME_FULL_WINDOW;
+  let deepest = 0;
+  for (const frame of tree.frames) {
+    if (frame.x + frame.width > window.start && frame.x < window.end && frame.width > 0) deepest = Math.max(deepest, frame.depth);
+  }
+  return capDepth(tree, deepest, 0, cap);
+}
+
+/** A frame as a windowed view draws it: geometry clipped to the window, in fractions of the view. */
+export interface FlameWindowFrame {
+  frame: FlameFrame;
+  /** Left edge of the visible part, as a fraction of the view. */
+  x: number;
+  /** Width of the visible part, as a fraction of the view. */
+  width: number;
+  /** The frame runs past the left or right edge of the window. */
+  clipped: boolean;
+}
+
+/**
+ * The frames inside a window, clipped to it, depth-first. A frame that only
+ * touches an edge is left out; one that crosses it is cut to the visible part,
+ * so its label sits on what can be seen — in a static render too.
+ */
+export function windowFlame(tree: FlameTree, window: FlameWindow, depth: FlameDepthWindow): FlameWindowFrame[] {
+  const span = window.end - window.start;
+  const out: FlameWindowFrame[] = [];
+  if (!(span > 0)) return out;
+  for (const frame of tree.frames) {
+    if (frame.depth < depth.min || frame.depth > depth.max) continue;
+    const left = Math.max(frame.x, window.start);
+    const right = Math.min(frame.x + frame.width, window.end);
+    if (right - left <= 0) continue;
+    out.push({ frame, x: (left - window.start) / span, width: (right - left) / span, clipped: left > frame.x + 1e-12 || right < frame.x + frame.width - 1e-12 });
+  }
+  return out;
+}
+
+/** True when two windows are the same to within rounding. */
+export function sameFlameWindow(a: FlameWindow, b: FlameWindow): boolean {
+  return Math.abs(a.start - b.start) < 1e-9 && Math.abs(a.end - b.end) < 1e-9;
+}
