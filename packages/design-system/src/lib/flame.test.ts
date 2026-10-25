@@ -11,6 +11,7 @@ import {
   formatFlameValue,
   parseFoldedStacks,
   rankFlameFrames,
+  rankFlameFunctions,
   searchFlame,
   zoomFlame,
   type FlameDiff,
@@ -179,6 +180,30 @@ describe('formatting', () => {
     expect(fitFlameLabel('Microsoft.AspNetCore.Routing', 70, 7)).toBe('Microsoft…');
     expect(fitFlameLabel('render', 14, 7)).toBe('');
     expect(fitFlameLabel('render', 0, 7)).toBe('');
+  });
+});
+
+describe('rankFlameFunctions', () => {
+  it('folds a function’s frames into one row, counting recursion once in its total', () => {
+    const tree = buildFlame('main;a;fmt 10\nmain;b;fmt 20\nmain;rec;rec;rec 6\nmain;rec 2');
+    const rows = rankFlameFunctions(tree);
+    expect(rows.map((row) => [row.name, row.self, row.total])).toEqual([['fmt', 30, 30], ['rec', 8, 8]]);
+    expect(rows[0].frameIds).toEqual(['main;b;fmt', 'main;a;fmt']);
+  });
+
+  it('ranks a diff by each function’s change, new and removed included', () => {
+    const before = buildFlame('main;a;fmt 10\nmain;b;fmt 20\nmain;gone 4\nmain;same 5');
+    const after = buildFlame('main;a;fmt 13\nmain;b;fmt 26\nmain;fresh 2\nmain;same 5');
+    const diff = diffFlame(before, after);
+    if (!diff.compatible) throw new Error(diff.reason);
+    const rows = rankFlameFunctions(after, diff);
+    expect(rows.map((row) => [row.name, row.change?.status, row.change?.self.absolute])).toEqual([
+      ['fmt', 'changed', 9],
+      ['gone', 'removed', -4],
+      ['fresh', 'new', 2],
+    ]);
+    expect(rows[0].change?.self.relative).toBeCloseTo(0.3);
+    expect(rows[1].frameIds).toEqual([]);
   });
 });
 

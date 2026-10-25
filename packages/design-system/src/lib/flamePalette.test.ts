@@ -69,12 +69,12 @@ function role(level: (typeof THEME_LEVELS)[number], name: FlameRole): Rgb {
 }
 
 function swatchColour(level: (typeof THEME_LEVELS)[number], swatch: FlameSwatch): Rgb {
-  const [a, p, b] = swatch.mix;
+  const [a, p, b] = level === 'midnight' && swatch.dark ? swatch.dark.mix : swatch.mix;
   return p === undefined || b === undefined ? role(level, a) : mixOklch(role(level, a), p, role(level, b));
 }
 
 /** The class a swatch's `mix` should be written as. */
-function classFor(swatch: FlameSwatch): string {
+function classFor(swatch: Pick<FlameSwatch, 'mix'>): string {
   const variable = (name: FlameRole) => `var(--color-${name.replace('text.', 'content.').replace('.', '-')})`;
   const [a, p, b] = swatch.mix;
   if (p === undefined || b === undefined) return `fill-${a.replace('text.', 'content.').replace('.', '-')}`;
@@ -90,11 +90,13 @@ const ALL: Array<[string, FlameSwatch]> = [
 describe('flame palettes', () => {
   it.each(ALL)('%s: the class says what the data says', (_, swatch) => {
     expect(swatch.fill).toBe(classFor(swatch));
+    if (swatch.dark) expect(swatch.dark.fill).toBe(`dark:${classFor(swatch.dark)}`);
   });
 
   it.each(THEME_LEVELS.flatMap((level) => ALL.map(([name, swatch]) => [level, name, swatch] as const)))('%s %s: its label clears 4.5:1', (level, _, swatch) => {
     const fill = swatchColour(level, swatch);
-    const label = role(level, swatch.label === 'fill-content-inverse' ? ('text.inverse' as FlameRole) : 'text.primary');
+    const labelClass = level === 'midnight' && swatch.dark ? swatch.dark.label.replace('dark:', '') : swatch.label;
+    const label = role(level, labelClass === 'fill-content-inverse' ? ('text.inverse' as FlameRole) : 'text.primary');
     expect(contrast(fill, label)).toBeGreaterThanOrEqual(4.5);
   });
 

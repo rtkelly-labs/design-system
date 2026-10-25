@@ -51,9 +51,9 @@ describe('Flamegraph', () => {
     fireEvent.click(frame(/^parse,/));
     expect(onSelectedChange).toHaveBeenLastCalledWith('main;handle;parse');
     expect(frame(/^parse,/).getAttribute('aria-selected')).toBe('true');
-    expect(frame(/^handle,/).getAttribute('class')).not.toContain('opacity-30');
-    expect(frame(/^render,/).getAttribute('class')).toContain('opacity-30');
-    expect(frame(/^gc,/).getAttribute('class')).toContain('opacity-30');
+    expect(frame(/^handle,/).getAttribute('class')).not.toContain('opacity-45');
+    expect(frame(/^render,/).getAttribute('class')).toContain('opacity-45');
+    expect(frame(/^gc,/).getAttribute('class')).toContain('opacity-45');
     const details = screen.getByRole('region', { name: 'Frame details' });
     expect(details.getAttribute('aria-live')).toBe('polite');
     expect(details.textContent).toContain('self 30 samples · 30%');
@@ -152,7 +152,7 @@ describe('Flamegraph', () => {
   it('lists the hottest frames, and a row selects its frame and opens the details panel', () => {
     const onSelectedChange = vi.fn();
     render(<Flamegraph profile={profile} list="always" onSelectedChange={onSelectedChange} />);
-    const list = screen.getByRole('region', { name: 'Hottest frames' });
+    const list = screen.getByRole('region', { name: 'Hottest functions' });
     const rows = within(list).getAllByRole('button');
     expect(rows.map((row) => row.textContent?.split('self')[0])).toEqual(['render', 'parse', 'gc']);
     fireEvent.click(rows[1]);
@@ -174,7 +174,7 @@ describe('Flamegraph', () => {
     const candidate = buildFlame('main;handle;parse 40\nmain;handle;render 50\nmain;audit 6');
     render(<Flamegraph profile={candidate} baseline={baseline} mode="diff" list="always" />);
     const items = within(screen.getByRole('region', { name: 'Largest changes' })).getAllByRole('listitem');
-    expect(items.map((item) => item.getAttribute('data-frame-id'))).toEqual(['main;handle;parse', 'main;audit', 'main;legacy']);
+    expect(items.map((item) => item.getAttribute('data-frame-id'))).toEqual(['fn:parse', 'fn:audit', 'fn:legacy']);
     expect(items[0].textContent).toContain('self +10 samples (+33.3%)');
     expect(items[2].textContent).toContain('removed · was 5 samples');
     expect(within(items[2]).queryByRole('button')).toBeNull();
@@ -198,6 +198,32 @@ describe('Flamegraph', () => {
     expect(fill()).toContain('fill-surface-raised');
     rerender(<Flamegraph profile={profile} palette="package" />);
     expect(fill()).toContain('accent-quiet');
+  });
+
+  it('folds a function’s call sites into one row, lights them all, and steps through them', () => {
+    const repeated = buildFlame('main;a;fmt 10\nmain;b;fmt 30\nmain;c;fmt 20\nmain;a 5\nmain;b 1');
+    const { container } = render(<Flamegraph profile={repeated} list="always" />);
+    const rows = within(screen.getByRole('region', { name: 'Hottest functions' })).getAllByRole('button');
+    expect(rows[0].textContent).toMatch(/^fmt/);
+    expect(rows.filter((row) => /^fmt/.test(row.textContent ?? ''))).toHaveLength(1);
+    fireEvent.click(rows[0]);
+    const lit = [...container.querySelectorAll('[data-slot="flamegraph-frame"]')].filter((g) => !g.getAttribute('class')!.includes('opacity-45')).map((g) => g.getAttribute('data-frame-id'));
+    expect(lit).toEqual(['main;a;fmt', 'main;b;fmt', 'main;c;fmt']);
+    expect(frame(/^fmt, total 30/).getAttribute('aria-selected')).toBe('true');
+    const details = screen.getByRole('region', { name: 'Frame details' });
+    expect(within(details).getByText('Call site 1 of 3')).toBeTruthy();
+    fireEvent.click(within(details).getByRole('button', { name: 'Next call site' }));
+    expect(within(details).getByText('Call site 2 of 3')).toBeTruthy();
+    expect(frame(/^fmt, total 20/).getAttribute('aria-selected')).toBe('true');
+    // A frame tapped in the graph goes back to stack highlighting.
+    fireEvent.click(frame(/^gc|^a,/));
+    expect(screen.queryByText(/Call site/)).toBeNull();
+  });
+
+  it('lists every call path on its own with listBy="frame"', () => {
+    const repeated = buildFlame('main;a;fmt 10\nmain;b;fmt 30');
+    render(<Flamegraph profile={repeated} list="always" listBy="frame" />);
+    expect(within(screen.getByRole('region', { name: 'Hottest frames' })).getAllByRole('button')).toHaveLength(2);
   });
 
   it('says so when there is nothing to draw', () => {

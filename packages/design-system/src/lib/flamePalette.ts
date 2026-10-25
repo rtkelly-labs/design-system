@@ -32,7 +32,8 @@ export type FlameRole =
   | 'accent.quiet'
   | 'surface.base'
   | 'surface.raised'
-  | 'text.primary';
+  | 'text.primary'
+  | 'text.muted';
 
 /** One fill and the label drawn on it. */
 export interface FlameSwatch {
@@ -42,6 +43,16 @@ export interface FlameSwatch {
   label: 'fill-content-inverse' | 'fill-content-primary';
   /** The fill as data: one role, or `[a, percent of a, b]` mixed in OKLCH. */
   mix: readonly [FlameRole] | readonly [FlameRole, number, FlameRole];
+  /**
+   * A different fill on the dark Level, where the light one's would sink into
+   * the ground. Classes carry the `dark:` variant; `mix` and `label` restate
+   * them for the contrast test.
+   */
+  dark?: {
+    fill: string;
+    label: 'dark:fill-content-inverse' | 'dark:fill-content-primary';
+    mix: readonly [FlameRole] | readonly [FlameRole, number, FlameRole];
+  };
 }
 
 /** `palette` values. */
@@ -93,11 +104,25 @@ export const PACKAGE_SWATCHES: Readonly<Record<FlamePackage, readonly FlameSwatc
   ],
 };
 
-/** A diff's unchanged frames: the raised surface, and two steps toward the ink, so neighbours still separate. */
+/**
+ * A diff's unchanged frames, three steps by name hash so neighbours separate:
+ * on a light Level the raised sheet eased toward the ink; on the dark one a
+ * mid-grey ramp from the muted ink, so the unchanged bulk of the graph is
+ * visible rather than one shade off the ground.
+ */
 export const SAME_SWATCHES: readonly FlameSwatch[] = [
-  { fill: 'fill-surface-raised', label: 'fill-content-primary', mix: ['surface.raised'] },
-  { fill: 'fill-[color-mix(in_oklch,var(--color-surface-raised)_92%,var(--color-content-primary))]', label: 'fill-content-primary', mix: ['surface.raised', 92, 'text.primary'] },
-  { fill: 'fill-[color-mix(in_oklch,var(--color-surface-raised)_85%,var(--color-content-primary))]', label: 'fill-content-primary', mix: ['surface.raised', 85, 'text.primary'] },
+  {
+    fill: 'fill-surface-raised', label: 'fill-content-primary', mix: ['surface.raised'],
+    dark: { fill: 'dark:fill-content-muted', label: 'dark:fill-content-inverse', mix: ['text.muted'] },
+  },
+  {
+    fill: 'fill-[color-mix(in_oklch,var(--color-surface-raised)_92%,var(--color-content-primary))]', label: 'fill-content-primary', mix: ['surface.raised', 92, 'text.primary'],
+    dark: { fill: 'dark:fill-[color-mix(in_oklch,var(--color-content-muted)_88%,var(--color-surface-raised))]', label: 'dark:fill-content-inverse', mix: ['text.muted', 88, 'surface.raised'] },
+  },
+  {
+    fill: 'fill-[color-mix(in_oklch,var(--color-surface-raised)_85%,var(--color-content-primary))]', label: 'fill-content-primary', mix: ['surface.raised', 85, 'text.primary'],
+    dark: { fill: 'dark:fill-[color-mix(in_oklch,var(--color-content-muted)_88%,var(--color-content-primary))]', label: 'dark:fill-content-inverse', mix: ['text.muted', 88, 'text.primary'] },
+  },
 ];
 
 /** FNV-1a: a stable 32-bit hash of a frame name, so a function keeps its colour across renders and profiles. */
