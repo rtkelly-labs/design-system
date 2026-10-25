@@ -100,6 +100,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
     "test:a11y": "playwright test tests/a11y.spec.ts",
+    "test:edges": "playwright test tests/edges.spec.ts",
     "test:visual": "playwright test tests/visual.spec.ts",
     "test:visual:missing": "playwright test tests/visual.spec.ts --update-snapshots=missing",
     "test:visual:update": "playwright test tests/visual.spec.ts --update-snapshots=all",

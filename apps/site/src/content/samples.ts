@@ -52,6 +52,20 @@ export const SAMPLES: readonly SampleDef[] = [
     components: ['AppShell', 'DataTable', 'Badge', 'Menu'],
     story: storybookUrl('/story/saas-admindashboard--content-studio'),
   },
+  {
+    slug: 'review-report',
+    title: 'Review report',
+    lede: 'The report a comparison tool such as Diffra emits: verdict, provenance, measured drift with direction, records by identity and every changed file as a line diff.',
+    components: ['ReviewReportPage', 'VerdictBand', 'ProvenanceStrip', 'DeltaValue', 'KeyedDiff', 'ChangeIndex', 'DiffView'],
+    story: storybookUrl('/story/saas-reviewreport--default'),
+  },
+  {
+    slug: 'pull-request',
+    title: 'Pull request review',
+    lede: 'A pull request under review: checks as outcome marks, reviewers, a conversation led by a comparison verdict, and diffs with comments pinned to their lines.',
+    components: ['PullRequestPage', 'StatusMark', 'VerdictBand', 'ChangeIndex', 'DiffView'],
+    story: storybookUrl('/story/saas-pullrequest--default'),
+  },
 ];
 
 export const sampleHref = (sample: SampleDef) => `/examples/${sample.slug}`;

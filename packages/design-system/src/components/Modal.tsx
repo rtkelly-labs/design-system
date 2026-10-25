@@ -142,7 +142,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
 
             <div data-slot="modal-footer" className={slots.footer()}>
               {footer || (
-                <Button onClick={onClose} variant="tertiary" bracketed size="sm">
+                <Button appearance="raised" onClick={onClose} variant="tertiary" bracketed size="sm">
                   CLOSE
                 </Button>
               )}

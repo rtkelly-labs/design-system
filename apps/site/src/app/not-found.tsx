@@ -9,7 +9,7 @@ export default function NotFound() {
           title="404: NO SUCH PAGE"
           description="The path does not match any page. Every page on this site is built ahead of time, so it has never existed."
           action={
-            <Button href="/docs" variant="primary" bracketed>
+            <Button appearance="raised" href="/docs" variant="primary" bracketed>
               GO TO THE DOCS
             </Button>
           }

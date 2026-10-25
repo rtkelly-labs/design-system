@@ -19,8 +19,7 @@ export const GAP_MM = 6;
 export const SLACK_MM = 25;
 
 /** Index rows per sheet (three columns, one sheet for ~100 plates and groups): the first carries the title block. The strict overflow check fails the build if the rows stop fitting; lower these to spill onto a second sheet. */
-// 112 rows (100 plates, 12 groups) printed 81px past A4 with the title block above them; ~97 fit.
-export const INDEX_FIRST_ROWS = 96;
+export const INDEX_FIRST_ROWS = 100;
 export const INDEX_ROWS = 120;
 
 export interface Packable {

@@ -72,7 +72,7 @@ export function AccountSettingsPage({
       topbar={
         <AppTopbar
           actions={
-            <Button size="sm" variant="inverse">
+            <Button appearance="raised" size="sm" variant="inverse">
               SIGN OUT
             </Button>
           }
@@ -105,11 +105,11 @@ export function AccountSettingsPage({
           */}
           <div>
             {scheduled ? (
-              <Button type="button" variant="inverse" onClick={cancelDelete}>
+              <Button appearance="raised" type="button" variant="inverse" onClick={cancelDelete}>
                 CANCEL DELETION
               </Button>
             ) : (
-              <Button type="button" variant="tertiary" bracketed onClick={() => setConfirming(true)}>
+              <Button appearance="raised" type="button" variant="tertiary" bracketed onClick={() => setConfirming(true)}>
                 DELETE ACCOUNT
               </Button>
             )}

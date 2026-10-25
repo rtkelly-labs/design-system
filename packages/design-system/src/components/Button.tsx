@@ -27,6 +27,22 @@ interface ButtonOwnProps {
    */
   variant?: ButtonVariant;
   /**
+   * How the button stands off the page. **Required, with no default**: a button's mode is a
+   * decision about the surface around it, and buttons that sit together should share one, so the
+   * call site states it rather than inheriting whatever the component happened to pick.
+   *
+   * - `raised` — filled, on a hard offset shadow, and it presses into the page. The brand's loud
+   *   button: the one action a page or panel is asking for.
+   * - `flat` — filled, no shadow. It brightens under the pointer and darkens when pressed, and
+   *   never moves. For actions in a row, a toolbar or a card, beside a heavier object.
+   * - `outline` — transparent, drawn in its accent's border and ink, and it fills with the accent
+   *   under the pointer. A secondary action that should be visible but not compete.
+   *
+   * Buttons in one group must share an appearance; `pnpm test:edges` fails a story where siblings
+   * mix them. See `docs/edge-hierarchy.md`.
+   */
+  appearance: ButtonAppearance;
+  /**
    * Padding and type scale, not a semantic weight. `md` is the default and the
    * one to reach for; `sm` is for dense rows such as a table's row actions,
    * and `lg` for a page's single primary action. Hit area is the constraint
@@ -61,6 +77,12 @@ export type ButtonVariant =
     | 'tertiary'
     | 'inverse'
     | 'default';
+
+/** How a Button stands off the page. See `appearance`. */
+export type ButtonAppearance = 'raised' | 'flat' | 'outline';
+
+/** Every appearance, in order of weight, for tests, stories and docs that enumerate them. */
+export const BUTTON_APPEARANCES: readonly ButtonAppearance[] = ['raised', 'flat', 'outline'];
 
 /**
  * The `<button>` form. `href?: never` is what makes the union below
@@ -160,14 +182,47 @@ const DISABLED =
   'disabled:text-content-muted disabled:shadow-none';
 
 /**
- * One constant per rendered form, aliased by every name that resolves to it.
- *
- * `default` and `primary` share the same constant and render identically.
+ * The press, for `flat`: no shadow and no movement, so its feedback is the fill itself — brighter
+ * under the pointer, darker when pressed. `brightness()` rather than a second colour, so it
+ * follows whichever accent the button wears without naming one.
  */
-const PRIMARY = `bg-accent-primary text-content-inverse border-edge-strong ${PRESS}`;
-const SECONDARY = `bg-accent-secondary text-content-inverse border-edge-strong ${PRESS}`;
-const TERTIARY = `bg-accent-tertiary text-content-inverse border-edge-strong ${PRESS}`;
-const INVERSE = `bg-content-primary text-content-inverse border-content-primary ${PRESS}`;
+const FLAT =
+  'not-disabled:not-aria-disabled:hover:brightness-110 ' +
+  'not-disabled:not-aria-disabled:active:brightness-90';
+
+/**
+ * The fills, per variant, for `raised` and `flat`. `default` and `primary` share one. Written out
+ * per variant rather than built from a name: Tailwind reads class names from source text, and a
+ * template literal emits no CSS.
+ */
+const FILL = {
+  primary: 'bg-accent-primary text-content-inverse border-edge-strong',
+  secondary: 'bg-accent-secondary text-content-inverse border-edge-strong',
+  tertiary: 'bg-accent-tertiary text-content-inverse border-edge-strong',
+  inverse: 'bg-content-primary text-content-inverse border-content-primary',
+} as const;
+
+/**
+ * The lines, per variant, for `outline`: the accent's border and ink on no ground, filling with
+ * the accent under the pointer. `check:contrast` gates every accent on every surface and
+ * `text.inverse` on every accent, so both halves of the hover are measured.
+ */
+const LINE = {
+  primary:
+    'bg-transparent text-accent-primary border-accent-primary ' +
+    'not-disabled:not-aria-disabled:hover:bg-accent-primary not-disabled:not-aria-disabled:hover:text-content-inverse',
+  secondary:
+    'bg-transparent text-accent-secondary border-accent-secondary ' +
+    'not-disabled:not-aria-disabled:hover:bg-accent-secondary not-disabled:not-aria-disabled:hover:text-content-inverse',
+  tertiary:
+    'bg-transparent text-accent-tertiary border-accent-tertiary ' +
+    'not-disabled:not-aria-disabled:hover:bg-accent-tertiary not-disabled:not-aria-disabled:hover:text-content-inverse',
+  inverse:
+    'bg-transparent text-content-primary border-content-primary ' +
+    'not-disabled:not-aria-disabled:hover:bg-content-primary not-disabled:not-aria-disabled:hover:text-content-inverse',
+} as const;
+
+const FILLED = ['raised', 'flat'] as ButtonAppearance[];
 
 const button = recipe({
   base: `font-mono font-bold uppercase border-2 transition-all duration-200 ${DISABLED}`,
@@ -178,11 +233,16 @@ const button = recipe({
       lg: 'px-8 py-4 text-lg',
     },
     variant: {
-      primary: PRIMARY,
-      secondary: SECONDARY,
-      tertiary: TERTIARY,
-      inverse: INVERSE,
-      default: PRIMARY,
+      primary: '',
+      secondary: '',
+      tertiary: '',
+      inverse: '',
+      default: '',
+    },
+    appearance: {
+      raised: PRESS,
+      flat: FLAT,
+      outline: '',
     },
     /**
      * An anchor is not `inline-flex` by default and carries an underline, so the
@@ -194,15 +254,24 @@ const button = recipe({
       true: 'inline-flex items-center justify-center no-underline',
     },
     /**
-     * Held in its press: the `:active` offset with the shadow gone, over the
-     * variant's own fill. Enabled is raised, disabled is sunken and muted, and
-     * pending is the one in between — this button was pressed and has not let
-     * go. `relative` is the box the spinner is centred in.
+     * A request in flight. `relative` is the box the spinner is centred in. A `raised` button is
+     * also held in its press — the `:active` offset with the shadow gone — below.
      */
     pending: {
-      true: 'relative cursor-progress translate-x-1 translate-y-1 shadow-none',
+      true: 'relative cursor-progress',
     },
   },
+  compoundVariants: [
+    { variant: ['primary', 'default'], appearance: FILLED, class: FILL.primary },
+    { variant: 'secondary', appearance: FILLED, class: FILL.secondary },
+    { variant: 'tertiary', appearance: FILLED, class: FILL.tertiary },
+    { variant: 'inverse', appearance: FILLED, class: FILL.inverse },
+    { variant: ['primary', 'default'], appearance: 'outline', class: LINE.primary },
+    { variant: 'secondary', appearance: 'outline', class: LINE.secondary },
+    { variant: 'tertiary', appearance: 'outline', class: LINE.tertiary },
+    { variant: 'inverse', appearance: 'outline', class: LINE.inverse },
+    { appearance: 'raised', pending: true, class: 'translate-x-1 translate-y-1 shadow-none' },
+  ],
   defaultVariants: {
     variant: 'tertiary',
     size: 'md',
@@ -226,8 +295,8 @@ const button = recipe({
  * nothing whatsoever on an anchor.
  *
  * ```tsx
- * <Button onClick={save}>SAVE</Button>
- * <Button href="/pricing" variant="tertiary" bracketed size="lg">SEE PRICING</Button>
+ * <Button appearance="flat" onClick={save}>SAVE</Button>
+ * <Button appearance="raised" href="/pricing" variant="tertiary" bracketed size="lg">SEE PRICING</Button>
  * ```
  */
 /**
@@ -248,11 +317,21 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
   const {
     children,
     variant = 'tertiary',
+    appearance,
     size = 'md',
     bracketed = false,
     className,
     ...rest
   } = props;
+
+  // The type makes `appearance` required; this is for a caller the type cannot reach — plain
+  // JavaScript, MDX, a cast. A missing mode is a decision not taken, so it fails loudly here
+  // rather than quietly rendering one of the three.
+  if (!appearance || !BUTTON_APPEARANCES.includes(appearance)) {
+    throw new TypeError(
+      `Button needs an appearance: one of ${BUTTON_APPEARANCES.join(', ')}. Received ${String(appearance)}.`,
+    );
+  }
 
   const label = bracketed ? (
     <span className="inline-flex items-center justify-center gap-2">
@@ -287,7 +366,8 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
           anchorProps.rel ??
           (anchorProps.target === '_blank' ? 'noopener noreferrer' : undefined)
         }
-        className={button({ variant, size, asLink: true, class: className })}
+        data-appearance={appearance}
+        className={button({ variant, appearance, size, asLink: true, class: className })}
       >
         {label}
       </a>
@@ -314,7 +394,8 @@ export const Button = forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonPr
       aria-disabled={isPending ? true : buttonProps['aria-disabled']}
       onClick={isPending ? preventActivation : buttonProps.onClick}
       data-pending={isPending ? '' : undefined}
-      className={button({ variant, size, pending: isPending, class: className })}
+      data-appearance={appearance}
+      className={button({ variant, appearance, size, pending: isPending, class: className })}
     >
       {isPending ? (
         <>

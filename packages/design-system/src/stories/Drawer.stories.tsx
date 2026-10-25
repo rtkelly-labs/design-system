@@ -85,7 +85,7 @@ function ToggleableExample() {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div style={{ padding: '2rem' }}>
-      <Button bracketed onClick={() => setIsOpen(true)}>OPEN DRAWER</Button>
+      <Button appearance="raised" bracketed onClick={() => setIsOpen(true)}>OPEN DRAWER</Button>
       <Drawer
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
@@ -103,7 +103,7 @@ function StackedExample() {
   return (
     <Modal isOpen onClose={() => {}} title="Deployments">
       <p style={{ marginBottom: '1rem' }}>Twelve deployments in the last seven days.</p>
-      <Button bracketed variant="tertiary" onClick={() => setFiltering(true)}>
+      <Button appearance="raised" bracketed variant="tertiary" onClick={() => setFiltering(true)}>
         FILTER RESULTS
       </Button>
       <Drawer isOpen={filtering} onClose={() => setFiltering(false)} title="Filters">

@@ -591,6 +591,16 @@ jobs:
           A11Y_FULL_MATRIX: ${{ github.event_name == 'pull_request' && '0' || '1' }}
         run: pnpm test:a11y
 
+      # Edge hierarchy (`tests/edges.spec.ts`): heavy panels and box nesting per asserted
+      # story, as a ratchet against `tests/edges.baseline.json`, with limits for a new story
+      # taken from the GOV.UK / Primer / Carbon benchmark in `docs/edge-hierarchy.md`. Same
+      # build, same browser, one `page.evaluate` a story, so it rides along with the suites.
+      - name: Run Edge Hierarchy Tests
+        if: steps.verdict.outputs.cache-hit != 'true'
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: telemetry/edges.json
+        run: pnpm test:edges
+
       # Per-story selection, in shadow mode (`scripts/select-stories.mjs`): which
       # asserted stories this change can reach, and whether any failure above
       # fell outside that set — a "selection miss". It skips nothing and gates

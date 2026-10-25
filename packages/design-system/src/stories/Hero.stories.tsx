@@ -32,10 +32,10 @@ export const Default: Story = {
     subtitle: 'A contrast-checked palette, two levels and every export, from one source file.',
     actions: (
       <>
-        <Button href="/signup" variant="tertiary" bracketed size="lg">
+        <Button appearance="raised" href="/signup" variant="tertiary" bracketed size="lg">
           START FREE
         </Button>
-        <Button href="/features" variant="inverse" bracketed size="lg">
+        <Button appearance="raised" href="/features" variant="inverse" bracketed size="lg">
           TOUR
         </Button>
       </>
@@ -56,7 +56,7 @@ export const WithMedia: Story = {
     title: 'A brutalist design system',
     subtitle: 'Tokens, components and the gates that hold them.',
     actions: (
-      <Button href="/docs" variant="primary" bracketed>
+      <Button appearance="raised" href="/docs" variant="primary" bracketed>
         READ THE DOCS
       </Button>
     ),

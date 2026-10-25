@@ -168,7 +168,7 @@ describe('Modal and AlertDialog stacking', () => {
     const [confirming, setConfirming] = useState(false);
     return (
       <Modal isOpen onClose={onOuterClose} title="Settings">
-        <Button onClick={() => setConfirming(true)}>Delete account</Button>
+        <Button appearance="raised" onClick={() => setConfirming(true)}>Delete account</Button>
         <AlertDialog
           isOpen={confirming}
           onClose={() => setConfirming(false)}

@@ -141,28 +141,28 @@ function Triggers() {
   const toast = useToast();
   return (
     <div className="mt-6 flex flex-wrap gap-3">
-      <Button
+      <Button appearance="raised"
         size="sm"
         onClick={() => toast.show({ intent: 'info', title: 'Sync queued', description: 'Twelve records waiting.' })}
       >
         INFO
       </Button>
-      <Button size="sm" onClick={() => toast.show({ intent: 'success', title: 'Saved' })}>
+      <Button appearance="raised" size="sm" onClick={() => toast.show({ intent: 'success', title: 'Saved' })}>
         SUCCESS
       </Button>
-      <Button
+      <Button appearance="raised"
         size="sm"
         onClick={() => toast.show({ intent: 'warning', title: 'Quota at 90%', description: 'Backups pause at 100%.' })}
       >
         WARNING
       </Button>
-      <Button
+      <Button appearance="raised"
         size="sm"
         onClick={() => toast.show({ intent: 'danger', title: 'Deploy failed', description: 'Step 3 of 5.' })}
       >
         DANGER
       </Button>
-      <Button
+      <Button appearance="raised"
         size="sm"
         bracketed
         onClick={() =>

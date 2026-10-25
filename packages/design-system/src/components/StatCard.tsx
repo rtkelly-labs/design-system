@@ -10,6 +10,13 @@ import type { AccentToken } from '../lib/theme';
  */
 export type StatCardAccent = AccentToken;
 
+/**
+ * `boxed` is the brand's 2px panel, for a figure that stands alone. `quiet` drops the box: a
+ * figure in a row of figures, separated from its neighbour by a dashed hairline, so the row reads
+ * as one strip rather than as one heavy object per number — see `docs/edge-hierarchy.md`.
+ */
+export type StatCardAppearance = 'boxed' | 'quiet';
+
 export interface StatCardProps {
   title: string;
   value: string | number;
@@ -18,6 +25,8 @@ export interface StatCardProps {
   subtitle?: string;
   icon?: ElementType<{ className?: string }>;
   accent?: StatCardAccent;
+  /** `boxed` by default. `quiet` for a card in a row of cards. */
+  appearance?: StatCardAppearance;
   className?: string;
 }
 
@@ -40,13 +49,15 @@ export function StatCard({
   subtitle,
   icon: Icon,
   accent = 'primary',
+  appearance = 'boxed',
   className,
 }: StatCardProps) {
   return (
     <div data-slot="stat-card"
       className={cn(
-        'bg-surface-raised border-2 border-edge-strong p-6 transition-all duration-200',
-        accentHoverEdgeClass(accent),
+        appearance === 'boxed'
+          ? ['bg-surface-raised border-2 border-edge-strong p-6 transition-all duration-200', accentHoverEdgeClass(accent)]
+          : 'border-l border-dashed border-edge-subtle px-6 py-4 first:border-l-0 first:pl-0',
         className,
       )}
     >
