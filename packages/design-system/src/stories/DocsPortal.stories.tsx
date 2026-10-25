@@ -97,8 +97,8 @@ function SampleBody() {
         Install
       </AnchorHeading>
       <CodeTabs group="pkg">
-        <CodeTab label="pnpm">pnpm add @rtkelly13/design-system</CodeTab>
-        <CodeTab label="npm">npm install @rtkelly13/design-system</CodeTab>
+        <CodeTab label="pnpm">pnpm add @rtkelly-labs/design-system</CodeTab>
+        <CodeTab label="npm">npm install @rtkelly-labs/design-system</CodeTab>
       </CodeTabs>
       <CodeBlock title="main.tsx" language="tsx">
         {STYLES_SOURCE}

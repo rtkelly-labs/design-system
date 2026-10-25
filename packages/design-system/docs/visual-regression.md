@@ -108,7 +108,7 @@ and is noted below.
   layer that creates is drawn on Chromium's schedule: on some runs it was drawn
   resampled at a sub-pixel offset, smearing the whole popup horizontally, and
   on others it was not. That was
-  [#293](https://github.com/rtkelly13/design-system/issues/293): the mobile
+  [#293](https://github.com/rtkelly-labs/design-system/issues/293): the mobile
   tooltip at the viewport edge failed by the same 215 pixels in two CI runs out
   of 69, then matched on retry, while the desktop rows of the same components,
   at 1x with no layer, never failed. `floatingSurface.ts` and `Select` force
@@ -218,7 +218,7 @@ more.
 
 That number was never chosen for real components. It was set when all five
 baselines were the same placeholder error page, so it was only ever exercised
-against an image that could not change ([#32](https://github.com/rtkelly13/design-system/issues/32)).
+against an image that could not change ([#32](https://github.com/rtkelly-labs/design-system/issues/32)).
 
 ### What `maxDiffPixels: 0` does not mean
 
@@ -482,6 +482,6 @@ Revisit when one of these becomes true:
   3. A second viewport, once the shells are decomposed enough to be worth it.
   4. Revisit `threshold`, which is still Playwright's default 0.2.
 
-Closed recently: tolerance ([#32](https://github.com/rtkelly13/design-system/issues/32)),
+Closed recently: tolerance ([#32](https://github.com/rtkelly-labs/design-system/issues/32)),
 self-hosted fonts, the portal-aware render guard, and `/update-snapshots` being
 unable to create a baseline at all.

@@ -52,7 +52,7 @@ function run(command, args, cwd, allowFailure = false) {
   return { ok: result.status === 0, out };
 }
 
-const REPORT = `import { Card, ReportDocument, ReportSection, StatCard } from '@rtkelly13/design-system';
+const REPORT = `import { Card, ReportDocument, ReportSection, StatCard } from '@rtkelly-labs/design-system';
 
 export default function Report() {
   return (
@@ -67,7 +67,7 @@ export default function Report() {
 `;
 
 /** A report the lint must refuse, to prove the rules ship and run. */
-const BAD_REPORT = `import { Card, ReportDocument } from '@rtkelly13/design-system';
+const BAD_REPORT = `import { Card, ReportDocument } from '@rtkelly-labs/design-system';
 
 export default function Report() {
   return (
@@ -89,7 +89,7 @@ const pack = (dir) => {
 // that cannot satisfy each other, which is the worst place to find out.
 {
   const declared = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'))
-    .peerDependencies['@rtkelly13/design-system'];
+    .peerDependencies['@rtkelly-labs/design-system'];
   const actual = JSON.parse(readFileSync(path.join(DESIGN_SYSTEM, 'package.json'), 'utf8')).version;
   const [major, minor] = actual.split('.');
   // Pre-1.0, `^0.3.0` admits 0.3.x only, so the guard is major *and* minor.
@@ -97,7 +97,7 @@ const pack = (dir) => {
   check(
     `peer range ${declared} still admits the design system's ${actual}`,
     satisfied,
-    'Bump the @rtkelly13/design-system range in packages/design-system-report/package.json.',
+    'Bump the @rtkelly-labs/design-system range in packages/design-system-report/package.json.',
   );
 }
 

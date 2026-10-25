@@ -1,7 +1,7 @@
 'use client';
 
 import { Download, GitBranch, Rocket } from 'lucide-react';
-import { Button } from '@rtkelly13/design-system';
+import { Button } from '@rtkelly-labs/design-system';
 
 export default function ButtonWithIcon() {
   return (

@@ -19,7 +19,7 @@ importers:
       '@next/mdx':
         specifier: ^16.4.2
         version: 16.4.2(@mdx-js/loader@3.1.1)(@mdx-js/react@3.1.1(@types/react@19.2.18)(react@19.2.8))
-      '@rtkelly13/design-system':
+      '@rtkelly-labs/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
       lucide-react:
@@ -231,7 +231,7 @@ importers:
 
   packages/design-system-report:
     devDependencies:
-      '@rtkelly13/design-system':
+      '@rtkelly-labs/design-system':
         specifier: workspace:*
         version: link:../design-system
       '@tailwindcss/typography':

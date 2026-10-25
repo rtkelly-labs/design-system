@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, DataTable, type Column } from '@rtkelly13/design-system';
+import { Badge, DataTable, type Column } from '@rtkelly-labs/design-system';
 import { DEPLOYMENTS, formatDuration, formatStamp, type Deployment } from '@/data/fixtures';
 
 const STATUS_INTENT = {

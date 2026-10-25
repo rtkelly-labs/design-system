@@ -24,7 +24,7 @@ import {
   ReportDocument,
   ReportSection,
   StatCard,
-} from '@rtkelly13/design-system';
+} from '@rtkelly-labs/design-system';
 
 const rows = [
   { check: 'tokens:check', status: 'pass', detail: 'theme.css matches levels.ts' },

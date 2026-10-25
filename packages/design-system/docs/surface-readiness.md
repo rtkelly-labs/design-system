@@ -23,7 +23,7 @@ It deliberately does **not** re-litigate the gaps already documented elsewhere:
   design, test layer, publishing.
 - [`docs/gap-analysis.md`](./gap-analysis.md) — **stated invariants with no
   enforcement**, and the divergence of the two consumers. (Lands with
-  [#34](https://github.com/rtkelly13/design-system/pull/34).)
+  [#34](https://github.com/rtkelly-labs/design-system/pull/34).)
 
 Those two ask *"does the system hold together?"*. This one asks *"how many kinds
 of site can you actually build with it?"* — a different axis, and the one the
@@ -191,7 +191,7 @@ marketing page.
 render-blocking cross-origin request on the one surface where LCP is a business
 metric — and the blog already solved it by self-hosting via `@fontsource`. Note
 this survived the theme work in
-[#33](https://github.com/rtkelly13/design-system/pull/33), which has since landed
+[#33](https://github.com/rtkelly-labs/design-system/pull/33), which has since landed
 in 0.2.0.
 
 ---
@@ -242,11 +242,11 @@ as dark boxes on a light page. The blog and docs surfaces barely touch these
 components; admin is built from nothing else.
 
 `Input` is migrated as of 0.2.0
-([#33](https://github.com/rtkelly13/design-system/pull/33)); `StatCard` is migrated by
-[#36](https://github.com/rtkelly13/design-system/pull/36). `DataTable`, `Pagination`
+([#33](https://github.com/rtkelly-labs/design-system/pull/33)); `StatCard` is migrated by
+[#36](https://github.com/rtkelly-labs/design-system/pull/36). `DataTable`, `Pagination`
 and `PageHeader` are covered by
-[#40](https://github.com/rtkelly13/design-system/pull/40), and `Modal`'s a11y gaps
-by [#38](https://github.com/rtkelly13/design-system/pull/38).
+[#40](https://github.com/rtkelly-labs/design-system/pull/40), and `Modal`'s a11y gaps
+by [#38](https://github.com/rtkelly-labs/design-system/pull/38).
 
 ### Missing for any real admin
 
@@ -254,21 +254,21 @@ by [#38](https://github.com/rtkelly13/design-system/pull/38).
 `Progress`, sortable and paginated `DataTable`, form-field layout, auth screens,
 charts.
 
-`Drawer` was on this list until [#241](https://github.com/rtkelly13/design-system/issues/241)
+`Drawer` was on this list until [#241](https://github.com/rtkelly-labs/design-system/issues/241)
 landed it as `Modal`'s edge-anchored sibling — the off-canvas primitive the
 responsive admin sidebar, filter panels and mobile navigation all sit on.
 
-`Toast` was on it until [#243](https://github.com/rtkelly13/design-system/issues/243)
+`Toast` was on it until [#243](https://github.com/rtkelly-labs/design-system/issues/243)
 landed `ToastProvider` and `useToast` on `@base-ui/react/toast` — a queue, a
 live region present from mount and a lifetime that pauses for the reader —
 with `AdminDashboardLayout`'s `TRIGGER SYNC` as its first call site.
 
 An application shell was the thing missing underneath all of these until
-[#247](https://github.com/rtkelly13/design-system/issues/247) extracted `AppShell`,
+[#247](https://github.com/rtkelly-labs/design-system/issues/247) extracted `AppShell`,
 `AppSidebar`, `AppSidebarNav`, `AppTopbar` and `AppMain`: a persistent sidebar at desktop
 width that becomes a left `Drawer` below it, a consumer-supplied navigation tree, and the
 account area as a slot rather than a signed-in user.
-[#249](https://github.com/rtkelly13/design-system/issues/249) then removed `AdminDashboardLayout`
+[#249](https://github.com/rtkelly-labs/design-system/issues/249) then removed `AdminDashboardLayout`
 rather than keep a second shell model beside it. Its navigation, signed-in user, KPI values,
 bank-ingestion table and `TRIGGER SYNC` are story fixtures now (`SaaS/AdminDashboard`, *Finance
 Console*), and an unrelated CMS (*Content Studio*) sits on the same `AppShell` with no change to
@@ -276,7 +276,7 @@ the shell between the two. Everything this section quotes from the old file is g
 package.
 
 `Dropdown` / `Menu` and `Tooltip` were on it until
-[#166](https://github.com/rtkelly13/design-system/issues/166) landed `Tooltip`,
+[#166](https://github.com/rtkelly-labs/design-system/issues/166) landed `Tooltip`,
 `Popover` and `Menu` on `@base-ui/react` — one floating surface, one layer, and
 the dialogs' dismissal stack — with `DocsHeader`'s level chooser and
 `SlideDeck`'s control hints as the first call sites.
@@ -312,7 +312,7 @@ So consumers re-declare them, and they have already drifted:
 `blog/components/talks/theme.ts` re-declares the accents a third time for
 Spectacle. This is one gap producing three copies of the palette.
 
-**Mostly solved as of 0.2.0.** [#33](https://github.com/rtkelly13/design-system/pull/33)
+**Mostly solved as of 0.2.0.** [#33](https://github.com/rtkelly-labs/design-system/pull/33)
 introduced `src/theme/levels.ts`, which holds the ladder as literal colours in
 TypeScript and generates `theme.css` from it. What remains is the small part:
 exporting those literals from the package entrypoint, and migrating the blog's
@@ -355,15 +355,15 @@ Cross-referenced so this document does not generate duplicate work.
 
 | Open PR / issue | Covers |
 |---|---|
-| [#31](https://github.com/rtkelly13/design-system/pull/31) | Stories for every component + widened visual suite |
-| [#33](https://github.com/rtkelly13/design-system/pull/33) — **merged, 0.2.0** | Four-level theme ladder, literal tokens in TS, SSR-safe `ThemeProvider`, `Input` migration, contrast/CSS/token/coverage gates |
-| [#34](https://github.com/rtkelly13/design-system/pull/34) | Vitest suite over `lib`/`hooks`, and `gap-analysis.md` |
-| [#35](https://github.com/rtkelly13/design-system/pull/35) | Semantic Tailwind aliases follow nested theme panels |
-| [#36](https://github.com/rtkelly13/design-system/pull/36) | `Input` + `StatCard` onto semantic roles |
-| [#38](https://github.com/rtkelly13/design-system/pull/38) | `Modal` focus trap, Escape, portal, scroll lock, labelled title |
-| [#39](https://github.com/rtkelly13/design-system/pull/39) | `Button` renders an anchor when given an `href` |
-| [#40](https://github.com/rtkelly13/design-system/pull/40) | `DataTable`, `Pagination`, `PageHeader` onto semantic roles |
-| [#32](https://github.com/rtkelly13/design-system/issues/32) | Visual regression tolerance too loose |
+| [#31](https://github.com/rtkelly-labs/design-system/pull/31) | Stories for every component + widened visual suite |
+| [#33](https://github.com/rtkelly-labs/design-system/pull/33) — **merged, 0.2.0** | Four-level theme ladder, literal tokens in TS, SSR-safe `ThemeProvider`, `Input` migration, contrast/CSS/token/coverage gates |
+| [#34](https://github.com/rtkelly-labs/design-system/pull/34) | Vitest suite over `lib`/`hooks`, and `gap-analysis.md` |
+| [#35](https://github.com/rtkelly-labs/design-system/pull/35) | Semantic Tailwind aliases follow nested theme panels |
+| [#36](https://github.com/rtkelly-labs/design-system/pull/36) | `Input` + `StatCard` onto semantic roles |
+| [#38](https://github.com/rtkelly-labs/design-system/pull/38) | `Modal` focus trap, Escape, portal, scroll lock, labelled title |
+| [#39](https://github.com/rtkelly-labs/design-system/pull/39) | `Button` renders an anchor when given an `href` |
+| [#40](https://github.com/rtkelly-labs/design-system/pull/40) | `DataTable`, `Pagination`, `PageHeader` onto semantic roles |
+| [#32](https://github.com/rtkelly-labs/design-system/issues/32) | Visual regression tolerance too loose |
 
 Between them, most of §4's theming problem and all of §5's hard part are handled.
 `Modal`, `Button`, `DataTable` and `Pagination` were untouched when this was

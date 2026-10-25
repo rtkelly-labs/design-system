@@ -264,7 +264,7 @@ export const DesignSandbox: React.FC = () => {
               <Badge accent="primary">REUSABLE ENGINE</Badge>
             </Slide>
             <Slide title="ZERO TOKEN DRIFT PRINCIPLE">
-              <p className="text-xl text-content-secondary font-mono mb-4">&gt; Every downstream app imports @rtkelly13/design-system/tailwind-preset.</p>
+              <p className="text-xl text-content-secondary font-mono mb-4">&gt; Every downstream app imports @rtkelly-labs/design-system/tailwind-preset.</p>
               <Badge accent="tertiary">SINGLE SOURCE OF TRUTH</Badge>
             </Slide>
           </SlideDeck>
