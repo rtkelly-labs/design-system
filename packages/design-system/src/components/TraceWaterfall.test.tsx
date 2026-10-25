@@ -53,6 +53,21 @@ describe('TraceWaterfall', () => {
     expect(rowNames()).toEqual(['a', 'b', 'c', 'd']);
   });
 
+  it('never takes focus back after a key press that did not move', () => {
+    const outside = document.createElement('input');
+    document.body.append(outside);
+    const { rerender } = render(<TraceWaterfall spans={spans} />);
+    const root = screen.getByRole('treeitem', { name: /^GET/ });
+    fireEvent.keyDown(root, { key: 'End' });
+    const last = screen.getByRole('treeitem', { name: /^payment/ });
+    fireEvent.keyDown(last, { key: 'End' });
+    outside.focus();
+    // Filtering the active row away moves the roving tab stop, and must leave focus where the user put it.
+    rerender(<TraceWaterfall spans={spans} filter="cart" />);
+    expect(document.activeElement).toBe(outside);
+    outside.remove();
+  });
+
   it('toggles from the disclosure glyph without selecting', () => {
     const onSelectedChange = vi.fn();
     const { container } = render(<TraceWaterfall spans={spans} onSelectedChange={onSelectedChange} />);

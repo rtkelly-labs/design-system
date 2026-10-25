@@ -170,8 +170,13 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
   }, [focusId]);
   const moveTo = (id: string | undefined) => {
     if (!id) return;
-    pendingFocus.current = true;
     setActiveId(id);
+    // Focus a rendered row now. Only a row that is not rendered yet waits for
+    // the effect: a flag left set by a key press that did not move would fire
+    // on the next unrelated change of `focusId` and pull focus from elsewhere.
+    const node = rowRefs.current.get(id);
+    if (node) node.focus();
+    else pendingFocus.current = true;
   };
 
   const toggle = (span: TraceSpan, open?: boolean) => {
