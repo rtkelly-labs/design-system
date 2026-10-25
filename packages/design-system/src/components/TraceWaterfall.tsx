@@ -18,16 +18,20 @@ const SCALE = 1000;
 
 const traceWaterfall = recipe({
   slots: {
-    root: 'flex min-w-0 flex-col font-mono text-sm text-content-primary',
-    axis: 'grid grid-cols-[minmax(8rem,16rem)_minmax(0,1fr)_4.5rem] gap-3 border-b border-edge-subtle pb-1 text-xs text-content-muted',
+    // A container, so the layout follows the waterfall's own width: in a phone
+    // or a narrow panel the bar would get no column, so it drops to a line of
+    // its own under the name, still aligned with the axis.
+    root: '@container flex min-w-0 flex-col font-mono text-sm text-content-primary',
+    axis: 'grid grid-cols-[minmax(0,1fr)_4.5rem] gap-3 border-b border-edge-subtle pb-1 text-xs text-content-muted @xl:grid-cols-[minmax(8rem,16rem)_minmax(0,1fr)_4.5rem]',
+    axisLabel: 'hidden @xl:block',
     tree: 'flex flex-col py-1',
-    row: 'grid cursor-pointer grid-cols-[minmax(8rem,16rem)_minmax(0,1fr)_4.5rem] items-center gap-3 border-l-2 border-transparent px-1 py-0.5 hover:bg-surface-sunken',
-    label: 'flex min-w-0 items-center gap-1',
+    row: 'grid cursor-pointer grid-cols-[minmax(0,1fr)_4.5rem] items-center gap-x-3 border-l-2 border-transparent px-1 py-1 hover:bg-surface-sunken @xl:grid-cols-[minmax(8rem,16rem)_minmax(0,1fr)_4.5rem] @xl:py-0.5',
+    label: 'col-start-1 row-start-1 flex min-w-0 items-center gap-1',
     guide: 'h-[1.5em] w-3 shrink-0 border-l border-edge-subtle',
     toggle: 'w-3 shrink-0 select-none text-center text-content-muted',
     name: 'truncate',
-    bar: 'h-3 w-full overflow-visible',
-    duration: 'text-right tabular-nums text-content-secondary',
+    bar: 'col-start-1 row-start-2 mt-0.5 h-2 w-full overflow-visible @xl:col-start-2 @xl:row-start-1 @xl:mt-0 @xl:h-3',
+    duration: 'col-start-2 row-start-1 text-right tabular-nums text-content-secondary @xl:col-start-3',
     empty: 'text-content-muted',
   },
   variants: {
@@ -224,7 +228,7 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
     <div ref={ref} data-slot="trace-waterfall" data-live={model.inFlightCount > 0 || undefined} {...props} className={styles.root({ className })}>
       <p className="sr-only">{summary}</p>
       <div aria-hidden="true" data-part="axis" className={styles.axis()}>
-        <span>Span</span>
+        <span className={styles.axisLabel()}>Span</span>
         <span className="flex min-w-0">
           {axis.map((tick, index) => (
             // Keyed by position: a zero-length trace has every tick at 0.
