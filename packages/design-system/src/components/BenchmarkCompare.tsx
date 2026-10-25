@@ -7,7 +7,10 @@ import {
   formatPercent,
   formatRatioChange,
   formatSignificant,
+  kernelDensity,
+  median,
   sortByImpact,
+  type BenchmarkClassification,
   type BenchmarkComparison,
 } from '../lib/benchmark';
 import { DeltaValue } from './review/DeltaValue';
@@ -38,11 +41,17 @@ const RATIO_TICKS = [0.25, 0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 2, 4];
 const benchmarkCompare = recipe({
   slots: {
     root: '@container flex min-w-0 flex-col gap-2 font-mono text-xs text-content-primary',
-    panels: 'm-0 grid list-none grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-2 p-0',
-    panel: 'flex aspect-square min-w-0 flex-col gap-1.5 border border-edge-subtle bg-surface-base p-3',
-    panelName: 'm-0 text-xs text-content-primary',
-    headline: 'm-0 mt-auto flex flex-col text-2xl font-bold leading-tight tabular-nums',
-    sortBar: 'flex flex-wrap items-baseline gap-x-3 gap-y-1 text-content-muted',
+    panels: 'm-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,13rem),1fr))] gap-3 p-0',
+    panel: '@container flex min-w-0 flex-col border border-t-4 border-edge-subtle bg-surface-raised @min-[28rem]:aspect-square',
+    panelHeader: 'flex flex-col items-start gap-1.5 border-b border-edge-subtle px-4 py-3',
+    eyebrow: 'm-0 text-caption text-content-muted [overflow-wrap:anywhere]',
+    panelTitle: 'm-0 text-lead font-bold leading-tight text-content-primary [overflow-wrap:anywhere]',
+    panelBody: 'flex flex-1 flex-col gap-3 px-4 py-4',
+    hero: 'm-0 whitespace-nowrap font-bold leading-none tabular-nums text-title @min-[12rem]:text-display',
+    medians: 'm-0 text-body tabular-nums text-content-primary',
+    panelFooter: 'mt-auto border-t border-edge-subtle px-4 py-2 text-caption text-content-muted',
+    chip: 'inline-flex items-center gap-1.5 border border-current px-2 py-1 font-mono text-caption font-bold uppercase tracking-wider',
+    sortBar: 'flex flex-wrap items-baseline gap-x-3 gap-y-1 text-caption text-content-muted',
     summary: 'flex flex-wrap gap-x-4 gap-y-1 text-content-secondary',
     frame: 'overflow-x-auto border-t-2 border-edge-strong',
     table: 'w-full border-collapse text-sm [&_tbody_tr:last-child>*]:border-b-0',
@@ -102,6 +111,113 @@ function breakable(name: string): ReactNode {
       {index < parts.length - 1 ? <wbr /> : null}
     </Fragment>
   ));
+}
+
+/** Role classes per classification. A regression takes `danger`, an improvement `success`; inconclusive stays muted and dashed, as the review vocabulary draws it. */
+const VERDICT_TONE = {
+  slower: { text: 'text-intent-danger', stroke: 'stroke-intent-danger', fill: 'fill-intent-danger', ground: 'bg-delta-ground-removed', edge: 'border-t-intent-danger', dashed: false },
+  faster: { text: 'text-intent-success', stroke: 'stroke-intent-success', fill: 'fill-intent-success', ground: 'bg-delta-ground-added', edge: 'border-t-intent-success', dashed: false },
+  inconclusive: { text: 'text-content-secondary', stroke: 'stroke-content-secondary', fill: 'fill-content-secondary', ground: 'bg-surface-sunken', edge: 'border-t-edge-default', dashed: true },
+  unchanged: { text: 'text-content-primary', stroke: 'stroke-content-primary', fill: 'fill-content-primary', ground: 'bg-delta-ground-hunk', edge: 'border-t-edge-strong', dashed: false },
+} as const satisfies Record<BenchmarkClassification, { text: string; stroke: string; fill: string; ground: string; edge: string; dashed: boolean }>;
+
+/** `ParquetSerializer.Serialize(Rows=10000)` → eyebrow `ParquetSerializer`, title `Serialize(10000)`. */
+function splitName(name: string): { eyebrow: string | null; title: string } {
+  const paren = name.indexOf('(');
+  const dot = name.lastIndexOf('.', paren < 0 ? name.length : paren);
+  const title = (dot < 0 ? name : name.slice(dot + 1)).replace(/\b[A-Za-z_]\w*=/g, '');
+  return { eyebrow: dot < 0 ? null : name.slice(0, dot), title };
+}
+
+/** Where a ratio sits across the card, as a percentage with a small inset at each end. */
+function panelRatioX(domain: readonly [number, number], ratio: number): number {
+  const lo = Math.log(domain[0]);
+  const hi = Math.log(domain[1]);
+  const clamped = Math.max(domain[0], Math.min(domain[1], ratio));
+  return 4 + ((Math.log(clamped) - lo) / (hi - lo || 1)) * 92;
+}
+
+/**
+ * The interval drawn to the card's width. Percent coordinates rather than a viewBox, so the point
+ * stays round and the labels stay at their size whatever the card's width.
+ */
+function PanelInterval({ comparison, domain }: { comparison: BenchmarkComparison; domain: readonly [number, number] }) {
+  const tone = VERDICT_TONE[comparison.classification];
+  const pct = (ratio: number) => panelRatioX(domain, ratio);
+  const { interval, ratio, band, classification } = comparison;
+  const conclusive = classification !== 'inconclusive';
+  const estimate = interval?.estimate ?? ratio;
+  const ticks: number[] = [];
+  for (const tick of RATIO_TICKS.filter((t) => t >= domain[0] && t <= domain[1]).sort((a, b) => Math.abs(Math.log(a)) - Math.abs(Math.log(b)))) {
+    if (ticks.every((other) => Math.abs(pct(other) - pct(tick)) >= 24)) ticks.push(tick);
+  }
+  return (
+    <svg data-slot="benchmark-compare-interval" width="100%" height={42} aria-hidden="true" className="block overflow-visible">
+      <rect data-part="band" x={`${pct(band.low)}%`} y={0} width={`${Math.max(0, pct(band.high) - pct(band.low))}%`} height={22} className="fill-content-muted" fillOpacity={0.2} />
+      <line data-part="reference" x1={`${pct(1)}%`} x2={`${pct(1)}%`} y1={0} y2={22} strokeWidth={1.5} className="stroke-content-primary" />
+      {interval ? (
+        <g data-part="whisker" className={tone.stroke} strokeWidth={2} strokeDasharray={conclusive ? undefined : '4 3'}>
+          <line x1={`${pct(interval.low)}%`} x2={`${pct(interval.high)}%`} y1={11} y2={11} />
+          <line x1={`${pct(interval.low)}%`} x2={`${pct(interval.low)}%`} y1={6} y2={16} strokeDasharray={undefined} />
+          <line x1={`${pct(interval.high)}%`} x2={`${pct(interval.high)}%`} y1={6} y2={16} strokeDasharray={undefined} />
+        </g>
+      ) : null}
+      {estimate != null && Number.isFinite(estimate) ? (
+        <circle data-part="estimate" cx={`${pct(estimate)}%`} cy={11} r={5} strokeWidth={2} className={cn(tone.stroke, conclusive ? tone.fill : 'fill-surface-raised')} />
+      ) : null}
+      {ticks.map((tick) => (
+        <text key={tick} x={`${pct(tick)}%`} y={38} textAnchor="middle" fontSize={12} className={tick === 1 ? 'fill-content-secondary' : 'fill-content-muted'}>{`${tick}×`}</text>
+      ))}
+    </svg>
+  );
+}
+
+/** Fewest samples a side needs before the card's shape draws a density rather than ticks. */
+const SHAPE_DENSITY_SAMPLES = 8;
+
+/**
+ * Baseline above the centre line, candidate below, each normalised to its own half: a shape, not
+ * a density comparison — the reader sees the distribution move. Stretches to the card's width.
+ */
+function PanelShape({ comparison }: { comparison: BenchmarkComparison }) {
+  const tone = VERDICT_TONE[comparison.classification];
+  const sides = [
+    { side: 'baseline' as const, samples: (comparison.samples?.baseline ?? []).filter(Number.isFinite), sign: -1, fill: 'fill-content-muted', stroke: 'stroke-content-muted' },
+    { side: 'candidate' as const, samples: (comparison.samples?.candidate ?? []).filter(Number.isFinite), sign: 1, fill: tone.fill as string, stroke: tone.stroke as string },
+  ].filter((s) => s.samples.length);
+  if (!sides.length) return null;
+  let min = Infinity;
+  let max = -Infinity;
+  for (const s of sides) for (const v of s.samples) { if (v < min) min = v; if (v > max) max = v; }
+  const pad = (max - min || Math.abs(max) || 1) * 0.08;
+  const from = min - pad;
+  const to = max + pad;
+  const x = (v: number) => ((v - from) / (to - from)) * 100;
+  const mid = 24;
+  return (
+    <svg data-slot="benchmark-compare-shape" viewBox="0 0 100 48" preserveAspectRatio="none" width="100%" height={48} aria-hidden="true" className="block">
+      <line x1={0} x2={100} y1={mid} y2={mid} className="stroke-edge-default" vectorEffect="non-scaling-stroke" />
+      {sides.map((s) => {
+        const curve = s.samples.length >= SHAPE_DENSITY_SAMPLES ? kernelDensity(s.samples, from, to, 64) : [];
+        const peak = Math.max(1e-12, ...curve.map((p) => p.density));
+        const m = median(s.samples);
+        return (
+          <g key={s.side} data-part="shape-side" data-side={s.side}>
+            {curve.length ? (
+              <path
+                d={`M0,${mid}${curve.map((p) => `L${x(p.value).toFixed(2)},${(mid + s.sign * (p.density / peak) * (mid - 2)).toFixed(2)}`).join('')}L100,${mid}Z`}
+                fillOpacity={s.side === 'baseline' ? 0.45 : 0.6}
+                className={s.fill}
+              />
+            ) : (
+              s.samples.map((v, i) => <line key={i} x1={x(v)} x2={x(v)} y1={mid} y2={mid + s.sign * 14} strokeWidth={2} vectorEffect="non-scaling-stroke" className={s.stroke} />)
+            )}
+            <line x1={x(m)} x2={x(m)} y1={mid} y2={mid + s.sign * (mid - 1)} strokeWidth={2} vectorEffect="non-scaling-stroke" className="stroke-content-primary" />
+          </g>
+        );
+      })}
+    </svg>
+  );
 }
 
 /** The sort applied to a list, stable. */
@@ -222,7 +338,8 @@ export const BenchmarkCompare = forwardRef<HTMLDivElement, BenchmarkCompareProps
   const setSort = (next: BenchmarkCompareSort) => setChosen({ base: sortProp, sort: next });
   // False on the server and in a static render, true once hydrated: the sort buttons are an enhancement.
   const enhanced = useSyncExternalStore(subscribeNever, isClient, isServer);
-  const rows = useMemo(() => ordered(comparisons, sort), [comparisons, sort]);
+  const [filter, setFilter] = useState<BenchmarkClassification | null>(null);
+  const rows = useMemo(() => ordered(comparisons, sort).filter((c) => filter === null || c.classification === filter), [comparisons, sort, filter]);
   const domain = useMemo(() => domainProp ?? sharedDomain(comparisons), [domainProp, comparisons]);
 
   if (!comparisons.length) {
@@ -240,10 +357,6 @@ export const BenchmarkCompare = forwardRef<HTMLDivElement, BenchmarkCompareProps
   const methods = [...new Set(comparisons.flatMap((c) => (c.interval ? [c.interval.method] : [])))];
   const summaryParts = [
     `${comparisons.length} ${comparisons.length === 1 ? 'benchmark' : 'benchmarks'}`,
-    `${counts.slower} slower`,
-    `${counts.faster} faster`,
-    `${counts.inconclusive} inconclusive`,
-    `${counts.unchanged} unchanged`,
     thresholds.length === 1 ? `noise ±${formatPercent(thresholds[0]!)}` : 'noise thresholds vary',
     levels.length === 1 ? `${formatPercent(levels[0]!)} intervals${methods.length === 1 ? ` (${methods[0]})` : ''}` : null,
   ].filter((part): part is string => part !== null);
@@ -260,6 +373,29 @@ export const BenchmarkCompare = forwardRef<HTMLDivElement, BenchmarkCompareProps
 
   return (
     <div ref={ref} data-slot="benchmark-compare" data-sort={sort} {...props} className={styles.root({ className })}>
+      <div data-part="counts" className="flex flex-wrap gap-2">
+        {(['slower', 'faster', 'inconclusive', 'unchanged'] as const).map((key) => {
+          const tone = VERDICT_TONE[key];
+          const text = `${counts[key]} ${key}`;
+          const chipClass = cn(styles.chip(), tone.text, tone.dashed && 'border-dashed', filter === key && tone.ground);
+          return enhanced ? (
+            <button
+              key={key}
+              type="button"
+              data-classification={key}
+              aria-pressed={filter === key}
+              className={cn(chipClass, 'cursor-pointer bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary', filter === key && tone.ground)}
+              onClick={() => setFilter(filter === key ? null : key)}
+            >
+              {text}
+            </button>
+          ) : (
+            <span key={key} data-classification={key} className={chipClass}>
+              {text}
+            </span>
+          );
+        })}
+      </div>
       <p data-part="summary" className={styles.summary()}>
         {summaryParts.map((part) => (
           <span key={part}>{part}</span>
@@ -331,7 +467,7 @@ export const BenchmarkCompare = forwardRef<HTMLDivElement, BenchmarkCompareProps
                     <span className="sr-only">{`${c.baseline?.n ?? 0} baseline samples, ${c.candidate?.n ?? 0} candidate samples`}</span>
                   </td>
                   <td className={styles.cell()}>
-                    <StatusMark vocabulary="delta" status={mark.status} label={mark.label} />
+                    <StatusMark vocabulary="delta" status={mark.status} label={mark.label} className={VERDICT_TONE[c.classification].text} />
                     {c.reason ? <span className={styles.note()}>{INCONCLUSIVE_REASON_TEXT[c.reason]}</span> : null}
                   </td>
                 </tr>
@@ -357,40 +493,51 @@ export const BenchmarkCompare = forwardRef<HTMLDivElement, BenchmarkCompareProps
           <ul className={styles.panels()}>
             {rows.map((c) => {
               const display = benchmarkDisplayUnit(c.baseline?.median ?? c.candidate?.median ?? Number.NaN, c.unit);
-              const scaled = (value: number | undefined) => (value != null && Number.isFinite(value) ? value / display.factor : null);
-              const conclusive = c.classification !== 'inconclusive';
+              const value = (summary: BenchmarkComparison['baseline']) => (summary?.n ? formatSignificant(summary.median / display.factor) : '—');
+              const tone = VERDICT_TONE[c.classification];
               const mark = statusFor(c.classification);
-              const headline = c.reason === 'missing-candidate' ? 'removed' : c.reason === 'missing-baseline' ? 'new' : formatRatioChange(c.ratio);
+              const { eyebrow, title } = splitName(c.name);
+              const hero = c.reason === 'missing-candidate' ? 'removed' : c.reason === 'missing-baseline' ? 'new' : formatRatioChange(c.ratio);
               return (
-                <li key={c.id} data-slot="benchmark-compare-panel" data-classification={c.classification} data-reason={c.reason} className={styles.panel()}>
-                  <div>
-                    <StatusMark vocabulary="delta" status={mark.status} label={mark.label} />
-                    {c.reason ? <span className={styles.note()}>{INCONCLUSIVE_REASON_TEXT[c.reason]}</span> : null}
+                <li
+                  key={c.id}
+                  data-slot="benchmark-compare-panel"
+                  data-classification={c.classification}
+                  data-reason={c.reason}
+                  className={cn(styles.panel(), tone.edge, tone.dashed && 'border-dashed')}
+                >
+                  <header className={cn(styles.panelHeader(), tone.ground)}>
+                    <StatusMark vocabulary="delta" status={mark.status} label={mark.label} className={tone.text} />
+                    {eyebrow ? <p className={styles.eyebrow()}>{breakable(eyebrow)}</p> : null}
+                    <p className={styles.panelTitle()} title={c.name}>
+                      {breakable(title)}
+                    </p>
+                  </header>
+                  <div className={styles.panelBody()}>
+                    <p data-part="headline" className={cn(styles.hero(), tone.text)}>
+                      {hero}
+                    </p>
+                    <PanelShape comparison={c} />
+                    {plot === 'interval' ? <PanelInterval comparison={c} domain={domain} /> : null}
+                    <p data-part="medians" className={styles.medians()}>
+                      {`${value(c.baseline)} → ${value(c.candidate)} ${display.unit}`}
+                    </p>
                   </div>
-                  <p className={styles.panelName()}>{breakable(c.name)}</p>
-                  <p data-part="headline" className={cn(styles.headline(), conclusive ? 'text-content-primary' : 'text-content-secondary')}>
-                    <span>{headline}</span>
-                    <span className="text-xs font-normal text-content-muted">{c.direction.replace(/-/g, ' ')}</span>
-                  </p>
-                  <DeltaValue
-                    before={scaled(c.baseline?.n ? c.baseline.median : undefined)}
-                    after={scaled(c.candidate?.n ? c.candidate.median : undefined)}
-                    unit={display.unit}
-                    direction={conclusive ? c.direction : undefined}
-                    format={formatSignificant}
-                    className="flex-wrap gap-x-1.5 gap-y-0 whitespace-normal text-xs"
-                  />
-                  {plot === 'interval' ? (
-                    <div>
-                      <IntervalPlot comparison={c} domain={domain} density={density} fluid />
-                      <IntervalAxis domain={domain} density={density} fluid />
-                    </div>
-                  ) : null}
-                  <p className="m-0 tabular-nums text-content-muted">
-                    <span aria-hidden="true">{`n = ${c.baseline?.n ?? 0} / ${c.candidate?.n ?? 0}`}</span>
-                    <span className="sr-only">{`${c.baseline?.n ?? 0} baseline samples, ${c.candidate?.n ?? 0} candidate samples`}</span>
-                    {c.interval ? <span className="block">{`${formatPercent(c.interval.level)} ${formatRatio(c.interval.low)}–${formatRatio(c.interval.high)}`}</span> : null}
-                  </p>
+                  <details className={styles.panelFooter()}>
+                    <summary className="cursor-pointer select-none py-1">{c.reason ? INCONCLUSIVE_REASON_TEXT[c.reason] : 'details'}</summary>
+                    <dl className="m-0 mt-1 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 tabular-nums">
+                      <dt>direction</dt>
+                      <dd className="m-0">{c.direction.replace(/-/g, ' ')}</dd>
+                      <dt>n</dt>
+                      <dd className="m-0">{`${c.baseline?.n ?? 0} baseline / ${c.candidate?.n ?? 0} candidate`}</dd>
+                      <dt>ratio</dt>
+                      <dd className="m-0">{formatRatio(c.ratio)}</dd>
+                      <dt>interval</dt>
+                      <dd className="m-0">{c.interval ? `${formatPercent(c.interval.level)} ${formatRatio(c.interval.low)}–${formatRatio(c.interval.high)} (${c.interval.method})` : 'none'}</dd>
+                      <dt>noise</dt>
+                      <dd className="m-0">{`±${formatPercent(c.threshold)}`}</dd>
+                    </dl>
+                  </details>
                 </li>
               );
             })}
