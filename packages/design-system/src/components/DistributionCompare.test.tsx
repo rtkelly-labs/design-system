@@ -16,17 +16,21 @@ describe('DistributionCompare', () => {
     const root = container.firstElementChild as HTMLElement;
     expect(root.dataset.slot).toBe('distribution-compare');
     expect(root.dataset.classification).toBe('slower');
-    expect(container.querySelectorAll('circle')).toHaveLength(60);
-    expect(container.querySelectorAll('[data-part="median"]')).toHaveLength(2);
-    expect(screen.getByRole('img', { name: 'Beta' })).toBeTruthy();
+    const wide = container.querySelector('[data-size="wide"]')!;
+    expect(wide.querySelectorAll('circle')).toHaveLength(60);
+    expect(wide.querySelectorAll('[data-part="median"]')).toHaveLength(2);
+    // A narrow drawing of the same data sits beside it, shown by a container query.
+    expect(container.querySelector('[data-size="narrow"] svg')?.getAttribute('viewBox')).toBe('0 0 360 168');
+    expect(screen.getAllByRole('img', { name: 'Beta' })).toHaveLength(2);
     expect(container.querySelector('[data-part="readout"]')?.textContent).toContain('slower');
   });
 
   it('draws densities for violin, keeping dots for a side too small for one', () => {
     const { container } = render(<DistributionCompare baseline={base} candidate={[9000, 9100, 9200]} unit="ns" variant="violin" />);
-    expect(container.querySelector('[data-side="baseline"] [data-part="density"]')).not.toBeNull();
-    expect(container.querySelector('[data-side="candidate"] [data-part="density"]')).toBeNull();
-    expect(container.querySelectorAll('[data-side="candidate"] circle')).toHaveLength(3);
+    const wide = container.querySelector('[data-size="wide"]')!;
+    expect(wide.querySelector('[data-side="baseline"] [data-part="density"]')).not.toBeNull();
+    expect(wide.querySelector('[data-side="candidate"] [data-part="density"]')).toBeNull();
+    expect(wide.querySelectorAll('[data-side="candidate"] circle')).toHaveLength(3);
     expect(container.querySelector('[data-part="readout"]')?.textContent).toContain('too few samples');
   });
 
