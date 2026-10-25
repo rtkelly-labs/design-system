@@ -1,4 +1,4 @@
-import { AnchorHeading, Breadcrumbs, DocPager, Prose } from '@rtkelly13/design-system';
+import { AnchorHeading, Breadcrumbs, DocPager, Prose } from '@rtkelly-labs/design-system';
 import { componentHref, pagerFor, propsSectionId } from '@/content/registry';
 import type { ComponentPageDef } from '@/content/types';
 import { catalogueEntry, componentDoc, sourceHref, storybookHref } from '@/lib/docs-data';
@@ -48,7 +48,7 @@ export function ComponentPage({ page }: { page: ComponentPageDef }) {
         <div className="not-prose">
           <Code
             title="import"
-            code={`import { ${[page.name, ...imports].join(', ')} } from '@rtkelly13/design-system';`}
+            code={`import { ${[page.name, ...imports].join(', ')} } from '@rtkelly-labs/design-system';`}
           />
         </div>
 

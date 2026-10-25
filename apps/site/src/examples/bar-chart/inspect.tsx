@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BarChart, type BarChartDatum } from '@rtkelly13/design-system';
+import { BarChart, type BarChartDatum } from '@rtkelly-labs/design-system';
 import { REGION_LATENCY } from '@/data/fixtures';
 
 export default function InspectBars() {

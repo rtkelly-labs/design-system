@@ -1,4 +1,4 @@
-import { Button, CodeBlock, CTASection, Hero } from '@rtkelly13/design-system';
+import { Button, CodeBlock, CTASection, Hero } from '@rtkelly-labs/design-system';
 import { SiteChrome } from '@/components/chrome/SiteChrome';
 import { ButtonPlayground } from '@/components/home/ButtonPlayground';
 import { Dashboard } from '@/components/home/Dashboard';
@@ -36,7 +36,7 @@ export default function Home() {
           >
             <div className="mx-auto max-w-xl text-left">
               <CodeBlock language="bash" title="install">
-                <code>pnpm add @rtkelly13/design-system</code>
+                <code>pnpm add @rtkelly-labs/design-system</code>
               </CodeBlock>
             </div>
           </Hero>

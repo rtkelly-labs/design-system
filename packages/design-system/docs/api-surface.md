@@ -87,7 +87,7 @@ it was dropped rather than kept per module:
   Before 22.12 the CommonJS build failed anyway: it `require()`s
   `@microcharts/react`, which is ESM only (`ERR_REQUIRE_ESM` on Node 22.11,
   for 0.12.0 as for the per-module build). The blog, Vite and Next
-  resolve the `import` condition. The one `require('@rtkelly13/design-system')`
+  resolve the `import` condition. The one `require('@rtkelly-labs/design-system')`
   in the estate is generated: `design-system-report`'s own CommonJS build,
   which Node 22.12+ serves from this ESM output.
 - **Two copies was a bug waiting.** Where one part of an app imported the
@@ -96,7 +96,7 @@ it was dropped rather than kept per module:
   `useTheme` from the other. One format has one module instance, however it is
   reached: `require()` and `import()` now return the same `Button`.
 
-`require('@rtkelly13/design-system')` still works on Node 22.12+; it returns
+`require('@rtkelly-labs/design-system')` still works on Node 22.12+; it returns
 the ES module's namespace. What no longer works is a CommonJS toolchain that
 wants a `.js` file to be CommonJS — Jest without ESM support, for one.
 
@@ -158,7 +158,7 @@ barrels, and it brings that to +46 KB:
 
 ```js
 // next.config.mjs
-export default { experimental: { optimizePackageImports: ['@rtkelly13/design-system'] } };
+export default { experimental: { optimizePackageImports: ['@rtkelly-labs/design-system'] } };
 ```
 
 Turbopack, Next 16's default, needs nothing. Importing from a client

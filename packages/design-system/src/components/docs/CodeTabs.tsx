@@ -52,14 +52,14 @@ import { useTabGroup } from './codeTabsStore';
  *   <CodeTab label="pnpm">
  *
  *     ```bash
- *     pnpm add @rtkelly13/design-system
+ *     pnpm add @rtkelly-labs/design-system
  *     ```
  *
  *   </CodeTab>
  *   <CodeTab label="npm">
  *
  *     ```bash
- *     npm install @rtkelly13/design-system
+ *     npm install @rtkelly-labs/design-system
  *     ```
  *
  *   </CodeTab>

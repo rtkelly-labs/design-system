@@ -6,7 +6,7 @@
  *   - `scripts/check-tokens.mjs` runs them over `src/components` and
  *     `src/stories` as a **ratchet**. Those files carry pre-existing debt, so
  *     each rule has a budget and CI fails only when a number rises.
- *   - `@rtkelly13/design-system-report`'s linter runs them over a report's TSX
+ *   - `@rtkelly-labs/design-system-report`'s linter runs them over a report's TSX
  *     at **budget zero**. A
  *     report is new code written today; there is no debt to grandfather, and a
  *     hex literal in one renders identically on `midnight` and on `white`, which

@@ -167,11 +167,11 @@ export const projectCta: CtaFixture = {
   title: 'Read the docs',
   body: 'Install the package, import the stylesheet, and wrap the app in a ThemeProvider.',
   primary: { label: 'GET STARTED', href: '/docs' },
-  secondary: { label: 'VIEW SOURCE', href: 'https://github.com/rtkelly13/design-system' },
+  secondary: { label: 'VIEW SOURCE', href: 'https://github.com/rtkelly-labs/design-system' },
   accent: 'secondary',
 };
 
-export const installSnippet = 'pnpm add @rtkelly13/design-system';
+export const installSnippet = 'pnpm add @rtkelly-labs/design-system';
 
 export function features(items: readonly FeatureFixture[]) {
   return items.map((item) => (

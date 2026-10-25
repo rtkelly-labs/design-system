@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart } from '@rtkelly13/design-system';
+import { BarChart } from '@rtkelly-labs/design-system';
 import { SERVICES, seeded } from '@/data/fixtures';
 
 const rng = seeded(0xc0de);

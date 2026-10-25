@@ -2,7 +2,7 @@
 
 import NextLink from 'next/link';
 import { forwardRef } from 'react';
-import type { LinkComponentProps } from '@rtkelly13/design-system';
+import type { LinkComponentProps } from '@rtkelly-labs/design-system';
 import { isStorybookHref } from '@/lib/links';
 
 /**

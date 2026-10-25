@@ -11,7 +11,7 @@
  * selects on, the class is mirrored for consumers whose own CSS keys off it.
  */
 
-import type { ThemeLevel } from '@rtkelly13/design-system';
+import type { ThemeLevel } from '@rtkelly-labs/design-system';
 
 const ESCAPES: Record<string, string> = {
   '&': '&amp;',

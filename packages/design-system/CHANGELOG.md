@@ -29,6 +29,13 @@ those props to change. `ObservabilityConsole` composes all of it. Nothing to cha
 
 ## 0.16.0
 
+**The package is now `@rtkelly-labs/design-system`.** The repository moved to the
+`rtkelly-labs` org, and npm can't move a scoped package, so 0.16.0 is the first
+version under the new name. `@rtkelly13/design-system` stops at 0.12.0 and is
+deprecated. Swap the dependency and rewrite imports from `@rtkelly13/design-system`
+to `@rtkelly-labs/design-system`, including the CSS, token and terminal-theme
+entry points. 0.13.0 to 0.15.0 were never published.
+
 Five MDX figures: `SwatchCompare`, `MetricStrip`, `TokenTable`, `Decision` with `Option`, `TermGrid` with `Term`. Registered in `mdxComponents`.
 
 ## 0.15.0

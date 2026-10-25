@@ -13,7 +13,7 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
 3. **Linear History**: Maintain a strictly linear history. Rebase feature branches onto `main` before merging; no merge commits allowed.
 4. **Publishing (npm, trusted publishing)**:
    - Stable releases publish automatically from pushes to `main` via `publish-package.yml`, using npm **Trusted Publishing** (OIDC) — no tokens anywhere. Bump `package.json` version in the PR; the workflow skips already-published versions.
-   - Dev prereleases: comment **`/publish-dev`** on a PR to publish `<version>-dev.<pr>.<sha>` under the `dev` dist-tag (`publish-dev-command.yml` dispatches the trusted workflow on the PR branch). Consumers test with `pnpm add @rtkelly13/design-system@dev`.
+   - Dev prereleases: comment **`/publish-dev`** on a PR to publish `<version>-dev.<pr>.<sha>` under the `dev` dist-tag (`publish-dev-command.yml` dispatches the trusted workflow on the PR branch). Consumers test with `pnpm add @rtkelly-labs/design-system@dev`.
    - The Tailwind contract consumers import is **`theme.css`** (`@theme` tokens, per-level and polarity variants, `@source`) — now **generated** from `src/theme/levels.ts`; `styles.css` layers fonts + global resets on top. There is no JS tailwind preset — do not reintroduce one.
 5. **Visual Regression Testing** — the standards, the determinism contract and the operating instructions live in [`docs/visual-regression.md`](./visual-regression.md); these are the rules:
    - Powered by Playwright snapshot testing (`tests/visual.spec.ts`).
@@ -30,11 +30,29 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    skipped rather than re-run. Only on a pull request; a push to `main` always
    runs them in full, which is what checks the key. `visual` is sharded, so the
    verdict is recorded by the `record` job, which needs every shard to have
-   passed and to have computed the same key, as a miss — never by a shard. `pnpm check:governance`
+   passed and to have computed the same key, as a miss — never by a shard, and
+   only on a full run (`main`, or the `ready-to-merge` regression), so the key
+   means the whole a11y matrix passed. `pnpm check:governance`
    holds the exception to that shape: no other job may read the verdict, the
-   lookup is pull-request-only, and the key names both the input hash and the
-   image.
-   Branch protection requires the single aggregate check named **`ci`** (the
+   lookup is pull-request-only, the recorder is full-run-only, and the key
+   names both the input hash and the image.
+
+   **Smoke, then full.** `ci.yml` on a pull request is the smoke suite: every
+   job, with the narrow-viewport a11y scan cut to the `MOBILE_CASES` components.
+   Labelling the PR **`ready-to-merge`** runs `regression.yml`, which calls
+   `ci.yml` with `full: true` — the whole a11y matrix, as `main` runs it — on
+   that push and every later one while the label stays. It reports as the
+   commit status **`regression`**: *pending* with "Add the ready-to-merge label
+   to run full regression" until then, so it blocks the merge without reading
+   as a failure. It is a status rather than a job because a job skipped by its
+   `if:` reports Success, and a required check that reports Success merges.
+   This exists because `SwatchCompare` and `TokenTable` failed the narrow scan
+   only on `main`, nine days after their PR passed. Commits pushed with
+   `GITHUB_TOKEN` start no workflow, so after `/update-snapshots` remove and
+   re-add the label to run the gate on the new head.
+
+   Branch protection requires the aggregate check named **`ci`** and the status
+   **`regression`**. `ci` is the `verify` job (the
    `verify` job), which passes only if all four jobs do. That name is
    deliberately content-free, and **must stay that way**: the string is what
    branch protection and `shared-utilities`' governance map match on. It used to

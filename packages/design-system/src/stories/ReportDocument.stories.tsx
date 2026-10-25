@@ -10,7 +10,7 @@ import { StatCard } from '../components/StatCard';
 /**
  * The frame a generated report is built in.
  *
- * `@rtkelly13/design-system-report` renders reports into this, but the dependency runs one
+ * `@rtkelly-labs/design-system-report` renders reports into this, but the dependency runs one
  * way only: that package depends on this one, so nothing here may import it.
  * The split of responsibility follows — **this package asserts how the report
  * frame looks**, through the story below and its visual baseline, and the

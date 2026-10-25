@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { ThemeProvider } from '@rtkelly13/design-system';
-import type { ThemeLevel } from '@rtkelly13/design-system';
+import { ThemeProvider } from '@rtkelly-labs/design-system';
+import type { ThemeLevel } from '@rtkelly-labs/design-system';
 
 type Choice = 'page' | ThemeLevel;
 

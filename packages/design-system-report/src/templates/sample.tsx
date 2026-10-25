@@ -53,7 +53,7 @@ import {
   Tag,
   accentVar,
   type AccentToken,
-} from '@rtkelly13/design-system';
+} from '@rtkelly-labs/design-system';
 
 /* ── data ──────────────────────────────────────────────────────────────────
    Passed in as props in a real report; inline here so the fixture is fixed. */

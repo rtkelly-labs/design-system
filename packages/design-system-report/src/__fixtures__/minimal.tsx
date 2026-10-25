@@ -5,7 +5,7 @@
  * tested against the case a text scanner is worst at.
  */
 
-import { ReportDocument } from '@rtkelly13/design-system';
+import { ReportDocument } from '@rtkelly-labs/design-system';
 
 export default function Fixture() {
   return (

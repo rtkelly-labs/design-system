@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Input } from '@rtkelly13/design-system';
+import { Input } from '@rtkelly-labs/design-system';
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 

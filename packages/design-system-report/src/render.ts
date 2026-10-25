@@ -27,7 +27,7 @@ import { createReportCssCompiler } from './css';
 import { renderMarkup } from './markup';
 import { documentShell } from './shell';
 import { typecheckReports } from './typecheck';
-import { THEME_LEVELS, type ThemeLevel } from '@rtkelly13/design-system';
+import { THEME_LEVELS, type ThemeLevel } from '@rtkelly-labs/design-system';
 
 /**
  * The design system this report renders against, resolved **from the report**.
@@ -35,7 +35,7 @@ import { THEME_LEVELS, type ThemeLevel } from '@rtkelly13/design-system';
  * This is the arrangement a separate package buys. While the generator lived
  * inside the design system it could only ever use the copy it shipped with, so
  * upgrading the components meant upgrading the tool and vice versa. Now
- * `@rtkelly13/design-system` is a peer, resolved from the report's own
+ * `@rtkelly-labs/design-system` is a peer, resolved from the report's own
  * directory: an author renders against the version they installed, the one their
  * editor typechecks against and their app is built with.
  *
@@ -46,15 +46,15 @@ function designSystem(from: string) {
   const require_ = createRequire(path.join(from, 'noop.js'));
   const fail = (error: unknown) => {
     throw new Error(
-      `Could not resolve @rtkelly13/design-system from ${from}. ` +
+      `Could not resolve @rtkelly-labs/design-system from ${from}. ` +
         'A report is rendered against the copy its own project installs, so it must be a ' +
-        `dependency there:\n  pnpm add @rtkelly13/design-system\n\n${String(error)}`,
+        `dependency there:\n  pnpm add @rtkelly-labs/design-system\n\n${String(error)}`,
     );
   };
   try {
     return {
-      entry: require_.resolve('@rtkelly13/design-system'),
-      styles: require_.resolve('@rtkelly13/design-system/styles.css'),
+      entry: require_.resolve('@rtkelly-labs/design-system'),
+      styles: require_.resolve('@rtkelly-labs/design-system/styles.css'),
     };
   } catch (error) {
     return fail(error) as never;

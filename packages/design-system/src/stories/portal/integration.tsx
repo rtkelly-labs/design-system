@@ -18,14 +18,14 @@ import { ThemeProvider } from '../../components/ThemeProvider';
 export const LEVEL = 'midnight' as const;
 
 /** Step 1 — the stylesheet, once, wherever your app boots. */
-export const STYLES_SOURCE = `import '@rtkelly13/design-system/styles.css';`;
+export const STYLES_SOURCE = `import '@rtkelly-labs/design-system/styles.css';`;
 
 /**
  * Step 2 — the provider. Printed on the page *and* parsed by the test that keeps
  * it honest, which is why the level appears as a literal rather than an
  * interpolation.
  */
-export const MOUNT_SOURCE = `import { ThemeProvider } from '@rtkelly13/design-system';
+export const MOUNT_SOURCE = `import { ThemeProvider } from '@rtkelly-labs/design-system';
 
 export function App() {
   return (
@@ -40,7 +40,7 @@ export function App() {
  * level and the second uses the stored one, which reads as the page changing its
  * mind.
  */
-export const INIT_SOURCE = `import { getThemeInitScript } from '@rtkelly13/design-system';
+export const INIT_SOURCE = `import { getThemeInitScript } from '@rtkelly-labs/design-system';
 
 // In your document <head>, before any stylesheet:
 <script dangerouslySetInnerHTML={{ __html: getThemeInitScript({ defaultLevel: '${LEVEL}' }) }} />`;
@@ -50,7 +50,7 @@ export const INIT_SOURCE = `import { getThemeInitScript } from '@rtkelly13/desig
  * package's utilities with Tailwind, so consumers need no manual dist path.
  */
 export const TAILWIND_SOURCE = `@import 'tailwindcss';
-@import '@rtkelly13/design-system/theme.css';`;
+@import '@rtkelly-labs/design-system/theme.css';`;
 
 /**
  * The live preview for step 2.

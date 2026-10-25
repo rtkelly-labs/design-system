@@ -1,8 +1,9 @@
+import createMDX from '@next/mdx';
 import type { NextConfig } from 'next';
 
 const config: NextConfig = {
   output: 'export',
-  experimental: { optimizePackageImports: ['@rtkelly13/design-system'] },
+  experimental: { optimizePackageImports: ['@rtkelly-labs/design-system'] },
   // The site is served from inside the Storybook deployment, under `/site`
   // (docs/hosting.md, "The applied site, embedded"). `next/link` and the asset
   // URLs carry the prefix; `out/` itself does not, and the assembly step
@@ -14,6 +15,11 @@ const config: NextConfig = {
   trailingSlash: true,
   reactStrictMode: true,
   images: { unoptimized: true },
+  // Posts are `page.mdx` files (see `src/content/posts.ts`).
+  pageExtensions: ['ts', 'tsx', 'md', 'mdx'],
 };
 
-export default config;
+// Plugins are named by string, not imported: Turbopack cannot take functions.
+const withMDX = createMDX({ options: { remarkPlugins: ['remark-gfm'] } });
+
+export default withMDX(config);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { DataTable, Input } from '@rtkelly13/design-system';
+import { DataTable, Input } from '@rtkelly-labs/design-system';
 import { DEPLOYMENTS } from '@/data/fixtures';
 
 export default function FilteredTable() {

@@ -6,7 +6,7 @@
  *
  * Consumers get the built `ds-report` bin instead. The one subtlety is *where*
  * the bundle is written: the renderer resolves
- * `@rtkelly13/design-system` from the *report's* directory, and the dev bundle
+ * `@rtkelly-labs/design-system` from the *report's* directory, and the dev bundle
  * has to sit inside this package for that walk to reach the workspace's
  * node_modules. It is gitignored, and dot-prefixed so neither tsup, knip nor tsc
  * picks it up.

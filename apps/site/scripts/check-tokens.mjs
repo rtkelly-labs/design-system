@@ -13,7 +13,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { TOKEN_RULES, scanTokenRules } from '@rtkelly13/design-system';
+import { TOKEN_RULES, scanTokenRules } from '@rtkelly-labs/design-system';
 
 const SRC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src');
 const SKIP = new Set(['generated']);
@@ -23,7 +23,7 @@ function walk(dir, found = []) {
     if (SKIP.has(entry)) continue;
     const full = path.join(dir, entry);
     if (statSync(full).isDirectory()) walk(full, found);
-    else if (/\.(tsx?|css)$/.test(entry)) found.push(full);
+    else if (/\.(tsx?|css|mdx)$/.test(entry)) found.push(full);
   }
   return found;
 }

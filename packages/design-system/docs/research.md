@@ -67,7 +67,7 @@ keyboard interaction is a breaking change.
 **What it means here.** `pnpm check:api` gates `api/index.d.ts`, which is the TypeScript surface
 only. We emit 83 `--ds-*` custom properties with no committed baseline, so a rename is invisible to
 every gate. And under the accessibility-behaviour clause, changing `CodeTabs`' keyboard model is a
-breaking change — which is awkward for [#163](https://github.com/rtkelly13/design-system/issues/163),
+breaking change — which is awkward for [#163](https://github.com/rtkelly-labs/design-system/issues/163),
 because nothing currently records what that model is.
 
 **Status:** open. Same ADR as §1; the custom-property baseline is the mechanical half.
@@ -84,9 +84,9 @@ containers dominate area while being few components; and **dynamic content has t
 production**, or dialogs and dropdowns never appear in the numbers.
 
 **What it means here.** We have two consumers and no idea what fraction of either is ours.
-[#115](https://github.com/rtkelly13/design-system/issues/115) proposes `data-slot` for a different
+[#115](https://github.com/rtkelly-labs/design-system/issues/115) proposes `data-slot` for a different
 reason — letting a consumer target internals — and
-[#160](https://github.com/rtkelly13/design-system/issues/160) makes it clause 4 of the component
+[#160](https://github.com/rtkelly-labs/design-system/issues/160) makes it clause 4 of the component
 contract. That attribute is most of the instrumentation this method needs, so the metric is close to
 free once the contract lands.
 
@@ -124,11 +124,11 @@ deferred breaking changes to batch into the next major rather than deciding case
 **What it means here.** This repo *is* the one-maintainer case, and the mitigation is unusual: the
 gates are the governance. A rule that is a Gate survives without a reviewer to enforce it, which is
 why [`CONTEXT.md`](../CONTEXT.md) defines Gate as distinct from convention, and why
-[#152](https://github.com/rtkelly13/design-system/pull/152) added a gate that checks the repository's
+[#152](https://github.com/rtkelly-labs/design-system/pull/152) added a gate that checks the repository's
 own rules against the repository.
 
 Of the named health metrics, **accessibility pass rate** is
-[#52](https://github.com/rtkelly13/design-system/issues/52) and **dependency freshness** is
+[#52](https://github.com/rtkelly-labs/design-system/issues/52) and **dependency freshness** is
 untracked — `check:deps` gates that every dependency is *justified*, not that it is *current*.
 
 ---

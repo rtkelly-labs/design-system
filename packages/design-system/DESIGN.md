@@ -9,7 +9,7 @@ generated from or verified against `src/theme/levels.ts`, which is the only plac
 originates — see [`docs/adr/0002`](./docs/adr/0002-one-source-many-emitted-surfaces.md).
 
 Machine-readable form: [`tokens/palette.<level>.tokens.json`](./tokens), Design Tokens Format
-Module 2025.10, installable as `@rtkelly13/design-system/tokens/midnight.tokens.json`.
+Module 2025.10, installable as `@rtkelly-labs/design-system/tokens/midnight.tokens.json`.
 
 ---
 

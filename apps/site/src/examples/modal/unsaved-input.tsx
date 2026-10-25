@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Input, Modal, TextArea } from '@rtkelly13/design-system';
+import { Button, Input, Modal, TextArea } from '@rtkelly-labs/design-system';
 
 export default function IncidentNote() {
   const [isOpen, setOpen] = useState(false);

@@ -49,7 +49,7 @@ rather than a copy into `storybook-static/`, because CI, `check:visual-coverage`
 `check:deployed` read `storybook-static/index.json` as the catalogue. The script ends by
 checking that no exported page asks for `/_next/` at the root and that every
 `/site/_next/…` asset a page names was exported — a broken basePath otherwise serves a blank
-page with a 200. `installCommand` is filtered to `@rtkelly13/design-system-site...`, which
+page with a 200. `installCommand` is filtered to `@rtkelly-labs/design-system-site...`, which
 selects the site and, through its `workspace:*` dependency, the package with its dev
 dependencies. The report package is not installed.
 
@@ -100,7 +100,7 @@ due, like any other drift.
 **Sample projects.** The site renders the exported `SaasLandingPage` and the finance
 console and content studio from Storybook's canonical admin fixtures. The site generator
 writes those fixtures to its ignored `src/generated/admin.tsx`, replacing component and
-theme imports with `@rtkelly13/design-system`. Both hosts render the same composition,
+theme imports with `@rtkelly-labs/design-system`. Both hosts render the same composition,
 while the site resolves components through the package's built exports and uses the site's
 providers. Generation fails if another relative import appears.
 
@@ -309,7 +309,7 @@ consumer would write:
 ```json
 "foundations-button": {
   "name": "Button",
-  "import": "import { Button } from \"@rtkelly13/design-system\";",
+  "import": "import { Button } from \"@rtkelly-labs/design-system\";",
   "reactDocgenTypescript": { "props": { "variant": …, "size": …, "bracketed": …, "href": … } }
 }
 ```

@@ -45,7 +45,7 @@ describe('the portal’s integration snippet', () => {
 
   it('imports the theme contract that registers its own Tailwind source', () => {
     expect(TAILWIND_SOURCE).toContain('@import');
-    expect(TAILWIND_SOURCE).toContain('@rtkelly13/design-system/theme.css');
+    expect(TAILWIND_SOURCE).toContain('@rtkelly-labs/design-system/theme.css');
   });
 
   it('does not write to the host page’s storage', () => {

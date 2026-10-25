@@ -27,4 +27,4 @@ export const STORYBOOK_URL = storybookUrl('/docs/guides-introduction--docs');
  */
 export const isStorybookHref = (href: string) => href.startsWith('/?');
 
-export const REPO_URL = 'https://github.com/rtkelly13/design-system';
+export const REPO_URL = 'https://github.com/rtkelly-labs/design-system';

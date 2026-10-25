@@ -521,7 +521,7 @@ export function VoiceSpecimen() {
  * held to the next best thing: every path in it is an entry in `package.json`'s
  * `exports` map, and every class name is one the token lint rule would accept.
  */
-const INSTALL = `pnpm add @rtkelly13/design-system
+const INSTALL = `pnpm add @rtkelly-labs/design-system
 
 # Published to public npm from main via npm Trusted Publishing.
 # Node >=22, and pnpm is the package manager here.`;
@@ -529,9 +529,9 @@ const INSTALL = `pnpm add @rtkelly13/design-system
 const MOUNT = `// One stylesheet, one import. \`styles.css\` is the opinionated whole;
 // \`theme.css\` alone is the tokens and nothing else, for a consumer
 // bringing its own resets and fonts.
-import '@rtkelly13/design-system/styles.css';
+import '@rtkelly-labs/design-system/styles.css';
 
-import { ThemeProvider, getThemeInitScript } from '@rtkelly13/design-system';
+import { ThemeProvider, getThemeInitScript } from '@rtkelly-labs/design-system';
 
 // The inline script runs before first paint, so the page never
 // flashes the default level and then corrects itself. React
@@ -565,11 +565,11 @@ const ROLES_CODE = `// Address the job, never the appearance.
 
 const TOKENS_CODE = `// Design Tokens Format Module 2025.10, for anything that
 // cannot read CSS — a diagram generator, an editor scheme.
-import midnight from '@rtkelly13/design-system/tokens/midnight.tokens.json';
+import midnight from '@rtkelly-labs/design-system/tokens/midnight.tokens.json';
 
 // Or take the terminal straight out of the box:
-//   @rtkelly13/design-system/terminal/midnight.ghostty.conf
-//   @rtkelly13/design-system/terminal/sketch.alacritty.toml`;
+//   @rtkelly-labs/design-system/terminal/midnight.ghostty.conf
+//   @rtkelly-labs/design-system/terminal/sketch.alacritty.toml`;
 
 export function UsageTabs() {
   return (

@@ -60,7 +60,7 @@ export interface MarkupOptions {
   input: string;
   /**
    * Absolute path this package's own entry module resolves to. Reports import
-   * `@rtkelly13/design-system` by name; aliasing it to the copy that owns this
+   * `@rtkelly-labs/design-system` by name; aliasing it to the copy that owns this
    * renderer means the markup and the CSS can never come from two versions.
    */
   designSystemEntry: string;
@@ -91,7 +91,7 @@ export async function renderMarkup({
       platform: 'node',
       jsx: 'automatic',
       define: { 'process.env.NODE_ENV': '"production"' },
-      alias: { '@rtkelly13/design-system': designSystemEntry },
+      alias: { '@rtkelly-labs/design-system': designSystemEntry },
       // A report is styled by utilities in its TSX; a stylesheet an imported
       // module pulls in has no meaning in this pipeline and must not fail it.
       loader: { '.css': 'empty' },

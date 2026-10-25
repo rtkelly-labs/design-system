@@ -46,8 +46,9 @@ export const SwatchCompare = React.forwardRef<HTMLDivElement, SwatchCompareProps
   { label = 'Colour comparison', level, columns, rows, className, ...rest },
   ref,
 ) {
+  // Focusable and named because it scrolls on a narrow screen; `Table` says why.
   return (
-    <div data-slot="swatch-compare" ref={ref} {...rest} data-theme={level} className={cn('min-w-0 overflow-x-auto bg-surface-sunken p-3', className)}>
+    <div data-slot="swatch-compare" ref={ref} role="region" tabIndex={0} aria-label={`${label} scroll area`} {...rest} data-theme={level} className={cn('min-w-0 overflow-x-auto bg-surface-sunken p-3', className)}>
       <table aria-label={label} className="w-full border-collapse font-mono text-xs">
         <thead>
           <tr>

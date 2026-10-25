@@ -3,8 +3,8 @@
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { DocsHeader, DocsLayout, DocsSidebar, Drawer, SocialIcon, TableOfContents } from '@rtkelly13/design-system';
-import type { DocsNavNode, TocEntry } from '@rtkelly13/design-system';
+import { DocsHeader, DocsLayout, DocsSidebar, Drawer, SocialIcon, TableOfContents } from '@rtkelly-labs/design-system';
+import type { DocsNavNode, TocEntry } from '@rtkelly-labs/design-system';
 import { useSearch } from '@/components/chrome/Search';
 import { REPO_URL, STORYBOOK_URL } from '@/lib/links';
 
@@ -40,7 +40,7 @@ export function DocsShell({
           title="RTK / DS"
           titleHref="/"
           nav={[
-            { label: 'Docs', href: '/docs', active: pathname === '/docs' || pathname === '/docs/installation' },
+            { label: 'Docs', href: '/docs', active: pathname === '/docs' || pathname === '/docs/installation' || pathname.startsWith('/docs/foundations') || pathname.startsWith('/docs/guides') },
             { label: 'Components', href: '/docs/components', active: pathname.startsWith('/docs/components') },
             { label: 'Examples', href: '/examples' },
             { label: 'Storybook', href: STORYBOOK_URL, external: true },

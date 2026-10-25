@@ -1,4 +1,4 @@
-import { Card, ReportDocument } from '@rtkelly13/design-system';
+import { Card, ReportDocument } from '@rtkelly-labs/design-system';
 
 export default function Report() {
   return (

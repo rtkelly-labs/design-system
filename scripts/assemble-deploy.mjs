@@ -37,9 +37,9 @@ const run = (...args) => {
 
 if (!process.argv.includes('--no-build')) {
   // The site resolves the package through its exports map, so `dist/` first.
-  run('--filter', '@rtkelly13/design-system', 'build');
-  run('--filter', '@rtkelly13/design-system', 'build-storybook');
-  run('--filter', '@rtkelly13/design-system-site', 'build');
+  run('--filter', '@rtkelly-labs/design-system', 'build');
+  run('--filter', '@rtkelly-labs/design-system', 'build-storybook');
+  run('--filter', '@rtkelly-labs/design-system-site', 'build');
 }
 
 const fail = (message) => {

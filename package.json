@@ -1,5 +1,5 @@
 {
-  "name": "@rtkelly13/design-system-workspace",
+  "name": "@rtkelly-labs/design-system-workspace",
   "private": true,
   "description": "Workspace root. The published packages live under packages/ — see README.md.",
   "type": "module",
@@ -7,19 +7,19 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-report build",
+    "build": "pnpm --filter @rtkelly-labs/design-system build && pnpm --filter @rtkelly-labs/design-system-report build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm --filter @rtkelly13/design-system lint",
-    "storybook": "pnpm --filter @rtkelly13/design-system storybook",
-    "build-storybook": "pnpm --filter @rtkelly13/design-system build-storybook",
-    "test:visual": "pnpm --filter @rtkelly13/design-system test:visual",
-    "test:a11y": "pnpm --filter @rtkelly13/design-system test:a11y",
-    "walkthrough": "pnpm --filter @rtkelly13/design-system walkthrough",
-    "report": "pnpm --filter @rtkelly13/design-system-report report",
-    "manifesto": "pnpm --filter @rtkelly13/design-system-report manifesto",
-    "site": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-site dev",
-    "site:build": "pnpm --filter @rtkelly13/design-system build && pnpm --filter @rtkelly13/design-system-site build",
+    "lint": "pnpm --filter @rtkelly-labs/design-system lint",
+    "storybook": "pnpm --filter @rtkelly-labs/design-system storybook",
+    "build-storybook": "pnpm --filter @rtkelly-labs/design-system build-storybook",
+    "test:visual": "pnpm --filter @rtkelly-labs/design-system test:visual",
+    "test:a11y": "pnpm --filter @rtkelly-labs/design-system test:a11y",
+    "walkthrough": "pnpm --filter @rtkelly-labs/design-system walkthrough",
+    "report": "pnpm --filter @rtkelly-labs/design-system-report report",
+    "manifesto": "pnpm --filter @rtkelly-labs/design-system-report manifesto",
+    "site": "pnpm --filter @rtkelly-labs/design-system build && pnpm --filter @rtkelly-labs/design-system-site dev",
+    "site:build": "pnpm --filter @rtkelly-labs/design-system build && pnpm --filter @rtkelly-labs/design-system-site build",
     "build:deploy": "node scripts/assemble-deploy.mjs",
     "serve:deploy": "node scripts/serve-deploy.mjs"
   }

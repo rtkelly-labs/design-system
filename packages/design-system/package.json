@@ -1,5 +1,5 @@
 {
-  "name": "@rtkelly13/design-system",
+  "name": "@rtkelly-labs/design-system",
   "version": "0.17.0",
   "description": "Brutalist design system for Ryan Kelly websites: a two-level theme ladder, role-addressed tokens, and Base UI-backed components",
   "type": "module",
@@ -124,7 +124,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rtkelly13/design-system.git"
+    "url": "https://github.com/rtkelly-labs/design-system.git"
   },
   "keywords": [
     "design-system",

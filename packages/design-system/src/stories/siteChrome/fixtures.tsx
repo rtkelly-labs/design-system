@@ -138,7 +138,7 @@ export const projectSite: SiteFixture = {
     { label: 'Docs', href: '/docs' },
     { label: 'Components', href: '/components' },
     { label: 'Changelog', href: '/changelog' },
-    { label: 'GitHub', href: 'https://github.com/rtkelly13/design-system' },
+    { label: 'GitHub', href: 'https://github.com/rtkelly-labs/design-system' },
   ],
   actions: (
     <Button href="/docs/install" size="sm" variant="inverse" className="hidden sm:inline-flex">

@@ -1,4 +1,4 @@
-# 🎨 @rtkelly13/design-system
+# 🎨 @rtkelly-labs/design-system
 
 The foundational visual design system for **ryankelly.dev** and every personal surface that has
 to look like it. Built around a **brutalist / neon-terminal** aesthetic: hard edges, zero
@@ -37,7 +37,7 @@ Two decisions carry this, and they are worth reading before changing anything ab
 [`docs/theme-taxonomy.md`](./docs/theme-taxonomy.md) is the full matrix: what every Level must
 declare, which target needs which group, what is generated, and which gate covers each.
 
-Published to the public **npm registry** as `@rtkelly13/design-system` (via npm trusted publishing — see `.github/workflows/publish-package.yml`).
+Published to the public **npm registry** as `@rtkelly-labs/design-system` (via npm trusted publishing — see `.github/workflows/publish-package.yml`).
 
 **📖 Browse it: [design-system.ryankelly.dev](https://design-system.ryankelly.dev)** — the
 full Storybook, with the blog's own Storybook composed into the sidebar. Unreleased work
@@ -54,7 +54,7 @@ see [AGENTS.md](./AGENTS.md#-hosted-storybook).
 their own frame, so related views can share one. For example:
 
 ```tsx
-import { FigureFrame, Timeline, UptimeStrip } from '@rtkelly13/design-system';
+import { FigureFrame, Timeline, UptimeStrip } from '@rtkelly-labs/design-system';
 
 <FigureFrame title="SERVICE INCIDENT">
 	<Timeline events={[{ date: '14:02', label: 'Latency rose' }, { date: '14:11', label: 'Rolled back' }]} />
@@ -134,13 +134,13 @@ determinism controls and are redundant under it. Full reasoning in
 ### Stable Release
 
 ```bash
-pnpm add @rtkelly13/design-system
+pnpm add @rtkelly-labs/design-system
 ```
 
 No registry configuration needed — it's a public npm package.
 
 **ESM only, Node 22 or later.** The package is `"type": "module"` with one build. Bundlers
-(Vite, Next, webpack, esbuild) and `import` need nothing. `require('@rtkelly13/design-system')`
+(Vite, Next, webpack, esbuild) and `import` need nothing. `require('@rtkelly-labs/design-system')`
 works on Node 22.12+, which loads ES modules from `require()`; a toolchain that needs the package
 to be CommonJS (Jest without ESM support, for one) does not. Server components can import it
 directly — see [`docs/api-surface.md`](./docs/api-surface.md) for which components render on the
@@ -152,8 +152,8 @@ Comment `/publish-dev` on a Pull Request and CI publishes that branch as
 `<version>-dev.<pr>.<short-sha>` under the `dev` dist-tag:
 
 ```bash
-pnpm add @rtkelly13/design-system@dev          # latest dev build
-pnpm view @rtkelly13/design-system dist-tags   # exact versions per PR
+pnpm add @rtkelly-labs/design-system@dev          # latest dev build
+pnpm view @rtkelly-labs/design-system dist-tags   # exact versions per PR
 ```
 
 ---
@@ -165,8 +165,8 @@ pnpm view @rtkelly13/design-system dist-tags   # exact versions per PR
 In your app entrypoint (`_app.tsx`, `main.tsx`, or `layout.tsx`):
 
 ```tsx
-import '@rtkelly13/design-system/styles.css';
-import { ThemeProvider, Button, Card, PageTitle, Badge, Divider } from '@rtkelly13/design-system';
+import '@rtkelly-labs/design-system/styles.css';
+import { ThemeProvider, Button, Card, PageTitle, Badge, Divider } from '@rtkelly-labs/design-system';
 
 export function App() {
   return (
@@ -207,7 +207,7 @@ utilities the compiled components use:
 
 ```css
 @import "tailwindcss";
-@import "@rtkelly13/design-system/theme.css";
+@import "@rtkelly-labs/design-system/theme.css";
 ```
 
 `theme.css` is **generated** from `src/theme/levels.ts`, which is the single place
@@ -239,7 +239,7 @@ editing the component. Every pair is contrast-audited on every level by
 | `--ds-font-*` | `display`, `body`, `mono`, `pixel` | Typography roles |
 
 ```tsx
-import { Badge, Tag, accentVar, semanticTokens } from '@rtkelly13/design-system';
+import { Badge, Tag, accentVar, semanticTokens } from '@rtkelly-labs/design-system';
 
 <Badge accent="primary">HIERARCHY</Badge>
 <Tag text="deprecated" accent="danger" />          {/* meaning, not colour */}
@@ -264,8 +264,8 @@ import {
   DocsLayout, DocsHeader, DocsSidebar, TableOfContents,
   Breadcrumbs, DocPager, Prose, CodeBlock, CodeTabs, CodeTab, AnchorHeading,
   DocsLinkProvider, mdxComponents,
-} from '@rtkelly13/design-system';
-import '@rtkelly13/design-system/prose.css';
+} from '@rtkelly-labs/design-system';
+import '@rtkelly-labs/design-system/prose.css';
 ```
 
 **Every section is addressable.** Headings render through `AnchorHeading`, which gives
@@ -309,8 +309,8 @@ misconfigured `@source` would half-break a sidebar rather than fail loudly.
 
 ## 🛠 Repository & Publishing
 
-- **Repository**: `https://github.com/rtkelly13/design-system`
-- **npm**: `@rtkelly13/design-system` on `https://registry.npmjs.org`
+- **Repository**: `https://github.com/rtkelly-labs/design-system`
+- **npm**: `@rtkelly-labs/design-system` on `https://registry.npmjs.org`
 - **CI Pipelines**:
   - `ci.yml`: Typecheck, package build, Storybook build, and Linux visual regression testing.
   - `publish-package.yml`: npm publishing (stable on main, dev prereleases via dispatch).
