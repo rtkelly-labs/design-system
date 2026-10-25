@@ -1,6 +1,5 @@
 'use client';
 
-import { useParentSize } from '@visx/responsive';
 import { scaleLinear, scaleLog, scaleTime } from '@visx/scale';
 import {
   forwardRef,
@@ -13,6 +12,7 @@ import {
   type KeyboardEvent,
   type PointerEvent,
 } from 'react';
+import { useMeasuredWidth } from '../hooks/useMeasuredWidth';
 import { cn, recipe } from '../lib/recipe';
 import { formatTimeTick, formatTimestamp, timeTicks, type TimeRange } from '../lib/timeRange';
 import {
@@ -191,14 +191,6 @@ function useControllable<T>(value: T | undefined, initial: T, onChange?: (next: 
   }, [value, onChange]);
   return [current, set];
 }
-
-/** Stand-in for environments without `ResizeObserver` (jsdom, old runtimes): never measures. */
-class NoResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-}
-const resizeObserverPolyfill = typeof ResizeObserver === 'undefined' ? (NoResizeObserver as unknown as typeof ResizeObserver) : undefined;
 
 /** Plot insets for a density, with room for axes, inline labels and annotation labels as needed. */
 function plotMargin(compact: boolean, showAxes: boolean, inline: boolean, annotated: boolean) {
@@ -384,8 +376,7 @@ export const TimeSeriesChart = forwardRef<HTMLDivElement, TimeSeriesChartProps>(
   );
 
   const margin = plotMargin(compact, showAxes, inline, annotationsInDomain.length > 0);
-  const { parentRef, width: measured } = useParentSize({ debounceTime: 50, ignoreDimensions: ['height', 'top', 'left'], resizeObserverPolyfill });
-  const width = measured > 0 ? measured : FALLBACK_WIDTH;
+  const [parentRef, width] = useMeasuredWidth(FALLBACK_WIDTH);
   const innerWidth = Math.max(1, width - margin.left - margin.right);
   const innerHeight = Math.max(1, height - margin.top - margin.bottom);
 

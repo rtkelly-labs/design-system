@@ -2,6 +2,7 @@
 
 import { scaleLinear } from '@visx/scale';
 import { forwardRef, useCallback, useEffect, useId, useMemo, useState, type HTMLAttributes, type KeyboardEvent, type MouseEvent } from 'react';
+import { useMeasuredWidth } from '../hooks/useMeasuredWidth';
 import { recipe } from '../lib/recipe';
 import {
   formatCount,
@@ -48,22 +49,6 @@ function stepOpacity(level: number, steps: number): number {
   if (level <= 0) return 0;
   if (steps <= 1) return 1;
   return Number((0.14 + (0.86 * (level - 1)) / (steps - 1)).toFixed(3));
-}
-
-/** Track an element's content width; `FALLBACK_WIDTH` until it reports one. */
-function useMeasuredWidth(): [(node: HTMLDivElement | null) => void, number] {
-  const [node, setNode] = useState<HTMLDivElement | null>(null);
-  const [width, setWidth] = useState(0);
-  useEffect(() => {
-    if (!node) return undefined;
-    const measure = () => setWidth(Math.floor(node.getBoundingClientRect().width));
-    measure();
-    if (typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [node]);
-  return [setNode, width > 0 ? width : FALLBACK_WIDTH];
 }
 
 const latencyHeatmap = recipe({
@@ -168,7 +153,7 @@ export const LatencyHeatmap = forwardRef<HTMLDivElement, LatencyHeatmapProps>(fu
   const height = heightProp ?? layout.height;
   const steps = Math.max(3, Math.min(9, Math.round(Number.isFinite(colorSteps) ? colorSteps : 6)));
   const styles = latencyHeatmap();
-  const [measureRef, width] = useMeasuredWidth();
+  const [measureRef, width] = useMeasuredWidth(FALLBACK_WIDTH);
   const shared = useTimeRange();
   const sharedCursor = useTimeCursor();
 
