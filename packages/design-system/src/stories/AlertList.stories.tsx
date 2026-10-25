@@ -45,8 +45,8 @@ export const WithActions: Story = {
     alerts: mixed.filter((alert) => alert.state !== 'resolved'),
     renderActions: (alert) => alert.state === 'firing' || alert.state === 'pending' ? (
       <>
-        <Button size="sm" variant="secondary">ACK</Button>
-        <Button size="sm">SILENCE</Button>
+        <Button appearance="raised" size="sm" variant="secondary">ACK</Button>
+        <Button appearance="raised" size="sm">SILENCE</Button>
       </>
     ) : null,
   },
