@@ -1,6 +1,9 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import * as React from 'react';
 import { cn } from '../../../lib/recipe';
+import { FigureSurfaceContext } from './FigureSurfaceContext';
 
 export interface IndexedSectionProps extends Omit<React.HTMLAttributes<HTMLElement>, 'title'> {
   /** Short reference drawn in the solid tab, such as `A`, `B2`, or `01`. */
@@ -11,6 +14,11 @@ export interface IndexedSectionProps extends Omit<React.HTMLAttributes<HTMLEleme
   headingLevel?: 2 | 3 | 4;
   /** Controls drawn at the right of the header, such as a comment button. */
   actions?: ReactNode;
+  /**
+   * Surface elevation rung for the section background.
+   * If omitted, defaults to `'raised'` when nested in a `DrawingSheet`, or `'base'` standalone.
+   */
+  surface?: 'base' | 'raised' | 'transparent';
   /** Section content. */
   children?: ReactNode;
   /** Additional classes for the root. */
@@ -22,9 +30,17 @@ export interface IndexedSectionProps extends Omit<React.HTMLAttributes<HTMLEleme
  * slot, and a hard-ruled body. Works on its own, inside an article/spec, or within a `DrawingSheet`.
  */
 export const IndexedSection = React.forwardRef<HTMLElement, IndexedSectionProps>(function IndexedSection(
-  { index, title, headingLevel = 3, actions, children, className, ...rest },
+  { index, title, headingLevel = 3, actions, surface, children, className, ...rest },
   ref,
 ) {
+  const enclosingSurface = React.useContext(FigureSurfaceContext);
+  const resolvedSurface = surface ?? (enclosingSurface === 'sheet' ? 'raised' : 'base');
+  const surfaceClass = resolvedSurface === 'raised'
+    ? 'bg-surface-raised'
+    : resolvedSurface === 'transparent'
+      ? 'bg-transparent'
+      : 'bg-surface-base';
+
   const headingId = React.useId();
   const Heading = `h${headingLevel}` as const;
   return (
@@ -33,7 +49,7 @@ export const IndexedSection = React.forwardRef<HTMLElement, IndexedSectionProps>
       aria-labelledby={headingId}
       {...rest}
       data-slot="indexed-section"
-      className={cn('flex min-w-0 flex-col border-2 border-edge-strong bg-surface-base', className)}
+      className={cn('flex min-w-0 flex-col border-2 border-edge-strong', surfaceClass, className)}
     >
       <header data-slot="indexed-section-header" className="flex items-stretch border-b-2 border-edge-strong">
         <span

@@ -48,4 +48,15 @@ describe('DrawingSheet with IndexedSection', () => {
     expect(sheet.current).toBe(screen.getByTestId('sheet'));
     expect(section.current).toBe(screen.getByRole('region', { name: 'Checks' }));
   });
+
+  it('automatically elevates nested IndexedSection to bg-surface-raised via FigureSurfaceContext', () => {
+    render(
+      <DrawingSheet>
+        <IndexedSection index="A" title="Nested Section" />
+      </DrawingSheet>,
+    );
+    const section = screen.getByRole('region', { name: 'Nested Section' });
+    expect(section.classList.contains('bg-surface-raised')).toBe(true);
+    expect(section.classList.contains('bg-surface-base')).toBe(false);
+  });
 });

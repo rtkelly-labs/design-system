@@ -3693,12 +3693,16 @@ interface IndexedSectionProps extends Omit<react.HTMLAttributes<HTMLElement>, 't
 
     actions?: ReactNode;
 
+    surface?: 'base' | 'raised' | 'transparent';
+
     children?: ReactNode;
 
     className?: string;
 }
 
 declare const IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
+
+type FigureSurface = 'base' | 'sheet';
 
 type Glyphs = 'shade' | 'ascii' | 'hash' | 'bar' | readonly string[];
 type FigurePalette = 'mono' | 'duo' | 'multi';
@@ -4191,6 +4195,7 @@ export {
   type FieldsetProps,
   FigureFrame,
   type FigureFrameProps,
+  type FigureSurface,
   type FileChange,
   type FileChangeNode,
   FileChangeTree,
