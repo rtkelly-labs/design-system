@@ -69,6 +69,21 @@ describe('AlertList', () => {
     expect(rows[2]!.getAttribute('aria-pressed')).toBe('true');
   });
 
+  it('never takes focus back after a key press that did not move', () => {
+    const outside = document.createElement('input');
+    document.body.append(outside);
+    const { rerender } = render(<AlertList alerts={alerts} now={now} onSelectedChange={() => {}} />);
+    const first = screen.getAllByRole('button').find((b) => b.getAttribute('data-slot') === 'alert-list-select')!;
+    first.focus();
+    fireEvent.keyDown(first, { key: 'Home' });
+    outside.focus();
+    // Removing the active row moves the roving tab stop, and must leave focus where the user put it.
+    const firstId = sortAlerts(alerts)[0]!.id;
+    rerender(<AlertList alerts={alerts.filter((alert) => alert.id !== firstId)} now={now} onSelectedChange={() => {}} />);
+    expect(document.activeElement).toBe(outside);
+    outside.remove();
+  });
+
   it('renders actions as siblings of the select target, never inside it', () => {
     render(<AlertList alerts={alerts} now={now} defaultSelectedId={null} renderActions={(a) => <button type="button">ACK {a.id}</button>} />);
     const ack = screen.getByRole('button', { name: 'ACK fc' });
