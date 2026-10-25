@@ -156,6 +156,8 @@ export interface BenchmarkComparison {
   classification: BenchmarkClassification;
   /** Why, when `classification` is `inconclusive`. */
   reason?: BenchmarkInconclusiveReason;
+  /** The raw samples compared, when there were any — for a view that draws the distributions. */
+  samples?: { baseline: readonly number[] | null; candidate: readonly number[] | null };
 }
 
 const DEFAULTS = { threshold: 0.05, level: 0.95, minSamples: 5, method: 'bootstrap', resamples: 2000, seed: 0x5eed } as const;
@@ -338,7 +340,7 @@ export function compareBenchmark(input: BenchmarkInput, options: BenchmarkCompar
   const baseline = baseRaw ? summarize(baseRaw) : (input.baselineSummary ?? null);
   const candidate = candRaw ? summarize(candRaw) : (input.candidateSummary ?? null);
   const ratio = baseline && candidate && baseline.median > 0 && candidate.median > 0 ? candidate.median / baseline.median : null;
-  const base = { id: input.id ?? input.name, name: input.name, unit: input.unit, direction: input.direction, baseline, candidate, ratio, band, threshold };
+  const base = { id: input.id ?? input.name, name: input.name, unit: input.unit, direction: input.direction, baseline, candidate, ratio, band, threshold, samples: { baseline: baseRaw, candidate: candRaw } };
   const inconclusive = (reason: BenchmarkInconclusiveReason, interval: RatioInterval | null = null): BenchmarkComparison => ({ ...base, interval, classification: 'inconclusive', reason });
 
   if (!baseline || !baseline.n) return inconclusive('missing-baseline');
