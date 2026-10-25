@@ -1,7 +1,7 @@
-# AGENTS.md — @rtkelly13/design-system-site
+# AGENTS.md — @rtkelly-labs/design-system-site
 
 The applied design-system website: a Next.js App Router site built only from
-`@rtkelly13/design-system`. It has a homepage of live demos, component docs and
+`@rtkelly-labs/design-system`. It has a homepage of live demos, component docs and
 full-page examples. It is private and not published. It **is** deployed, but not by a
 project of its own: the Storybook Vercel project serves it under `/site/`, beside
 Storybook at `/` ([`docs/hosting.md`](../../packages/design-system/docs/hosting.md),
@@ -21,7 +21,7 @@ library, and colour is addressed by role, never by hue.
 
 From the workspace root, `pnpm site` (dev) and `pnpm site:build` build the package
 first. Inside `apps/site` the scripts below assume `packages/design-system/dist`
-already exists (`pnpm --filter @rtkelly13/design-system build`), so that CI, which
+already exists (`pnpm --filter @rtkelly-labs/design-system build`), so that CI, which
 builds the package once in its own step, does not build it twice. The site resolves it through its exports
 map, as an npm consumer would.
 
@@ -37,7 +37,7 @@ map, as an npm consumer would.
 
 ## Rules that are not discoverable
 
-1. **Import directly from `@rtkelly13/design-system`.** The package's per-module
+1. **Import directly from `@rtkelly-labs/design-system`.** The package's per-module
    build marks interactive components as client references. Server-safe components and
    helpers remain on the server. Put event handlers in client components and pass
    serialisable props across their boundaries. The site build verifies this against `dist/`.
@@ -64,7 +64,7 @@ map, as an npm consumer would.
    `npx` stops fetching it and finds no binary in `packages/design-system`, so
    `test:a11y` fails with `serve: command not found`.
 7. **When the package can't express something, record it before working
-   around it.** Open an issue on `rtkelly13/design-system` with a repro, then
+   around it.** Open an issue on `rtkelly-labs/design-system` with a repro, then
    put the smallest site-local workaround in place with a comment naming the
    issue. The current ones are 306, 309, 310, 311 and 312.
 
@@ -81,6 +81,10 @@ map, as an npm consumer would.
    import components from source by relative path, so importing one here would
    compile a second copy of the library into the site. Move a fixture to where both
    can import it first; do not copy it.
+10. **Posts are `.mdx` under `src/app/docs/<group>/<slug>/page.mdx`, registered in `src/content/posts.ts`.**
+    Sections come from the file's `##`/`###` headings at generate time, slugged with the package's
+    `slugify`, so an anchor cannot drift from the contents rail. Colours and figures come from the
+    package's exports, never literals; `check:tokens` scans `.mdx`. The steps are under "Adding a post".
 
 ## Adding a component page
 
@@ -89,6 +93,21 @@ map, as an npm consumer would.
    examples, the components whose props to show, accessibility notes and keys).
 3. Add it to `COMPONENT_PAGES` in `src/content/registry.ts`. The nav, pager,
    TOC, search and static params follow from that.
+
+## Adding a post
+
+1. Create `src/app/docs/<group>/<slug>/page.mdx`.
+2. Register it in `src/content/posts.ts` (file, href, title, group, lede, keywords).
+3. Wrap the body in `<Post href="/docs/<group>/<slug>">` and export
+   `metadata = postMetadata('/docs/<group>/<slug>')`, both from `@/components/docs/Post`.
+4. `src/generated/` is gitignored and `pnpm dev` generates once, so re-run `pnpm generate`
+   after you edit a heading.
+5. A package figure the post uses must also be added to `src/mdx-components.tsx`, which lists
+   components one by one.
+6. Headings are plain text. The generator throws on `{ < & _` or a backslash in one.
+7. Link issues by URL. `#NNN` trips the hex rule in `check:tokens`.
+8. Colours and numbers come from package exports (`LEVELS`, `PALETTE_HUES`, `contrastRatio`,
+   `auditContrast`), never literals.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

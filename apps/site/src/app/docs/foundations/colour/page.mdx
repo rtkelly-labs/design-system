@@ -1,0 +1,118 @@
+import {
+  LEVELS, MINIMUM_RATIO, PALETTE_HUES, apcaContrast, auditContrast, contrastRatio,
+} from '@rtkelly-labs/design-system';
+import { Post, postMetadata } from '@/components/docs/Post';
+
+export const metadata = postMetadata('/docs/foundations/colour');
+
+export const checks = auditContrast(LEVELS);
+export const failing = checks.filter((c) => !c.passes).length;
+
+{/* Data helpers: they compute each figure's data from package exports. Later posts keep such helpers at the top in the same way. */}
+
+export const hueHalves = [PALETTE_HUES.slice(0, 5), PALETTE_HUES.slice(5)];
+export const hueColumns = (hues) => hues.map((name) => ({ name }));
+export const hueRows = (level, hues) => [
+  { label: 'Base', values: hues.map((h) => LEVELS[level].palette[h]) },
+  { label: 'Bright', values: hues.map((h) => LEVELS[level].paletteBright[h]) },
+];
+
+export const roles = [
+  ['text.primary', (d) => d.text.primary],
+  ['text.secondary', (d) => d.text.secondary],
+  ['text.muted', (d) => d.text.muted],
+  ['intent.info', (d) => d.intent.info],
+  ['intent.success', (d) => d.intent.success],
+  ['intent.warning', (d) => d.intent.warning],
+  ['intent.danger', (d) => d.intent.danger],
+];
+export const roleRows = (level) => {
+  const def = LEVELS[level];
+  const grounds = [def.surface.base, def.surface.raised, def.surface.sunken];
+  return roles.map(([token, pick]) => {
+    const colour = pick(def);
+    // The tightest ground has the lowest WCAG ratio. APCA is read on that same ground.
+    const ground = grounds.reduce((a, b) => (contrastRatio(colour, b) < contrastRatio(colour, a) ? b : a));
+    return {
+      token,
+      after: colour,
+      values: [
+        `${contrastRatio(colour, ground).toFixed(2)}:1`,
+        `${Math.round(Math.abs(apcaContrast(colour, ground)))}`,
+      ],
+    };
+  });
+};
+
+<Post href="/docs/foundations/colour">
+
+A component names a job. A Level decides what the job looks like. Colour is addressed by role, so one component reads correctly on both Levels. To use the package yourself, start with the [installation guide](/docs/installation/).
+
+## Four words
+
+<FigureFrame title="Four words">
+  <TermGrid label="Four words">
+    <Term term="Lightness" scale="0 = black · 1 = white">How light a colour is, apart from how colourful.</Term>
+    <Term term="Chroma" scale="0 = grey · higher = more vivid">How colourful a colour is.</Term>
+    <Term term="Contrast ratio" scale="4.5:1 = WCAG AA for body text">Whether text reads on its ground.</Term>
+    <Term term="Delta E" scale="under 0.04 = too close to tell apart">How different two colours look.</Term>
+  </TermGrid>
+</FigureFrame>
+
+## Ten hues, drawn twice
+
+Each Level authors its own ten hues. They share hue angles, so the two read as one brand, and they share no values. A base hue clears {MINIMUM_RATIO.palette}:1 against the tightest ground of its Level. A bright hue carries emphasis, so it clears {MINIMUM_RATIO.paletteBright}:1.
+
+<FigureFrame title="Midnight">
+  {hueHalves.map((hues, i) => (
+    <SwatchCompare key={i} label={`Midnight hues, ${i + 1} of 2`} level="midnight" columns={hueColumns(hues)} rows={hueRows("midnight", hues)} />
+  ))}
+</FigureFrame>
+
+<FigureFrame title="Sketch">
+  {hueHalves.map((hues, i) => (
+    <SwatchCompare key={i} label={`Sketch hues, ${i + 1} of 2`} level="sketch" columns={hueColumns(hues)} rows={hueRows("sketch", hues)} />
+  ))}
+</FigureFrame>
+
+## Roles above hues
+
+Components ask for `text.primary` or `intent.danger`. Each Level answers with a value declared below the role and checked against it. Both tables measure every answer against its Level's tightest ground, the one with the lowest WCAG ratio across base, raised and sunken. The APCA value is read on that same ground.
+
+<FigureFrame title="Midnight roles">
+  <TokenTable label="Midnight roles" measures={['WCAG', 'APCA Lc']} rows={roleRows('midnight')} />
+</FigureFrame>
+
+<FigureFrame title="Sketch roles">
+  <TokenTable label="Sketch roles" measures={['WCAG', 'APCA Lc']} rows={roleRows('sketch')} />
+</FigureFrame>
+
+## Measured in CI
+
+The contrast gate audits every pair in both Levels. One failing pair fails the check.
+
+<FigureFrame title="Contrast gate">
+  <MetricStrip
+    label="Contrast gate"
+    items={[
+      { value: String(checks.length), label: 'Pairs checked' },
+      { value: `${MINIMUM_RATIO.palette}:1`, label: 'Hue floor' },
+      { value: String(failing), label: 'Failing', tone: failing === 0 ? 'success' : 'danger' },
+    ]}
+  />
+</FigureFrame>
+
+<Decision
+  question="Which floor should a hue clear?"
+  context="Recorded in the palette provenance."
+  recommendation={<p>Solving once at {MINIMUM_RATIO.palette}:1 leaves room to tint the ground behind a hue.</p>}
+>
+  <Option title={`${MINIMUM_RATIO.text}:1`}>
+    WCAG AA. An editor draws selection and find-match backgrounds behind the same tokens, so a palette solved to exactly this has no room left to tint the ground.
+  </Option>
+  <Option title={`${MINIMUM_RATIO.palette}:1`} picked>
+    Above AA on purpose. The tightest ground is raised on midnight and sunken on sketch.
+  </Option>
+</Decision>
+
+</Post>

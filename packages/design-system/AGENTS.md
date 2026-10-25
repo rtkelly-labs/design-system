@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Foundational brutalist design system for ryankelly.dev and personal web applications (`@rtkelly13/design-system`, published to public npm).
+Foundational brutalist design system for ryankelly.dev and personal web applications (`@rtkelly-labs/design-system`, published to public npm).
 
 Package manager is **pnpm** (`node >=22`). The package is **ESM only** (`"type": "module"`, one
 build, `dist/*.js`), and `verbatimModuleSyntax` is on: a binding used only as a type is imported
@@ -152,7 +152,7 @@ citation names a rule that does not exist.
 3. **Linear History**: rebase onto `main` before merging; no merge commits.
 4. **Publishing**: stable releases publish from `main` via npm Trusted Publishing — no tokens. Bump `package.json` in the PR. Comment `/publish-dev` for a prerelease.
 5. **Visual Regression Testing**: Playwright snapshots, rendered **only in the pinned Playwright image** (`mcr.microsoft.com/playwright:v1.62.1-noble@sha256:…`, in CI), `maxDiffPixels: 0` — and this suite does **not** gate colour; arithmetic does.
-6. **Required Checks**: branch protection requires the single aggregate check named **`ci`**. That name is content-free and **must stay that way** — `shared-utilities` governance matches on the string.
+6. **Required Checks**: branch protection requires the aggregate check named **`ci`** (the smoke suite, every push) and the status **`regression`** (the full suite, once the PR is labelled **`ready-to-merge`**; pending until then). Both names are content-free and **must stay that way** — `shared-utilities` governance matches on the strings.
 7. **New Components Need Baselines**: a story without a snapshot asserts nothing. `pnpm check:visual-coverage` is the gate, and its budget is **0**.
 8. **Re-baselining Happens In The PR**: comment `/update-snapshots` — say `all` when the change is *meant* to alter rendering, and name the story that forced it.
 9. **Every CI Job Has A Ceiling**: every job carries `timeout-minutes`, a job that drives a browser runs in the pinned Playwright image and installs none, and an upload step uses `if: success() || failure()`, never `always()`.

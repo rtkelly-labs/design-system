@@ -21,13 +21,13 @@ type Story = StoryObj<typeof CodeTabs>;
 const install = (
   <>
     <CodeTab label="pnpm" language="bash">
-      pnpm add @rtkelly13/design-system
+      pnpm add @rtkelly-labs/design-system
     </CodeTab>
     <CodeTab label="npm" language="bash">
-      npm install @rtkelly13/design-system
+      npm install @rtkelly-labs/design-system
     </CodeTab>
     <CodeTab label="yarn" language="bash">
-      yarn add @rtkelly13/design-system
+      yarn add @rtkelly-labs/design-system
     </CodeTab>
   </>
 );

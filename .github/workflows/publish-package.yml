@@ -8,11 +8,13 @@ name: Publish Design System to npm
 # Two modes:
 #   - Stable: push to main / v* tag (or a plain workflow_dispatch) publishes
 #     package.json's version under the `latest` dist-tag, skipping if it
-#     already exists.
+#     already exists. A separate job reconciles v<version> against npm's
+#     gitHead after publication, so a failed tag operation can be retried.
+#     Only main and v* refs can run the write-permitted tagging job.
 #   - Dev: workflow_dispatch with dev=true (usually via the `/publish-dev` PR
 #     comment — see publish-dev-command.yml) publishes
 #     `<version>-dev.<pr>.<short-sha>` under the `dev` dist-tag so consumers
-#     can trial a branch: `pnpm add @rtkelly13/design-system@dev`.
+#     can trial a branch: `pnpm add @rtkelly-labs/design-system@dev`.
 #     Trusted publishing is scoped to this workflow FILE, not a branch, so
 #     dispatching it on a PR branch still authenticates.
 
@@ -44,6 +46,9 @@ jobs:
     permissions:
       contents: read
       id-token: write # OIDC for npm trusted publishing + provenance
+
+    outputs:
+      version: ${{ steps.publish.outputs.version }}
 
     steps:
       - name: Checkout Repository
@@ -82,22 +87,95 @@ jobs:
         run: pnpm build
 
       - name: Publish Package to npm
+        id: publish
         shell: bash
         run: |
           VERSION=$(node -p "require('./package.json').version")
           TAG="${{ inputs.dev == true && 'dev' || 'latest' }}"
-          if npm view "@rtkelly13/design-system@${VERSION}" version > /dev/null 2>&1; then
+          if npm view "@rtkelly-labs/design-system@${VERSION}" version > /dev/null 2>&1; then
             echo "Version ${VERSION} is already published to npm. Skipping publish step."
           else
             echo "Publishing version ${VERSION} to npm (dist-tag: ${TAG})..."
             npm publish --tag "${TAG}"
           fi
 
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
       - name: Job summary
         shell: bash
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          echo "Published (or found existing) **@rtkelly13/design-system@${VERSION}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "Published (or found existing) **@rtkelly-labs/design-system@${VERSION}**" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          echo "pnpm add @rtkelly13/design-system@${VERSION}" >> "$GITHUB_STEP_SUMMARY"
+          echo "pnpm add @rtkelly-labs/design-system@${VERSION}" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+  tag-release:
+    needs: build-and-publish
+    if: inputs.dev != true && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      # No checkout, install or branch-controlled build runs with this token.
+      - name: Reconcile published release tag
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          RELEASE_VERSION: ${{ needs.build-and-publish.outputs.version }}
+        with:
+          script: |
+            const version = process.env.RELEASE_VERSION;
+            if (!/^\d+\.\d+\.\d+$/.test(version)) {
+              throw new Error(`Expected a stable release version, got ${version}`);
+            }
+            // npm can take a moment to expose a newly published version.
+            let release;
+            for (let attempt = 0; attempt < 5; attempt++) {
+              const response = await fetch(`https://registry.npmjs.org/@rtkelly-labs%2Fdesign-system/${version}`);
+              if (response.ok) {
+                release = await response.json();
+                break;
+              }
+              if (response.status !== 404 || attempt === 4) {
+                throw new Error(`npm metadata lookup failed: ${response.status}`);
+              }
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            const sha = release.gitHead;
+            if (release.version !== version || !/^[0-9a-f]{40}$/.test(sha ?? '')) {
+              throw new Error('npm metadata must contain the requested version and a valid gitHead');
+            }
+            // Confirm the published commit belongs to this repository.
+            await github.rest.git.getCommit({ ...context.repo, commit_sha: sha });
+            const ref = `tags/v${version}`;
+            async function existingTag() {
+              try {
+                const { data } = await github.rest.git.getRef({ ...context.repo, ref });
+                return data.object;
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                return null;
+              }
+            }
+            let object = await existingTag();
+            if (!object) {
+              try {
+                await github.rest.git.createRef({ ...context.repo, ref: `refs/${ref}`, sha });
+                object = { type: 'commit', sha };
+              } catch (error) {
+                // A concurrent run may have created the tag. Verify it below.
+                if (error.status !== 422) throw error;
+                object = await existingTag();
+                if (!object) throw error;
+              }
+            }
+            // Existing annotated tags must resolve to the published commit too.
+            while (object.type === 'tag') {
+              const { data } = await github.rest.git.getTag({ ...context.repo, tag_sha: object.sha });
+              object = data.object;
+            }
+            if (object.type !== 'commit' || object.sha !== sha) {
+              throw new Error(`v${version} already points somewhere other than npm gitHead ${sha}; refusing to move it`);
+            }
+            await core.summary.addRaw(`Release v${version} points to npm gitHead ${sha}`).write();
