@@ -2616,6 +2616,201 @@ interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
 
 declare const TraceViewer: react.ForwardRefExoticComponent<TraceViewerProps & react.RefAttributes<HTMLElement>>;
 
+type FlameUnit = 'samples' | 'ms' | (string & {});
+
+interface FlameStack {
+    frames: readonly string[];
+    value: number;
+}
+
+interface FoldedStacks {
+    stacks: FlameStack[];
+
+    skipped: number[];
+}
+
+type FlameOrder = 'alphabetical' | 'time';
+
+interface FlameFrame {
+
+    id: string;
+    name: string;
+    parentId: string | null;
+
+    depth: number;
+
+    total: number;
+
+    self: number;
+
+    x: number;
+
+    width: number;
+
+    children: FlameFrame[];
+}
+
+interface FlameTree {
+
+    root: FlameFrame;
+
+    frames: FlameFrame[];
+    byId: ReadonlyMap<string, FlameFrame>;
+
+    maxDepth: number;
+    total: number;
+    unit: FlameUnit;
+    order: FlameOrder;
+}
+interface BuildFlameOptions {
+
+    order?: FlameOrder;
+
+    unit?: FlameUnit;
+
+    rootName?: string;
+}
+
+declare function parseFoldedStacks(text: string): FoldedStacks;
+
+declare function buildFlame(input: readonly FlameStack[] | FoldedStacks | string, options?: BuildFlameOptions): FlameTree;
+interface FlameFromTraceOptions {
+
+    order?: FlameOrder;
+
+    label?: (span: {
+        name: string;
+        service: string;
+    }) => string;
+}
+
+declare function flameFromTrace(input: readonly TraceSpanInput[] | TraceModel, options?: FlameFromTraceOptions): FlameTree;
+
+interface FlameViewFrame {
+    frame: FlameFrame;
+
+    x: number;
+
+    width: number;
+
+    context: boolean;
+}
+
+declare function zoomFlame(tree: FlameTree, focusId?: string | null): FlameViewFrame[];
+
+declare function flamePath(tree: FlameTree, id?: string | null): FlameFrame[];
+
+interface FlameSearchResult {
+
+    ids: Set<string>;
+
+    matched: number;
+
+    share: number | null;
+}
+
+declare function searchFlame(tree: FlameTree, query: string): FlameSearchResult;
+
+declare function formatFlameValue(value: number, unit: FlameUnit): string;
+
+declare function formatFlameShare(share: number | null): string;
+
+declare function fitFlameLabel(name: string, width: number, charWidth: number): string;
+
+interface FlameDelta {
+    baseline: number | null;
+    candidate: number | null;
+
+    absolute: number | null;
+
+    relative: number | null;
+}
+
+type FlameDiffStatus = 'new' | 'removed' | 'changed' | 'unchanged';
+
+interface FlameFrameDelta {
+    id: string;
+    name: string;
+    depth: number;
+    status: FlameDiffStatus;
+    total: FlameDelta;
+    self: FlameDelta;
+}
+interface DiffFlameOptions {
+
+    normalize?: boolean;
+}
+
+interface FlameDiff {
+    compatible: true;
+
+    tree: FlameTree;
+    baseline: FlameTree;
+
+    frames: ReadonlyMap<string, FlameFrameDelta>;
+
+    removed: FlameFrameDelta[];
+
+    basis: 'absolute' | 'share';
+}
+
+interface FlameDiffIncompatible {
+    compatible: false;
+    reason: string;
+}
+
+declare function diffFlame(baseline: FlameTree, candidate: FlameTree, options?: DiffFlameOptions): FlameDiff | FlameDiffIncompatible;
+
+type FlameDeltaTone = 'new' | 'grew-large' | 'grew' | 'same' | 'shrank' | 'shrank-large' | 'unknown';
+interface FlameDeltaToneOptions {
+
+    metric?: 'self' | 'total';
+
+    threshold?: number;
+
+    large?: number;
+}
+
+declare function flameDeltaTone(change: FlameFrameDelta | undefined, options?: FlameDeltaToneOptions): FlameDeltaTone;
+
+declare function formatFlameDelta(change: FlameFrameDelta, metric: 'self' | 'total', unit: FlameUnit, basis?: 'absolute' | 'share'): string;
+
+declare function describeFlameFrame(frame: FlameFrame, tree: FlameTree, change?: FlameFrameDelta, metric?: 'self' | 'total'): string;
+interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+
+    profile: FlameTree;
+
+    mode?: 'single' | 'diff';
+
+    baseline?: FlameTree;
+
+    diffMetric?: 'self' | 'total';
+
+    threshold?: number;
+
+    large?: number;
+
+    normalize?: boolean;
+
+    orientation?: 'flame' | 'icicle';
+
+    zoomedId?: string | null;
+
+    defaultZoomedId?: string | null;
+
+    onZoomedChange?: (id: string | null) => void;
+
+    search?: string;
+
+    width?: number;
+
+    rowHeight?: number;
+
+    label?: string;
+}
+
+declare const Flamegraph: react.ForwardRefExoticComponent<FlamegraphProps & react.RefAttributes<HTMLDivElement>>;
+
 interface TimeRange {
     from: number;
     to: number;
@@ -4541,6 +4736,7 @@ export {
   Breadcrumbs,
   type BreadcrumbsProps,
   type BrutalistTheme,
+  type BuildFlameOptions,
   type BuildTraceOptions,
   BulletChart,
   type BulletChartProps,
@@ -4608,6 +4804,7 @@ export {
   DeltaValue,
   type DeltaValueProps,
   DesignSandbox,
+  type DiffFlameOptions,
   type DiffHunk,
   type DiffLine,
   type DiffLineComment,
@@ -4677,12 +4874,30 @@ export {
   type FilterParseResult,
   type Finding,
   type FixedColour,
+  type FlameDelta,
+  type FlameDeltaTone,
+  type FlameDeltaToneOptions,
+  type FlameDiff,
+  type FlameDiffIncompatible,
+  type FlameDiffStatus,
+  type FlameFrame,
+  type FlameFrameDelta,
+  type FlameFromTraceOptions,
+  type FlameOrder,
+  type FlameSearchResult,
+  type FlameStack,
+  type FlameTree,
+  type FlameUnit,
+  type FlameViewFrame,
+  Flamegraph,
+  type FlamegraphProps,
   FlowDiagram,
   type FlowDiagramProps,
   type FlowNode,
   type FlowPathProps,
   type FlowRow,
   type FlowTone,
+  type FoldedStacks,
   FreshnessIndicator,
   type FreshnessIndicatorProps,
   type FreshnessState,
@@ -5086,6 +5301,7 @@ export {
   bucketIndex,
   bucketPercentile,
   bucketTimes,
+  buildFlame,
   buildTrace,
   childrenToText,
   clampToRange,
@@ -5097,10 +5313,16 @@ export {
   createAnchorHeading,
   deltaTrend,
   describeFilter,
+  describeFlameFrame,
   describeLogEntry,
   describeTraceSpan,
   diffAnchor,
+  diffFlame,
   filterLogEntries,
+  fitFlameLabel,
+  flameDeltaTone,
+  flameFromTrace,
+  flamePath,
   fontVar,
   formatAge,
   formatAlertDuration,
@@ -5108,6 +5330,9 @@ export {
   formatCount,
   formatDay,
   formatFilter,
+  formatFlameDelta,
+  formatFlameShare,
+  formatFlameValue,
   formatLatencyRange,
   formatRange,
   formatRangeDuration,
@@ -5146,6 +5371,7 @@ export {
   normaliseRange,
   parseColor,
   parseFilter,
+  parseFoldedStacks,
   parseOtlpTrace,
   parseTraceDocument,
   parseUnifiedDiff,
@@ -5157,6 +5383,7 @@ export {
   sameFilter,
   scanRules,
   scanTokenRules,
+  searchFlame,
   semanticTokens,
   serviceEdgeMidpoint,
   serviceEdgePath,
@@ -5187,4 +5414,5 @@ export {
   useTraceClock,
   useTraceReplay,
   visibleTraceSpans,
+  zoomFlame,
 };
