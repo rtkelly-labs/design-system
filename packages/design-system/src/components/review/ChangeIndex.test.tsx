@@ -1,3 +1,4 @@
+import { diffAnchor } from './diff';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { ChangeIndex } from './ChangeIndex';
@@ -23,7 +24,7 @@ describe('ChangeIndex', () => {
   it('links each file to its diff anchor', () => {
     render(<ChangeIndex groups={GROUPS} />);
     const links = screen.getAllByRole('link');
-    expect(links.map((a) => a.getAttribute('href'))).toEqual(['#diff-metrics-duplication-txt', '#diff-callgraph-a-callgraph-txt', '#custom']);
+    expect(links.map((a) => a.getAttribute('href'))).toEqual([`#${diffAnchor('metrics/duplication.txt')}`, `#${diffAnchor('callgraph/a.callgraph.txt')}`, '#custom']);
   });
 
   it('scales every bar to the largest file', () => {

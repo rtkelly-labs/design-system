@@ -82,7 +82,22 @@ export function countDiff(hunks: readonly DiffHunk[]): { added: number; removed:
   return { added, removed };
 }
 
-/** The anchor a file's diff is reachable at: `metrics/duplication.txt` becomes `diff-metrics-duplication-txt`. */
+/** FNV-1a over UTF-16 code units, as base 36: short, stable, and different for different paths. */
+function pathHash(path: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < path.length; i++) {
+    hash ^= path.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(36);
+}
+
+/**
+ * The anchor a file's diff is reachable at: `metrics/duplication.txt` becomes
+ * `diff-metrics-duplication-txt-<hash>`. The slug keeps it readable; the hash of
+ * the exact path keeps it unique, since `src/foo-bar.ts` and `src/foo/bar.ts`
+ * slug the same.
+ */
 export function diffAnchor(path: string): string {
-  return `diff-${path.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+  return `diff-${path.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-${pathHash(path)}`;
 }

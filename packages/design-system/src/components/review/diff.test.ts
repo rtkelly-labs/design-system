@@ -38,7 +38,14 @@ describe('parseUnifiedDiff', () => {
 });
 
 describe('diffAnchor', () => {
-  it('turns a path into a stable fragment', () => {
-    expect(diffAnchor('metrics/Parquet.SourceGenerator.metrics.txt')).toBe('diff-metrics-parquet-sourcegenerator-metrics-txt');
+  it('turns a path into a readable, stable fragment', () => {
+    const anchor = diffAnchor('metrics/Parquet.SourceGenerator.metrics.txt');
+    expect(anchor).toMatch(/^diff-metrics-parquet-sourcegenerator-metrics-txt-[0-9a-z]+$/);
+    expect(diffAnchor('metrics/Parquet.SourceGenerator.metrics.txt')).toBe(anchor);
+  });
+
+  it('keeps paths that slug the same apart', () => {
+    expect(diffAnchor('src/foo-bar.ts')).not.toBe(diffAnchor('src/foo/bar.ts'));
+    expect(diffAnchor('README.md')).not.toBe(diffAnchor('readme.md'));
   });
 });
