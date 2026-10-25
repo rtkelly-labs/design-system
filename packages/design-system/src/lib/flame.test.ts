@@ -10,6 +10,7 @@ import {
   formatFlameShare,
   formatFlameValue,
   parseFoldedStacks,
+  rankFlameFrames,
   searchFlame,
   zoomFlame,
   type FlameDiff,
@@ -178,6 +179,26 @@ describe('formatting', () => {
     expect(fitFlameLabel('Microsoft.AspNetCore.Routing', 70, 7)).toBe('Microsoft…');
     expect(fitFlameLabel('render', 14, 7)).toBe('');
     expect(fitFlameLabel('render', 0, 7)).toBe('');
+  });
+});
+
+describe('rankFlameFrames', () => {
+  it('ranks one profile by self time, leaving out the root and frames with none', () => {
+    const tree = buildFlame('main;handle;parse 30\nmain;handle;render 50\nmain;gc 20\nmain;handle 5');
+    expect(rankFlameFrames(tree).map((row) => [row.name, row.self])).toEqual([['render', 50], ['parse', 30], ['gc', 20], ['handle', 5]]);
+  });
+
+  it('ranks a diff by the size of the change, either sign, removed frames included', () => {
+    const before = buildFlame('main;a 50\nmain;b 40\nmain;gone 8\nmain;same 10');
+    const after = buildFlame('main;a 65\nmain;b 30\nmain;new 4\nmain;same 10');
+    const diff = diffFlame(before, after);
+    if (!diff.compatible) throw new Error(diff.reason);
+    expect(rankFlameFrames(after, diff).map((row) => [row.name, row.change?.self.absolute])).toEqual([
+      ['a', 15],
+      ['b', -10],
+      ['gone', -8],
+      ['new', 4],
+    ]);
   });
 });
 

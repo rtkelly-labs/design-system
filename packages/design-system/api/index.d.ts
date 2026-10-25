@@ -2775,6 +2775,18 @@ declare function flameDeltaTone(change: FlameFrameDelta | undefined, options?: F
 
 declare function formatFlameDelta(change: FlameFrameDelta, metric: 'self' | 'total', unit: FlameUnit, basis?: 'absolute' | 'share'): string;
 
+interface FlameRankedFrame {
+    id: string;
+    name: string;
+    depth: number;
+    total: number;
+    self: number;
+
+    change?: FlameFrameDelta;
+}
+
+declare function rankFlameFrames(tree: FlameTree, diff?: FlameDiff | null, metric?: 'self' | 'total'): FlameRankedFrame[];
+
 declare function describeFlameFrame(frame: FlameFrame, tree: FlameTree, change?: FlameFrameDelta, metric?: 'self' | 'total'): string;
 interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 
@@ -2793,6 +2805,8 @@ interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children
     normalize?: boolean;
 
     orientation?: 'flame' | 'icicle';
+
+    list?: 'auto' | 'always' | 'never';
 
     zoomedId?: string | null;
 
@@ -4884,6 +4898,7 @@ export {
   type FlameFrameDelta,
   type FlameFromTraceOptions,
   type FlameOrder,
+  type FlameRankedFrame,
   type FlameSearchResult,
   type FlameStack,
   type FlameTree,
@@ -5378,6 +5393,7 @@ export {
   percentile,
   percentiles,
   presetRange,
+  rankFlameFrames,
   relativeLuminance,
   replayTrace,
   sameFilter,

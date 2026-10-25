@@ -534,3 +534,45 @@ export function formatFlameDelta(change: FlameFrameDelta, metric: 'self' | 'tota
   const relative = value.relative === null ? 'n/a' : `${value.relative > 0 ? '+' : '−'}${PERCENT.format(Math.abs(value.relative) * 100)}%`;
   return `${sign}${amount} (${relative})`;
 }
+
+// ---------------------------------------------------------------------------
+// Ranking
+// ---------------------------------------------------------------------------
+
+/** One row of a frame list: a frame, and its change when the list ranks a diff. */
+export interface FlameRankedFrame {
+  id: string;
+  name: string;
+  depth: number;
+  total: number;
+  self: number;
+  /** Present when ranking a diff. A `removed` frame has no candidate numbers: `total` and `self` are 0. */
+  change?: FlameFrameDelta;
+}
+
+/**
+ * The frames worth reading first, hottest first. One profile ranks by self
+ * time, so the frames that themselves burn the time lead. A diff ranks by the
+ * size of the change in `metric` (default `self`), either sign, and includes
+ * removed frames — they have no width to be drawn at, but they did change.
+ * Frames whose change is zero or not computable are left out of a diff's
+ * ranking; ties break on id so the order is stable.
+ */
+export function rankFlameFrames(tree: FlameTree, diff?: FlameDiff | null, metric: 'self' | 'total' = 'self'): FlameRankedFrame[] {
+  const byId = (a: FlameRankedFrame, b: FlameRankedFrame) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+  if (!diff) {
+    return tree.frames
+      .filter((frame) => frame.parentId !== null && frame.self > 0)
+      .map((frame) => ({ id: frame.id, name: frame.name, depth: frame.depth, total: frame.total, self: frame.self }))
+      .sort((a, b) => b.self - a.self || byId(a, b));
+  }
+  const size = (row: FlameRankedFrame) => Math.abs(row.change?.[metric].absolute ?? 0);
+  const rows: FlameRankedFrame[] = [];
+  for (const frame of tree.frames) {
+    const change = diff.frames.get(frame.id);
+    if (frame.parentId === null || !change || !change[metric].absolute) continue;
+    rows.push({ id: frame.id, name: frame.name, depth: frame.depth, total: frame.total, self: frame.self, change });
+  }
+  for (const change of diff.removed) if (change[metric].absolute) rows.push({ id: change.id, name: change.name, depth: change.depth, total: 0, self: 0, change });
+  return rows.sort((a, b) => size(b) - size(a) || byId(a, b));
+}
