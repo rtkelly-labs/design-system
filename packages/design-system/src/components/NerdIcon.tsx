@@ -138,7 +138,7 @@ export interface NerdIconProps extends HTMLAttributes<HTMLSpanElement> {
  * <NerdIcon name="git-branch" accent="primary" />
  *
  * // Bracketed terminal button icon
- * <Button>
+ * <Button appearance="raised">
  *   <NerdIcon name="terminal" bracketed accent="secondary" /> EXECUTE RUNTIME
  * </Button>
  * ```

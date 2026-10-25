@@ -275,7 +275,7 @@ describe('Drawer stacking', () => {
     const [filtering, setFiltering] = useState(false);
     return (
       <Modal isOpen onClose={onModalClose} title="Reports">
-        <Button onClick={() => setFiltering(true)}>Filter results</Button>
+        <Button appearance="raised" onClick={() => setFiltering(true)}>Filter results</Button>
         <Drawer
           isOpen={filtering}
           onClose={() => setFiltering(false)}
@@ -311,7 +311,7 @@ describe('Drawer stacking', () => {
     const [confirming, setConfirming] = useState(false);
     return (
       <Drawer isOpen onClose={onDrawerClose} placement="left" title="Navigation">
-        <Button onClick={() => setConfirming(true)}>Sign out</Button>
+        <Button appearance="raised" onClick={() => setConfirming(true)}>Sign out</Button>
         <AlertDialog
           isOpen={confirming}
           onClose={() => setConfirming(false)}

@@ -264,13 +264,13 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
 
         {/* Action Controls */}
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <Button onClick={prevSlide} style={{ padding: '0.4rem 0.8rem' }}>
+          <Button appearance="raised" onClick={prevSlide} style={{ padding: '0.4rem 0.8rem' }}>
             <ChevronLeft size={16} /> PREV
           </Button>
 
           {autoPlayInterval > 0 && (
             <Tooltip content={isPlaying ? 'Pause autoplay' : 'Start autoplay'}>
-              <Button
+              <Button appearance="raised"
                 onClick={() => setIsPlaying(!isPlaying)}
                 aria-pressed={isPlaying}
                 aria-label={isPlaying ? 'Pause autoplay' : 'Start autoplay'}
@@ -281,7 +281,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
             </Tooltip>
           )}
 
-          <Button onClick={nextSlide} style={{ padding: '0.4rem 0.8rem' }}>
+          <Button appearance="raised" onClick={nextSlide} style={{ padding: '0.4rem 0.8rem' }}>
             NEXT <ChevronRight size={16} />
           </Button>
 
@@ -293,7 +293,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
             */}
           {deckHasNotes && (
             <Tooltip content={showNotes ? 'Hide notes (N)' : 'Speaker notes (N)'}>
-              <Button
+              <Button appearance="raised"
                 onClick={() => setShowNotes((visible) => !visible)}
                 aria-pressed={showNotes}
                 aria-label={showNotes ? 'Hide speaker notes' : 'Show speaker notes'}
@@ -305,7 +305,7 @@ export const SlideDeck: React.FC<SlideDeckProps> = ({
           )}
 
           <Tooltip content={isFullscreen ? 'Exit fullscreen (F)' : 'Fullscreen (F)'}>
-            <Button
+            <Button appearance="raised"
               onClick={toggleFullscreen}
               aria-pressed={isFullscreen}
               aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}

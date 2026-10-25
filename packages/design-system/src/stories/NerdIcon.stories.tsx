@@ -60,11 +60,11 @@ export const BracketedInUI: Story = {
       </h3>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button bracketed>
+        <Button appearance="raised" bracketed>
           <NerdIcon name="terminal" accent="primary" className="mr-1.5" />
           DEPLOY REPLICA
         </Button>
-        <Button variant="tertiary" bracketed>
+        <Button appearance="raised" variant="tertiary" bracketed>
           <NerdIcon name="trash" accent="danger" className="mr-1.5" />
           PURGE POD
         </Button>

@@ -90,7 +90,7 @@ export interface StatusPageProps
  *   code="503"
  *   title="Down for maintenance"
  *   description="Back by 09:00 UTC."
- *   action={<Button href="https://status.example.com">STATUS PAGE</Button>}
+ *   action={<Button appearance="raised" href="https://status.example.com">STATUS PAGE</Button>}
  * />
  * ```
  */
@@ -146,7 +146,7 @@ interface StatusPagePresetProps extends Omit<StatusPageProps, 'title'> {
 
 function homeAction(homeHref: string, homeLabel: string) {
   return (
-    <Button href={homeHref} variant="primary" bracketed>
+    <Button appearance="raised" href={homeHref} variant="primary" bracketed>
       {homeLabel}
     </Button>
   );

@@ -87,7 +87,7 @@ const tooltip = recipe({
  * @example
  * ```tsx
  * <Tooltip content="Speaker notes (N)">
- *   <Button aria-label="Show speaker notes"><FileText /></Button>
+ *   <Button appearance="raised" aria-label="Show speaker notes"><FileText /></Button>
  * </Tooltip>
  * ```
  */

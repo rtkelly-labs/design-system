@@ -27,6 +27,16 @@ export type Emphasis = 'primary' | 'secondary' | 'tertiary' | 'quiet';
 export type Intent = 'info' | 'success' | 'warning' | 'danger';
 
 /**
+ * Change, as a comparison reports it. Use for diff signs, change counts and
+ * change bars — never for whether the change is acceptable, which is an
+ * {@link Intent}. Red text on a removed line says *removed*, not *wrong*.
+ */
+export type Delta = 'added' | 'removed' | 'moved';
+
+/** The grounds a diff paints behind its rows. `hunk` sits behind a hunk header. */
+export type DeltaGround = 'added' | 'removed' | 'hunk';
+
+/**
  * Background elevation. `base` is the page, `raised` sits above it (cards,
  * header, drawers), `sunken` is inset (code wells), `overlay` is modal.
  */
@@ -106,6 +116,18 @@ const INTENT_VARS: Record<Intent, string> = {
   danger: 'var(--ds-intent-danger)',
 };
 
+const DELTA_VARS: Record<Delta, string> = {
+  added: 'var(--ds-delta-added)',
+  removed: 'var(--ds-delta-removed)',
+  moved: 'var(--ds-delta-moved)',
+};
+
+const DELTA_GROUND_VARS: Record<DeltaGround, string> = {
+  added: 'var(--ds-delta-ground-added)',
+  removed: 'var(--ds-delta-ground-removed)',
+  hunk: 'var(--ds-delta-ground-hunk)',
+};
+
 const SURFACE_VARS: Record<Surface, string> = {
   base: 'var(--ds-surface-base)',
   raised: 'var(--ds-surface-raised)',
@@ -182,6 +204,8 @@ export const HEADING_EMPHASIS: Record<1 | 2 | 3 | 4 | 5 | 6, Emphasis> = {
 export const semanticTokens = {
   accent: EMPHASIS_VARS,
   intent: INTENT_VARS,
+  delta: DELTA_VARS,
+  deltaGround: DELTA_GROUND_VARS,
   surface: SURFACE_VARS,
   text: TEXT_VARS,
   border: BORDER_VARS,

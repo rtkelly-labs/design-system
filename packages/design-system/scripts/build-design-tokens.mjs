@@ -199,6 +199,21 @@ function levelDocument(level) {
         }),
       ),
     },
+    delta: {
+      $type: 'color',
+      $description: 'Change Roles, aliased onto Hues by the declared `deltaHue` map. Not meaning: an added line is not a success.',
+      ...Object.fromEntries(
+        Object.entries(def.delta).map(([key, value]) => {
+          const ref = def.deltaHue[key];
+          return [key, ref === 'neutral' ? colour(value) : alias(ref)];
+        }),
+      ),
+    },
+    deltaGround: {
+      $type: 'color',
+      $description: 'The grounds a diff paints behind changed rows and hunk headers.',
+      ...Object.fromEntries(Object.entries(def.deltaGround).map(([key, value]) => [key, colour(value)])),
+    },
     shadow: { $type: 'color', color: colour(def.shadow, 'Colour of the hard offset shadows.') },
   };
 }

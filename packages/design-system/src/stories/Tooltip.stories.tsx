@@ -44,7 +44,7 @@ export const OnAnIconButton: Story = {
   render: (args) => (
     <Stage className="justify-center">
       <Tooltip {...args}>
-        <Button aria-label="Show speaker notes" size="sm">
+        <Button appearance="raised" aria-label="Show speaker notes" size="sm">
           <FileText size={16} aria-hidden="true" />
         </Button>
       </Tooltip>
@@ -60,22 +60,22 @@ export const Sides: Story = {
   render: () => (
     <Stage className="justify-center gap-24 py-24">
       <Tooltip content="Top" side="top" defaultOpen>
-        <Button size="sm" aria-label="Copy">
+        <Button appearance="raised" size="sm" aria-label="Copy">
           <Copy size={16} aria-hidden="true" />
         </Button>
       </Tooltip>
       <Tooltip content="Right" side="right" defaultOpen>
-        <Button size="sm" aria-label="Fullscreen">
+        <Button appearance="raised" size="sm" aria-label="Fullscreen">
           <Maximize2 size={16} aria-hidden="true" />
         </Button>
       </Tooltip>
       <Tooltip content="Bottom" side="bottom" defaultOpen>
-        <Button size="sm" aria-label="Notes">
+        <Button appearance="raised" size="sm" aria-label="Notes">
           <FileText size={16} aria-hidden="true" />
         </Button>
       </Tooltip>
       <Tooltip content="Left" side="left" defaultOpen>
-        <Button size="sm" aria-label="Delete">
+        <Button appearance="raised" size="sm" aria-label="Delete">
           <Trash2 size={16} aria-hidden="true" />
         </Button>
       </Tooltip>
@@ -92,7 +92,7 @@ export const AtTheViewportEdge: Story = {
   render: () => (
     <Stage className="justify-end px-2">
       <Tooltip content="Copy a link to this section" side="right" defaultOpen>
-        <Button size="sm" aria-label="Copy link">
+        <Button appearance="raised" size="sm" aria-label="Copy link">
           <Copy size={16} aria-hidden="true" />
         </Button>
       </Tooltip>
@@ -108,17 +108,17 @@ export const Interactive: Story = {
   render: () => (
     <Stage>
       <Tooltip content="Copy (C)">
-        <Button size="sm" aria-label="Copy">
+        <Button appearance="raised" size="sm" aria-label="Copy">
           <Copy size={16} aria-hidden="true" />
         </Button>
       </Tooltip>
       <Tooltip content="Fullscreen (F)">
-        <Button size="sm" aria-label="Enter fullscreen">
+        <Button appearance="raised" size="sm" aria-label="Enter fullscreen">
           <Maximize2 size={16} aria-hidden="true" />
         </Button>
       </Tooltip>
       <Tooltip content="Delete">
-        <Button size="sm" variant="secondary" aria-label="Delete">
+        <Button appearance="raised" size="sm" variant="secondary" aria-label="Delete">
           <Trash2 size={16} aria-hidden="true" />
         </Button>
       </Tooltip>

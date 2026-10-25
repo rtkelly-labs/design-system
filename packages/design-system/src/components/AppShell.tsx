@@ -124,7 +124,7 @@ export interface AppShellProps extends Omit<HTMLAttributes<HTMLDivElement>, 'cla
  *       <AppSidebarNav label="Primary" items={nav} activeId="projects" />
  *     </AppSidebar>
  *   }
- *   topbar={<AppTopbar actions={<Button size="sm">NEW</Button>}>PROJECTS</AppTopbar>}
+ *   topbar={<AppTopbar actions={<Button appearance="raised" size="sm">NEW</Button>}>PROJECTS</AppTopbar>}
  * >
  *   <AppMain>…</AppMain>
  * </AppShell>
@@ -492,7 +492,7 @@ export const AppTopbar = forwardRef<HTMLElement, AppTopbarProps>(function AppTop
       {...props}
     >
       {context?.hasSidebar && (
-        <Button
+        <Button appearance="raised"
           type="button"
           size="sm"
           aria-label={sidebarToggleLabel}
