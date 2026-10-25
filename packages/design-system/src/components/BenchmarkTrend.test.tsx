@@ -10,8 +10,10 @@ describe('BenchmarkTrend', () => {
     const root = container.firstElementChild as HTMLElement;
     expect(root.dataset.slot).toBe('benchmark-trend');
     expect(root.dataset.outsideBand).toBe('true');
-    expect(container.querySelectorAll('[data-part="point"]')).toHaveLength(6);
-    expect(container.querySelector('[data-part="tag"]')?.textContent).toBe('v1.0.0');
+    const wide = container.querySelector('[data-size="wide"]')!;
+    expect(wide.querySelectorAll('[data-part="point"]')).toHaveLength(6);
+    expect(wide.querySelector('[data-part="tag"]')?.textContent).toBe('v1.0.0');
+    expect(container.querySelectorAll('[data-size="narrow"] [data-part="point"]')).toHaveLength(6);
     expect(container.querySelector('[data-part="band"]')).not.toBeNull();
     expect(container.querySelector('[data-part="readout"]')?.textContent).toContain('outside the noise band');
   });

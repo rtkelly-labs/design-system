@@ -18,7 +18,11 @@ export const BENCHMARK_COMPARE_VARIANTS = {
   sort: ['impact', 'input', 'name'],
   density: ['regular', 'compact'],
   plot: ['interval', 'none'],
+  layout: ['auto', 'table', 'panels'],
 } as const satisfies Record<string, readonly unknown[]>;
+
+/** How the comparisons are laid out. */
+export type BenchmarkCompareLayout = (typeof BENCHMARK_COMPARE_VARIANTS.layout)[number];
 
 /** The order rows are drawn in. */
 export type BenchmarkCompareSort = (typeof BENCHMARK_COMPARE_VARIANTS.sort)[number];
@@ -33,7 +37,12 @@ const RATIO_TICKS = [0.25, 0.5, 0.67, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 2, 4];
 
 const benchmarkCompare = recipe({
   slots: {
-    root: 'flex min-w-0 flex-col gap-2 font-mono text-xs text-content-primary',
+    root: '@container flex min-w-0 flex-col gap-2 font-mono text-xs text-content-primary',
+    panels: 'm-0 grid list-none grid-cols-[repeat(auto-fill,minmax(10.5rem,1fr))] gap-2 p-0',
+    panel: 'flex aspect-square min-w-0 flex-col gap-1.5 border border-edge-subtle bg-surface-base p-3',
+    panelName: 'm-0 text-xs text-content-primary',
+    headline: 'm-0 mt-auto flex flex-col text-2xl font-bold leading-tight tabular-nums',
+    sortBar: 'flex flex-wrap items-baseline gap-x-3 gap-y-1 text-content-muted',
     summary: 'flex flex-wrap gap-x-4 gap-y-1 text-content-secondary',
     frame: 'overflow-x-auto border-t-2 border-edge-strong',
     table: 'w-full border-collapse text-sm [&_tbody_tr:last-child>*]:border-b-0',
@@ -73,6 +82,11 @@ export interface BenchmarkCompareProps extends HTMLAttributes<HTMLDivElement> {
   domain?: readonly [low: number, high: number];
   /** A caption above the table, e.g. the suite and the two commits. */
   caption?: string;
+  /**
+   * `auto` (default) answers the component's own width with a container query, no script: a
+   * grid of square panels below 40rem, the table from there up. `table` and `panels` force one.
+   */
+  layout?: BenchmarkCompareLayout;
 }
 
 const subscribeNever = () => () => {};
@@ -115,7 +129,8 @@ function statusFor(classification: BenchmarkComparison['classification']) {
   return { status: classification, label: undefined };
 }
 
-function IntervalPlot({ comparison, domain, density }: { comparison: BenchmarkComparison; domain: readonly [number, number]; density: 'regular' | 'compact' }) {
+/** `fluid` drops the fixed size and scales the drawing to its container's width. */
+function IntervalPlot({ comparison, domain, density, fluid = false }: { comparison: BenchmarkComparison; domain: readonly [number, number]; density: 'regular' | 'compact'; fluid?: boolean }) {
   const g = PLOT[density] ?? PLOT.regular;
   const lo = Math.log(domain[0]);
   const hi = Math.log(domain[1]);
@@ -132,10 +147,10 @@ function IntervalPlot({ comparison, domain, density }: { comparison: BenchmarkCo
       data-slot="benchmark-compare-interval"
       data-clipped={clipped || undefined}
       viewBox={`0 0 ${g.width} ${g.height}`}
-      width={g.width}
-      height={g.height}
+      width={fluid ? undefined : g.width}
+      height={fluid ? undefined : g.height}
       aria-hidden="true"
-      className="block shrink-0 overflow-visible"
+      className={fluid ? 'block h-auto w-full overflow-visible' : 'block shrink-0 overflow-visible'}
     >
       <rect data-part="band" x={x(band.low)} y={0} width={Math.max(0, x(band.high) - x(band.low))} height={g.height} className="fill-content-muted" fillOpacity={0.16} />
       <line data-part="reference" x1={x(1)} x2={x(1)} y1={0} y2={g.height} className="stroke-edge-strong" strokeWidth={1} />
@@ -160,7 +175,7 @@ function IntervalPlot({ comparison, domain, density }: { comparison: BenchmarkCo
   );
 }
 
-function IntervalAxis({ domain, density }: { domain: readonly [number, number]; density: 'regular' | 'compact' }) {
+function IntervalAxis({ domain, density, fluid = false }: { domain: readonly [number, number]; density: 'regular' | 'compact'; fluid?: boolean }) {
   const g = PLOT[density] ?? PLOT.regular;
   const lo = Math.log(domain[0]);
   const hi = Math.log(domain[1]);
@@ -171,7 +186,7 @@ function IntervalAxis({ domain, density }: { domain: readonly [number, number]; 
     if (ticks.every((other) => Math.abs(x(other) - x(tick)) >= 30)) ticks.push(tick);
   }
   return (
-    <svg data-slot="benchmark-compare-axis" viewBox={`0 0 ${g.width} 12`} width={g.width} height={12} aria-hidden="true" className="mt-1 block shrink-0 overflow-visible">
+    <svg data-slot="benchmark-compare-axis" viewBox={`0 0 ${g.width} 12`} width={fluid ? undefined : g.width} height={fluid ? undefined : 12} aria-hidden="true" className={fluid ? 'block h-auto w-full overflow-visible' : 'mt-1 block shrink-0 overflow-visible'}>
       {ticks.map((tick) => (
         <text key={tick} x={x(tick)} y={10} textAnchor="middle" fontSize={9} className={tick === 1 ? 'fill-content-secondary' : 'fill-content-muted'}>{`${tick}×`}</text>
       ))}
@@ -191,10 +206,12 @@ function IntervalAxis({ domain, density }: { domain: readonly [number, number]; 
  * conclusive, so a noise-sized difference is not drawn heavier than it deserves.
  *
  * Static-first: the default `impact` order, the plots and every number are in the server render.
- * Sorting by the column headers is an enhancement that appears once the page hydrates.
+ * Sorting by the column headers is an enhancement that appears once the page hydrates. Below a
+ * 40rem container the table becomes a grid of square panels — a CSS container query, so it
+ * answers the component's own width and needs no script.
  */
 export const BenchmarkCompare = forwardRef<HTMLDivElement, BenchmarkCompareProps>(function BenchmarkCompare(
-  { comparisons, sort: sortProp = 'impact', density = 'regular', plot = 'interval', domain: domainProp, caption, className, ...props },
+  { comparisons, sort: sortProp = 'impact', density = 'regular', plot = 'interval', domain: domainProp, caption, layout = 'auto', className, ...props },
   ref,
 ) {
   const id = useId();
@@ -253,7 +270,8 @@ export const BenchmarkCompare = forwardRef<HTMLDivElement, BenchmarkCompareProps
           Sorts the table. Press again to return to the input order.
         </p>
       ) : null}
-      <div className={styles.frame()}>
+      {layout !== 'panels' ? (
+      <div data-part="table" className={cn(styles.frame(), layout === 'auto' && 'hidden @min-[40rem]:block')}>
         <table className={styles.table()}>
           {caption ? <caption className={styles.caption()}>{caption}</caption> : null}
           <thead>
@@ -322,6 +340,63 @@ export const BenchmarkCompare = forwardRef<HTMLDivElement, BenchmarkCompareProps
           </tbody>
         </table>
       </div>
+      ) : null}
+      {layout !== 'table' ? (
+        <div data-part="panels" className={cn('flex flex-col gap-2', layout === 'auto' && '@min-[40rem]:hidden')}>
+          {caption ? <p className={cn(styles.caption(), 'm-0 px-0 py-0')}>{caption}</p> : null}
+          {enhanced ? (
+            <p className={styles.sortBar()}>
+              <span>sort</span>
+              {(['impact', 'name', 'input'] as const).map((key) => (
+                <button key={key} type="button" aria-pressed={sort === key} className={cn(styles.sortButton(), sort === key ? 'text-content-primary no-underline' : '')} onClick={() => setSort(key)}>
+                  {key}
+                </button>
+              ))}
+            </p>
+          ) : null}
+          <ul className={styles.panels()}>
+            {rows.map((c) => {
+              const display = benchmarkDisplayUnit(c.baseline?.median ?? c.candidate?.median ?? Number.NaN, c.unit);
+              const scaled = (value: number | undefined) => (value != null && Number.isFinite(value) ? value / display.factor : null);
+              const conclusive = c.classification !== 'inconclusive';
+              const mark = statusFor(c.classification);
+              const headline = c.reason === 'missing-candidate' ? 'removed' : c.reason === 'missing-baseline' ? 'new' : formatRatioChange(c.ratio);
+              return (
+                <li key={c.id} data-slot="benchmark-compare-panel" data-classification={c.classification} data-reason={c.reason} className={styles.panel()}>
+                  <div>
+                    <StatusMark vocabulary="delta" status={mark.status} label={mark.label} />
+                    {c.reason ? <span className={styles.note()}>{INCONCLUSIVE_REASON_TEXT[c.reason]}</span> : null}
+                  </div>
+                  <p className={styles.panelName()}>{breakable(c.name)}</p>
+                  <p data-part="headline" className={cn(styles.headline(), conclusive ? 'text-content-primary' : 'text-content-secondary')}>
+                    <span>{headline}</span>
+                    <span className="text-xs font-normal text-content-muted">{c.direction.replace(/-/g, ' ')}</span>
+                  </p>
+                  <DeltaValue
+                    before={scaled(c.baseline?.n ? c.baseline.median : undefined)}
+                    after={scaled(c.candidate?.n ? c.candidate.median : undefined)}
+                    unit={display.unit}
+                    direction={conclusive ? c.direction : undefined}
+                    format={formatSignificant}
+                    className="flex-wrap gap-x-1.5 gap-y-0 whitespace-normal text-xs"
+                  />
+                  {plot === 'interval' ? (
+                    <div>
+                      <IntervalPlot comparison={c} domain={domain} density={density} fluid />
+                      <IntervalAxis domain={domain} density={density} fluid />
+                    </div>
+                  ) : null}
+                  <p className="m-0 tabular-nums text-content-muted">
+                    <span aria-hidden="true">{`n = ${c.baseline?.n ?? 0} / ${c.candidate?.n ?? 0}`}</span>
+                    <span className="sr-only">{`${c.baseline?.n ?? 0} baseline samples, ${c.candidate?.n ?? 0} candidate samples`}</span>
+                    {c.interval ? <span className="block">{`${formatPercent(c.interval.level)} ${formatRatio(c.interval.low)}–${formatRatio(c.interval.high)}`}</span> : null}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 });

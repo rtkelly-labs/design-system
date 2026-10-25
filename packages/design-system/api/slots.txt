@@ -42,6 +42,7 @@ before-after	BeforeAfter
 benchmark-compare	BenchmarkCompare
 benchmark-compare-axis	BenchmarkCompare
 benchmark-compare-interval	BenchmarkCompare
+benchmark-compare-panel	BenchmarkCompare
 benchmark-compare-row	BenchmarkCompare
 benchmark-trend	BenchmarkTrend
 blog-post	BlogPost

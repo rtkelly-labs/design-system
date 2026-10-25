@@ -18,6 +18,7 @@ const meta: Meta<typeof BenchmarkCompare> = {
     sort: { control: 'inline-radio', options: [...BENCHMARK_COMPARE_VARIANTS.sort] },
     density: { control: 'inline-radio', options: [...BENCHMARK_COMPARE_VARIANTS.density] },
     plot: { control: 'inline-radio', options: [...BENCHMARK_COMPARE_VARIANTS.plot] },
+    layout: { control: 'inline-radio', options: [...BENCHMARK_COMPARE_VARIANTS.layout] },
     comparisons: { control: false },
     domain: { control: 'object' },
   },
@@ -37,6 +38,22 @@ type Story = StoryObj<typeof BenchmarkCompare>;
 export const ParquetSuite: Story = {
   args: { caption: 'Parquet.Benchmarks · main@ad61c03 → PR 212 at f00dcaf' },
   parameters: { docs: { description: { story: 'Sorted by impact, so the 18% regression is first and the noise last. `ReadFooter` moved 14% but ran three iterations a side, so it is inconclusive with a visibly wide whisker; `Serialize(Rows=100)` is bimodal, its median barely moves while its interval reaches 1.35×, which is exactly what a single-point rule would miss.' } } },
+};
+
+/** The suite as square panels, forced at any width. */
+export const Panels: Story = {
+  args: { layout: 'panels', caption: 'Parquet.Benchmarks · main@ad61c03 → PR 212 at f00dcaf' },
+  parameters: { docs: { description: { story: '`layout="panels"`: one roughly square card per benchmark — the mark, the name, the change large, the medians, the interval drawn to the card\'s width, and n. Two columns on a phone, more as the container widens. The default `auto` switches to this below a 40rem container with a CSS container query, so it works with no script.' } } },
+};
+
+/** `auto` inside a phone-width container: the same component chooses panels by its own width. */
+export const NarrowContainer: Story = {
+  render: (args) => (
+    <div className="w-[390px] max-w-full border border-dashed border-edge-subtle p-4">
+      <BenchmarkCompare {...args} />
+    </div>
+  ),
+  parameters: { docs: { description: { story: 'A 390px box on a wide page. `layout="auto"` answers the container, not the viewport, so a narrow sidebar or column gets panels even on a desktop.' } } },
 };
 
 /** The same rows in the order the suite declared them. */
