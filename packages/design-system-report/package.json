@@ -1,6 +1,6 @@
 {
   "name": "@rtkelly13/design-system-report",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Render a TSX file to one self-contained HTML report, styled by @rtkelly13/design-system",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -52,6 +52,36 @@ export const DIVIDER_PATTERNS: Readonly<Record<Polarity, string>> = {
   light: '· ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ·',
 };
 
+/**
+ * The same marks, as a start cap, a repeating fill and an end cap, so a rule can run the full
+ * width of its container instead of stopping where a fixed string happens to end.
+ *
+ * `step` is the fill unit's length in characters and `caps` the two caps' total; both feed the
+ * width calculation below, so a mark changed here must change its numbers with it.
+ */
+export const DIVIDER_MARKS: Readonly<Record<Polarity, { start: string; fill: string; end: string }>> = {
+  dark: { start: '//', fill: '=', end: '//' },
+  light: { start: '·', fill: ' ─', end: ' ·' },
+};
+
+/**
+ * The fill's width: the container less the caps, rounded **down to a whole fill unit**, so the
+ * last glyph is never cut in half and the end cap sits flush against the fill. One character's
+ * advance is `1ch` plus the `0.2em` tracking. CSS `round()` does the arithmetic with no script, so
+ * the rule also fills a static `ds-report` page; a browser without `round()` drops the width and
+ * the fill is simply clipped, which is how every divider behaved before.
+ *
+ * Written out per polarity, not built from the numbers: Tailwind reads class names from source
+ * text, and a template literal emits no CSS.
+ */
+const FILL_WIDTH: Readonly<Record<Polarity, string>> = {
+  dark: '[width:round(down,calc(100%_-_4*(1ch_+_0.2em)),calc(1ch_+_0.2em))]',
+  light: '[width:round(down,calc(100%_-_3*(1ch_+_0.2em)),calc(2*(1ch_+_0.2em)))]',
+};
+
+/** Enough fill for a 4K-wide container; the width above trims it to the container. */
+const FILL_REPEAT = 400;
+
 const VARIANT_POLARITY: Readonly<Record<Exclude<DividerVariant, 'auto'>, Polarity>> = {
   terminal: 'dark',
   pencil: 'light',
@@ -82,19 +112,27 @@ export const Divider: React.FC<DividerProps> = ({
       ? (theme?.polarity ?? LEVELS[DEFAULT_LEVEL].polarity)
       : VARIANT_POLARITY[variant];
 
+  const base = 'font-mono text-accent-primary tracking-[0.2em] select-none my-6 overflow-hidden whitespace-nowrap';
+
+  // An explicit pattern is drawn as given and clipped, as it always was.
+  if (pattern != null) {
+    return (
+      <div data-slot="divider" className={cn(base, className)} aria-hidden="true" {...props}>
+        {pattern}
+      </div>
+    );
+  }
+
+  // Clipped, not truncated: an ellipsis on a rule reads as a broken string. The mark is
+  // decoration, so `aria-hidden` keeps it out of the accessibility tree.
+  const mark = DIVIDER_MARKS[polarity];
   return (
-    <div data-slot="divider"
-      className={cn(
-        'font-mono text-accent-primary tracking-[0.2em] select-none my-6 overflow-hidden whitespace-nowrap',
-        className
-      )}
-      // Clipped, not truncated: an ellipsis on a rule reads as a broken string.
-      // The mark is decoration, so losing its tail to a narrow container is
-      // correct and `aria-hidden` keeps it out of the accessibility tree.
-      aria-hidden="true"
-      {...props}
-    >
-      {pattern ?? DIVIDER_PATTERNS[polarity]}
+    <div data-slot="divider" className={cn(base, 'flex', className)} aria-hidden="true" {...props}>
+      <span className="shrink-0">{mark.start}</span>
+      <span data-slot="divider-fill" className={cn('min-w-0 overflow-hidden', FILL_WIDTH[polarity])}>
+        {mark.fill.repeat(FILL_REPEAT)}
+      </span>
+      <span className="shrink-0">{mark.end}</span>
     </div>
   );
 };

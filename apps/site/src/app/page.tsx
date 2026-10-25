@@ -25,10 +25,10 @@ export default function Home() {
             subtitle="Brutalist components for React and Tailwind v4. Zero radius, hard shadows, colour by role, and contrast checked in CI. Everything on this page is a live component."
             actions={
               <>
-                <Button href="/docs/installation" variant="primary" size="lg" bracketed>
+                <Button appearance="raised" href="/docs/installation" variant="primary" size="lg" bracketed>
                   GET STARTED
                 </Button>
-                <Button href="/docs/components" variant="inverse" size="lg">
+                <Button appearance="raised" href="/docs/components" variant="inverse" size="lg">
                   BROWSE COMPONENTS
                 </Button>
               </>
@@ -78,7 +78,7 @@ export default function Home() {
           <CTASection
             title="Install it and ship something square"
             actions={
-              <Button href="/docs/installation" variant="primary" bracketed>
+              <Button appearance="raised" href="/docs/installation" variant="primary" bracketed>
                 READ THE INSTALL GUIDE
               </Button>
             }

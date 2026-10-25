@@ -76,7 +76,7 @@ function FinanceAccount() {
   return (
     <div className="flex flex-col gap-3">
       {theme && (
-        <Button size="sm" bracketed onClick={theme.cycleLevel}>
+        <Button appearance="raised" size="sm" bracketed onClick={theme.cycleLevel}>
           LEVEL: {LEVELS[theme.level].label.toUpperCase()}
         </Button>
       )}
@@ -99,7 +99,7 @@ function FinanceAccount() {
 function SyncButton({ onSync }: { onSync?: () => void }) {
   const toast = useOptionalToast();
   return (
-    <Button
+    <Button appearance="raised"
       size="sm"
       variant="tertiary"
       bracketed
@@ -122,10 +122,10 @@ function FinanceOverview() {
   return (
     <>
       <PageHeader title="System overview" subtitle="Statements, reconciliation and backups at a glance." icon={LayoutDashboard} />
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <StatCard title="Net cashflow" value="+$4,280.00" change="+12.4%" changeType="positive" subtitle="vs last month" accent="primary" />
-        <StatCard title="Unreconciled audits" value="3 variances" subtitle="Action required" accent="tertiary" />
-        <StatCard title="Drive backup" value="Synced 10m ago" subtitle="~/Google Drive/Backup/" accent="secondary" />
+      <div className="grid grid-cols-1 border-y border-edge-subtle md:grid-cols-3">
+        <StatCard appearance="quiet" title="Net cashflow" value="+$4,280.00" change="+12.4%" changeType="positive" subtitle="vs last month" accent="primary" />
+        <StatCard appearance="quiet" title="Unreconciled audits" value="3 variances" subtitle="Action required" accent="tertiary" />
+        <StatCard appearance="quiet" title="Drive backup" value="Synced 10m ago" subtitle="~/Google Drive/Backup/" accent="secondary" />
       </div>
       <DataTable
         caption="Recent bank statement ingestions"
@@ -142,7 +142,7 @@ function FinanceOverview() {
           {
             header: 'ACTION',
             accessor: (row) => (
-              <Button size="sm" bracketed aria-label={`View ${row.source}`}>
+              <Button appearance="raised" size="sm" bracketed aria-label={`View ${row.source}`}>
                 VIEW
               </Button>
             ),
@@ -252,7 +252,7 @@ function StudioAccount() {
     <Menu
       side="top"
       trigger={
-        <Button size="sm" variant="secondary">
+        <Button appearance="raised" size="sm" variant="secondary">
           M. HOPPER · EDITOR
         </Button>
       }
@@ -269,7 +269,7 @@ function StudioPosts() {
   return (
     <>
       <PageHeader title="Posts" subtitle="Twelve posts, three drafts waiting on review." icon={FileText}>
-        <Button size="sm" bracketed>
+        <Button appearance="raised" size="sm" bracketed>
           NEW POST
         </Button>
       </PageHeader>
@@ -313,10 +313,10 @@ export function ContentStudio() {
           label="Content studio"
           actions={
             <>
-              <Button size="sm" variant="secondary">
+              <Button appearance="raised" size="sm" variant="secondary">
                 PREVIEW SITE
               </Button>
-              <Button size="sm" bracketed>
+              <Button appearance="raised" size="sm" bracketed>
                 PUBLISH
               </Button>
             </>

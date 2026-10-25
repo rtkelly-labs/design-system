@@ -48,6 +48,9 @@ export * from './components/Badge';
 // measure, the header strip and the print behaviour, and everything inside it
 // is ordinary composition.
 export * from './components/ReportDocument';
+// Reviewing a change — the verdict, provenance, measured deltas and line diffs a review report
+// is built from. Separate from the report frame because an application can show a review too.
+export * from './components/review';
 
 // The colour-instead-of-role rules, and the scanner over them. Published
 // because a tool generating markup against this system should be able to hold

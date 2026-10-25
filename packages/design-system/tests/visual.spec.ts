@@ -56,6 +56,8 @@ interface VisualCase {
  */
 const CASES: readonly VisualCase[] = [
   { id: 'components-actions-forms-button--default', snapshot: 'button-default.png' },
+  { id: 'components-actions-forms-button--appearances', snapshot: 'button-appearances.png' },
+  { id: 'components-actions-forms-button--appearances-sketch', snapshot: 'button-appearances-sketch.png' },
   { id: 'components-actions-forms-button--bracketed', snapshot: 'button-bracketed.png' },
   { id: 'components-content-card--default', snapshot: 'card-default.png' },
   { id: 'presentation-slidedeck--default-deck', snapshot: 'slidedeck-default.png' },
@@ -239,6 +241,11 @@ const CASES: readonly VisualCase[] = [
   // shipped, now a story fixture, and an unrelated CMS. Neither pins a Level,
   // so the a11y suite axes both on both, at both widths.
   { id: 'saas-admindashboard--finance-console', snapshot: 'admin-finance-console.png', fullPage: true },
+  // The developer-tooling pages: a comparison tool's report and a pull request under review.
+  { id: 'saas-reviewreport--default', snapshot: 'review-report-default.png', fullPage: true },
+  { id: 'saas-reviewreport--sketch-theme', snapshot: 'review-report-sketch.png', fullPage: true },
+  { id: 'saas-pullrequest--default', snapshot: 'pull-request-default.png', fullPage: true },
+  { id: 'saas-pullrequest--sketch-theme', snapshot: 'pull-request-sketch.png', fullPage: true },
   { id: 'saas-admindashboard--content-studio', snapshot: 'admin-content-studio.png', fullPage: true },
   { id: 'saas-landingpage--dark-mode', snapshot: 'saas-landing-midnight.png', fullPage: true },
   { id: 'saas-landingpage--sketch-mode', snapshot: 'saas-landing-sketch.png', fullPage: true },
@@ -336,6 +343,26 @@ const CASES: readonly VisualCase[] = [
   { id: 'docs-content-terminal--sketch-theme', snapshot: 'terminal-sketch.png' },
   { id: 'docs-content-steps--default', snapshot: 'steps-default.png' },
   { id: 'docs-content-steps--sketch-theme', snapshot: 'steps-sketch.png' },
+  // The review family. Each has its main story and its `sketch` twin, which is the level
+  // where tinted diff grounds and dashed could-not-tell marks are most likely to fade.
+  { id: 'components-reports-statusmark--all-vocabularies', snapshot: 'statusmark-all-vocabularies.png' },
+  { id: 'components-reports-statusmark--sketch-theme', snapshot: 'statusmark-sketch.png' },
+  { id: 'components-reports-verdictband--all-outcomes', snapshot: 'verdictband-all-outcomes.png' },
+  { id: 'components-reports-verdictband--sketch-theme', snapshot: 'verdictband-sketch.png' },
+  { id: 'components-reports-provenancestrip--default', snapshot: 'provenancestrip-default.png' },
+  { id: 'components-reports-provenancestrip--sketch-theme', snapshot: 'provenancestrip-sketch.png' },
+  { id: 'components-reports-deltavalue--states', snapshot: 'deltavalue-states.png' },
+  { id: 'components-reports-deltavalue--sketch-theme', snapshot: 'deltavalue-sketch.png' },
+  { id: 'components-reports-changecount--with-bar', snapshot: 'changecount-with-bar.png' },
+  { id: 'components-reports-changecount--sketch-theme', snapshot: 'changecount-sketch.png' },
+  { id: 'components-reports-changebar--shared-scale', snapshot: 'changebar-shared-scale.png' },
+  { id: 'components-reports-changebar--sketch-theme', snapshot: 'changebar-sketch.png' },
+  { id: 'components-reports-changeindex--default', snapshot: 'changeindex-default.png' },
+  { id: 'components-reports-changeindex--sketch-theme', snapshot: 'changeindex-sketch.png' },
+  { id: 'components-reports-diffview--default', snapshot: 'diffview-default.png' },
+  { id: 'components-reports-diffview--sketch-theme', snapshot: 'diffview-sketch.png' },
+  { id: 'components-reports-keyeddiff--default', snapshot: 'keyeddiff-default.png' },
+  { id: 'components-reports-keyeddiff--sketch-theme', snapshot: 'keyeddiff-sketch.png' },
 ];
 
 /**

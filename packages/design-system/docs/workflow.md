@@ -56,6 +56,7 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    - `pnpm check:reference-material` (unlicensed reference artwork stays untracked, its catalogue stays tracked)
    - `pnpm check:lint-budget` (the one ESLint pass: errors fail outright, warnings as a per-rule ratchet)
    - `pnpm test:a11y` (axe over every asserted story, on both Levels)
+   - `pnpm test:edges` (heavy panels and box nesting per asserted story, as a ratchet)
    - `pnpm check:css` (styling-in-CSS ratchet)
    - `pnpm check:tokens` (hue-named call sites, budget 0)
    - `pnpm ansi:check` (terminal slot coverage and the committed fixture diff)

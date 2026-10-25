@@ -9,6 +9,10 @@ type Emphasis = 'primary' | 'secondary' | 'tertiary' | 'quiet';
 
 type Intent = 'info' | 'success' | 'warning' | 'danger';
 
+type Delta = 'added' | 'removed' | 'moved';
+
+type DeltaGround = 'added' | 'removed' | 'hunk';
+
 type Surface = 'base' | 'raised' | 'sunken' | 'overlay';
 
 type TextTone = 'primary' | 'secondary' | 'muted' | 'inverse';
@@ -40,6 +44,8 @@ declare const HEADING_EMPHASIS: Record<1 | 2 | 3 | 4 | 5 | 6, Emphasis>;
 declare const semanticTokens: {
     readonly accent: Record<Emphasis, string>;
     readonly intent: Record<Intent, string>;
+    readonly delta: Record<Delta, string>;
+    readonly deltaGround: Record<DeltaGround, string>;
     readonly surface: Record<Surface, string>;
     readonly text: Record<TextTone, string>;
     readonly border: Record<BorderTone, string>;
@@ -79,6 +85,10 @@ interface LevelDefinition {
     readonly accent: Readonly<Record<Emphasis, string>>;
     readonly intent: Readonly<Record<Intent, string>>;
 
+    readonly delta: Readonly<Record<Delta, string>>;
+
+    readonly deltaGround: Readonly<Record<DeltaGround, string>>;
+
     readonly palette: Readonly<Record<Hue, string>>;
 
     readonly paletteBright: Readonly<Record<Hue, string>>;
@@ -86,6 +96,8 @@ interface LevelDefinition {
     readonly accentHue: Readonly<Record<Emphasis, HueRef>>;
 
     readonly intentHue: Readonly<Record<Intent, HueRef>>;
+
+    readonly deltaHue: Readonly<Record<Delta, HueRef>>;
 
     readonly shadow: string;
 }
@@ -384,49 +396,13 @@ interface UseActiveHeadingOptions {
 
 declare function useActiveHeading(ids: readonly string[], { offset, enabled }?: UseActiveHeadingOptions): string | null;
 
-interface UseTraceClockOptions {
-
-    running?: boolean;
-
-    interval?: number;
-
-    read?: () => number;
-}
-
-declare function useTraceClock({ running, interval, read }?: UseTraceClockOptions): number;
-
-interface UseTraceReplayOptions {
-
-    autoPlay?: boolean;
-
-    loop?: boolean;
-
-    speed?: number;
-
-    loopDelay?: number;
-}
-interface TraceReplay {
-
-    elapsed: number;
-    playing: boolean;
-    speed: number;
-    play: () => void;
-    pause: () => void;
-    toggle: () => void;
-
-    restart: () => void;
-
-    seek: (elapsed: number) => void;
-    setSpeed: (speed: number) => void;
-}
-
-declare function useTraceReplay(duration: number, { autoPlay, loop, speed: initialSpeed, loopDelay }?: UseTraceReplayOptions): TraceReplay;
-
 interface ButtonOwnProps {
 
     children: ReactNode;
 
     variant?: ButtonVariant;
+
+    appearance: ButtonAppearance;
 
     size?: 'sm' | 'md' | 'lg';
 
@@ -436,6 +412,10 @@ interface ButtonOwnProps {
 }
 
 type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'default';
+
+type ButtonAppearance = 'raised' | 'flat' | 'outline';
+
+declare const BUTTON_APPEARANCES: readonly ButtonAppearance[];
 
 type ButtonElementProps = ButtonOwnProps & DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & {
     href?: never;
@@ -458,6 +438,8 @@ type ButtonProps = ButtonElementProps | ButtonLinkProps;
 declare const Button: react.ForwardRefExoticComponent<(Omit<ButtonElementProps, "ref"> | Omit<ButtonLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
 
 type CardVariant = 'panel' | 'card';
+
+type CardWeight = 'strong' | 'quiet';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
     title?: string;
@@ -483,6 +465,8 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
     panel?: boolean;
 
     variant?: CardVariant;
+
+    weight?: CardWeight;
 }
 
 declare const Card: react.ForwardRefExoticComponent<CardProps & react.RefAttributes<HTMLDivElement>>;
@@ -541,6 +525,407 @@ interface ReportDetailsProps extends HTMLAttributes<HTMLDetailsElement> {
 }
 declare const ReportDetails: react.ForwardRefExoticComponent<ReportDetailsProps & react.RefAttributes<HTMLDetailsElement>>;
 
+type AssessmentOutcome = 'pass' | 'warn' | 'fail' | 'needs-review' | 'inconclusive' | 'none';
+
+type DeltaStatus = 'unchanged' | 'changed' | 'unavailable' | 'invalid' | 'incompatible' | 'inconclusive' | 'unsupported';
+
+type EvidenceStatus = 'produced' | 'unavailable' | 'invalid' | 'inconclusive';
+
+type TrustStatus = 'trusted' | 'candidate' | 'untrusted' | 'missing' | 'corrupt' | 'incompatible';
+
+interface StatusVocabularies {
+    outcome: AssessmentOutcome;
+    delta: DeltaStatus;
+    evidence: EvidenceStatus;
+    trust: TrustStatus;
+}
+type StatusVocabulary = keyof StatusVocabularies;
+
+type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'hollow';
+interface StatusAppearance {
+    glyph: string;
+    tone: StatusTone;
+
+    word: string;
+}
+declare const STATUS_APPEARANCE: {
+    readonly [V in StatusVocabulary]: Readonly<Record<StatusVocabularies[V], StatusAppearance>>;
+};
+
+declare const STATUS_TONE_TEXT: Readonly<Record<StatusTone, string>>;
+
+declare function statusAppearance<V extends StatusVocabulary>(vocabulary: V, status: StatusVocabularies[V]): StatusAppearance;
+
+type DiffLineKind = 'added' | 'removed' | 'context';
+
+interface DiffLineComment {
+
+    author: string;
+
+    meta?: string;
+
+    body: ReactNode;
+}
+interface DiffLine {
+
+    kind: DiffLineKind;
+
+    oldNumber?: number;
+
+    newNumber?: number;
+
+    text: string;
+
+    comments?: readonly DiffLineComment[];
+}
+interface DiffHunk {
+
+    header: string;
+
+    lines: DiffLine[];
+}
+
+declare function parseUnifiedDiff(text: string): DiffHunk[];
+
+declare function countDiff(hunks: readonly DiffHunk[]): {
+    added: number;
+    removed: number;
+};
+
+declare function diffAnchor(path: string): string;
+
+type StatusMarkOwnProps = {
+    [V in StatusVocabulary]: {
+
+        vocabulary: V;
+
+        status: StatusVocabularies[V];
+    };
+}[StatusVocabulary];
+type StatusMarkProps = StatusMarkOwnProps & Omit<react.HTMLAttributes<HTMLSpanElement>, 'children'> & {
+
+    label?: string;
+
+    className?: string;
+};
+
+declare const StatusMark: react.ForwardRefExoticComponent<StatusMarkProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface VerdictBandProps extends Omit<react.HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    outcome: AssessmentOutcome;
+
+    title: ReactNode;
+
+    children?: ReactNode;
+
+    label?: string;
+
+    className?: string;
+}
+
+declare const VerdictBand: react.ForwardRefExoticComponent<VerdictBandProps & react.RefAttributes<HTMLDivElement>>;
+
+interface ProvenanceItem {
+
+    label: string;
+
+    value: ReactNode;
+
+    note?: ReactNode;
+}
+interface ProvenanceStripProps extends react.HTMLAttributes<HTMLElement> {
+
+    label?: string;
+
+    items: readonly ProvenanceItem[];
+
+    className?: string;
+}
+
+declare const ProvenanceStrip: react.ForwardRefExoticComponent<ProvenanceStripProps & react.RefAttributes<HTMLElement>>;
+
+type MetricDirection = 'higher-is-better' | 'lower-is-better';
+interface DeltaValueProps extends Omit<react.HTMLAttributes<HTMLSpanElement>, 'children'> {
+
+    before?: number | null;
+
+    after?: number | null;
+
+    unit?: string;
+
+    direction?: MetricDirection;
+
+    relative?: boolean;
+
+    format?: (value: number) => string;
+
+    className?: string;
+}
+
+declare function deltaTrend(change: number, direction?: MetricDirection): 'against' | 'with' | undefined;
+
+declare const DeltaValue: react.ForwardRefExoticComponent<DeltaValueProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface ChangeCountProps extends Omit<react.HTMLAttributes<HTMLSpanElement>, 'children'> {
+
+    added: number;
+
+    removed: number;
+
+    moved?: number;
+
+    noun?: readonly [one: string, other: string];
+
+    className?: string;
+}
+
+declare const ChangeCount: react.ForwardRefExoticComponent<ChangeCountProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface ChangeBarProps extends Omit<react.SVGAttributes<SVGSVGElement>, 'children'> {
+
+    added: number;
+
+    removed: number;
+
+    max?: number;
+
+    label?: string;
+
+    className?: string;
+}
+
+declare const ChangeBar: react.ForwardRefExoticComponent<ChangeBarProps & react.RefAttributes<SVGSVGElement>>;
+
+interface ChangeIndexFile {
+
+    path: string;
+
+    added: number;
+
+    removed: number;
+
+    href?: string;
+}
+interface ChangeIndexGroup {
+
+    title: string;
+
+    files: readonly ChangeIndexFile[];
+}
+interface ChangeIndexProps extends react.HTMLAttributes<HTMLElement> {
+
+    label?: string;
+
+    groups: readonly ChangeIndexGroup[];
+
+    emptyText?: react.ReactNode;
+
+    className?: string;
+}
+
+declare const ChangeIndex: react.ForwardRefExoticComponent<ChangeIndexProps & react.RefAttributes<HTMLElement>>;
+
+interface DiffViewProps extends Omit<react.HTMLAttributes<HTMLElement>, 'children'> {
+
+    path: string;
+
+    hunks: readonly DiffHunk[];
+
+    collapsible?: boolean;
+
+    defaultOpen?: boolean;
+
+    wrap?: boolean;
+
+    max?: number;
+
+    className?: string;
+}
+
+declare const DiffView: react.ForwardRefExoticComponent<DiffViewProps & react.RefAttributes<HTMLElement>>;
+
+type KeyedChange = 'added' | 'removed' | 'changed' | 'renamed' | 'unchanged';
+interface KeyedDiffRow {
+
+    identity: ReactNode;
+
+    change: KeyedChange;
+
+    cells?: readonly ReactNode[];
+}
+interface KeyedDiffProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    caption: ReactNode;
+
+    identityLabel?: string;
+
+    columns?: readonly string[];
+
+    rows: readonly KeyedDiffRow[];
+
+    emptyText?: ReactNode;
+
+    changeLabels?: Partial<Record<KeyedChange, string>>;
+
+    className?: string;
+}
+
+declare const KeyedDiff: react.ForwardRefExoticComponent<KeyedDiffProps & react.RefAttributes<HTMLDivElement>>;
+
+interface ReviewValue {
+    before?: number | null;
+    after?: number | null;
+    direction?: MetricDirection;
+    unit?: string;
+}
+interface ReviewColumn {
+
+    label: string;
+    direction?: MetricDirection;
+    unit?: string;
+}
+
+interface ReviewMeasurementTable {
+    caption: string;
+
+    identityLabel: string;
+    columns: readonly ReviewColumn[];
+    rows: readonly {
+        identity: string;
+        values: readonly ReviewValue[];
+    }[];
+}
+
+interface ReviewRecordTable {
+    caption: string;
+    identityLabel: string;
+    columns: readonly ReviewColumn[];
+    rows: readonly {
+        identity: string;
+        change: KeyedChange;
+        values: readonly ReviewValue[];
+    }[];
+}
+
+interface ReviewFileGroup {
+    title: string;
+    files: readonly {
+        path: string;
+        hunks: readonly DiffHunk[];
+    }[];
+}
+
+interface ReviewReportData {
+    title: string;
+
+    subtitle?: string;
+
+    meta?: readonly ReportMetaItem[];
+
+    outcome: AssessmentOutcome;
+
+    verdict: string;
+
+    verdictContext?: string;
+
+    provenance: readonly ProvenanceItem[];
+
+    figures?: readonly {
+        label: string;
+        value: string;
+        note?: string;
+    }[];
+
+    measurements?: readonly ReviewMeasurementTable[];
+
+    records?: ReviewRecordTable;
+
+    caveats?: readonly {
+        title: string;
+        body: ReactNode;
+    }[];
+
+    files: readonly ReviewFileGroup[];
+}
+interface ReviewReportPageProps extends Omit<react.HTMLAttributes<HTMLElement>, 'title'> {
+
+    report: ReviewReportData;
+
+    className?: string;
+}
+
+declare const ReviewReportPage: react.ForwardRefExoticComponent<ReviewReportPageProps & react.RefAttributes<HTMLElement>>;
+
+type PullRequestState = 'open' | 'draft' | 'merged' | 'closed';
+type ReviewerState = 'approved' | 'changes-requested' | 'commented' | 'pending';
+
+interface PullRequestCheck {
+    name: string;
+    status: AssessmentOutcome;
+
+    label?: string;
+
+    summary?: string;
+
+    duration?: string;
+}
+
+interface PullRequestData {
+
+    repository: string;
+    number: number;
+    title: string;
+    state: PullRequestState;
+    author: string;
+
+    base: string;
+
+    head: string;
+
+    opened: string;
+    labels?: readonly string[];
+
+    description: readonly ReactNode[];
+    reviewers: readonly {
+        name: string;
+        state: ReviewerState;
+    }[];
+    checks: readonly PullRequestCheck[];
+
+    verdict?: {
+        outcome: AssessmentOutcome;
+        title: string;
+        context?: string;
+    };
+
+    conversation?: readonly {
+        author: string;
+        meta?: string;
+        body: ReactNode;
+    }[];
+
+    files: readonly {
+        path: string;
+        hunks: readonly DiffHunk[];
+    }[];
+}
+interface PullRequestPageProps extends react.HTMLAttributes<HTMLElement> {
+
+    pullRequest: PullRequestData;
+
+    className?: string;
+}
+
+declare const PullRequestPage: react.ForwardRefExoticComponent<PullRequestPageProps & react.RefAttributes<HTMLElement>>;
+
+declare const SAMPLE_BASELINE_COMMIT = "216f6fc28cec75077f5b8fa90cd3d7055e81db7b";
+declare const SAMPLE_DUPLICATION_HUNKS: DiffHunk[];
+declare const SAMPLE_METRICS_HUNKS: DiffHunk[];
+declare const SAMPLE_CALLGRAPH_HUNKS: DiffHunk[];
+declare const DEFAULT_REVIEW_REPORT: ReviewReportData;
+declare const DEFAULT_PULL_REQUEST: PullRequestData;
+
 interface TokenRule {
     id: 'hex' | 'rawPalette' | 'legacyAlias' | 'darkVariant';
     label: string;
@@ -579,9 +964,11 @@ interface PageTitleProps extends HTMLAttributes<HTMLHeadingElement> {
     children: ReactNode;
     subtitle?: string;
     bracketed?: boolean;
+
+    framed?: boolean;
     className?: string;
 }
-declare function PageTitle({ children, subtitle, bracketed, className, ...props }: PageTitleProps): react.JSX.Element;
+declare function PageTitle({ children, subtitle, bracketed, framed, className, ...props }: PageTitleProps): react.JSX.Element;
 
 interface PageHeaderProps {
 
@@ -704,6 +1091,12 @@ declare function SectionContainer({ children, className }: SectionContainerProps
 type DividerVariant = 'auto' | 'terminal' | 'pencil';
 
 declare const DIVIDER_PATTERNS: Readonly<Record<Polarity, string>>;
+
+declare const DIVIDER_MARKS: Readonly<Record<Polarity, {
+    start: string;
+    fill: string;
+    end: string;
+}>>;
 interface DividerProps extends react__default.HTMLAttributes<HTMLDivElement> {
 
     variant?: DividerVariant;
@@ -988,6 +1381,8 @@ interface SwatchGroupProps extends HTMLAttributes<HTMLElement> {
 declare const SwatchGroup: react.ForwardRefExoticComponent<SwatchGroupProps & react.RefAttributes<HTMLElement>>;
 
 type StatCardAccent = AccentToken;
+
+type StatCardAppearance = 'boxed' | 'quiet';
 interface StatCardProps {
     title: string;
     value: string | number;
@@ -998,9 +1393,11 @@ interface StatCardProps {
         className?: string;
     }>;
     accent?: StatCardAccent;
+
+    appearance?: StatCardAppearance;
     className?: string;
 }
-declare function StatCard({ title, value, change, changeType, subtitle, icon: Icon, accent, className, }: StatCardProps): react.JSX.Element;
+declare function StatCard({ title, value, change, changeType, subtitle, icon: Icon, accent, appearance, className, }: StatCardProps): react.JSX.Element;
 
 type TableAppearance = 'grid' | 'quiet' | 'index';
 
@@ -1588,6 +1985,8 @@ interface HeroProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'childre
 
     bracketed?: boolean;
 
+    framed?: boolean;
+
     align?: SectionAlign;
 
     className?: string;
@@ -1619,6 +2018,8 @@ interface FeatureProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
 
     accent?: AccentToken;
 
+    weight?: CardWeight;
+
     children?: ReactNode;
 
     className?: string;
@@ -1647,6 +2048,8 @@ type PricingTierAccent = 'primary' | 'secondary' | 'tertiary';
 interface PricingTierProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
 
     name: ReactNode;
+
+    weight?: CardWeight;
 
     price: ReactNode;
 
@@ -2033,982 +2436,6 @@ interface BulletChartProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' 
 
 declare const BulletChart: react.ForwardRefExoticComponent<BulletChartProps & react.RefAttributes<HTMLDivElement>>;
 
-type TraceAttributeValue = string | number | boolean;
-
-type TraceSpanStatus = 'ok' | 'error' | 'unset';
-
-interface TraceSpanInput {
-
-    id: string;
-
-    parentId?: string | null;
-
-    name: string;
-
-    service?: string;
-
-    start: number;
-
-    end?: number;
-
-    duration?: number;
-
-    status?: TraceSpanStatus;
-
-    kind?: string;
-
-    attributes?: Record<string, TraceAttributeValue>;
-}
-
-interface TraceSpan {
-    id: string;
-    parentId: string | null;
-    name: string;
-    service: string;
-    status: TraceSpanStatus;
-    kind?: string;
-    attributes: Record<string, TraceAttributeValue>;
-
-    depth: number;
-
-    children: string[];
-
-    offset: number;
-
-    duration: number;
-
-    selfTime: number;
-
-    inFlight: boolean;
-
-    critical: boolean;
-}
-
-interface TraceModel {
-
-    spans: TraceSpan[];
-    byId: ReadonlyMap<string, TraceSpan>;
-
-    start: number;
-
-    duration: number;
-
-    services: string[];
-    errorCount: number;
-    inFlightCount: number;
-
-    criticalPath: string[];
-}
-interface BuildTraceOptions {
-
-    now?: number;
-}
-
-declare function buildTrace(input: readonly TraceSpanInput[] | TraceModel, options?: BuildTraceOptions): TraceModel;
-
-declare function visibleTraceSpans(model: TraceModel, collapsed?: ReadonlySet<string>, filter?: (span: TraceSpan) => boolean): TraceSpan[];
-
-declare function matchTraceSpan(span: TraceSpan, query: string): boolean;
-
-declare function formatTraceDuration(ms: number): string;
-
-declare function parseOtlpTrace(document: unknown): TraceSpanInput[];
-
-declare function parseTraceDocument(input: unknown): TraceSpanInput[];
-
-declare function replayTrace(input: readonly TraceSpanInput[] | TraceModel, elapsed: number): TraceSpanInput[];
-
-declare function describeTraceSpan(span: TraceSpan): string;
-interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
-
-    spans: readonly TraceSpanInput[] | TraceModel;
-
-    now?: number;
-
-    selectedId?: string | null;
-
-    defaultSelectedId?: string | null;
-
-    onSelectedChange?: (id: string | null) => void;
-
-    collapsed?: readonly string[];
-
-    defaultCollapsed?: readonly string[];
-
-    onCollapsedChange?: (ids: string[]) => void;
-
-    filter?: string;
-
-    ticks?: number;
-
-    range?: number;
-
-    playhead?: number;
-
-    animate?: boolean;
-
-    label?: string;
-}
-
-declare const TraceWaterfall: react.ForwardRefExoticComponent<TraceWaterfallProps & react.RefAttributes<HTMLDivElement>>;
-
-interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
-
-    spans: readonly TraceSpanInput[] | TraceModel;
-
-    now?: number;
-
-    title?: string;
-
-    defaultSelectedId?: string | null;
-
-    searchable?: boolean;
-
-    replay?: boolean;
-
-    autoPlay?: boolean;
-
-    loop?: boolean;
-
-    defaultSpeed?: number;
-}
-
-declare const TraceViewer: react.ForwardRefExoticComponent<TraceViewerProps & react.RefAttributes<HTMLElement>>;
-
-interface TimeRange {
-    from: number;
-    to: number;
-}
-
-interface TimeRangePreset {
-    id: string;
-    label: string;
-
-    duration: number;
-}
-
-declare const TIME_RANGE_PRESETS: readonly TimeRangePreset[];
-
-declare function presetRange(preset: TimeRangePreset, now: number): TimeRange;
-
-declare function normaliseRange(range: TimeRange | null | undefined): TimeRange | null;
-
-declare function clampToRange(time: number, range: TimeRange): number;
-
-declare function formatClock(time: number, seconds?: boolean): string;
-
-declare function formatDay(time: number): string;
-
-declare function formatTimestamp(time: number, precision?: 'minute' | 'second' | 'millisecond'): string;
-
-declare function formatTimeTick(time: number, span: number): string;
-
-declare function formatRangeDuration(ms: number): string;
-
-declare function formatRange(range: TimeRange): string;
-
-declare function timeTicks(range: TimeRange, target?: number): number[];
-
-declare function bucketTimes(range: TimeRange, count: number): TimeRange[];
-
-interface TimeRangeState {
-
-    now: number;
-
-    range: TimeRange;
-
-    presetId: string | null;
-    presets: readonly TimeRangePreset[];
-
-    setRange: (range: TimeRange, presetId?: string | null) => void;
-
-    selectPreset: (id: string) => void;
-}
-interface TimeCursorState {
-
-    cursor: number | null;
-    setCursor: (time: number | null) => void;
-}
-
-declare function useTimeRange(): TimeRangeState | null;
-
-declare function useTimeCursor(): TimeCursorState | null;
-interface TimeRangeProviderProps {
-
-    now: number;
-
-    defaultPresetId?: string;
-
-    range?: TimeRange;
-
-    onRangeChange?: (range: TimeRange, presetId: string | null) => void;
-
-    presets?: readonly TimeRangePreset[];
-    children?: ReactNode;
-}
-
-declare function TimeRangeProvider({ now, defaultPresetId, range: rangeProp, onRangeChange, presets, children }: TimeRangeProviderProps): react.JSX.Element;
-interface TimeRangePickerProps extends HTMLAttributes<HTMLDivElement> {
-
-    label?: string;
-}
-
-declare const TimeRangePicker: react.ForwardRefExoticComponent<TimeRangePickerProps & react.RefAttributes<HTMLDivElement>>;
-
-type LogSeverity = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal';
-
-type AlertState = 'firing' | 'pending' | 'resolved' | 'silenced';
-
-type AlertSeverity = 'critical' | 'warning' | 'info';
-
-type Severity = LogSeverity | AlertState | AlertSeverity;
-
-declare const SEVERITY_ACCENTS: Readonly<Record<Severity, AccentToken>>;
-
-declare function severityAccent(severity: string): AccentToken;
-
-interface SeverityBadgeProps extends Omit<BadgeProps, 'accent' | 'children'> {
-
-    severity: Severity;
-
-    children?: BadgeProps['children'];
-}
-
-declare const SeverityBadge: react.ForwardRefExoticComponent<SeverityBadgeProps & react.RefAttributes<HTMLSpanElement>>;
-
-type TimeSeriesPoint = readonly [time: number, value: number | null];
-
-interface TimeSeries {
-
-    id: string;
-
-    label: string;
-
-    points: ReadonlyArray<TimeSeriesPoint>;
-
-    unit?: string;
-
-    tone?: 'primary' | 'secondary' | 'neutral' | 'info' | 'success' | 'warning' | 'danger';
-}
-
-type TimeSeriesCurve = 'linear' | 'monotone' | 'step';
-
-interface TimeSeriesThreshold {
-
-    value: number;
-
-    label: string;
-
-    intent: 'warning' | 'danger';
-}
-
-interface TimeSeriesAnnotation {
-
-    time: number;
-
-    label: string;
-
-    intent?: 'info' | 'warning' | 'danger';
-}
-
-declare const TIME_SERIES_VARIANTS: {
-    readonly variant: readonly ["line", "area", "stacked"];
-    readonly curve: readonly ["linear", "monotone", "step"];
-    readonly points: readonly ["none", "hover", "all"];
-    readonly grid: readonly ["none", "horizontal", "both"];
-    readonly yScale: readonly ["linear", "log"];
-    readonly yDomain: readonly ["zero", "data"];
-    readonly legend: readonly ["top", "bottom", "none", "inline"];
-    readonly colorStrategy: readonly ["categorical", "emphasis"];
-    readonly density: readonly ["regular", "compact"];
-};
-
-type TimeSeriesVariant = (typeof TIME_SERIES_VARIANTS.variant)[number];
-
-type TimeSeriesPointMarkers = (typeof TIME_SERIES_VARIANTS.points)[number];
-
-type TimeSeriesGrid = (typeof TIME_SERIES_VARIANTS.grid)[number];
-
-type TimeSeriesYScale = (typeof TIME_SERIES_VARIANTS.yScale)[number];
-
-type TimeSeriesYDomain = (typeof TIME_SERIES_VARIANTS.yDomain)[number] | readonly [min: number, max: number];
-
-type TimeSeriesLegend = (typeof TIME_SERIES_VARIANTS.legend)[number];
-
-type TimeSeriesColorStrategy = (typeof TIME_SERIES_VARIANTS.colorStrategy)[number];
-
-type TimeSeriesDensity = (typeof TIME_SERIES_VARIANTS.density)[number];
-interface TimeSeriesChartProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-
-    series: readonly TimeSeries[];
-
-    variant?: TimeSeriesVariant;
-
-    curve?: TimeSeriesCurve;
-
-    strokeWidth?: number;
-
-    points?: TimeSeriesPointMarkers;
-
-    fillOpacity?: number;
-
-    grid?: TimeSeriesGrid;
-
-    yScale?: TimeSeriesYScale;
-
-    yDomain?: TimeSeriesYDomain;
-
-    legend?: TimeSeriesLegend;
-
-    colorStrategy?: TimeSeriesColorStrategy;
-
-    emphasisSeriesId?: string;
-
-    density?: TimeSeriesDensity;
-
-    annotations?: readonly TimeSeriesAnnotation[];
-
-    showAxes?: boolean;
-
-    thresholds?: readonly TimeSeriesThreshold[];
-
-    range?: TimeRange;
-
-    formatValue?: (value: number) => string;
-
-    unit?: string;
-
-    hiddenSeries?: readonly string[];
-
-    defaultHiddenSeries?: readonly string[];
-
-    onHiddenSeriesChange?: (ids: string[]) => void;
-
-    onRangeSelect?: (range: TimeRange) => void;
-
-    zoomable?: boolean;
-
-    height?: number;
-
-    title?: string;
-
-    showTitle?: boolean;
-}
-
-declare const TimeSeriesChart: react.ForwardRefExoticComponent<TimeSeriesChartProps & react.RefAttributes<HTMLDivElement>>;
-
-interface LatencyBucket {
-
-    from: number;
-
-    to: number;
-
-    count: number;
-}
-
-interface LatencyPoint {
-
-    time: number;
-
-    value: number;
-}
-
-interface LatencyCell {
-
-    column: number;
-
-    row: number;
-
-    timeRange: TimeRange;
-
-    latencyRange: {
-        from: number;
-        to: number;
-    };
-
-    count: number;
-}
-
-interface LatencyGrid {
-    cells: LatencyCell[];
-    columns: number;
-    rows: number;
-
-    max: number;
-
-    total: number;
-}
-
-declare function latencyBuckets(min: number, max: number, count: number): number[];
-
-declare function linearBuckets(min: number, max: number, count: number): number[];
-
-declare function bucketIndex(value: number, edges: readonly number[]): number;
-
-declare function histogram(samples: readonly number[], edges: readonly number[]): LatencyBucket[];
-
-declare function percentile(samples: readonly number[], p: number): number;
-
-declare function percentiles(samples: readonly number[], ps?: readonly number[]): number[];
-
-declare function bucketPercentile(buckets: readonly LatencyBucket[], p: number): number;
-
-declare function shareAbove(samples: readonly number[], threshold: number): number;
-
-declare function latencyExtent(values: Iterable<number>): {
-    min: number;
-    max: number;
-} | null;
-
-declare function logTicks(min: number, max: number, target?: number): number[];
-
-declare function heatmapCells(points: readonly LatencyPoint[], timeBuckets: readonly TimeRange[], latencyEdges: readonly number[]): LatencyGrid;
-
-type IntensityScale = 'sqrt' | 'linear' | 'log' | 'quantile';
-
-declare function intensityThresholds(counts: readonly number[], levels?: number, scale?: IntensityScale): number[];
-
-declare function intensityLevel(count: number, thresholds: readonly number[]): number;
-
-declare function latencyRowPosition(value: number, edges: readonly number[]): number;
-
-declare function formatCount(value: number): string;
-
-declare function formatShare(share: number): string;
-
-declare function formatLatencyRange(from: number, to: number, format?: (ms: number) => string): string;
-
-declare function formatRequests(count: number): string;
-
-declare const LATENCY_HISTOGRAM_VARIANTS: {
-    readonly scale: readonly ["log", "linear"];
-    readonly binning: readonly ["log", "linear"];
-    readonly bar: readonly ["bars", "steps", "outline"];
-    readonly markers: readonly ["lines", "labels", "none"];
-    readonly density: readonly ["regular", "compact"];
-    readonly cumulative: readonly [false, true];
-};
-
-interface LatencySlo {
-
-    value: number;
-
-    label?: string;
-}
-interface LatencyHistogramProps extends HTMLAttributes<HTMLDivElement> {
-
-    samples?: readonly number[];
-
-    buckets?: readonly LatencyBucket[];
-
-    percentiles?: readonly number[];
-
-    slo?: LatencySlo;
-
-    scale?: 'log' | 'linear';
-
-    binning?: 'log' | 'linear';
-
-    bins?: number;
-
-    min?: number;
-
-    max?: number;
-
-    height?: number;
-
-    title?: string;
-
-    formatValue?: (ms: number) => string;
-
-    bar?: 'bars' | 'steps' | 'outline';
-
-    cumulative?: boolean;
-
-    markers?: 'lines' | 'labels' | 'none';
-
-    density?: 'regular' | 'compact';
-}
-
-declare const LatencyHistogram: react.ForwardRefExoticComponent<LatencyHistogramProps & react.RefAttributes<HTMLDivElement>>;
-
-declare const LATENCY_HEATMAP_VARIANTS: {
-    readonly colorScale: readonly ["sqrt", "linear", "log", "quantile"];
-    readonly colorSteps: readonly [6, 3, 4, 5, 7, 8, 9];
-    readonly density: readonly ["regular", "compact"];
-    readonly showLegend: readonly [true, false];
-    readonly zoomable: readonly [true, false];
-    readonly cellGap: readonly [1, 0, 2, 4];
-    readonly percentileOverlay: readonly [readonly [], readonly [50], readonly [50, 99]];
-};
-interface LatencyHeatmapProps extends HTMLAttributes<HTMLDivElement> {
-
-    points: readonly LatencyPoint[];
-
-    range?: TimeRange;
-
-    columns?: number;
-
-    rows?: number;
-
-    min?: number;
-
-    max?: number;
-
-    height?: number;
-
-    title?: string;
-
-    onCellSelect?: (cell: LatencyCell) => void;
-
-    onRangeSelect?: (range: TimeRange) => void;
-
-    zoomable?: boolean;
-
-    formatValue?: (ms: number) => string;
-
-    colorSteps?: number;
-
-    colorScale?: IntensityScale;
-
-    cellGap?: number;
-
-    showLegend?: boolean;
-
-    density?: 'regular' | 'compact';
-
-    percentileOverlay?: readonly number[];
-}
-
-declare const LatencyHeatmap: react.ForwardRefExoticComponent<LatencyHeatmapProps & react.RefAttributes<HTMLDivElement>>;
-
-type LogFieldValue = string | number | boolean;
-
-interface LogEntry {
-
-    id: string;
-
-    time: number;
-
-    severity: LogSeverity;
-
-    message: string;
-
-    service?: string;
-
-    traceId?: string;
-
-    spanId?: string;
-
-    fields?: Record<string, LogFieldValue>;
-}
-
-declare const LOG_SEVERITIES: readonly LogSeverity[];
-
-interface LogFilter {
-
-    query?: string;
-
-    severities?: readonly LogSeverity[];
-
-    range?: TimeRange | null;
-}
-
-declare function matchLogEntry(entry: LogEntry, query: string): boolean;
-
-declare function inLogRange(time: number, range: TimeRange): boolean;
-
-declare function filterLogEntries(entries: readonly LogEntry[], filter?: LogFilter): LogEntry[];
-
-declare function sortLogEntries(entries: readonly LogEntry[], order?: 'asc' | 'desc'): LogEntry[];
-
-interface LogHighlightPart {
-    text: string;
-    match: boolean;
-}
-
-declare function highlightLogText(text: string, query: string | undefined): LogHighlightPart[];
-
-declare function nearestLogIndex(entries: readonly LogEntry[], time: number | null | undefined): number | null;
-
-declare function describeLogEntry(entry: LogEntry): string;
-
-interface LogViewerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
-
-    entries: readonly LogEntry[];
-
-    order?: 'asc' | 'desc';
-
-    query?: string;
-
-    severities?: readonly LogSeverity[];
-
-    range?: TimeRange;
-
-    followRange?: boolean;
-
-    follow?: boolean;
-
-    onTraceSelect?: (traceId: string, entry: LogEntry) => void;
-
-    height?: number;
-
-    virtualize?: boolean;
-
-    showHeader?: boolean;
-
-    announce?: boolean;
-
-    defaultExpanded?: readonly string[];
-
-    emptyText?: ReactNode;
-
-    label?: string;
-}
-
-declare const LogViewer: react.ForwardRefExoticComponent<LogViewerProps & react.RefAttributes<HTMLDivElement>>;
-
-type FilterOperator = '=' | '!=' | '~' | '!~';
-
-interface Filter {
-
-    key: string;
-    operator: FilterOperator;
-    value: string;
-}
-
-declare const FREE_TEXT_KEY = "*";
-
-type FilterParseResult = {
-    ok: true;
-    filter: Filter;
-} | {
-    ok: false;
-    error: string;
-};
-
-declare const FILTER_OPERATORS: readonly FilterOperator[];
-
-declare const FILTER_OPERATOR_LABELS: Record<FilterOperator, string>;
-
-declare function tryParseFilter(text: string): FilterParseResult | null;
-
-declare function parseFilter(text: string): Filter | null;
-
-declare function formatFilter(filter: Filter): string;
-
-declare function describeFilter(filter: Filter): string;
-
-declare function sameFilter(a: Filter, b: Filter): boolean;
-
-declare function lookupField(record: Record<string, unknown>, key: string): unknown;
-
-declare function matchFilters(record: Record<string, unknown>, filters: readonly Filter[]): boolean;
-
-interface FilterBarField {
-
-    key: string;
-
-    label?: string;
-
-    values?: readonly string[];
-}
-interface FilterBarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue'> {
-
-    filters?: readonly Filter[];
-
-    defaultFilters?: readonly Filter[];
-
-    onFiltersChange?: (filters: Filter[]) => void;
-
-    fields?: readonly FilterBarField[];
-
-    label?: string;
-
-    hideLabel?: boolean;
-
-    placeholder?: string;
-
-    summary?: ReactNode;
-
-    clearLabel?: string;
-}
-
-declare const FilterBar: react.ForwardRefExoticComponent<FilterBarProps & react.RefAttributes<HTMLDivElement>>;
-
-type ServiceNodeKind = 'service' | 'database' | 'queue' | 'external';
-
-interface ServiceNode {
-
-    id: string;
-
-    requests: number;
-
-    errors: number;
-
-    avgDuration: number;
-
-    p95Duration?: number;
-
-    kind?: ServiceNodeKind;
-}
-
-interface ServiceEdge {
-
-    from: string;
-
-    to: string;
-
-    calls: number;
-
-    errors: number;
-
-    avgDuration: number;
-}
-
-interface ServiceGraph {
-
-    nodes: ServiceNode[];
-
-    edges: ServiceEdge[];
-}
-
-declare function serviceGraph(input: readonly TraceSpanInput[] | readonly (readonly TraceSpanInput[])[]): ServiceGraph;
-
-interface ServiceGraphPoint {
-    x: number;
-    y: number;
-}
-
-interface ServiceGraphLayoutNode {
-    id: string;
-    x: number;
-    y: number;
-
-    layer: number;
-
-    index: number;
-}
-
-interface ServiceGraphLayoutEdge {
-    from: string;
-    to: string;
-
-    source: ServiceGraphPoint;
-
-    target: ServiceGraphPoint;
-
-    back: boolean;
-
-    dip?: number;
-}
-
-interface ServiceGraphLayout {
-
-    nodes: ServiceGraphLayoutNode[];
-
-    edges: ServiceGraphLayoutEdge[];
-
-    width: number;
-    height: number;
-
-    nodeWidth: number;
-    nodeHeight: number;
-
-    layers: number;
-}
-
-interface ServiceGraphLayoutOptions {
-
-    columnGap?: number;
-
-    rowGap?: number;
-
-    nodeWidth?: number;
-
-    nodeHeight?: number;
-}
-
-declare function layoutServiceGraph(graph: ServiceGraph, options?: ServiceGraphLayoutOptions): ServiceGraphLayout;
-
-declare function serviceEdgePath(edge: ServiceGraphLayoutEdge): string;
-
-declare function serviceEdgeMidpoint(edge: ServiceGraphLayoutEdge): ServiceGraphPoint;
-
-declare function formatServiceCount(value: number): string;
-
-declare function formatServiceErrorRate(errors: number, total: number): string;
-
-interface ServiceMapProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-
-    graph?: ServiceGraph;
-
-    spans?: readonly TraceSpanInput[] | readonly (readonly TraceSpanInput[])[];
-
-    selectedId?: string | null;
-
-    defaultSelectedId?: string | null;
-
-    onSelectedChange?: (id: string | null) => void;
-
-    errorThreshold?: number;
-
-    title?: string;
-
-    height?: number | string;
-
-    edgeLabels?: 'auto' | 'always' | 'interactive';
-}
-
-declare const ServiceMap: react.ForwardRefExoticComponent<ServiceMapProps & react.RefAttributes<HTMLDivElement>>;
-
-interface Alert {
-
-    id: string;
-
-    name: string;
-
-    state: AlertState;
-
-    severity: AlertSeverity;
-
-    since: number;
-
-    service?: string;
-
-    summary?: string;
-
-    value?: string;
-
-    threshold?: string;
-
-    trend?: readonly number[];
-}
-
-declare const ALERT_STATE_ORDER: readonly AlertState[];
-
-declare function sortAlerts(alerts: readonly Alert[]): Alert[];
-
-declare function formatAlertDuration(alert: Pick<Alert, 'state' | 'since'>, now: number): string;
-interface AlertListProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
-
-    alerts: readonly Alert[];
-
-    now: number;
-
-    stateFilter?: readonly AlertState[];
-
-    defaultStateFilter?: readonly AlertState[];
-
-    onStateFilterChange?: (states: AlertState[]) => void;
-
-    selectedId?: string | null;
-
-    defaultSelectedId?: string | null;
-
-    onSelectedChange?: (id: string | null) => void;
-
-    renderActions?: (alert: Alert) => ReactNode;
-
-    heading?: ReactNode;
-
-    emptyMessage?: ReactNode;
-
-    label?: string;
-}
-
-declare const AlertList: react.ForwardRefExoticComponent<AlertListProps & react.RefAttributes<HTMLDivElement>>;
-
-type IncidentEventKind = 'detected' | 'alert' | 'acknowledged' | 'update' | 'deploy' | 'mitigated' | 'resolved';
-
-interface IncidentEvent {
-
-    id: string;
-
-    time: number;
-
-    kind: IncidentEventKind;
-
-    title: string;
-
-    detail?: string;
-
-    author?: string;
-}
-
-interface IncidentSummary {
-
-    status: 'ongoing' | 'resolved';
-
-    start: number | null;
-
-    timeToAcknowledge: number | null;
-
-    timeToMitigate: number | null;
-
-    timeToResolve: number | null;
-
-    duration: number | null;
-}
-
-declare function summariseIncident(events: readonly IncidentEvent[], now?: number): IncidentSummary;
-interface IncidentTimelineProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
-
-    events: readonly IncidentEvent[];
-
-    title?: ReactNode;
-
-    severity?: AlertSeverity;
-
-    now?: number;
-
-    order?: 'oldest-first' | 'newest-first';
-
-    onEventSelect?: (event: IncidentEvent) => void;
-
-    label?: string;
-}
-
-declare const IncidentTimeline: react.ForwardRefExoticComponent<IncidentTimelineProps & react.RefAttributes<HTMLDivElement>>;
-
-interface FreshnessIndicatorProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
-
-    updatedAt: number;
-
-    now: number;
-
-    staleAfter?: number;
-
-    live?: boolean;
-
-    paused?: boolean;
-}
-
-type FreshnessState = 'fresh' | 'stale' | 'paused';
-
-declare function formatAge(ms: number): string;
-
-declare const FreshnessIndicator: react.ForwardRefExoticComponent<FreshnessIndicatorProps & react.RefAttributes<HTMLSpanElement>>;
-
-declare function truncateId(value: string, count?: number): string;
-
-interface IdChipProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'onCopy'> {
-
-    value: string;
-
-    label?: string;
-
-    truncate?: number;
-
-    href?: string;
-
-    copyable?: boolean;
-
-    onCopy?: (value: string, ok: boolean) => void;
-}
-
-declare const IdChip: react.ForwardRefExoticComponent<IdChipProps & react.RefAttributes<HTMLSpanElement>>;
-
 interface SlideProps {
     title?: string;
     subtitle?: string;
@@ -3211,19 +2638,6 @@ interface SaasLandingPageProps {
 }
 
 declare const SaasLandingPage: react__default.FC<SaasLandingPageProps>;
-
-type View = 'overview' | 'logs' | 'traces' | 'services' | 'alerts';
-interface ObservabilityConsoleProps extends Omit<HTMLAttributes<HTMLDivElement>, 'className'> {
-
-    defaultView?: View;
-}
-
-declare const ObservabilityConsole: react.ForwardRefExoticComponent<ObservabilityConsoleProps & react.RefAttributes<HTMLDivElement>>;
-
-declare const OBSERVABILITY_INCIDENT_WINDOW: {
-    from: number;
-    to: number;
-};
 
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 interface AnchorHeadingProps extends Omit<HTMLAttributes<HTMLHeadingElement>, 'id'> {
@@ -3693,16 +3107,12 @@ interface IndexedSectionProps extends Omit<react.HTMLAttributes<HTMLElement>, 't
 
     actions?: ReactNode;
 
-    surface?: 'base' | 'raised' | 'transparent';
-
     children?: ReactNode;
 
     className?: string;
 }
 
 declare const IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
-
-type FigureSurface = 'base' | 'sheet';
 
 type Glyphs = 'shade' | 'ascii' | 'hash' | 'bar' | readonly string[];
 type FigurePalette = 'mono' | 'duo' | 'multi';
@@ -4044,19 +3454,13 @@ declare const mdxComponents: {
 type MdxComponents = typeof mdxComponents;
 
 export {
-  ALERT_STATE_ORDER,
   ANSI_SLOTS,
   type AccentToken,
   type ActivityDay,
   ActivityGrid,
   type ActivityGridProps,
-  type Alert,
   AlertDialog,
   type AlertDialogProps,
-  AlertList,
-  type AlertListProps,
-  type AlertSeverity,
-  type AlertState,
   AnchorHeading,
   type AnchorHeadingProps,
   type AnsiChrome,
@@ -4079,8 +3483,10 @@ export {
   AsciiGauge,
   type AsciiGaugeProps,
   type AsciiGaugeVariant,
+  type AssessmentOutcome,
   Avatar,
   type AvatarProps,
+  BUTTON_APPEARANCES,
   Badge,
   type BadgeProps,
   BarChart,
@@ -4098,10 +3504,10 @@ export {
   Breadcrumbs,
   type BreadcrumbsProps,
   type BrutalistTheme,
-  type BuildTraceOptions,
   BulletChart,
   type BulletChartProps,
   Button,
+  type ButtonAppearance,
   type ButtonElementProps,
   type ButtonLinkProps,
   type ButtonProps,
@@ -4113,6 +3519,15 @@ export {
   Card,
   type CardProps,
   type CardVariant,
+  type CardWeight,
+  ChangeBar,
+  type ChangeBarProps,
+  ChangeCount,
+  type ChangeCountProps,
+  ChangeIndex,
+  type ChangeIndexFile,
+  type ChangeIndexGroup,
+  type ChangeIndexProps,
   ChangeSummary,
   type ChangeSummaryProps,
   ChartTooltip,
@@ -4139,6 +3554,9 @@ export {
   DEFAULT_EXPERIMENTS,
   DEFAULT_LEVEL,
   DEFAULT_PRICING_TIERS,
+  DEFAULT_PULL_REQUEST,
+  DEFAULT_REVIEW_REPORT,
+  DIVIDER_MARKS,
   DIVIDER_PATTERNS,
   DataTable,
   type DataTableProps,
@@ -4146,10 +3564,21 @@ export {
   Decision,
   type DecisionOption,
   type DecisionProps,
+  type Delta,
+  type DeltaGround,
+  type DeltaStatus,
+  DeltaValue,
+  type DeltaValueProps,
   DesignSandbox,
+  type DiffHunk,
+  type DiffLine,
+  type DiffLineComment,
+  type DiffLineKind,
   type DiffLineProps,
   type DiffRow,
   type DiffSign,
+  DiffView,
+  type DiffViewProps,
   Divider,
   type DividerProps,
   type DividerVariant,
@@ -4180,13 +3609,11 @@ export {
   type ErrorSummaryError,
   type ErrorSummaryProps,
   Event,
+  type EvidenceStatus,
   type ExperimentItem,
   ExperimentsView,
   type ExperimentsViewProps,
-  FILTER_OPERATORS,
-  FILTER_OPERATOR_LABELS,
   FIXED_COLOURS,
-  FREE_TEXT_KEY,
   Feature,
   FeatureGrid,
   type FeatureGridProps,
@@ -4195,18 +3622,11 @@ export {
   type FieldsetProps,
   FigureFrame,
   type FigureFrameProps,
-  type FigureSurface,
   type FileChange,
   type FileChangeNode,
   FileChangeTree,
   type FileChangeTreeProps,
   type FileChangeView,
-  type Filter,
-  FilterBar,
-  type FilterBarField,
-  type FilterBarProps,
-  type FilterOperator,
-  type FilterParseResult,
   type Finding,
   type FixedColour,
   FlowDiagram,
@@ -4215,9 +3635,6 @@ export {
   type FlowPathProps,
   type FlowRow,
   type FlowTone,
-  FreshnessIndicator,
-  type FreshnessIndicatorProps,
-  type FreshnessState,
   GanttChart,
   type GanttChartProps,
   type GanttItem,
@@ -4232,32 +3649,16 @@ export {
   type HueAgreementCheck,
   type HueRef,
   INK_WEIGHT,
-  IdChip,
-  type IdChipProps,
-  type IncidentEvent,
-  type IncidentEventKind,
-  type IncidentSummary,
-  IncidentTimeline,
-  type IncidentTimelineProps,
   IndexedSection,
   type IndexedSectionProps,
   Input,
   type InputProps,
-  type IntensityScale,
   type Intent,
-  LATENCY_HEATMAP_VARIANTS,
-  LATENCY_HISTOGRAM_VARIANTS,
+  type KeyedChange,
+  KeyedDiff,
+  type KeyedDiffProps,
+  type KeyedDiffRow,
   LEVELS,
-  LOG_SEVERITIES,
-  type LatencyBucket,
-  type LatencyCell,
-  type LatencyGrid,
-  LatencyHeatmap,
-  type LatencyHeatmapProps,
-  LatencyHistogram,
-  type LatencyHistogramProps,
-  type LatencyPoint,
-  type LatencySlo,
   Legend,
   type LegendProps,
   type LevelDefinition,
@@ -4266,13 +3667,6 @@ export {
   LinkProvider,
   type LinkProviderProps,
   LinkedInIcon,
-  type LogEntry,
-  type LogFieldValue,
-  type LogFilter,
-  type LogHighlightPart,
-  type LogSeverity,
-  LogViewer,
-  type LogViewerProps,
   LoremIpsumPost,
   MAXIMUM_NEUTRAL_CHROMA,
   MEDIA,
@@ -4297,6 +3691,7 @@ export {
   type MetadataGridProps,
   type MetadataGridSeries,
   type Metric,
+  type MetricDirection,
   MetricStrip,
   type MetricStripProps,
   type MetricTone,
@@ -4316,9 +3711,6 @@ export {
   type NotFoundPageProps,
   NoteBlock,
   type NoteBlockProps,
-  OBSERVABILITY_INCIDENT_WINDOW,
-  ObservabilityConsole,
-  type ObservabilityConsoleProps,
   Option,
   type OverlayAlign,
   type OverlaySide,
@@ -4342,6 +3734,14 @@ export {
   type ProgressProps,
   Prose,
   type ProseProps,
+  type ProvenanceItem,
+  ProvenanceStrip,
+  type ProvenanceStripProps,
+  type PullRequestCheck,
+  type PullRequestData,
+  PullRequestPage,
+  type PullRequestPageProps,
+  type PullRequestState,
   RECOMMENDED_COLOURS,
   RECOMMENDED_COLOUR_CLASSES,
   RECOMMENDED_COLOUR_NAMESPACES,
@@ -4363,10 +3763,24 @@ export {
   type ReportMetaItem,
   ReportSection,
   type ReportSectionProps,
+  type ReviewColumn,
+  type ReviewFileGroup,
+  type ReviewMeasurementTable,
+  type ReviewRecordTable,
+  type ReviewReportData,
+  ReviewReportPage,
+  type ReviewReportPageProps,
+  type ReviewValue,
+  type ReviewerState,
   type Rgb,
-  SEVERITY_ACCENTS,
+  SAMPLE_BASELINE_COMMIT,
+  SAMPLE_CALLGRAPH_HUNKS,
+  SAMPLE_DUPLICATION_HUNKS,
+  SAMPLE_METRICS_HUNKS,
   SLIDE_DECK_HOTKEYS,
   SLOTS,
+  STATUS_APPEARANCE,
+  STATUS_TONE_TEXT,
   SYSTEM_LEVEL,
   SaasLandingPage,
   type SaasLandingPageProps,
@@ -4381,20 +3795,6 @@ export {
   type SelectionDeviceCheck,
   ServerErrorPage,
   type ServerErrorPageProps,
-  type ServiceEdge,
-  type ServiceGraph,
-  type ServiceGraphLayout,
-  type ServiceGraphLayoutEdge,
-  type ServiceGraphLayoutNode,
-  type ServiceGraphLayoutOptions,
-  type ServiceGraphPoint,
-  ServiceMap,
-  type ServiceMapProps,
-  type ServiceNode,
-  type ServiceNodeKind,
-  type Severity,
-  SeverityBadge,
-  type SeverityBadgeProps,
   SiteFooter,
   type SiteFooterProps,
   SiteHeader,
@@ -4428,9 +3828,16 @@ export {
   type SpinnerProps,
   StatCard,
   type StatCardAccent,
+  type StatCardAppearance,
   type StatCardProps,
+  type StatusAppearance,
+  StatusMark,
+  type StatusMarkProps,
   StatusPage,
   type StatusPageProps,
+  type StatusTone,
+  type StatusVocabularies,
+  type StatusVocabulary,
   Step,
   type StepProps,
   type StepState,
@@ -4450,8 +3857,6 @@ export {
   THEME_ATTRIBUTE,
   THEME_LEVELS,
   THEME_STORAGE_KEY,
-  TIME_RANGE_PRESETS,
-  TIME_SERIES_VARIANTS,
   TLDR,
   type TLDRProps,
   TOKEN_RULES,
@@ -4499,29 +3904,6 @@ export {
   type ThemeProviderProps,
   TickerTape,
   type TickerTapeProps,
-  type TimeCursorState,
-  type TimeRange,
-  TimeRangePicker,
-  type TimeRangePickerProps,
-  type TimeRangePreset,
-  TimeRangeProvider,
-  type TimeRangeProviderProps,
-  type TimeRangeState,
-  type TimeSeries,
-  type TimeSeriesAnnotation,
-  TimeSeriesChart,
-  type TimeSeriesChartProps,
-  type TimeSeriesColorStrategy,
-  type TimeSeriesCurve,
-  type TimeSeriesDensity,
-  type TimeSeriesGrid,
-  type TimeSeriesLegend,
-  type TimeSeriesPoint,
-  type TimeSeriesPointMarkers,
-  type TimeSeriesThreshold,
-  type TimeSeriesVariant,
-  type TimeSeriesYDomain,
-  type TimeSeriesYScale,
   Timeline,
   type TimelineEvent,
   type TimelineProps,
@@ -4539,16 +3921,6 @@ export {
   type TokenTableProps,
   Tooltip,
   type TooltipProps,
-  type TraceAttributeValue,
-  type TraceModel,
-  type TraceReplay,
-  type TraceSpan,
-  type TraceSpanInput,
-  type TraceSpanStatus,
-  TraceViewer,
-  type TraceViewerProps,
-  TraceWaterfall,
-  type TraceWaterfallProps,
   TrackCard,
   type TrackCardProps,
   type TrackItem,
@@ -4556,6 +3928,7 @@ export {
   TreeDiagram,
   type TreeDiagramProps,
   type TreeNode,
+  type TrustStatus,
   type TypeStep,
   type TypeStepName,
   type UptimeStatus,
@@ -4563,8 +3936,8 @@ export {
   type UptimeStripProps,
   type UseActiveHeadingOptions,
   type UseCopyToClipboardResult,
-  type UseTraceClockOptions,
-  type UseTraceReplayOptions,
+  VerdictBand,
+  type VerdictBandProps,
   type VerdictTone,
   WEB_FLOOR,
   XIcon,
@@ -4577,91 +3950,34 @@ export {
   auditSelectionDevices,
   auditTextHierarchy,
   borderVar,
-  bucketIndex,
-  bucketPercentile,
-  bucketTimes,
-  buildTrace,
   childrenToText,
-  clampToRange,
   cn,
   collectHeadings,
   composite,
   contrastRatio,
+  countDiff,
   createAnchorHeading,
-  describeFilter,
-  describeLogEntry,
-  describeTraceSpan,
-  filterLogEntries,
+  deltaTrend,
+  diffAnchor,
   fontVar,
-  formatAge,
-  formatAlertDuration,
-  formatClock,
-  formatCount,
-  formatDay,
-  formatFilter,
-  formatLatencyRange,
-  formatRange,
-  formatRangeDuration,
-  formatRequests,
-  formatServiceCount,
-  formatServiceErrorRate,
-  formatShare,
-  formatTimeTick,
-  formatTimestamp,
-  formatTraceDuration,
   getRecommendedColours,
   getThemeInitScript,
-  heatmapCells,
-  highlightLogText,
-  histogram,
-  inLogRange,
-  intensityLevel,
-  intensityThresholds,
   isExternalHref,
   isMedium,
   isRecommendedColourClass,
   isThemeLevel,
-  latencyBuckets,
-  latencyExtent,
-  latencyRowPosition,
-  layoutServiceGraph,
-  linearBuckets,
-  logTicks,
-  lookupField,
-  matchFilters,
-  matchLogEntry,
-  matchTraceSpan,
   mdxComponents,
-  nearestLogIndex,
   nextLevel,
-  normaliseRange,
   parseColor,
-  parseFilter,
-  parseOtlpTrace,
-  parseTraceDocument,
-  percentile,
-  percentiles,
-  presetRange,
+  parseUnifiedDiff,
   relativeLuminance,
-  replayTrace,
-  sameFilter,
   scanRules,
   scanTokenRules,
   semanticTokens,
-  serviceEdgeMidpoint,
-  serviceEdgePath,
-  serviceGraph,
-  severityAccent,
-  shareAbove,
   slugify,
-  sortAlerts,
-  sortLogEntries,
-  summariseIncident,
+  statusAppearance,
   surfaceVar,
   textVar,
-  timeTicks,
-  truncateId,
-  tryParseFilter,
   useActiveHeading,
   useCopyToClipboard,
   useDocsLinkComponent,
@@ -4670,10 +3986,5 @@ export {
   useOptionalTheme,
   useOptionalToast,
   useTheme,
-  useTimeCursor,
-  useTimeRange,
   useToast,
-  useTraceClock,
-  useTraceReplay,
-  visibleTraceSpans,
 };

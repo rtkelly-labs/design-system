@@ -26,6 +26,42 @@ standalone: `TimeSeriesChart` (crosshair, brush zoom), `LatencyHistogram`, `Late
 `lib/filters`, `lib/serviceGraph`, `lib/severity` and `lib/ids`. The charts expose their visual
 choices as props (`TIME_SERIES_VARIANTS` and friends) for evaluation in the chart lab (#418); expect
 those props to change. `ObservabilityConsole` composes all of it. Nothing to change.
+**Breaking:** `Button` takes a required `appearance` — `raised`, `flat` or `outline` — with no
+default. `raised` is the button as it was (filled, hard offset shadow, presses in); `flat` keeps
+the fill and drops the shadow and the movement; `outline` is the accent's border and ink, filling
+on hover. Add `appearance="raised"` to every existing `<Button>` to keep today's rendering; a
+`Button` without one throws. The rendered element carries `data-appearance`, and
+`pnpm test:edges` fails a story whose sibling buttons mix appearances.
+
+A `delta` role group — `added`, `removed`, `moved`, and `deltaGround` `added`, `removed`,
+`hunk` for diff rows — as `text-delta-*`, `bg-delta-*`, `fill-delta-*` and
+`bg-delta-ground-*`. Change is not meaning, so it does not use `intent`.
+
+`FileChangeTree` and `ChangeSummary` colour changes with the `delta` roles. `FileChangeTree`
+no longer paints an added file as a success or a modified one as a warning; `ChangeSummary`'s
+signs no longer follow `palette`. Nothing to change in code. Re-baseline both figures.
+
+The review family: `VerdictBand`, `StatusMark`, `ProvenanceStrip`, `DeltaValue`,
+`ChangeCount`, `ChangeBar`, `ChangeIndex`, `DiffView`, `KeyedDiff`, with
+`parseUnifiedDiff`, `countDiff` and `diffAnchor`. `DiffView` lines take review `comments`.
+Only the verdict carries a strong border and shadow; the rest of the family is ruled or
+hairline-framed.
+
+`ReviewReportPage` and `PullRequestPage` compose the family into whole pages: the report a
+comparison tool such as Diffra emits, and a pull request under review. Both ship with sample
+data (`DEFAULT_REVIEW_REPORT`, `DEFAULT_PULL_REQUEST`) and appear on the site's examples.
+
+`StatCard` takes `appearance="quiet"` and `Card` takes `weight="quiet"` (passed through by
+`Feature` and `PricingTier`), for figures in a row and panels beside a heavier object. Defaults
+are unchanged. `SaasLandingPage` now draws its features and non-recommended plans quiet:
+re-baseline its snapshots.
+
+`PageTitle` and `Hero` take `framed` (default `true`); `SaasLandingPage` passes `false`, so its
+deploy terminal leads. `BracketText` joins each bracket to its neighbouring word with a no-break
+space, so a wrapping title no longer strands a `]` on its own line, and `PageTitle` balances its
+lines. `Divider` now runs the full width of its container: a start cap, a fill sized to whole
+characters with CSS `round()`, and an end cap. An explicit `pattern` is drawn as before.
+Re-baseline anything showing a page title, a bracketed title or a divider.
 
 ## 0.16.0
 
