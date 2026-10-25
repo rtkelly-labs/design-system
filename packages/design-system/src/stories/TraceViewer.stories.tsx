@@ -97,7 +97,23 @@ const jobsExcept = (run: typeof mainRedRun, ...open: string[]) =>
 /** A real red run on main, read through `githubRunToSpans`: run → job → step. */
 export const CiRunFailed: Story = {
   args: { spans: mainRedSpans, title: 'CI · main · 27f9544', defaultCollapsed: jobsExcept(mainRedRun, 'visual (3)'), defaultSelectedId: 'job-' + String(mainRedRun.jobs.find((job) => job.name === 'visual (3)')?.id) },
-  parameters: { docs: { description: { story: 'A GitHub Actions run is a trace: the run is the root, each job a child, each step a grandchild. `visual (3)` is selected — the shard that failed, and with it the `ci` gate that waits on every shard. The critical path marks the job that decided how long the run took.' } } },
+  parameters: { docs: { description: { story: 'A GitHub Actions run is a trace: the run is the root, each job a child, each step a grandchild. `visual (3)` is selected — the shard that failed, and with it the `ci` gate that waits on every shard. The critical path marks the job that decided how long the run took. With 150-odd spans the minimap is on: it marks the time window and the rows in view, and dragging it pans both.' } } },
+};
+
+const visual3 = mainRedRun.jobs.find((job) => job.name === 'visual (3)');
+const a11yStep = mainRedSpans.find((span) => span.parentId === `job-${String(visual3?.id)}` && span.name === 'Run Accessibility Tests');
+const runStart = Math.min(...mainRedSpans.map((span) => span.start));
+const a11yWindow = (() => {
+  if (!a11yStep) return null;
+  const start = a11yStep.start - runStart;
+  const duration = (a11yStep.end ?? a11yStep.start) - a11yStep.start;
+  return { start: Math.max(0, start - duration * 0.05), end: start + duration * 1.05 };
+})();
+
+/** The same red run, opened on the accessibility step of the failing shard. */
+export const CiRunZoomed: Story = {
+  args: { ...CiRunFailed.args, title: 'CI · main · 27f9544 · a11y', defaultWindow: a11yWindow, defaultSelectedId: a11yStep?.id ?? null },
+  parameters: { docs: { description: { story: '`defaultWindow` opens the axis on `visual (3)`’s “Run Accessibility Tests” step with 5% either side. Steps that run past the window are clipped with a heavy tick on that edge; the minimap shows where the window sits in the whole run. Reset returns here, “Fit all” shows the run.' } } },
 };
 
 /** A green pull-request run, job by job. */

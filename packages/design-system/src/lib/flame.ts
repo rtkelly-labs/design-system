@@ -40,6 +40,20 @@
  */
 
 import { buildTrace, formatTraceDuration, type TraceModel, type TraceSpanInput } from './trace';
+import {
+  clampViewportRows,
+  clampViewportWindow,
+  fitViewportWindow,
+  panViewportRows,
+  panViewportWindow,
+  sameViewportWindow,
+  VIEWPORT_FULL_WINDOW,
+  VIEWPORT_MIN_WINDOW,
+  zoomViewportRows,
+  zoomViewportWindow,
+  type ViewportRows,
+  type ViewportWindow,
+} from './viewport';
 
 /** What a frame's numbers count. `samples` for folded profiles, `ms` for traces. */
 export type FlameUnit = 'samples' | 'ms' | (string & {});
@@ -581,36 +595,24 @@ export function rankFlameFrames(tree: FlameTree, diff?: FlameDiff | null, metric
 // Windows: what part of the profile a view shows, on both axes
 // ---------------------------------------------------------------------------
 
-/** A horizontal window, as fractions of the root: `0 ≤ start < end ≤ 1`. */
-export interface FlameWindow {
-  start: number;
-  end: number;
-}
+/** A horizontal window, as fractions of the root: `0 ≤ start < end ≤ 1`. The shared `ViewportWindow`. */
+export type FlameWindow = ViewportWindow;
 
-/** A depth window: the shallowest and deepest levels drawn, inclusive. The root is level 0. */
-export interface FlameDepthWindow {
-  min: number;
-  max: number;
-}
+/** A depth window: the shallowest and deepest levels drawn, inclusive. The root is level 0. The shared `ViewportRows`. */
+export type FlameDepthWindow = ViewportRows;
 
 /** The narrowest horizontal window: a thousandth of the root. */
-export const FLAME_MIN_WINDOW = 0.001;
+export const FLAME_MIN_WINDOW = VIEWPORT_MIN_WINDOW;
 
 /** The whole profile. */
-export const FLAME_FULL_WINDOW: FlameWindow = Object.freeze({ start: 0, end: 1 });
+export const FLAME_FULL_WINDOW: FlameWindow = VIEWPORT_FULL_WINDOW;
 
 /**
  * Keep a window inside the root and at least `FLAME_MIN_WINDOW` wide. A window
  * pushed past an edge slides back rather than shrinking, so a pan never zooms.
  */
 export function clampFlameWindow(window: FlameWindow): FlameWindow {
-  const start = finite(window.start) ? window.start : 0;
-  const end = finite(window.end) ? window.end : 1;
-  const width = Math.min(1, Math.max(FLAME_MIN_WINDOW, Math.abs(end - start)));
-  let from = Math.min(start, end);
-  if (from < 0) from = 0;
-  if (from + width > 1) from = 1 - width;
-  return { start: from, end: from + width };
+  return clampViewportWindow(window);
 }
 
 /**
@@ -618,24 +620,19 @@ export function clampFlameWindow(window: FlameWindow): FlameWindow {
  * root that stays put on screen — the pinch centre, the pointer, the tap.
  */
 export function zoomFlameWindow(window: FlameWindow, factor: number, anchor = (window.start + window.end) / 2): FlameWindow {
-  if (!(factor > 0)) return clampFlameWindow(window);
-  const width = window.end - window.start;
-  const next = Math.min(1, Math.max(FLAME_MIN_WINDOW, width / factor));
-  const at = width > 0 ? (anchor - window.start) / width : 0.5;
-  const start = anchor - at * next;
-  return clampFlameWindow({ start, end: start + next });
+  return zoomViewportWindow(window, factor, anchor);
 }
 
 /** Slide a window by `delta`, a fraction of the root. */
 export function panFlameWindow(window: FlameWindow, delta: number): FlameWindow {
-  return clampFlameWindow({ start: window.start + delta, end: window.end + delta });
+  return panViewportWindow(window, delta);
 }
 
 /** The window that frames `id` exactly; the whole profile for an unknown id or the root. */
 export function fitFlameWindow(tree: FlameTree, id?: string | null): FlameWindow {
   const frame = id ? tree.byId.get(id) : undefined;
   if (!frame || frame.parentId === null || !(frame.width > 0)) return FLAME_FULL_WINDOW;
-  return clampFlameWindow({ start: frame.x, end: frame.x + frame.width });
+  return fitViewportWindow(frame.x, frame.x + frame.width);
 }
 
 /** The deepest level beneath a frame (its own when it has no children). */
@@ -647,32 +644,17 @@ export function flameSubtreeDepth(frame: FlameFrame): number {
 
 /** Keep a depth window inside `[0, tree.maxDepth]`, at least one level, sliding rather than shrinking at an edge. */
 export function clampFlameDepth(tree: FlameTree, depth: FlameDepthWindow): FlameDepthWindow {
-  const top = tree.maxDepth;
-  const lo = finite(depth.min) ? Math.round(depth.min) : 0;
-  const hi = finite(depth.max) ? Math.round(depth.max) : top;
-  const span = Math.min(top, Math.max(0, Math.abs(hi - lo)));
-  let min = Math.min(lo, hi);
-  if (min < 0) min = 0;
-  if (min + span > top) min = top - span;
-  return { min, max: min + span };
+  return clampViewportRows(depth, tree.maxDepth);
 }
 
 /** Show `factor` times fewer levels (2) or more (0.5), about the middle of the current range. */
 export function zoomFlameDepth(tree: FlameTree, depth: FlameDepthWindow, factor: number): FlameDepthWindow {
-  if (!(factor > 0)) return clampFlameDepth(tree, depth);
-  const levels = depth.max - depth.min + 1;
-  let next = Math.round(levels / factor);
-  // Always move at least one level, or a small range could never change.
-  if (next === levels) next += factor > 1 ? -1 : 1;
-  next = Math.max(1, Math.min(tree.maxDepth + 1, next));
-  const centre = (depth.min + depth.max) / 2;
-  const min = Math.round(centre - (next - 1) / 2);
-  return clampFlameDepth(tree, { min, max: min + next - 1 });
+  return zoomViewportRows(depth, factor, tree.maxDepth);
 }
 
 /** Move a depth window by `delta` levels; positive is deeper. */
 export function panFlameDepth(tree: FlameTree, depth: FlameDepthWindow, delta: number): FlameDepthWindow {
-  return clampFlameDepth(tree, { min: depth.min + delta, max: depth.max + delta });
+  return panViewportRows(depth, delta, tree.maxDepth);
 }
 
 /**
@@ -797,5 +779,5 @@ export function windowFlame(tree: FlameTree, window: FlameWindow, depth: FlameDe
 
 /** True when two windows are the same to within rounding. */
 export function sameFlameWindow(a: FlameWindow, b: FlameWindow): boolean {
-  return Math.abs(a.start - b.start) < 1e-9 && Math.abs(a.end - b.end) < 1e-9;
+  return sameViewportWindow(a, b);
 }

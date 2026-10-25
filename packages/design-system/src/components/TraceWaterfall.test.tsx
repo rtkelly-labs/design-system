@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { createRef } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { TraceSpanInput } from '../lib/trace';
 import { TraceWaterfall } from './TraceWaterfall';
@@ -88,7 +89,7 @@ describe('TraceWaterfall', () => {
     const { container } = render(<TraceWaterfall spans={[{ id: 'r', name: 'job', start: 0, end: 100 }]} range={400} playhead={100} animate />);
     const labels = [...container.querySelectorAll('[data-part="axis"] > span:nth-child(2) > span')].map((node) => node.textContent);
     expect(labels).toEqual(['0ms', '100ms', '200ms', '300ms']);
-    expect(container.querySelector('rect')!.getAttribute('width')).toBe('250');
+    expect(container.querySelector('[role="treeitem"] rect')!.getAttribute('width')).toBe('250');
     expect(container.querySelector('[data-part="playhead"]')!.getAttribute('x1')).toBe('250');
     expect(screen.getByRole('treeitem').className).toContain('starting:opacity-0');
     expect(screen.getByRole('treeitem').className).toContain('motion-reduce:transition-none');
@@ -96,7 +97,7 @@ describe('TraceWaterfall', () => {
 
   it('never draws the axis shorter than the spans, and is still by default', () => {
     const { container } = render(<TraceWaterfall spans={[{ id: 'r', name: 'job', start: 0, end: 100 }]} range={10} />);
-    expect(container.querySelector('rect')!.getAttribute('width')).toBe('1000');
+    expect(container.querySelector('[role="treeitem"] rect')!.getAttribute('width')).toBe('1000');
     expect(container.querySelector('[data-part="playhead"]')).toBeNull();
     expect(screen.getByRole('treeitem').className).not.toContain('starting:');
   });
@@ -104,5 +105,52 @@ describe('TraceWaterfall', () => {
   it('renders an empty state', () => {
     render(<TraceWaterfall spans={[]} />);
     expect(screen.getByText('No spans to display.')).toBeTruthy();
+  });
+
+  it('draws bars and ticks inside a time window, clipping a span that crosses an edge', () => {
+    const { container } = render(<TraceWaterfall spans={spans} defaultWindow={{ start: 100, end: 300 }} />);
+    expect(container.querySelector('[data-slot="trace-waterfall"]')!.getAttribute('data-window')).toBe('100 300');
+    const labels = [...container.querySelectorAll('[data-part="axis-track"] > span')].map((node) => node.textContent);
+    expect(labels).toEqual(['100ms', '150ms', '200ms', '250ms']);
+    // cart.load runs 10–150: it starts before the window, so it is clipped on the left.
+    expect(container.querySelector('[data-span-id="b"]')!.getAttribute('data-clipped')).toBe('start');
+    expect(container.querySelectorAll('[data-span-id="b"] [data-part="edge"]')).toHaveLength(1);
+    expect(container.querySelector('[data-span-id="b"] rect')!.getAttribute('width')).toBe('250');
+    // payment.authorize runs 160–390: past the right edge.
+    expect(container.querySelector('[data-span-id="d"]')!.getAttribute('data-clipped')).toBe('end');
+  });
+
+  it('zooms, resets to the default window and fits all from the controls and keys', () => {
+    const onWindowChange = vi.fn();
+    const { container } = render(<TraceWaterfall spans={spans} defaultWindow={{ start: 100, end: 300 }} onWindowChange={onWindowChange} />);
+    const root = container.querySelector('[data-slot="trace-waterfall"]')!;
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }));
+    expect(root.getAttribute('data-window')).toBe('150 250');
+    expect(onWindowChange).toHaveBeenLastCalledWith({ start: 150, end: 250 });
+    fireEvent.click(screen.getByRole('button', { name: 'Fit all' }));
+    expect(root.getAttribute('data-window')).toBe('0 400');
+    fireEvent.click(screen.getByRole('button', { name: 'Reset' }));
+    expect(root.getAttribute('data-window')).toBe('100 300');
+    fireEvent.keyDown(screen.getByRole('treeitem', { name: /^GET/ }), { key: '-' });
+    expect(root.getAttribute('data-window')).toBe('0 400');
+    fireEvent.keyDown(screen.getByRole('treeitem', { name: /^GET/ }), { key: '0' });
+    expect(root.getAttribute('data-window')).toBe('100 300');
+  });
+
+  it('shows the minimap for a dense trace, and leaves it to the container query for a sparse one', () => {
+    const many: TraceSpanInput[] = Array.from({ length: 45 }, (_, index) => ({ id: `s${index}`, parentId: index ? 's0' : null, name: `step ${index}`, start: index * 10, end: index * 10 + 8 }));
+    const { container, rerender } = render(<TraceWaterfall spans={many} />);
+    expect(screen.getByRole('slider', { name: 'Trace overview' }).getAttribute('class')).not.toContain('hidden');
+    rerender(<TraceWaterfall spans={spans} />);
+    expect(container.querySelector('[data-slot="minimap"]')!.getAttribute('class')).toContain('hidden @max-xl:flex');
+    rerender(<TraceWaterfall spans={many} minimap="never" />);
+    expect(container.querySelector('[data-slot="minimap"]')).toBeNull();
+  });
+
+  it('renders a windowed view statically, with the minimap and no controls', () => {
+    const html = renderToStaticMarkup(<TraceWaterfall spans={spans} defaultWindow={{ start: 100, end: 300 }} minimap="always" />);
+    expect(html).toContain('data-slot="minimap"');
+    expect(html).toContain('data-clipped="start"');
+    expect(html).not.toContain('data-part="controls"');
   });
 });

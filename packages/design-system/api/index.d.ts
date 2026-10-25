@@ -2559,7 +2559,63 @@ declare function parseTraceDocument(input: unknown): TraceSpanInput[];
 
 declare function replayTrace(input: readonly TraceSpanInput[] | TraceModel, elapsed: number): TraceSpanInput[];
 
+interface GitHubActionsStep {
+    name: string;
+    number: number;
+    status: string;
+    conclusion: string | null;
+    started_at: string | null;
+    completed_at: string | null;
+}
+
+interface GitHubActionsJob {
+    id: number;
+    name: string;
+    status: string;
+    conclusion: string | null;
+    created_at?: string | null;
+    started_at: string | null;
+    completed_at: string | null;
+    runner_name?: string | null;
+    labels?: string[];
+    html_url?: string | null;
+    steps?: GitHubActionsStep[];
+}
+
+interface GitHubActionsRun {
+    id: number;
+    name: string;
+    status: string;
+    conclusion: string | null;
+    created_at?: string | null;
+    run_started_at?: string | null;
+    updated_at?: string | null;
+    html_url?: string | null;
+    head_branch?: string | null;
+    head_sha?: string | null;
+    event?: string | null;
+    run_attempt?: number;
+    display_title?: string | null;
+}
+interface GitHubRunTraceOptions {
+
+    queue?: boolean;
+
+    steps?: boolean;
+
+    service?: string;
+}
+
+declare function ciConclusionStatus(conclusion: string | null | undefined): TraceSpanStatus;
+
+declare function githubRunToSpans(run: GitHubActionsRun, jobs: readonly GitHubActionsJob[], options?: GitHubRunTraceOptions): TraceSpanInput[];
+
 declare function describeTraceSpan(span: TraceSpan): string;
+
+interface TraceWindow {
+    start: number;
+    end: number;
+}
 interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
 
     spans: readonly TraceSpanInput[] | TraceModel;
@@ -2586,6 +2642,14 @@ interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSe
 
     playhead?: number;
 
+    window?: TraceWindow | null;
+
+    defaultWindow?: TraceWindow | null;
+
+    onWindowChange?: (window: TraceWindow) => void;
+
+    minimap?: 'auto' | 'always' | 'never';
+
     animate?: boolean;
 
     label?: string;
@@ -2603,6 +2667,8 @@ interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
 
     defaultSelectedId?: string | null;
 
+    defaultCollapsed?: readonly string[];
+
     searchable?: boolean;
 
     replay?: boolean;
@@ -2612,9 +2678,49 @@ interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
     loop?: boolean;
 
     defaultSpeed?: number;
+
+    window?: TraceWindow | null;
+
+    defaultWindow?: TraceWindow | null;
+
+    onWindowChange?: (window: TraceWindow) => void;
+
+    minimap?: 'auto' | 'always' | 'never';
 }
 
 declare const TraceViewer: react.ForwardRefExoticComponent<TraceViewerProps & react.RefAttributes<HTMLElement>>;
+
+interface ViewportWindow {
+    start: number;
+    end: number;
+}
+
+interface ViewportRows {
+    min: number;
+    max: number;
+}
+
+declare const VIEWPORT_MIN_WINDOW = 0.001;
+
+declare const VIEWPORT_FULL_WINDOW: ViewportWindow;
+
+declare function clampViewportWindow(window: ViewportWindow, minWidth?: number): ViewportWindow;
+
+declare function zoomViewportWindow(window: ViewportWindow, factor: number, anchor?: number, minWidth?: number): ViewportWindow;
+
+declare function panViewportWindow(window: ViewportWindow, delta: number, minWidth?: number): ViewportWindow;
+
+declare function fitViewportWindow(x0: number, x1: number, pad?: number, minWidth?: number): ViewportWindow;
+
+declare function sameViewportWindow(a: ViewportWindow, b: ViewportWindow): boolean;
+
+declare function clampViewportRows(rows: ViewportRows, last: number): ViewportRows;
+
+declare function zoomViewportRows(rows: ViewportRows, factor: number, last: number): ViewportRows;
+
+declare function panViewportRows(rows: ViewportRows, delta: number, last: number): ViewportRows;
+
+declare function centreViewportRows(rows: ViewportRows, row: number, last: number): ViewportRows;
 
 type FlameUnit = 'samples' | 'ms' | (string & {});
 
@@ -2787,15 +2893,9 @@ interface FlameRankedFrame {
 
 declare function rankFlameFrames(tree: FlameTree, diff?: FlameDiff | null, metric?: 'self' | 'total'): FlameRankedFrame[];
 
-interface FlameWindow {
-    start: number;
-    end: number;
-}
+type FlameWindow = ViewportWindow;
 
-interface FlameDepthWindow {
-    min: number;
-    max: number;
-}
+type FlameDepthWindow = ViewportRows;
 
 declare const FLAME_MIN_WINDOW = 0.001;
 
@@ -2906,6 +3006,45 @@ interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children
 }
 
 declare const Flamegraph: react.ForwardRefExoticComponent<FlamegraphProps & react.RefAttributes<HTMLDivElement>>;
+
+type MinimapTone = 'neutral' | 'muted' | 'accent' | 'danger' | 'info' | 'added' | 'added-ground' | 'removed' | 'removed-ground';
+
+interface MinimapMark {
+    x0: number;
+    x1: number;
+    row: number;
+    tone?: MinimapTone;
+}
+interface MinimapProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'children'> {
+
+    marks: readonly MinimapMark[];
+
+    rows: number;
+
+    window: ViewportWindow;
+
+    rowWindow?: ViewportRows | null;
+
+    onWindowChange?: (window: ViewportWindow, rows: ViewportRows | null) => void;
+
+    rowOrder?: 'top-down' | 'bottom-up';
+
+    markStyle?: 'fill' | 'line';
+
+    height?: number;
+
+    minWidth?: number;
+
+    pixelWidth?: number;
+
+    label?: string;
+
+    valueText?: string;
+
+    chartClassName?: string;
+}
+
+declare const Minimap: react.ForwardRefExoticComponent<MinimapProps & react.RefAttributes<HTMLDivElement>>;
 
 interface TimeRange {
     from: number;
@@ -3313,6 +3452,341 @@ interface LatencyHeatmapProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 declare const LatencyHeatmap: react.ForwardRefExoticComponent<LatencyHeatmapProps & react.RefAttributes<HTMLDivElement>>;
+
+type BenchmarkDirection = MetricDirection;
+
+declare const BENCHMARK_CLASSIFICATIONS: readonly ["slower", "faster", "inconclusive", "unchanged"];
+
+type BenchmarkClassification = (typeof BENCHMARK_CLASSIFICATIONS)[number];
+
+type BenchmarkInconclusiveReason = 'missing-baseline' | 'missing-candidate' | 'no-raw-samples' | 'too-few-samples' | 'non-positive-median' | 'straddles-threshold';
+
+declare const BENCHMARK_INTERVAL_METHODS: readonly ["bootstrap", "mann-whitney"];
+
+type BenchmarkIntervalMethod = (typeof BENCHMARK_INTERVAL_METHODS)[number];
+
+interface SampleSummary {
+
+    n: number;
+    mean: number;
+    median: number;
+
+    stddev: number;
+    min: number;
+    max: number;
+
+    p95: number;
+
+    mad: number;
+}
+
+interface RatioInterval {
+
+    estimate: number;
+    low: number;
+    high: number;
+
+    level: number;
+    method: BenchmarkIntervalMethod;
+}
+
+interface BenchmarkInput {
+
+    id?: string;
+
+    name: string;
+
+    unit: string;
+
+    direction: BenchmarkDirection;
+
+    baseline?: readonly number[] | null;
+
+    candidate?: readonly number[] | null;
+
+    baselineSummary?: SampleSummary | null;
+
+    candidateSummary?: SampleSummary | null;
+}
+
+interface BenchmarkCompareOptions {
+
+    threshold?: number;
+
+    level?: number;
+
+    minSamples?: number;
+
+    method?: BenchmarkIntervalMethod;
+
+    resamples?: number;
+
+    seed?: number;
+}
+
+interface BenchmarkComparison {
+    id: string;
+    name: string;
+    unit: string;
+    direction: BenchmarkDirection;
+    baseline: SampleSummary | null;
+    candidate: SampleSummary | null;
+
+    ratio: number | null;
+
+    interval: RatioInterval | null;
+
+    band: {
+        low: number;
+        high: number;
+    };
+
+    threshold: number;
+    classification: BenchmarkClassification;
+
+    reason?: BenchmarkInconclusiveReason;
+
+    samples?: {
+        baseline: readonly number[] | null;
+        candidate: readonly number[] | null;
+    };
+}
+
+declare function mulberry32(seed: number): () => number;
+
+declare function median(samples: readonly number[]): number;
+
+declare function summarize(samples: readonly number[]): SampleSummary;
+
+declare function normalQuantile(p: number): number;
+
+declare function medianInterval(samples: readonly number[], level?: number): {
+    low: number;
+    high: number;
+    level: number;
+} | null;
+
+declare function bootstrapRatioInterval(baseline: readonly number[], candidate: readonly number[], { level, resamples, seed }?: {
+    level?: number;
+    resamples?: number;
+    seed?: number;
+}): RatioInterval | null;
+
+declare function mannWhitneyRatioInterval(baseline: readonly number[], candidate: readonly number[], { level }?: {
+    level?: number;
+}): RatioInterval | null;
+
+declare function noiseBand(threshold: number): {
+    low: number;
+    high: number;
+};
+
+declare function classifyInterval(interval: {
+    low: number;
+    high: number;
+}, band: {
+    low: number;
+    high: number;
+}, direction: BenchmarkDirection): {
+    classification: BenchmarkClassification;
+    reason?: BenchmarkInconclusiveReason;
+};
+
+declare function compareBenchmark(input: BenchmarkInput, options?: BenchmarkCompareOptions): BenchmarkComparison;
+
+declare function compareBenchmarks(inputs: readonly BenchmarkInput[], options?: BenchmarkCompareOptions): BenchmarkComparison[];
+
+declare function benchmarkImpact(comparison: BenchmarkComparison): number;
+
+declare function sortByImpact(comparisons: readonly BenchmarkComparison[]): BenchmarkComparison[];
+
+declare const INCONCLUSIVE_REASON_TEXT: Readonly<Record<BenchmarkInconclusiveReason, string>>;
+
+declare function benchmarkDisplayUnit(value: number, unit: string): {
+    unit: string;
+    factor: number;
+};
+
+declare function formatSignificant(value: number): string;
+
+declare function formatBenchmarkValue(value: number, unit: string): string;
+
+declare function formatPercent(share: number): string;
+
+declare function formatRatio(ratio: number | null): string;
+
+declare function formatRatioChange(ratio: number | null): string;
+
+interface BenchmarkDotNetMeasurement {
+    IterationMode: string;
+    IterationStage: string;
+    LaunchIndex?: number;
+    IterationIndex?: number;
+    Operations: number;
+    Nanoseconds: number;
+}
+
+interface BenchmarkDotNetStatistics {
+    OriginalValues?: number[];
+    N: number;
+    Min: number;
+    Max: number;
+    Mean: number;
+    Median: number;
+    StandardDeviation: number;
+    Percentiles?: {
+        P95?: number;
+    };
+}
+
+interface BenchmarkDotNetBenchmark {
+    FullName?: string;
+    Namespace?: string;
+    Type?: string;
+    Method?: string;
+    MethodTitle?: string;
+    Parameters?: string;
+    DisplayInfo?: string;
+    Statistics?: BenchmarkDotNetStatistics | null;
+    Measurements?: BenchmarkDotNetMeasurement[];
+}
+
+interface BenchmarkDotNetReport {
+    Title?: string;
+    Benchmarks: BenchmarkDotNetBenchmark[];
+}
+
+interface BenchmarkRun {
+    id: string;
+    name: string;
+    unit: string;
+    direction: BenchmarkDirection;
+
+    samples: number[] | null;
+
+    summary: SampleSummary;
+
+    source: 'measurements' | 'original-values' | 'statistics';
+}
+
+declare function fromBenchmarkDotNet(report: BenchmarkDotNetReport): BenchmarkRun[];
+
+declare function pairBenchmarkRuns(baseline: readonly BenchmarkRun[], candidate: readonly BenchmarkRun[]): BenchmarkInput[];
+
+declare function kernelDensity(samples: readonly number[], from: number, to: number, points?: number): Array<{
+    value: number;
+    density: number;
+}>;
+
+declare const BENCHMARK_COMPARE_VARIANTS: {
+    readonly sort: readonly ["impact", "input", "name"];
+    readonly density: readonly ["regular", "compact"];
+    readonly plot: readonly ["interval", "none"];
+    readonly layout: readonly ["auto", "table", "panels"];
+};
+
+type BenchmarkCompareLayout = (typeof BENCHMARK_COMPARE_VARIANTS.layout)[number];
+
+type BenchmarkCompareSort = (typeof BENCHMARK_COMPARE_VARIANTS.sort)[number];
+interface BenchmarkCompareProps extends HTMLAttributes<HTMLDivElement> {
+
+    comparisons: readonly BenchmarkComparison[];
+
+    sort?: BenchmarkCompareSort;
+
+    density?: 'regular' | 'compact';
+
+    plot?: 'interval' | 'none';
+
+    domain?: readonly [low: number, high: number];
+
+    caption?: string;
+
+    layout?: BenchmarkCompareLayout;
+}
+
+declare const BenchmarkCompare: react.ForwardRefExoticComponent<BenchmarkCompareProps & react.RefAttributes<HTMLDivElement>>;
+
+declare const DISTRIBUTION_COMPARE_VARIANTS: {
+    readonly variant: readonly ["strip", "violin"];
+    readonly scale: readonly ["linear", "log"];
+    readonly density: readonly ["regular", "compact"];
+};
+
+type DistributionCompareVariant = (typeof DISTRIBUTION_COMPARE_VARIANTS.variant)[number];
+interface DistributionCompareProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    baseline: readonly number[];
+
+    candidate: readonly number[];
+
+    unit: string;
+
+    direction?: BenchmarkDirection;
+
+    comparison?: BenchmarkComparison;
+
+    options?: BenchmarkCompareOptions;
+
+    variant?: DistributionCompareVariant;
+
+    scale?: 'linear' | 'log';
+
+    density?: 'regular' | 'compact';
+
+    level?: number;
+
+    title?: string;
+
+    labels?: {
+        baseline?: string;
+        candidate?: string;
+    };
+}
+
+declare const DistributionCompare: react.ForwardRefExoticComponent<DistributionCompareProps & react.RefAttributes<HTMLDivElement>>;
+
+declare const BENCHMARK_TREND_VARIANTS: {
+    readonly interval: readonly ["whisker", "ribbon", "none"];
+    readonly density: readonly ["regular", "compact"];
+};
+
+type BenchmarkTrendInterval = (typeof BENCHMARK_TREND_VARIANTS.interval)[number];
+
+interface BenchmarkTrendPoint {
+
+    commit: string;
+
+    timestamp: string;
+
+    tag?: string;
+
+    value: number;
+
+    low?: number;
+
+    high?: number;
+}
+interface BenchmarkTrendProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    points: readonly BenchmarkTrendPoint[];
+
+    candidate?: BenchmarkTrendPoint;
+
+    unit: string;
+
+    direction?: BenchmarkDirection;
+
+    threshold?: number;
+
+    interval?: BenchmarkTrendInterval;
+
+    density?: 'regular' | 'compact';
+
+    title?: string;
+}
+
+declare const BenchmarkTrend: react.ForwardRefExoticComponent<BenchmarkTrendProps & react.RefAttributes<HTMLDivElement>>;
 
 type LogFieldValue = string | number | boolean;
 
@@ -4814,6 +5288,10 @@ export {
   type AssessmentOutcome,
   Avatar,
   type AvatarProps,
+  BENCHMARK_CLASSIFICATIONS,
+  BENCHMARK_COMPARE_VARIANTS,
+  BENCHMARK_INTERVAL_METHODS,
+  BENCHMARK_TREND_VARIANTS,
   BUTTON_APPEARANCES,
   Badge,
   type BadgeProps,
@@ -4822,6 +5300,26 @@ export {
   type BarChartProps,
   BeforeAfter,
   type BeforeAfterProps,
+  type BenchmarkClassification,
+  BenchmarkCompare,
+  type BenchmarkCompareLayout,
+  type BenchmarkCompareOptions,
+  type BenchmarkCompareProps,
+  type BenchmarkCompareSort,
+  type BenchmarkComparison,
+  type BenchmarkDirection,
+  type BenchmarkDotNetBenchmark,
+  type BenchmarkDotNetMeasurement,
+  type BenchmarkDotNetReport,
+  type BenchmarkDotNetStatistics,
+  type BenchmarkInconclusiveReason,
+  type BenchmarkInput,
+  type BenchmarkIntervalMethod,
+  type BenchmarkRun,
+  BenchmarkTrend,
+  type BenchmarkTrendInterval,
+  type BenchmarkTrendPoint,
+  type BenchmarkTrendProps,
   type BlogAuthor,
   BlogPost,
   type BlogPostProps,
@@ -4886,6 +5384,7 @@ export {
   DEFAULT_PRICING_TIERS,
   DEFAULT_PULL_REQUEST,
   DEFAULT_REVIEW_REPORT,
+  DISTRIBUTION_COMPARE_VARIANTS,
   DIVIDER_MARKS,
   DIVIDER_PATTERNS,
   DataTable,
@@ -4910,6 +5409,9 @@ export {
   type DiffSign,
   DiffView,
   type DiffViewProps,
+  DistributionCompare,
+  type DistributionCompareProps,
+  type DistributionCompareVariant,
   Divider,
   type DividerProps,
   type DividerVariant,
@@ -5008,7 +5510,11 @@ export {
   GanttChart,
   type GanttChartProps,
   type GanttItem,
+  type GitHubActionsJob,
+  type GitHubActionsRun,
+  type GitHubActionsStep,
   GitHubIcon,
+  type GitHubRunTraceOptions,
   Glyph,
   type GlyphProps,
   HEADING_EMPHASIS,
@@ -5018,6 +5524,7 @@ export {
   type Hue,
   type HueAgreementCheck,
   type HueRef,
+  INCONCLUSIVE_REASON_TEXT,
   INK_WEIGHT,
   IdChip,
   type IdChipProps,
@@ -5092,6 +5599,10 @@ export {
   MetricStrip,
   type MetricStripProps,
   type MetricTone,
+  Minimap,
+  type MinimapMark,
+  type MinimapProps,
+  type MinimapTone,
   MobileNav,
   type MobileNavProps,
   Modal,
@@ -5152,6 +5663,7 @@ export {
   RadioGroup,
   type RadioGroupProps,
   type RadioProps,
+  type RatioInterval,
   type RecommendedColourClass,
   type RecommendedColourNamespace,
   type RecommendedColourProperty,
@@ -5185,6 +5697,7 @@ export {
   SYSTEM_LEVEL,
   SaasLandingPage,
   type SaasLandingPageProps,
+  type SampleSummary,
   type SectionAlign,
   type SectionColumns,
   SectionContainer,
@@ -5371,6 +5884,7 @@ export {
   type TraceViewerProps,
   TraceWaterfall,
   type TraceWaterfallProps,
+  type TraceWindow,
   TrackCard,
   type TrackCardProps,
   type TrackItem,
@@ -5388,9 +5902,13 @@ export {
   type UseCopyToClipboardResult,
   type UseTraceClockOptions,
   type UseTraceReplayOptions,
+  VIEWPORT_FULL_WINDOW,
+  VIEWPORT_MIN_WINDOW,
   VerdictBand,
   type VerdictBandProps,
   type VerdictTone,
+  type ViewportRows,
+  type ViewportWindow,
   WEB_FLOOR,
   XIcon,
   accentVar,
@@ -5401,18 +5919,28 @@ export {
   auditHueAgreement,
   auditSelectionDevices,
   auditTextHierarchy,
+  benchmarkDisplayUnit,
+  benchmarkImpact,
+  bootstrapRatioInterval,
   borderVar,
   bucketIndex,
   bucketPercentile,
   bucketTimes,
   buildFlame,
   buildTrace,
+  centreViewportRows,
   childrenToText,
+  ciConclusionStatus,
   clampFlameDepth,
   clampFlameWindow,
   clampToRange,
+  clampViewportRows,
+  clampViewportWindow,
+  classifyInterval,
   cn,
   collectHeadings,
+  compareBenchmark,
+  compareBenchmarks,
   composite,
   contrastRatio,
   countDiff,
@@ -5428,6 +5956,7 @@ export {
   fitFlameDepth,
   fitFlameLabel,
   fitFlameWindow,
+  fitViewportWindow,
   flameDeltaTone,
   flameFromTrace,
   flamePath,
@@ -5436,6 +5965,7 @@ export {
   fontVar,
   formatAge,
   formatAlertDuration,
+  formatBenchmarkValue,
   formatClock,
   formatCount,
   formatDay,
@@ -5444,17 +5974,23 @@ export {
   formatFlameShare,
   formatFlameValue,
   formatLatencyRange,
+  formatPercent,
   formatRange,
   formatRangeDuration,
+  formatRatio,
+  formatRatioChange,
   formatRequests,
   formatServiceCount,
   formatServiceErrorRate,
   formatShare,
+  formatSignificant,
   formatTimeTick,
   formatTimestamp,
   formatTraceDuration,
+  fromBenchmarkDotNet,
   getRecommendedColours,
   getThemeInitScript,
+  githubRunToSpans,
   heatmapCells,
   highlightLogText,
   histogram,
@@ -5466,6 +6002,7 @@ export {
   isMedium,
   isRecommendedColourClass,
   isThemeLevel,
+  kernelDensity,
   latencyBuckets,
   latencyExtent,
   latencyRowPosition,
@@ -5473,15 +6010,24 @@ export {
   linearBuckets,
   logTicks,
   lookupField,
+  mannWhitneyRatioInterval,
   matchFilters,
   matchLogEntry,
   matchTraceSpan,
   mdxComponents,
+  median,
+  medianInterval,
+  mulberry32,
   nearestLogIndex,
   nextLevel,
+  noiseBand,
+  normalQuantile,
   normaliseRange,
+  pairBenchmarkRuns,
   panFlameDepth,
   panFlameWindow,
+  panViewportRows,
+  panViewportWindow,
   parseColor,
   parseFilter,
   parseFoldedStacks,
@@ -5498,6 +6044,7 @@ export {
   resolveFlameWindow,
   sameFilter,
   sameFlameWindow,
+  sameViewportWindow,
   scanRules,
   scanTokenRules,
   searchFlame,
@@ -5509,9 +6056,11 @@ export {
   shareAbove,
   slugify,
   sortAlerts,
+  sortByImpact,
   sortLogEntries,
   statusAppearance,
   summariseIncident,
+  summarize,
   surfaceVar,
   textVar,
   timeTicks,
@@ -5535,4 +6084,6 @@ export {
   zoomFlame,
   zoomFlameDepth,
   zoomFlameWindow,
+  zoomViewportRows,
+  zoomViewportWindow,
 };

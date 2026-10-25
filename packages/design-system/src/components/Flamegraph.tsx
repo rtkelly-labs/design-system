@@ -15,6 +15,7 @@ import {
   type ReactNode,
 } from 'react';
 import { cn, recipe } from '../lib/recipe';
+import { Minimap, type MinimapMark, type MinimapTone } from './Minimap';
 import {
   clampFlameDepth,
   clampFlameWindow,
@@ -91,7 +92,6 @@ const flamegraph = recipe({
     controls: 'flex items-center gap-1 @min-[560px]:flex-wrap',
     menu: 'absolute right-0 top-full z-10 mt-1 flex gap-1 border border-edge-strong bg-surface-base p-1 shadow-hard-sm',
     control: 'h-7 min-w-7 cursor-pointer border border-edge-default px-2 text-content-secondary hover:border-edge-strong hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary disabled:cursor-default disabled:opacity-40 @max-[560px]:min-h-11 @max-[560px]:min-w-11',
-    minimap: 'block w-full cursor-grab touch-none select-none border border-edge-subtle',
     marker: 'flex h-6 w-full cursor-pointer items-center justify-center border border-dashed border-edge-default text-content-secondary hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary @max-[560px]:min-h-11',
     frame: 'w-full min-w-0',
     chart: 'block w-full touch-pan-y select-none overflow-visible',
@@ -117,6 +117,16 @@ const TONE: Record<FlameDeltaTone, { rect: string; text: string; label: string }
   'shrank-large': { rect: 'fill-delta-removed', text: 'fill-content-inverse', label: 'shrank ≥ large' },
   new: { rect: 'fill-delta-added', text: 'fill-content-inverse', label: 'new frame' },
   unknown: { rect: 'fill-surface-sunken', text: 'fill-content-secondary', label: 'not computable' },
+};
+/** The same tones, as the shared minimap names them. */
+const MINIMAP_TONE: Record<FlameDeltaTone, MinimapTone> = {
+  'grew-large': 'added',
+  grew: 'added-ground',
+  same: 'neutral',
+  shrank: 'removed-ground',
+  'shrank-large': 'removed',
+  new: 'added',
+  unknown: 'muted',
 };
 const LEGEND_ORDER: FlameDeltaTone[] = ['grew-large', 'grew', 'same', 'shrank', 'shrank-large', 'new'];
 
@@ -397,6 +407,12 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   const ranked = useMemo(
     () => (list === 'never' ? [] : rankFlameFrames(profile, diff?.compatible ? diff : null, diffMetric)),
     [list, profile, diff, diffMetric],
+  );
+
+  // The minimap's marks: every frame, toned as the graph tones it.
+  const minimapMarks = useMemo<MinimapMark[]>(
+    () => profile.frames.map((frame) => ({ x0: frame.x, x1: frame.x + frame.width, row: frame.depth, tone: changes ? MINIMAP_TONE[flameDeltaTone(changes.get(frame.id), { metric: diffMetric, threshold, large })] : 'neutral' })),
+    [profile, changes, diffMetric, threshold, large],
   );
 
   const levels = depth.max - depth.min + 1;
@@ -785,16 +801,17 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
         </p>
       ) : null}
       {zoomed ? (
-        <FlameMinimap
-          profile={profile}
+        <Minimap
+          label="Profile overview"
+          marks={minimapMarks}
+          rows={profile.maxDepth + 1}
           window={win}
-          depth={depth}
-          orientation={orientation}
-          cssFlip={cssFlip}
-          width={width}
-          tone={changes ? (frame) => toneOf(changes.get(frame.id)) : null}
-          className={styles.minimap()}
-          onMove={(next, nextDepth) => { setWindow(next); setDepth(nextDepth); }}
+          rowWindow={depth}
+          rowOrder={orientation === 'flame' ? 'bottom-up' : 'top-down'}
+          pixelWidth={width}
+          height={MINIMAP_HEIGHT}
+          chartClassName={cssFlip ? '@max-[560px]:-scale-y-100' : undefined}
+          onWindowChange={(next, nextDepth) => { setWindow(next); if (nextDepth) setDepth(nextDepth); }}
         />
       ) : null}
       {marker('top')}
@@ -947,70 +964,6 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
 });
 
 Flamegraph.displayName = 'Flamegraph';
-
-interface FlameMinimapProps {
-  profile: FlameTree;
-  window: FlameWindow;
-  depth: FlameDepthWindow;
-  orientation: 'flame' | 'icicle';
-  cssFlip: boolean;
-  width: number;
-  tone: ((frame: FlameFrame) => FlameDeltaTone | null) | null;
-  className: string;
-  onMove: (window: FlameWindow, depth: FlameDepthWindow) => void;
-}
-
-/**
- * The whole profile in a strip, with the current window drawn over it on both
- * axes. Dragging it (or pressing anywhere on it) centres the window there —
- * across and down — which is how a phone pans depth without taking over the
- * page's vertical scroll.
- */
-function FlameMinimap({ profile, window: win, depth, orientation, cssFlip, width, tone, className, onMove }: FlameMinimapProps) {
-  const rows = profile.maxDepth + 1;
-  const row = MINIMAP_HEIGHT / rows;
-  const yOf = (level: number) => (orientation === 'flame' ? (profile.maxDepth - level) * row : level * row);
-  const top = orientation === 'flame' ? yOf(depth.max) : yOf(depth.min);
-  const dragging = useRef(false);
-  const moveTo = (event: PointerEvent<SVGSVGElement>) => {
-    const box = event.currentTarget.getBoundingClientRect();
-    if (box.width <= 0 || box.height <= 0) return;
-    const fx = (event.clientX - box.left) / box.width;
-    const fy = (event.clientY - box.top) / box.height;
-    const half = (win.end - win.start) / 2;
-    const level = orientation === 'flame' ? profile.maxDepth - fy * rows : fy * rows;
-    const span = depth.max - depth.min;
-    const min = Math.round(level - span / 2);
-    onMove(clampFlameWindow({ start: fx - half, end: fx + half }), clampFlameDepth(profile, { min, max: min + span }));
-  };
-  return (
-    <svg
-      aria-hidden="true"
-      data-slot="flamegraph-minimap"
-      width="100%"
-      height={MINIMAP_HEIGHT}
-      className={cn(className, cssFlip && '@max-[560px]:-scale-y-100')}
-      onPointerDown={(event) => { dragging.current = true; event.currentTarget.setPointerCapture?.(event.pointerId); moveTo(event); }}
-      onPointerMove={(event) => { if (dragging.current) moveTo(event); }}
-      onPointerUp={() => { dragging.current = false; }}
-      onPointerCancel={() => { dragging.current = false; }}
-    >
-      {profile.frames.map((frame) => {
-        if (frame.width * width < 1) return null;
-        const t = tone?.(frame);
-        return <rect key={frame.id} x={`${frame.x * 100}%`} y={yOf(frame.depth)} width={`${frame.width * 100}%`} height={Math.max(0.5, row - 0.5)} className={t ? TONE[t].rect : 'fill-surface-raised'} />;
-      })}
-      <rect
-        data-slot="flamegraph-minimap-window"
-        x={`${win.start * 100}%`}
-        y={top}
-        width={`${(win.end - win.start) * 100}%`}
-        height={(depth.max - depth.min + 1) * row}
-        className="fill-accent-primary/15 stroke-accent-primary stroke-2"
-      />
-    </svg>
-  );
-}
 
 /** What a frame-list row's bar measures: self time, or the size of the change in a diff. */
 function rankedSize(row: FlameRankedFrame, metric: 'self' | 'total'): number {
