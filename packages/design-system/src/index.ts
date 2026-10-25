@@ -181,6 +181,11 @@ export * from './components/BulletChart';
 export * from './lib/trace';
 export * from './components/TraceWaterfall';
 export * from './components/TraceViewer';
+// Profiles: folded stacks or a trace's self time as one flame model
+// (`lib/flame`) — layout, zoom, search and a diff that never guesses — drawn by
+// `Flamegraph`.
+export * from './lib/flame';
+export * from './components/Flamegraph';
 // Observability (#407): one time window and hover cursor that every view on a
 // page shares, and the views that follow it. Each works standalone too.
 export * from './lib/timeRange';

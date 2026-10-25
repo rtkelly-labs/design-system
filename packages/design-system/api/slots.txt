@@ -1,5 +1,6 @@
 activity-grid	ActivityGrid
 alert-list	AlertList
+alert-list-actions	AlertList
 alert-list-duration	AlertList
 alert-list-empty	AlertList
 alert-list-filter	AlertList
@@ -139,6 +140,12 @@ filter-bar-field	FilterBar
 filter-bar-input	FilterBar
 filter-bar-label	FilterBar
 filter-bar-summary	FilterBar
+flamegraph	Flamegraph
+flamegraph-breadcrumb	Flamegraph
+flamegraph-chart	Flamegraph
+flamegraph-frame	Flamegraph
+flamegraph-legend	Flamegraph
+flamegraph-status	Flamegraph
 flow-diagram	FlowDiagram
 freshness-indicator	FreshnessIndicator
 freshness-indicator-dot	FreshnessIndicator
