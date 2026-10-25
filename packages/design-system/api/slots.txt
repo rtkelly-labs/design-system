@@ -1,5 +1,6 @@
 activity-grid	ActivityGrid
 alert-list	AlertList
+alert-list-actions	AlertList
 alert-list-duration	AlertList
 alert-list-empty	AlertList
 alert-list-filter	AlertList

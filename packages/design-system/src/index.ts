@@ -179,6 +179,7 @@ export * from './components/BulletChart';
 // Traces: one React-free model (`lib/trace`) — layout, critical path, OTLP
 // parsing — drawn by the waterfall and the viewer around it.
 export * from './lib/trace';
+export * from './lib/ciTrace';
 export * from './components/TraceWaterfall';
 export * from './components/TraceViewer';
 // Observability (#407): one time window and hover cursor that every view on a
