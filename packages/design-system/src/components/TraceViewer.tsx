@@ -41,6 +41,8 @@ export interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'tit
   title?: string;
   /** The span whose details show on mount. Default: the first root. */
   defaultSelectedId?: string | null;
+  /** Span ids collapsed on mount, so a large trace (a CI run's steps) opens at the level that summarises it. */
+  defaultCollapsed?: readonly string[];
   /** Show the filter field. Default true. */
   searchable?: boolean;
   /**
@@ -69,7 +71,7 @@ const TRACE_REPLAY_SPEEDS = [0.25, 0.5, 1, 2, 4] as const;
  * spans start.
  */
 export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function TraceViewer(
-  { spans, now, title = 'Trace', defaultSelectedId, searchable = true, replay = false, autoPlay = false, loop = false, defaultSpeed = 1, className, ...props },
+  { spans, now, title = 'Trace', defaultSelectedId, defaultCollapsed, searchable = true, replay = false, autoPlay = false, loop = false, defaultSpeed = 1, className, ...props },
   ref,
 ) {
   const full = useMemo(() => buildTrace(spans, { now }), [spans, now]);
@@ -157,6 +159,7 @@ export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function Tr
           range={replay ? full.duration : undefined}
           playhead={replaying ? player.elapsed : undefined}
           animate={replay}
+          defaultCollapsed={defaultCollapsed}
         />
         <aside aria-label="Span details" data-part="details" className={styles.details()}>
           {selected ? (
