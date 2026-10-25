@@ -86,8 +86,8 @@ export const Playground: Story = {
   parameters: { docs: { description: { story: 'Paste an exported trace — from an OpenTelemetry collector’s file exporter, or spans written by hand — and the viewer redraws as you type. Broken lines are skipped, so a half-pasted stream still renders.' } } },
 };
 
-const mainRedSpans = githubRunToSpans(mainRedRun.run, mainRedRun.jobs);
-const observabilitySpans = githubRunToSpans(observabilityRun.run, observabilityRun.jobs);
+const mainRedSpans = githubRunToSpans(mainRedRun.run, mainRedRun.jobs, { queue: false });
+const observabilitySpans = githubRunToSpans(observabilityRun.run, observabilityRun.jobs, { queue: false });
 const reportsSpans = githubRunToSpans(reportsRun.run, reportsRun.jobs);
 
 /** Every job collapsed but `open`: a run reads job by job until a job is expanded. */
@@ -100,7 +100,7 @@ export const CiRunFailed: Story = {
   parameters: { docs: { description: { story: 'A GitHub Actions run is a trace: the run is the root, each job a child, each step a grandchild. `visual (3)` is selected — the shard that failed, and with it the `ci` gate that waits on every shard. The critical path marks the job that decided how long the run took.' } } },
 };
 
-/** A green pull-request run, with the time each job waited for a runner. */
+/** A green pull-request run, job by job. */
 export const CiRunGreen: Story = {
   args: { spans: observabilitySpans, title: 'CI · PR 419 · 40dabc7', defaultCollapsed: jobsExcept(observabilityRun), defaultSelectedId: null },
   parameters: { docs: { description: { story: 'Every job passed. Read the waterfall for where the four minutes went: the visual shards are the long pole, and `verdict` and `ci` wait on all three.' } } },

@@ -63,7 +63,11 @@ export interface GitHubActionsRun {
 }
 
 export interface GitHubRunTraceOptions {
-  /** Add a `queued` span before each job that waited for a runner. Defaults to true. */
+  /**
+   * Add a `queued` span before each job that waited for a runner. Defaults to
+   * true. The wait is always on the job as `ci.queue.ms`, so turning the spans
+   * off loses no information — only rows, which a phone has no room for.
+   */
   queue?: boolean;
   /** Include steps under their jobs. Defaults to true. */
   steps?: boolean;
@@ -158,7 +162,7 @@ export function githubRunToSpans(
       start,
       end,
       status: job.status === 'completed' ? ciConclusionStatus(job.conclusion) : 'unset',
-      attributes: compact({ 'ci.job.id': job.id, 'ci.conclusion': job.conclusion, 'ci.runner.name': job.runner_name, url: job.html_url }),
+      attributes: compact({ 'ci.job.id': job.id, 'ci.conclusion': job.conclusion, 'ci.queue.ms': queued === undefined ? undefined : Math.max(0, start - queued), 'ci.runner.name': job.runner_name, url: job.html_url }),
     });
 
     if (!steps) continue;
