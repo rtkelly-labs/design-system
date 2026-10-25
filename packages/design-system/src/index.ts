@@ -197,6 +197,11 @@ export * from './components/TimeSeriesChart';
 export * from './lib/latency';
 export * from './components/LatencyHistogram';
 export * from './components/LatencyHeatmap';
+// Benchmarks with repeated samples: summaries, ratio intervals, classification, and the views.
+export * from './lib/benchmark';
+export * from './components/BenchmarkCompare';
+export * from './components/DistributionCompare';
+export * from './components/BenchmarkTrend';
 export * from './lib/logs';
 export * from './components/LogViewer';
 export * from './lib/filters';
