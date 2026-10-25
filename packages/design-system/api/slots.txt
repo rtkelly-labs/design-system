@@ -150,9 +150,13 @@ filter-bar-summary	FilterBar
 flamegraph	Flamegraph
 flamegraph-breadcrumb	Flamegraph
 flamegraph-chart	Flamegraph
+flamegraph-details	Flamegraph
 flamegraph-frame	Flamegraph
 flamegraph-legend	Flamegraph
 flamegraph-list	Flamegraph
+flamegraph-marker	Flamegraph
+flamegraph-minimap	Flamegraph
+flamegraph-minimap-window	Flamegraph
 flamegraph-status	Flamegraph
 flow-diagram	FlowDiagram
 freshness-indicator	FreshnessIndicator

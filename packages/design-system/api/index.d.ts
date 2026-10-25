@@ -2787,6 +2787,70 @@ interface FlameRankedFrame {
 
 declare function rankFlameFrames(tree: FlameTree, diff?: FlameDiff | null, metric?: 'self' | 'total'): FlameRankedFrame[];
 
+interface FlameWindow {
+    start: number;
+    end: number;
+}
+
+interface FlameDepthWindow {
+    min: number;
+    max: number;
+}
+
+declare const FLAME_MIN_WINDOW = 0.001;
+
+declare const FLAME_FULL_WINDOW: FlameWindow;
+
+declare function clampFlameWindow(window: FlameWindow): FlameWindow;
+
+declare function zoomFlameWindow(window: FlameWindow, factor: number, anchor?: number): FlameWindow;
+
+declare function panFlameWindow(window: FlameWindow, delta: number): FlameWindow;
+
+declare function fitFlameWindow(tree: FlameTree, id?: string | null): FlameWindow;
+
+declare function flameSubtreeDepth(frame: FlameFrame): number;
+
+declare function clampFlameDepth(tree: FlameTree, depth: FlameDepthWindow): FlameDepthWindow;
+
+declare function zoomFlameDepth(tree: FlameTree, depth: FlameDepthWindow, factor: number): FlameDepthWindow;
+
+declare function panFlameDepth(tree: FlameTree, depth: FlameDepthWindow, delta: number): FlameDepthWindow;
+
+declare function fitFlameDepth(tree: FlameTree, id?: string | null, cap?: number): FlameDepthWindow;
+
+type FlameWindowSpec = readonly [number, number] | {
+    frameId: string;
+} | 'hottest' | 'all';
+
+declare function hottestFlameFrame(tree: FlameTree, diff?: FlameDiff | null, metric?: 'self' | 'total'): FlameFrame | null;
+
+declare function flameWindowFrame(tree: FlameTree, spec?: FlameWindowSpec | null, diff?: FlameDiff | null, metric?: 'self' | 'total'): FlameFrame | null;
+
+declare function resolveFlameWindow(tree: FlameTree, spec?: FlameWindowSpec | null, diff?: FlameDiff | null, metric?: 'self' | 'total'): FlameWindow;
+
+type FlameDepthSpec = readonly [number, number] | number;
+
+declare function resolveFlameDepth(tree: FlameTree, spec: FlameDepthSpec | null | undefined, options?: {
+    window?: FlameWindow;
+    anchorId?: string | null;
+    cap?: number;
+}): FlameDepthWindow;
+
+interface FlameWindowFrame {
+    frame: FlameFrame;
+
+    x: number;
+
+    width: number;
+
+    clipped: boolean;
+}
+
+declare function windowFlame(tree: FlameTree, window: FlameWindow, depth: FlameDepthWindow): FlameWindowFrame[];
+
+declare function sameFlameWindow(a: FlameWindow, b: FlameWindow): boolean;
+
 declare function describeFlameFrame(frame: FlameFrame, tree: FlameTree, change?: FlameFrameDelta, metric?: 'self' | 'total'): string;
 interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 
@@ -2808,11 +2872,29 @@ interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children
 
     list?: 'auto' | 'always' | 'never';
 
+    defaultWindow?: FlameWindowSpec;
+
+    window?: FlameWindow;
+
+    onWindowChange?: (window: FlameWindow) => void;
+
+    defaultDepth?: FlameDepthSpec;
+
+    depth?: FlameDepthWindow;
+
+    onDepthChange?: (depth: FlameDepthWindow) => void;
+
     zoomedId?: string | null;
 
     defaultZoomedId?: string | null;
 
     onZoomedChange?: (id: string | null) => void;
+
+    selectedId?: string | null;
+
+    defaultSelectedId?: string | null;
+
+    onSelectedChange?: (id: string | null) => void;
 
     search?: string;
 
@@ -4865,6 +4947,8 @@ export {
   FILTER_OPERATORS,
   FILTER_OPERATOR_LABELS,
   FIXED_COLOURS,
+  FLAME_FULL_WINDOW,
+  FLAME_MIN_WINDOW,
   FREE_TEXT_KEY,
   Feature,
   FeatureGrid,
@@ -4891,6 +4975,8 @@ export {
   type FlameDelta,
   type FlameDeltaTone,
   type FlameDeltaToneOptions,
+  type FlameDepthSpec,
+  type FlameDepthWindow,
   type FlameDiff,
   type FlameDiffIncompatible,
   type FlameDiffStatus,
@@ -4904,6 +4990,9 @@ export {
   type FlameTree,
   type FlameUnit,
   type FlameViewFrame,
+  type FlameWindow,
+  type FlameWindowFrame,
+  type FlameWindowSpec,
   Flamegraph,
   type FlamegraphProps,
   FlowDiagram,
@@ -5319,6 +5408,8 @@ export {
   buildFlame,
   buildTrace,
   childrenToText,
+  clampFlameDepth,
+  clampFlameWindow,
   clampToRange,
   cn,
   collectHeadings,
@@ -5334,10 +5425,14 @@ export {
   diffAnchor,
   diffFlame,
   filterLogEntries,
+  fitFlameDepth,
   fitFlameLabel,
+  fitFlameWindow,
   flameDeltaTone,
   flameFromTrace,
   flamePath,
+  flameSubtreeDepth,
+  flameWindowFrame,
   fontVar,
   formatAge,
   formatAlertDuration,
@@ -5363,6 +5458,7 @@ export {
   heatmapCells,
   highlightLogText,
   histogram,
+  hottestFlameFrame,
   inLogRange,
   intensityLevel,
   intensityThresholds,
@@ -5384,6 +5480,8 @@ export {
   nearestLogIndex,
   nextLevel,
   normaliseRange,
+  panFlameDepth,
+  panFlameWindow,
   parseColor,
   parseFilter,
   parseFoldedStacks,
@@ -5396,7 +5494,10 @@ export {
   rankFlameFrames,
   relativeLuminance,
   replayTrace,
+  resolveFlameDepth,
+  resolveFlameWindow,
   sameFilter,
+  sameFlameWindow,
   scanRules,
   scanTokenRules,
   searchFlame,
@@ -5430,5 +5531,8 @@ export {
   useTraceClock,
   useTraceReplay,
   visibleTraceSpans,
+  windowFlame,
   zoomFlame,
+  zoomFlameDepth,
+  zoomFlameWindow,
 };
