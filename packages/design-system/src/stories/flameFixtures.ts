@@ -46,7 +46,7 @@ const STACKS: Array<[string[], number]> = [
 ];
 
 /** The frame the candidate adds: a fraud screen that runs a regex per order line. */
-const FRAUD: [string[], number] = [[...handler, PLACE, 'Shop.Api.FraudScreen.Evaluate', 'System.Text.RegularExpressions.Regex.IsMatch'], 85];
+const FRAUD: [string[], number] = [[...handler, PLACE, 'Shop.Api.FraudScreen.Evaluate', 'System.Text.RegularExpressions.Regex.IsMatch'], 45];
 
 function fold(stacks: Array<[string[], number]>, seed: number, scale: (frames: string[]) => number = () => 1): string {
   const jitter = seeded(seed);
@@ -74,4 +74,29 @@ export function frameIdByName(tree: FlameTree, name: string): string | null {
 }
 
 export const SERIALIZER_FRAME = SERIALIZE;
+export const SERIALIZER_LEAF_FRAME = 'System.Text.Json.Utf8JsonWriter.WriteStringValue';
 export const PLACE_ORDER_FRAME = PLACE;
+
+/**
+ * A pricing-rule endpoint whose rule text goes through a recursive descent
+ * parser: `ParseExpression → ParseTerm → ParseFactor → ParseExpression …` for
+ * every nested parenthesis. Twelve levels of nesting put the deepest stacks
+ * past forty frames — what a real .NET profile of a parser or an async state
+ * machine looks like, and too deep to show whole on a phone.
+ */
+export const deepStackFolded = (() => {
+  const prefix = [KESTREL, HOSTING, ENDPOINT, 'Shop.Api.RulesController.Evaluate', 'Shop.Rules.RuleEngine.Evaluate', 'Shop.Rules.RuleCompiler.Compile'];
+  const cycle = ['Shop.Rules.Parser.ParseExpression', 'Shop.Rules.Parser.ParseTerm', 'Shop.Rules.Parser.ParseFactor'];
+  const jitter = seeded(23);
+  const lines: string[] = [];
+  for (let nesting = 1; nesting <= 12; nesting += 1) {
+    const path = [...prefix, ...Array.from({ length: nesting }, () => cycle).flat()];
+    const weight = (base: number) => Math.round(base * (1 + (jitter() - 0.5) * 0.1));
+    lines.push(`${[...path, 'Shop.Rules.Lexer.NextToken', 'System.String.Substring'].join(';')} ${weight(60 - nesting * 3)}`);
+    lines.push(`${[...path, 'Shop.Rules.SymbolTable.Resolve', 'System.Collections.Generic.Dictionary.FindValue'].join(';')} ${weight(25 + nesting)}`);
+    lines.push(`${path.join(';')} ${weight(8)}`);
+  }
+  lines.push(`${[...prefix, 'Shop.Rules.Emitter.EmitIl', 'System.Reflection.Emit.ILGenerator.Emit'].join(';')} 140`);
+  lines.push(`${[KESTREL, HOSTING, 'System.IO.Pipelines.Pipe.FlushAsync'].join(';')} 30`);
+  return lines.join('\n');
+})();

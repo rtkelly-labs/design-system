@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Flamegraph } from '../components/Flamegraph';
 import { buildFlame, flameFromTrace, parseFoldedStacks } from '../lib/flame';
-import { frameIdByName, ordersCandidateFolded, ordersProfileFolded, PLACE_ORDER_FRAME } from './flameFixtures';
+import { deepStackFolded, frameIdByName, ordersCandidateFolded, ordersProfileFolded, PLACE_ORDER_FRAME, SERIALIZER_LEAF_FRAME } from './flameFixtures';
 import { checkoutTrace } from './traceFixtures';
 
 const ordersProfile = buildFlame(parseFoldedStacks(ordersProfileFolded));
 const ordersCandidate = buildFlame(parseFoldedStacks(ordersCandidateFolded));
+const deepStack = buildFlame(parseFoldedStacks(deepStackFolded));
 
 const meta: Meta<typeof Flamegraph> = {
   title: 'Components/Data/Flamegraph',
@@ -66,18 +67,43 @@ const phone = (Story: () => React.JSX.Element) => (
   </div>
 );
 
-/** The profile in a 390px column: an icicle overview, and the hottest frames listed beneath it. */
+/** The profile in a 390px column: a label-free icicle overview, and the hottest frames listed beneath it. */
 export const Mobile: Story = {
   args: { profile: ordersProfile },
   decorators: [phone],
-  parameters: { docs: { description: { story: 'Below 560px of container width the graph becomes an overview, root on top, and the frame list carries the detail: full names wrapping at `.` and `(`, self and total shares, and a bar. The ten hottest show; the rest sit behind “Show all”. Tapping a row zooms the graph to that frame and opens its numbers under it.' } } },
+  parameters: { docs: { description: { story: 'Below 560px of container width the graph is bars only, 22px rows root on top, and the frame list carries the names: each row the full name wrapping at `.` and `(`, its self share and a bar. Tap a bar or a row to select it — its stack stays bright, the rest dims, and its numbers open under the graph with a “Zoom to frame” button. Pinch or double-tap to zoom; drag sideways to pan.' } } },
 };
 
 /** The diff in a 390px column: the list ranks frames by the size of their change. */
 export const DiffMobile: Story = {
   args: { profile: ordersCandidate, baseline: ordersProfile, mode: 'diff' },
   decorators: [phone],
-  parameters: { docs: { description: { story: 'The serializer’s leaves lead the list with their change in self time and the delta colour; the new fraud screen follows. The legend folds into two columns.' } } },
+  parameters: { docs: { description: { story: 'Bars keep their delta colours. Each list row carries one number — the change in self time — and its colour; the colour key sits behind “Key”.' } } },
+};
+
+/** The diff opening on its biggest change, with the serializer's hot leaf selected. */
+export const DiffMobileSelected: Story = {
+  args: {
+    profile: ordersCandidate,
+    baseline: ordersProfile,
+    mode: 'diff',
+    defaultWindow: 'hottest',
+    defaultSelectedId: frameIdByName(ordersCandidate, SERIALIZER_LEAF_FRAME),
+  },
+  decorators: [phone],
+  parameters: { docs: { description: { story: '`defaultWindow="hottest"` fits the grandparent of the leaf that changed most — here `ObjectResultExecutor.ExecuteAsync`, two levels above `WriteStringValue` — and `defaultSelectedId` selects that leaf, so the page opens on the regression with its stack lit and its row highlighted. Reset returns here; “Fit all” shows everything.' } } },
+};
+
+/** A numeric opening window: the middle fifth of the profile, with the minimap showing where it sits. */
+export const ZoomedWindow: Story = {
+  args: { profile: ordersProfile, defaultWindow: [0.4, 0.6] },
+  parameters: { docs: { description: { story: '`defaultWindow={[0.4, 0.6]}` opens on 20% of the profile. Frames crossing the edges are clipped, their labels kept on the visible part; the minimap above marks the window and drags to pan. A static render shows the same view.' } } },
+};
+
+/** A 44-level recursive descent parser, opened on a depth window with levels hidden above and below. */
+export const DeepStack: Story = {
+  args: { profile: deepStack, defaultDepth: [14, 30] },
+  parameters: { docs: { description: { story: 'A rules endpoint whose parser recurses `ParseExpression → ParseTerm → ParseFactor` per nested parenthesis. `defaultDepth={[14, 30]}` shows seventeen levels; `▲` and `▼` count the rest and pan to them, and the minimap marks the window on both axes. Alt+wheel, a vertical pinch or the levels buttons change how many show.' } } },
 };
 
 /** The frame list at desktop width, beside the full graph. */
