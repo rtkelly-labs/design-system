@@ -1,3 +1,4 @@
+import { diffAnchor } from './diff';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { DiffView } from './DiffView';
@@ -9,7 +10,7 @@ describe('DiffView', () => {
   it('folds behind a summary with the path, counts and an anchor', () => {
     const { container } = render(<DiffView path="metrics/duplication.txt" hunks={HUNKS} />);
     const details = container.querySelector('details')!;
-    expect(details.id).toBe('diff-metrics-duplication-txt');
+    expect(details.id).toBe(diffAnchor('metrics/duplication.txt'));
     expect(details.open).toBe(false);
     expect(screen.getByText('metrics/').className).toContain('text-content-muted');
     expect(screen.getByText('1 line added, 1 line removed')).toBeTruthy();
