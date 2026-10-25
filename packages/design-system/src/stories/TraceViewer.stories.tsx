@@ -5,6 +5,8 @@ import { parseTraceDocument } from '../lib/trace';
 import { TraceViewer } from '../components/TraceViewer';
 import { useTraceClock } from '../hooks/useTraceClock';
 import { checkoutTrace, deployTrace, orderTrace } from './traceFixtures';
+import { githubRunToSpans } from '../lib/ciTrace';
+import { mainRedRun, observabilityRun, reportsRun } from './ciRunFixtures';
 
 const meta: Meta<typeof TraceViewer> = {
   title: 'Components/Data/TraceViewer',
@@ -82,4 +84,26 @@ function TracePlayground() {
 export const Playground: Story = {
   render: () => <TracePlayground />,
   parameters: { docs: { description: { story: 'Paste an exported trace — from an OpenTelemetry collector’s file exporter, or spans written by hand — and the viewer redraws as you type. Broken lines are skipped, so a half-pasted stream still renders.' } } },
+};
+
+const mainRedSpans = githubRunToSpans(mainRedRun.run, mainRedRun.jobs);
+const observabilitySpans = githubRunToSpans(observabilityRun.run, observabilityRun.jobs);
+const reportsSpans = githubRunToSpans(reportsRun.run, reportsRun.jobs);
+
+/** A real red run on main, read through `githubRunToSpans`: run → job → step. */
+export const CiRunFailed: Story = {
+  args: { spans: mainRedSpans, title: 'CI · main · 27f9544', defaultSelectedId: 'job-' + String(mainRedRun.jobs.find((job) => job.name === 'visual (3)')?.id) },
+  parameters: { docs: { description: { story: 'A GitHub Actions run is a trace: the run is the root, each job a child, each step a grandchild. `visual (3)` is selected — the shard that failed, and with it the `ci` gate that waits on every shard. The critical path marks the job that decided how long the run took.' } } },
+};
+
+/** A green pull-request run, with the time each job waited for a runner. */
+export const CiRunGreen: Story = {
+  args: { spans: observabilitySpans, title: 'CI · PR 419 · 40dabc7', defaultSelectedId: null },
+  parameters: { docs: { description: { story: 'Every job passed. Read the waterfall for where the four minutes went: the visual shards are the long pole, and `verdict` and `ci` wait on all three.' } } },
+};
+
+/** The Reports workflow played back as it ran. Not snapshotted: it moves. */
+export const CiRunReplay: Story = {
+  args: { spans: reportsSpans, title: 'Reports · replay', replay: true, autoPlay: true, loop: true, defaultSelectedId: null },
+  parameters: { docs: { description: { story: 'A finished run replayed with `replay`: jobs appear as runners pick them up and steps grow to the playhead, the way the run looked while it was live.' } } },
 };
