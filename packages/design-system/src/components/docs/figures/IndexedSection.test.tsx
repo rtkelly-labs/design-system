@@ -28,4 +28,15 @@ describe('IndexedSection', () => {
     render(<IndexedSection ref={section} index="B" title="Checks" />);
     expect(section.current).toBe(screen.getByRole('region', { name: 'Checks' }));
   });
+
+  it('defaults to bg-surface-base standalone, and can be overridden via surface prop', () => {
+    const { container: standalone } = render(<IndexedSection index="1" title="Standalone" />);
+    expect(standalone.firstElementChild?.classList.contains('bg-surface-base')).toBe(true);
+
+    const { container: raised } = render(<IndexedSection index="2" title="Raised" surface="raised" />);
+    expect(raised.firstElementChild?.classList.contains('bg-surface-raised')).toBe(true);
+
+    const { container: transparent } = render(<IndexedSection index="3" title="Transparent" surface="transparent" />);
+    expect(transparent.firstElementChild?.classList.contains('bg-transparent')).toBe(true);
+  });
 });

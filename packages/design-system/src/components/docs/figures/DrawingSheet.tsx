@@ -1,8 +1,12 @@
+'use client';
+
 import type { ReactNode } from 'react';
 import * as React from 'react';
 import { cn } from '../../../lib/recipe';
 
 
+
+import { FigureSurfaceContext } from './FigureSurfaceContext';
 
 const LETTERS = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
 
@@ -65,7 +69,9 @@ export const DrawingSheet = React.forwardRef<HTMLDivElement, DrawingSheetProps>(
         </div>
       ) : null}
       <div data-slot="drawing-sheet-body" className="flex min-w-0 flex-col gap-6 p-3 sm:p-6">
-        {children}
+        <FigureSurfaceContext.Provider value="sheet">
+          {children}
+        </FigureSurfaceContext.Provider>
       </div>
     </div>
   );

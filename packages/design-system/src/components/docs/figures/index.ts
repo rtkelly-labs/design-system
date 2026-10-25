@@ -9,6 +9,7 @@ export * from './TreeDiagram';
 export * from './FileChangeTree';
 export * from './DrawingSheet';
 export * from './IndexedSection';
+export type { FigureSurface } from './FigureSurfaceContext';
 export * from './ActivityGrid';
 export * from './GanttChart';
 export * from './Terminal';
