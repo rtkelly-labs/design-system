@@ -58,7 +58,7 @@ const menu = recipe({
  *
  * @example
  * ```tsx
- * <Menu trigger={<Button size="sm">ACTIONS</Button>}>
+ * <Menu trigger={<Button appearance="raised" size="sm">ACTIONS</Button>}>
  *   <MenuItem onClick={rename}>Rename</MenuItem>
  *   <MenuItem disabled>Move</MenuItem>
  *   <MenuSeparator />

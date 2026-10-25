@@ -132,6 +132,12 @@ function DeployPreview({ log }: { log: string }) {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          // Narrow screens: the status drops below the filename as a unit, rather than each
+          // breaking mid-word into a stack of fragments.
+          flexWrap: 'wrap',
+          columnGap: '1rem',
+          rowGap: '0.25rem',
+          whiteSpace: 'nowrap',
         }}
       >
         <span>// TERMINAL_ENGINE_DEMO.sh</span>
@@ -192,12 +198,16 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
         eyebrow={<Badge accent="primary">⚡ NEXT-GEN SAAS INFRASTRUCTURE</Badge>}
         title={title}
         subtitle={subtitle}
+        // The deploy terminal is this hero's one heavy object, so the title is not boxed. The
+        // buttons keep their press shadow: it is every button's affordance, and a hero whose two
+        // actions differ reads as one of them broken. See docs/edge-hierarchy.md, option A.
+        framed={false}
         actions={
           <>
-            <Button variant="tertiary" bracketed size="lg">
+            <Button appearance="raised" variant="tertiary" bracketed size="lg">
               LAUNCH APPLICATION <ArrowRight size={18} />
             </Button>
-            <Button variant="default" bracketed size="lg">
+            <Button appearance="raised" variant="default" bracketed size="lg">
               EXPLORE ARCHITECTURE
             </Button>
           </>
@@ -210,7 +220,7 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
 
       <FeatureGrid title="[ BUILT FOR EXTREME PERFORMANCE & CONTROL ]">
         {FEATURES.map((feature) => (
-          <Feature key={feature.title} title={feature.title} accent={feature.accent} icon={feature.icon}>
+          <Feature key={feature.title} title={feature.title} accent={feature.accent} icon={feature.icon} weight="quiet">
             {feature.desc}
           </Feature>
         ))}
@@ -228,9 +238,10 @@ export const SaasLandingPage: React.FC<SaasLandingPageProps> = ({
             description={tier.description}
             features={tier.features}
             accent={tier.accent}
+            weight={tier.highlighted ? 'strong' : 'quiet'}
             badge={tier.highlighted ? 'POPULAR' : undefined}
             action={
-              <Button
+              <Button appearance="raised"
                 variant={tier.accent}
                 bracketed
                 style={{ width: '100%', justifyContent: 'center', display: 'flex' }}

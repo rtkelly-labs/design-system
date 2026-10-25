@@ -27,6 +27,8 @@ export interface HeroProps
   children?: ReactNode;
   /** Draw the headline's brackets. On by default, as `PageTitle` does. */
   bracketed?: boolean;
+  /** Draw the title in its double-ruled box. `true` by default; `false` when the hero's media leads. */
+  framed?: boolean;
   /** Where the headline and actions sit — `center` (the default) or `start`. */
   align?: SectionAlign;
   /** Merged into the `<section>`'s classes. */
@@ -64,12 +66,12 @@ const hero = recipe({
  *   eyebrow={<Badge accent="primary">NEW</Badge>}
  *   title="Ship the thing"
  *   subtitle="One line on why."
- *   actions={<Button href="/start" variant="tertiary" bracketed size="lg">START</Button>}
+ *   actions={<Button appearance="raised" href="/start" variant="tertiary" bracketed size="lg">START</Button>}
  * />
  * ```
  */
 export const Hero = forwardRef<HTMLElement, HeroProps>(function Hero(
-  { title, subtitle, eyebrow, actions, children, bracketed = true, align = 'center', className, ...props },
+  { title, subtitle, eyebrow, actions, children, bracketed = true, framed = true, align = 'center', className, ...props },
   ref,
 ) {
   const styles = hero({ align });
@@ -88,7 +90,7 @@ export const Hero = forwardRef<HTMLElement, HeroProps>(function Hero(
           {eyebrow}
         </span>
       ) : null}
-      <PageTitle id={titleId} subtitle={subtitle} bracketed={bracketed}>
+      <PageTitle id={titleId} subtitle={subtitle} bracketed={bracketed} framed={framed}>
         {title}
       </PageTitle>
       {actions ? (

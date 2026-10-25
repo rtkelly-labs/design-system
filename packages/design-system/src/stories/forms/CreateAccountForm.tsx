@@ -134,7 +134,7 @@ export function CreateAccountForm({
         title="Account created"
         lede={`We have sent a confirmation link to ${values.email}.`}
       >
-        <Button href="#sign-in" variant="primary" bracketed>
+        <Button appearance="raised" href="#sign-in" variant="primary" bracketed>
           CONTINUE TO SIGN IN
         </Button>
       </AuthFrame>
@@ -206,7 +206,7 @@ export function CreateAccountForm({
           error={errors.terms}
         />
         <div className="flex">
-          <Button
+          <Button appearance="raised"
             type="submit"
             variant="primary"
             bracketed

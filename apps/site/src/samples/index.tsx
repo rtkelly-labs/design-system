@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { FinanceConsole, ContentStudio } from '@/generated/admin';
-import { SaasLandingPage } from '@rtkelly13/design-system';
+import { DEFAULT_PULL_REQUEST, DEFAULT_REVIEW_REPORT, PullRequestPage, ReviewReportPage, SaasLandingPage } from '@rtkelly13/design-system';
 
 /**
  * The sample pages, keyed by the slug in `src/content/samples.ts`. Each is a
@@ -19,6 +19,12 @@ const SAMPLE_PAGES: Record<string, () => ReactNode> = {
   ),
   'admin-dashboard': () => <FinanceConsole />,
   'content-studio': () => <ContentStudio />,
+  'review-report': () => (
+    <main id="main-content" className="bg-surface-base text-content-primary">
+      <ReviewReportPage report={DEFAULT_REVIEW_REPORT} />
+    </main>
+  ),
+  'pull-request': () => <PullRequestPage id="main-content" pullRequest={DEFAULT_PULL_REQUEST} />,
 };
 
 export function SamplePage({ slug }: { slug: string }) {

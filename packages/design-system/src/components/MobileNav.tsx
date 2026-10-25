@@ -158,7 +158,7 @@ export const MobileNav = forwardRef<HTMLDivElement, MobileNavProps>(function Mob
 
   return (
     <>
-      <Button
+      <Button appearance="raised"
         type="button"
         size="sm"
         data-slot="mobile-nav-trigger"

@@ -376,6 +376,8 @@ export const ALLOWLIST: readonly Allow[] = [
   { inv: 'spill', component: 'ActivityGrid', where: 'activity-grid > span', reason: 'same month labels: spill into the empty neighbouring column is the layout' },
   { inv: 'font', component: 'ColophonCard', reason: 'the section-mark watermark is set in the system serif stack on purpose (font-serif); which serif a machine has differs, so the font name is not a stable key' },
   { inv: 'spill', component: 'AnchorHeading', where: 'anchor-heading', reason: 'a heading box at tight leading: the descender of the last line sits 2px past the line box, painted and unclipped' },
+  { inv: 'escape', where: 'divider-fill', reason: "Divider's fill is a long run of its mark, sized to whole characters with CSS round() and clipped there on purpose; it renders wherever a page draws a rule" },
+  { inv: 'spill', where: 'divider-fill', reason: 'same fill: the clipped tail is the remainder past the last whole character, never text a reader needs' },
 ];
 
 // Filtered in the page, not here (each is a general rule, not a finding to list):
