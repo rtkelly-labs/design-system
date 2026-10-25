@@ -85,6 +85,47 @@ describe('Flamegraph', () => {
     expect(screen.getByText(/cannot be compared/)).toBeTruthy();
   });
 
+  it('lists the hottest frames, and a row zooms the graph and opens the details panel', () => {
+    const onZoomedChange = vi.fn();
+    render(<Flamegraph profile={profile} list="always" onZoomedChange={onZoomedChange} />);
+    const list = screen.getByRole('region', { name: 'Hottest frames' });
+    const rows = within(list).getAllByRole('button');
+    expect(rows.map((row) => row.textContent?.split('self')[0])).toEqual(['render', 'parse', 'gc']);
+    fireEvent.click(rows[1]);
+    expect(onZoomedChange).toHaveBeenLastCalledWith('main;handle;parse');
+    expect(rows[1].getAttribute('aria-current')).toBe('true');
+    expect(screen.getByRole('region', { name: 'Frame details' }).textContent).toContain('self 30 samples · 30%');
+    expect(screen.getByRole('navigation', { name: 'Zoom path' })).toBeTruthy();
+  });
+
+  it('keeps the list in the markup for a narrow container by default, and leaves it out with never', () => {
+    const { container, rerender } = render(<Flamegraph profile={profile} />);
+    expect(container.querySelector('[data-slot="flamegraph-list"]')?.className).toContain('@max-[560px]:flex');
+    rerender(<Flamegraph profile={profile} list="never" />);
+    expect(container.querySelector('[data-slot="flamegraph-list"]')).toBeNull();
+  });
+
+  it('ranks a diff by change, removed frames included, with the delta on each row', () => {
+    const baseline = buildFlame('main;handle;parse 30\nmain;handle;render 50\nmain;legacy 5');
+    const candidate = buildFlame('main;handle;parse 40\nmain;handle;render 50\nmain;audit 6');
+    render(<Flamegraph profile={candidate} baseline={baseline} mode="diff" list="always" />);
+    const items = within(screen.getByRole('region', { name: 'Largest changes' })).getAllByRole('listitem');
+    expect(items.map((item) => item.getAttribute('data-frame-id'))).toEqual(['main;handle;parse', 'main;audit', 'main;legacy']);
+    expect(items[0].textContent).toContain('self +10 samples (+33.3%)');
+    expect(items[2].textContent).toContain('removed · was 5 samples');
+    expect(within(items[2]).queryByRole('button')).toBeNull();
+  });
+
+  it('adapts a default orientation in a narrow container without script, and honours an explicit one', () => {
+    const wide = buildFlame('main;Microsoft.AspNetCore.Routing.EndpointMiddleware.Invoke 90\nmain;gc 10');
+    const html = renderToStaticMarkup(<Flamegraph profile={wide} />);
+    expect(html).toContain('@max-[560px]:-scale-y-100');
+    // A label that fits at 960px but not on a phone gets a narrow stand-in.
+    expect(html).toContain('>Microsoft.AspNetCore.Routing.EndpointMiddleware.Invoke</text>');
+    expect(html).toMatch(/hidden @max-\[560px\]:inline[^>]*>Microsoft\.AspNetCore\.Routing\.EndpointMid[^<]*…<\/text>/);
+    expect(renderToStaticMarkup(<Flamegraph profile={wide} orientation="flame" />)).not.toContain('-scale-y-100');
+  });
+
   it('says so when there is nothing to draw', () => {
     render(<Flamegraph profile={buildFlame([])} />);
     expect(screen.getByText('No samples to display.')).toBeTruthy();

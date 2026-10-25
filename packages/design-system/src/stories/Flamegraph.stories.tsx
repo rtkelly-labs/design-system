@@ -58,3 +58,30 @@ export const Diff: Story = {
   args: { profile: ordersCandidate, baseline: ordersProfile, mode: 'diff' },
   parameters: { docs: { description: { story: 'Widths come from the candidate. The serializer’s leaves take the solid `delta-added` fill — more time, past the 25% mark — and `FraudScreen.Evaluate` is new, so it carries a dashed edge. Run-to-run noise stays under the 5% threshold and is drawn unchanged.' } } },
 };
+
+/** A phone-width column: the container query, not the viewport, decides — so the story pins the column. */
+const phone = (Story: () => React.JSX.Element) => (
+  <div className="w-[390px] max-w-full">
+    <Story />
+  </div>
+);
+
+/** The profile in a 390px column: an icicle overview, and the hottest frames listed beneath it. */
+export const Mobile: Story = {
+  args: { profile: ordersProfile },
+  decorators: [phone],
+  parameters: { docs: { description: { story: 'Below 560px of container width the graph becomes an overview, root on top, and the frame list carries the detail: full names wrapping at `.` and `(`, self and total shares, and a bar. The ten hottest show; the rest sit behind “Show all”. Tapping a row zooms the graph to that frame and opens its numbers under it.' } } },
+};
+
+/** The diff in a 390px column: the list ranks frames by the size of their change. */
+export const DiffMobile: Story = {
+  args: { profile: ordersCandidate, baseline: ordersProfile, mode: 'diff' },
+  decorators: [phone],
+  parameters: { docs: { description: { story: 'The serializer’s leaves lead the list with their change in self time and the delta colour; the new fraud screen follows. The legend folds into two columns.' } } },
+};
+
+/** The frame list at desktop width, beside the full graph. */
+export const WithFrameList: Story = {
+  args: { profile: ordersCandidate, baseline: ordersProfile, mode: 'diff', list: 'always' },
+  parameters: { docs: { description: { story: '`list="always"` keeps the ranked list at every width — a reading order for a review, where the graph is the map.' } } },
+};
