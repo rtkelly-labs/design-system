@@ -39,6 +39,11 @@ avatar-fallback	Avatar
 badge	Badge
 barchart	BarChart
 before-after	BeforeAfter
+benchmark-compare	BenchmarkCompare
+benchmark-compare-axis	BenchmarkCompare
+benchmark-compare-interval	BenchmarkCompare
+benchmark-compare-row	BenchmarkCompare
+benchmark-trend	BenchmarkTrend
 blog-post	BlogPost
 bracket-text	BracketText
 breadcrumbs	Breadcrumbs
@@ -81,6 +86,7 @@ diff-view-comment	DiffView
 diff-view-hunk	DiffView
 diff-view-path	DiffView
 diff-view-table	DiffView
+distribution-compare	DistributionCompare
 divider	Divider
 divider-fill	Divider
 doc-pager	DocPager
