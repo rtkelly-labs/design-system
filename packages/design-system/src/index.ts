@@ -186,6 +186,7 @@ export * from './components/TraceViewer';
 // (`lib/flame`) — layout, zoom, search and a diff that never guesses — drawn by
 // `Flamegraph`.
 export * from './lib/flame';
+export * from './lib/flamePalette';
 export * from './components/Flamegraph';
 // Viewports: the 2-D window maths dense charts share (`lib/viewport`), and the
 // minimap that shows the window over the whole — used by Flamegraph and TraceWaterfall.

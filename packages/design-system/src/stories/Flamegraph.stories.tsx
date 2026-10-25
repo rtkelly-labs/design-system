@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Flamegraph } from '../components/Flamegraph';
 import { buildFlame, flameFromTrace, parseFoldedStacks } from '../lib/flame';
-import { deepStackFolded, frameIdByName, ordersCandidateFolded, ordersProfileFolded, PLACE_ORDER_FRAME, SERIALIZER_LEAF_FRAME } from './flameFixtures';
+import { deepStackFolded, PLACE_ORDER_FRAME, SERVER_SERIALIZER_FRAME, serverCandidateFolded, serverProfileFolded, widestFrameIdByName } from './flameFixtures';
 import { checkoutTrace } from './traceFixtures';
 
-const ordersProfile = buildFlame(parseFoldedStacks(ordersProfileFolded));
-const ordersCandidate = buildFlame(parseFoldedStacks(ordersCandidateFolded));
+const serverProfile = buildFlame(parseFoldedStacks(serverProfileFolded));
+const serverCandidate = buildFlame(parseFoldedStacks(serverCandidateFolded));
 const deepStack = buildFlame(parseFoldedStacks(deepStackFolded));
 
 const meta: Meta<typeof Flamegraph> = {
@@ -24,27 +24,33 @@ const meta: Meta<typeof Flamegraph> = {
 export default meta;
 type Story = StoryObj<typeof Flamegraph>;
 
-/** A CPU profile of an ASP.NET Core order handler: database reads, pricing and JSON dominate. */
+/** A CPU profile of an ASP.NET Core API, zoomed out: the stacked towers a flame graph is read by. */
 export const CpuProfile: Story = {
-  args: { profile: ordersProfile },
-  parameters: { docs: { description: { story: 'About 1,700 samples of `POST /orders`, frames sorted by name as in a classic flame graph. Hover or focus a frame for its total, self time and share; click to zoom.' } } },
+  args: { profile: serverProfile },
+  parameters: { docs: { description: { story: 'About 20,000 samples across a thousand stacks: Kestrel and the middleware chain, MVC actions, async state machines, EF Core down to the Npgsql socket, System.Text.Json walking each DTO, a tiering JIT, GC and an idle thread pool. Frames are sorted by name and filled from the `warm` palette — each name hashes to a step between the danger and warning roles — so neighbouring towers separate. Hover for a frame’s numbers; click to select its stack; double-click to zoom.' } } },
+};
+
+/** The same profile coloured by namespace, as speedscope does. */
+export const PackagePalette: Story = {
+  args: { profile: serverProfile, palette: 'package' },
+  parameters: { docs: { description: { story: '`palette="package"` gives `System.*`, `Microsoft.*`, `Npgsql.*`, the app and the runtime’s `[GC]`/`[JIT]` frames a role each, so a glance says whose code a tower is.' } } },
 };
 
 /** The same profile hanging from the top, for pages that read downward. */
 export const Icicle: Story = {
-  args: { profile: ordersProfile, orientation: 'icicle' },
+  args: { profile: serverProfile, orientation: 'icicle' },
   parameters: { docs: { description: { story: '`orientation="icicle"` puts the root at the top. Up and Down on the keyboard follow the drawing, so they flip with it.' } } },
 };
 
 /** Zoomed into `OrderService.PlaceAsync`, with the breadcrumb back out. */
 export const Zoomed: Story = {
-  args: { profile: ordersProfile, defaultZoomedId: frameIdByName(ordersProfile, PLACE_ORDER_FRAME) },
+  args: { profile: serverProfile, defaultZoomedId: widestFrameIdByName(serverProfile, PLACE_ORDER_FRAME) },
   parameters: { docs: { description: { story: 'The zoom target spans the full width; its ancestors stay drawn beneath it as context. `defaultZoomedId` sets it, so a static report can ship a zoomed view.' } } },
 };
 
 /** Searching highlights matching frames and reports the share of the profile beneath them. */
 export const Search: Story = {
-  args: { profile: ordersProfile, search: 'System.Text.Json' },
+  args: { profile: serverProfile, search: 'System.Text.Json' },
   parameters: { docs: { description: { story: 'Every frame whose name contains `System.Text.Json` takes the accent fill; the status line counts nested matches once, so the percentage is a real share of the profile.' } } },
 };
 
@@ -56,8 +62,8 @@ export const FromTrace: Story = {
 
 /** The candidate against the baseline: the response serializer about 30% slower, and a new fraud screen. */
 export const Diff: Story = {
-  args: { profile: ordersCandidate, baseline: ordersProfile, mode: 'diff' },
-  parameters: { docs: { description: { story: 'Widths come from the candidate. The serializer’s leaves take the solid `delta-added` fill — more time, past the 25% mark — and `FraudScreen.Evaluate` is new, so it carries a dashed edge. Run-to-run noise stays under the 5% threshold and is drawn unchanged.' } } },
+  args: { profile: serverCandidate, baseline: serverProfile, mode: 'diff' },
+  parameters: { docs: { description: { story: 'Widths come from the candidate. Every frame under `JsonSerializer.SerializeAsync` takes the solid `delta-added` fill — more time, past the 25% mark — and `FraudScreen.Evaluate` is new, so it carries a dashed edge. Unchanged frames stay on the surface, varied by name so the towers still read; run-to-run noise mostly stays under the 5% threshold.' } } },
 };
 
 /** A phone-width column: the container query, not the viewport, decides — so the story pins the column. */
@@ -67,36 +73,35 @@ const phone = (Story: () => React.JSX.Element) => (
   </div>
 );
 
-/** The profile in a 390px column: a label-free icicle overview, and the hottest frames listed beneath it. */
+/** The profile in a 390px column: bars only, zoomed out, root at the bottom, and the hottest frames listed beneath. */
 export const Mobile: Story = {
-  args: { profile: ordersProfile },
+  args: { profile: serverProfile },
   decorators: [phone],
-  parameters: { docs: { description: { story: 'Below 560px of container width the graph is bars only, 22px rows root on top, and the frame list carries the names: each row the full name wrapping at `.` and `(`, its self share and a bar. Tap a bar or a row to select it — its stack stays bright, the rest dims, and its numbers open under the graph with a “Zoom to frame” button. Pinch or double-tap to zoom; drag sideways to pan.' } } },
+  parameters: { docs: { description: { story: 'Below 560px of container width the graph is bars only, in 12px rows so the whole profile fits the screen, and the frame list carries the names: each row the full name wrapping at `.` and `(`, its self share and a bar. Tap a bar or a row to select it — its stack stays bright, the rest dims, and its numbers open under the graph with a “Zoom to frame” button. Pinch or double-tap to zoom; drag sideways to pan.' } } },
 };
 
 /** The diff in a 390px column: the list ranks frames by the size of their change. */
 export const DiffMobile: Story = {
-  args: { profile: ordersCandidate, baseline: ordersProfile, mode: 'diff' },
+  args: { profile: serverCandidate, baseline: serverProfile, mode: 'diff' },
   decorators: [phone],
   parameters: { docs: { description: { story: 'Bars keep their delta colours. Each list row carries one number — the change in self time — and its colour; the colour key sits behind “Key”.' } } },
 };
 
-/** The diff opening on its biggest change, with the serializer's hot leaf selected. */
+/** The diff, zoomed out, with the serializer selected: its stack lit, everything else dimmed. */
 export const DiffMobileSelected: Story = {
   args: {
-    profile: ordersCandidate,
-    baseline: ordersProfile,
+    profile: serverCandidate,
+    baseline: serverProfile,
     mode: 'diff',
-    defaultWindow: 'hottest',
-    defaultSelectedId: frameIdByName(ordersCandidate, SERIALIZER_LEAF_FRAME),
+    defaultSelectedId: widestFrameIdByName(serverCandidate, SERVER_SERIALIZER_FRAME),
   },
   decorators: [phone],
-  parameters: { docs: { description: { story: '`defaultWindow="hottest"` fits the grandparent of the leaf that changed most — here `ObjectResultExecutor.ExecuteAsync`, two levels above `WriteStringValue` — and `defaultSelectedId` selects that leaf, so the page opens on the regression with its stack lit and its row highlighted. Reset returns here; “Fit all” shows everything.' } } },
+  parameters: { docs: { description: { story: '`defaultSelectedId` selects the widest `JsonSerializer.SerializeAsync` without zooming: the regression’s tower stays bright inside the whole profile and its numbers sit under the graph. “Zoom to frame” in that panel fits it; `defaultWindow="hottest"` would open fitted to the biggest change instead.' } } },
 };
 
 /** A numeric opening window: the middle fifth of the profile, with the minimap showing where it sits. */
 export const ZoomedWindow: Story = {
-  args: { profile: ordersProfile, defaultWindow: [0.4, 0.6] },
+  args: { profile: serverProfile, defaultWindow: [0.4, 0.6] },
   parameters: { docs: { description: { story: '`defaultWindow={[0.4, 0.6]}` opens on 20% of the profile. Frames crossing the edges are clipped, their labels kept on the visible part; the minimap above marks the window and drags to pan. A static render shows the same view.' } } },
 };
 
@@ -108,6 +113,6 @@ export const DeepStack: Story = {
 
 /** The frame list at desktop width, beside the full graph. */
 export const WithFrameList: Story = {
-  args: { profile: ordersCandidate, baseline: ordersProfile, mode: 'diff', list: 'always' },
+  args: { profile: serverCandidate, baseline: serverProfile, mode: 'diff', list: 'always' },
   parameters: { docs: { description: { story: '`list="always"` keeps the ranked list at every width — a reading order for a review, where the graph is the map.' } } },
 };

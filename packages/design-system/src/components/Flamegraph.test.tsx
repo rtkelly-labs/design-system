@@ -180,14 +180,24 @@ describe('Flamegraph', () => {
     expect(within(items[2]).queryByRole('button')).toBeNull();
   });
 
-  it('adapts a default orientation in a narrow container without script, and honours an explicit one', () => {
+  it('draws a flame — root at the bottom — at every width, with labels hidden in a narrow container without script', () => {
     const wide = buildFlame('main;Microsoft.AspNetCore.Routing.EndpointMiddleware.Invoke 90\nmain;gc 10');
     const html = renderToStaticMarkup(<Flamegraph profile={wide} />);
-    expect(html).toContain('@max-[560px]:-scale-y-100');
+    expect(html).toContain('data-orientation="flame"');
+    expect(html).not.toContain('-scale-y-100');
     // Narrow, the overview is bars only: every label is hidden by the container query.
     expect(html).toMatch(/@max-\[560px\]:hidden[^>]*>Microsoft\.AspNetCore\.Routing\.EndpointMiddleware\.Invoke<\/text>/);
     expect(html).not.toMatch(/<text(?![^>]*@max-\[560px\]:hidden)[^>]*>(?!total|self|Δ)/);
-    expect(renderToStaticMarkup(<Flamegraph profile={wide} orientation="flame" />)).not.toContain('-scale-y-100');
+  });
+
+  it('fills frames from the warm palette by default, and from the surfaces with palette="theme"', () => {
+    const { container, rerender } = render(<Flamegraph profile={profile} />);
+    const fill = () => container.querySelector('[data-frame-id="main;handle;parse"] rect')!.getAttribute('class')!;
+    expect(fill()).toMatch(/fill-intent-danger|fill-intent-warning|color-mix\(in_oklch,var\(--color-intent-danger\)/);
+    rerender(<Flamegraph profile={profile} palette="theme" />);
+    expect(fill()).toContain('fill-surface-raised');
+    rerender(<Flamegraph profile={profile} palette="package" />);
+    expect(fill()).toContain('accent-quiet');
   });
 
   it('says so when there is nothing to draw', () => {

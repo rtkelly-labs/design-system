@@ -4,10 +4,10 @@ import { Minimap, type MinimapMark } from '../components/Minimap';
 import { buildFlame, parseFoldedStacks } from '../lib/flame';
 import { buildTrace } from '../lib/trace';
 import type { ViewportRows, ViewportWindow } from '../lib/viewport';
-import { ordersProfileFolded } from './flameFixtures';
+import { serverProfileFolded } from './flameFixtures';
 import { orderTrace } from './traceFixtures';
 
-const profile = buildFlame(parseFoldedStacks(ordersProfileFolded));
+const profile = buildFlame(parseFoldedStacks(serverProfileFolded));
 const flameMarks: MinimapMark[] = profile.frames.map((frame) => ({ x0: frame.x, x1: frame.x + frame.width, row: frame.depth, tone: frame.parentId === null ? 'muted' : 'neutral' }));
 const trace = buildTrace(orderTrace);
 const traceMarks: MinimapMark[] = trace.spans.map((span, index) => ({

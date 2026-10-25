@@ -2951,6 +2951,35 @@ declare function windowFlame(tree: FlameTree, window: FlameWindow, depth: FlameD
 
 declare function sameFlameWindow(a: FlameWindow, b: FlameWindow): boolean;
 
+type FlameRole = 'intent.danger' | 'intent.warning' | 'intent.success' | 'accent.primary' | 'accent.tertiary' | 'accent.quiet' | 'surface.base' | 'surface.raised' | 'text.primary';
+
+interface FlameSwatch {
+
+    fill: string;
+
+    label: 'fill-content-inverse' | 'fill-content-primary';
+
+    mix: readonly [FlameRole] | readonly [FlameRole, number, FlameRole];
+}
+
+type FlamePalette = 'warm' | 'package' | 'theme';
+
+declare const WARM_SWATCHES: readonly FlameSwatch[];
+
+type FlamePackage = 'app' | 'system' | 'microsoft' | 'data' | 'runtime' | 'other';
+
+declare const PACKAGE_SWATCHES: Readonly<Record<FlamePackage, readonly FlameSwatch[]>>;
+
+declare const SAME_SWATCHES: readonly FlameSwatch[];
+
+declare function flameNameHash(name: string): number;
+
+declare function flamePackage(name: string): FlamePackage;
+
+declare function flameSwatch(palette: FlamePalette, name: string): FlameSwatch | null;
+
+declare function flameSameSwatch(name: string): FlameSwatch;
+
 declare function describeFlameFrame(frame: FlameFrame, tree: FlameTree, change?: FlameFrameDelta, metric?: 'self' | 'total'): string;
 interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 
@@ -2967,6 +2996,8 @@ interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children
     large?: number;
 
     normalize?: boolean;
+
+    palette?: FlamePalette;
 
     orientation?: 'flame' | 'icicle';
 
@@ -5486,9 +5517,13 @@ export {
   type FlameFrameDelta,
   type FlameFromTraceOptions,
   type FlameOrder,
+  type FlamePackage,
+  type FlamePalette,
   type FlameRankedFrame,
+  type FlameRole,
   type FlameSearchResult,
   type FlameStack,
+  type FlameSwatch,
   type FlameTree,
   type FlameUnit,
   type FlameViewFrame,
@@ -5625,6 +5660,7 @@ export {
   Option,
   type OverlayAlign,
   type OverlaySide,
+  PACKAGE_SWATCHES,
   PALETTE_HUES,
   PageHeader,
   type PageHeaderProps,
@@ -5685,6 +5721,7 @@ export {
   type ReviewValue,
   type ReviewerState,
   type Rgb,
+  SAME_SWATCHES,
   SAMPLE_BASELINE_COMMIT,
   SAMPLE_CALLGRAPH_HUNKS,
   SAMPLE_DUPLICATION_HUNKS,
@@ -5909,6 +5946,7 @@ export {
   type VerdictTone,
   type ViewportRows,
   type ViewportWindow,
+  WARM_SWATCHES,
   WEB_FLOOR,
   XIcon,
   accentVar,
@@ -5959,8 +5997,12 @@ export {
   fitViewportWindow,
   flameDeltaTone,
   flameFromTrace,
+  flameNameHash,
+  flamePackage,
   flamePath,
+  flameSameSwatch,
   flameSubtreeDepth,
+  flameSwatch,
   flameWindowFrame,
   fontVar,
   formatAge,

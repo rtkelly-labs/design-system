@@ -1,4 +1,5 @@
 import type { FlameTree } from '../lib/flame';
+import { foldServerProfile, generateServerStacks } from './flameProfileGenerator';
 
 /**
  * A CPU profile of an ASP.NET Core `POST /orders` handler, as folded stacks —
@@ -100,3 +101,20 @@ export const deepStackFolded = (() => {
   lines.push(`${[KESTREL, HOSTING, 'System.IO.Pipelines.Pipe.FlushAsync'].join(';')} 30`);
   return lines.join('\n');
 })();
+
+/** The id of the widest frame named `name` — where a function spends most of its time. */
+export function widestFrameIdByName(tree: FlameTree, name: string): string | null {
+  let best: FlameTree['frames'][number] | null = null;
+  for (const frame of tree.frames) if (frame.name === name && (!best || frame.total > best.total)) best = frame;
+  return best?.id ?? null;
+}
+
+const serverStacks = generateServerStacks();
+
+/** The generated .NET server profile: ~1,000 stacks, ~20,000 samples, towers up to ~39 deep. */
+export const serverProfileFolded = foldServerProfile(serverStacks, { noiseSeed: 7 });
+
+/** The same server a release later: the serializer ~30% slower, and a new fraud screen under `PlaceAsync`. */
+export const serverCandidateFolded = foldServerProfile(serverStacks, { noiseSeed: 11, serializer: 1.3, fraudScreen: true });
+
+export { SERIALIZER as SERVER_SERIALIZER_FRAME } from './flameProfileGenerator';
