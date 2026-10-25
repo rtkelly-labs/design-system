@@ -36,8 +36,11 @@ const BUDGETS = {
     // #339 adds shipped symbol faces to all four role stacks and explains
     // their fallback order: 27,295 B raw, 5,127 B gzip on Node 22 in CI.
     // Local zlib emits 5,138 B. Keep the existing ~2% headroom for tooling.
-    maxRaw: 27_850,
-    maxGzip: 5_250,
+    // #422 adds the `delta` and `deltaGround` role groups (six roles, each
+    // declared per level and aliased into @theme): 28,875 B raw, 5,369 B gzip
+    // locally. Same ~2% headroom.
+    maxRaw: 29_450,
+    maxGzip: 5_480,
     desc: 'Design token CSS',
   },
 };
