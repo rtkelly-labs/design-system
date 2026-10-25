@@ -553,8 +553,9 @@ export function formatFlameDelta(change: FlameFrameDelta, metric: 'self' | 'tota
 // Ranking
 // ---------------------------------------------------------------------------
 
-/** One row of a frame list: a frame, and its change when the list ranks a diff. */
+/** One row of a frame list: a frame (or a function's frames), and its change when the list ranks a diff. */
 export interface FlameRankedFrame {
+  /** The frame id; for a function row, `fn:` and the name. */
   id: string;
   name: string;
   depth: number;
@@ -562,6 +563,61 @@ export interface FlameRankedFrame {
   self: number;
   /** Present when ranking a diff. A `removed` frame has no candidate numbers: `total` and `self` are 0. */
   change?: FlameFrameDelta;
+  /** A function row's call sites in the candidate, widest first. Absent on a frame row. */
+  frameIds?: string[];
+}
+
+/** Per function name: self summed over every frame, total summed over frames with no same-name ancestor (recursion counted once). */
+function functionSums(tree: FlameTree): Map<string, { self: number; total: number; ids: FlameFrame[]; depth: number }> {
+  const out = new Map<string, { self: number; total: number; ids: FlameFrame[]; depth: number }>();
+  const walk = (frame: FlameFrame, open: ReadonlySet<string>) => {
+    if (frame.parentId !== null) {
+      const entry = out.get(frame.name) ?? { self: 0, total: 0, ids: [], depth: frame.depth };
+      entry.self += frame.self;
+      if (!open.has(frame.name)) entry.total += frame.total;
+      entry.ids.push(frame);
+      entry.depth = Math.min(entry.depth, frame.depth);
+      out.set(frame.name, entry);
+    }
+    const next = frame.parentId === null ? open : new Set(open).add(frame.name);
+    for (const child of frame.children) walk(child, next);
+  };
+  walk(tree.root, new Set());
+  return out;
+}
+
+/**
+ * The frame list by function: every frame of a name folded into one row —
+ * self summed, total summed without counting a recursive call twice. One
+ * profile ranks by self time; a diff by the size of the function's change in
+ * `metric`, either sign, new and removed functions included. `frameIds` holds
+ * the call sites, widest first.
+ */
+export function rankFlameFunctions(tree: FlameTree, diff?: FlameDiff | null, metric: 'self' | 'total' = 'self'): FlameRankedFrame[] {
+  const after = functionSums(tree);
+  const byName = (a: FlameRankedFrame, b: FlameRankedFrame) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+  const sites = (frames: FlameFrame[]) => [...frames].sort((a, b) => b.total - a.total || (a.id < b.id ? -1 : 1)).map((frame) => frame.id);
+  if (!diff) {
+    return [...after]
+      .filter(([, entry]) => entry.self > 0)
+      .map(([name, entry]) => ({ id: `fn:${name}`, name, depth: entry.depth, total: entry.total, self: entry.self, frameIds: sites(entry.ids) }))
+      .sort((a, b) => b.self - a.self || byName(a, b));
+  }
+  const before = functionSums(diff.baseline);
+  const scale = (tree_: FlameTree, value: number) => (diff.basis === 'share' ? (tree_.total > 0 ? value / tree_.total : null) : value);
+  const rows: FlameRankedFrame[] = [];
+  for (const name of new Set([...after.keys(), ...before.keys()])) {
+    const a = after.get(name);
+    const b = before.get(name);
+    const total = delta(b ? scale(diff.baseline, b.total) : null, a ? scale(tree, a.total) : null);
+    const self = delta(b ? scale(diff.baseline, b.self) : null, a ? scale(tree, a.self) : null);
+    const status: FlameDiffStatus = !b ? 'new' : !a ? 'removed' : total.absolute === 0 && self.absolute === 0 ? 'unchanged' : 'changed';
+    const change: FlameFrameDelta = { id: `fn:${name}`, name, depth: (a ?? b)!.depth, status, total, self };
+    if (!change[metric].absolute) continue;
+    rows.push({ id: `fn:${name}`, name, depth: change.depth, total: a?.total ?? 0, self: a?.self ?? 0, change, frameIds: a ? sites(a.ids) : [] });
+  }
+  const size = (row: FlameRankedFrame) => Math.abs(row.change?.[metric].absolute ?? 0);
+  return rows.sort((x, y) => size(y) - size(x) || byName(x, y));
 }
 
 /**

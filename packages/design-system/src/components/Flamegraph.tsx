@@ -34,6 +34,7 @@ import {
   panFlameDepth,
   panFlameWindow,
   rankFlameFrames,
+  rankFlameFunctions,
   resolveFlameDepth,
   resolveFlameWindow,
   sameFlameWindow,
@@ -238,6 +239,13 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
    */
   list?: 'auto' | 'always' | 'never';
   /**
+   * What a list row is. `function` (default) folds every frame of a name into
+   * one row — self summed, recursion counted once — and tapping it highlights
+   * all of its call sites, with the details panel stepping through them.
+   * `frame` lists each call path on its own.
+   */
+  listBy?: 'function' | 'frame';
+  /**
    * Where the horizontal window opens, and where Reset returns: `[start, end]`
    * as fractions of the root; `{ frameId }` to fit a frame; `'hottest'` to fit
    * the grandparent of the hottest leaf — in a diff, the leaf that changed most
@@ -348,6 +356,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     orientation: orientationProp,
     palette = 'warm',
     list = 'auto',
+    listBy = 'function',
     defaultWindow,
     window: windowProp,
     onWindowChange,
@@ -412,8 +421,8 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   const found = useMemo(() => searchFlame(profile, search ?? ''), [profile, search]);
   const searching = !!search?.trim();
   const ranked = useMemo(
-    () => (list === 'never' ? [] : rankFlameFrames(profile, diff?.compatible ? diff : null, diffMetric)),
-    [list, profile, diff, diffMetric],
+    () => (list === 'never' ? [] : (listBy === 'function' ? rankFlameFunctions : rankFlameFrames)(profile, diff?.compatible ? diff : null, diffMetric)),
+    [list, listBy, profile, diff, diffMetric],
   );
 
   // The minimap's marks: every frame, toned as the graph tones it.
@@ -477,17 +486,43 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   };
   /** Select a frame, or clear the selection when it is already selected. */
   const toggleSelect = (id: string) => setSelectedId(selectedId === id ? null : id);
+  // A function picked from the list: every frame of that name lit, the rest dimmed.
+  const [functionName, setFunctionName] = useState<string | null>(null);
+  const functionSites = useMemo(
+    () => (functionName === null ? [] : profile.frames.filter((frame) => frame.parentId !== null && frame.name === functionName).sort((a, b) => b.total - a.total || (a.id < b.id ? -1 : 1)).map((frame) => frame.id)),
+    [functionName, profile],
+  );
+  /** A frame picked in the graph: back to stack highlighting. */
+  const selectFrame = (id: string) => {
+    setFunctionName(null);
+    toggleSelect(id);
+  };
+  /** A list row: a function lights its call sites (again to clear); a frame row selects that frame. */
+  const pickRow = (row: FlameRankedFrame) => {
+    if (!row.frameIds) {
+      selectFrame(row.id);
+      return;
+    }
+    if (functionName === row.name) {
+      setFunctionName(null);
+      setSelectedId(null);
+      return;
+    }
+    setFunctionName(row.name);
+    setSelectedId(row.frameIds[0] ?? null);
+  };
 
   // A selection made in the graph brings its list row into view — opening "show all" if it is behind it.
   const listRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (selectedId === null || !listRef.current) return;
-    const row = [...listRef.current.querySelectorAll<HTMLElement>('li[data-frame-id]')].find((item) => item.dataset.frameId === selectedId);
+    const key = listBy === 'function' ? `fn:${profile.byId.get(selectedId)?.name ?? ''}` : selectedId;
+    const row = [...listRef.current.querySelectorAll<HTMLElement>('li[data-frame-id]')].find((item) => item.dataset.frameId === key);
     if (!row) return;
     const details = row.closest('details');
     if (details && !details.open) details.open = true;
     row.scrollIntoView?.({ block: 'nearest' });
-  }, [selectedId]);
+  }, [selectedId, listBy, profile]);
 
   // ---- Gestures -----------------------------------------------------------
   const chartRef = useRef<SVGSVGElement | null>(null);
@@ -619,13 +654,13 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
       const distance = px < left ? left - px : px > right ? px - right : 0;
       if (distance <= TAP_SLOP && (!best || distance < best.distance)) best = { id: entry.frame.id, distance };
     }
-    if (best) toggleSelect(best.id);
+    if (best) selectFrame(best.id);
     else setSelectedId(null);
   };
   const onFrameClick = (event: MouseEvent<SVGGElement>, id: string) => {
     event.stopPropagation();
     if (suppressClick.current) { suppressClick.current = false; return; }
-    toggleSelect(id);
+    selectFrame(id);
   };
 
   const neighbour = (entry: FlameWindowFrame, step: 1 | -1) => {
@@ -645,7 +680,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
       case 'ArrowLeft': moveTo(neighbour(entry, -1)); break;
       case 'ArrowRight': moveTo(neighbour(entry, 1)); break;
       case 'Home': moveTo(profile.root.id); break;
-      case ' ': toggleSelect(frame.id); break;
+      case ' ': selectFrame(frame.id); break;
       case 'Enter':
         fitTo(frame.id);
         setSelectedId(frame.id);
@@ -737,7 +772,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   const lookOf = (frame: FlameFrame, tone: FlameDeltaTone | null, matched: boolean, context: boolean): { rect: string; text: string } => {
     if (tone === 'same') {
       const same = flameSameSwatch(frame.name);
-      return { rect: same.fill, text: same.label };
+      return { rect: cn(same.fill, same.dark?.fill), text: cn(same.label, same.dark?.label) };
     }
     if (tone) return TONE[tone];
     if (matched) return { rect: 'fill-accent-primary', text: 'fill-content-inverse' };
@@ -856,9 +891,11 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
             const shown = narrow ? '' : text;
             const change = changes?.get(frame.id);
             const tone = toneOf(change);
-            const matched = searching && found.ids.has(frame.id);
+            const ofFunction = functionName !== null && frame.name === functionName;
+            const matched = (searching && found.ids.has(frame.id)) || ofFunction;
             const isSelected = frame.id === selectedId;
-            const dimmed = (searching && !matched) || (stack !== null && !stack.has(frame.id));
+            // A picked function lights its call sites; otherwise a selection lights its stack. Either way the rest dims, not disappears.
+            const dimmed = functionName !== null ? !ofFunction : (searching && !matched) || (stack !== null && !stack.has(frame.id));
             const look = lookOf(frame, tone, matched, context);
             const x = `${entry.x * 100}%`;
             const w = `${entry.width * 100}%`;
@@ -878,7 +915,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
                 data-context={context || undefined}
                 data-selected={isSelected || undefined}
                 data-clipped={entry.clipped || undefined}
-                className={cn('group cursor-pointer outline-none!', dimmed && 'opacity-30')}
+                className={cn('group cursor-pointer outline-none!', dimmed && 'opacity-45')}
                 onClick={(event) => onFrameClick(event, frame.id)}
                 onKeyDown={(event) => onKeyDown(event, entry)}
                 onFocus={() => { setActiveId(frame.id); setFocusedId(frame.id); }}
@@ -927,10 +964,21 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
           {changes?.get(selected.id) ? (
             <span className="text-content-secondary tabular-nums">Δ {diffMetric} {formatFlameDelta(changes.get(selected.id)!, diffMetric, unit, basis)}</span>
           ) : null}
+          {functionName !== null && functionSites.length > 1 ? (
+            <span data-part="call-sites" className="flex flex-wrap items-center gap-1 text-content-secondary tabular-nums">
+              <span>Call site {Math.max(1, functionSites.indexOf(selected.id) + 1)} of {functionSites.length}</span>
+              {enhanced ? (
+                <>
+                  <button type="button" aria-label="Previous call site" className={styles.action()} onClick={() => setSelectedId(functionSites[(functionSites.indexOf(selected.id) - 1 + functionSites.length) % functionSites.length])}>‹</button>
+                  <button type="button" aria-label="Next call site" className={styles.action()} onClick={() => setSelectedId(functionSites[(functionSites.indexOf(selected.id) + 1) % functionSites.length])}>›</button>
+                </>
+              ) : null}
+            </span>
+          ) : null}
           {enhanced ? (
             <span className="flex flex-wrap gap-1 pt-1">
               <button type="button" className={styles.action()} onClick={() => fitTo(selected.id)}>Zoom to frame</button>
-              <button type="button" className={styles.action()} onClick={() => setSelectedId(null)}>Clear</button>
+              <button type="button" className={styles.action()} onClick={() => { setFunctionName(null); setSelectedId(null); }}>Clear</button>
             </span>
           ) : null}
         </section>
@@ -938,18 +986,18 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
       {list !== 'never' && ranked.length ? (
         <section
           ref={listRef}
-          aria-label={mode === 'diff' ? 'Largest changes' : 'Hottest frames'}
+          aria-label={mode === 'diff' ? 'Largest changes' : listBy === 'function' ? 'Hottest functions' : 'Hottest frames'}
           data-slot="flamegraph-list"
           className={cn(styles.list(), list === 'always' ? 'flex' : 'hidden @max-[560px]:flex')}
         >
           <p className="m-0 pb-1 text-content-muted">
-            {mode === 'diff' ? `Largest changes in ${diffMetric} time` : 'Hottest frames by self time'}
+            {mode === 'diff' ? `Largest changes in ${diffMetric} time${listBy === 'function' ? ', by function' : ''}` : `Hottest ${listBy === 'function' ? 'functions' : 'frames'} by self time`}
           </p>
-          <FrameRows rows={ranked.slice(0, LIST_TOP)} peak={peak} profile={profile} selectedId={selectedId} metric={diffMetric} basis={basis} tone={toneOf} onPick={toggleSelect} className={styles.rows()} rowClass={styles.row()} />
+          <FrameRows rows={ranked.slice(0, LIST_TOP)} peak={peak} profile={profile} isCurrent={(row) => (functionName !== null ? row.name === functionName : listBy === 'function' ? row.name === selected?.name : row.id === selectedId)} metric={diffMetric} basis={basis} tone={toneOf} onPick={pickRow} className={styles.rows()} rowClass={styles.row()} />
           {ranked.length > LIST_TOP ? (
             <details>
               <summary className={styles.more()}>Show all {ranked.length}</summary>
-              <FrameRows rows={ranked.slice(LIST_TOP)} start={LIST_TOP + 1} peak={peak} profile={profile} selectedId={selectedId} metric={diffMetric} basis={basis} tone={toneOf} onPick={toggleSelect} className={styles.rows()} rowClass={styles.row()} />
+              <FrameRows rows={ranked.slice(LIST_TOP)} start={LIST_TOP + 1} peak={peak} profile={profile} isCurrent={(row) => (functionName !== null ? row.name === functionName : listBy === 'function' ? row.name === selected?.name : row.id === selectedId)} metric={diffMetric} basis={basis} tone={toneOf} onPick={pickRow} className={styles.rows()} rowClass={styles.row()} />
             </details>
           ) : null}
         </section>
@@ -991,17 +1039,18 @@ interface FrameRowsProps {
   /** The largest size in the whole list, so bars scale alike above and below "show all". */
   peak: number;
   profile: FlameTree;
-  selectedId: string | null;
+  /** Whether a row is the one the graph is showing. */
+  isCurrent: (row: FlameRankedFrame) => boolean;
   metric: 'self' | 'total';
   basis: 'absolute' | 'share';
   tone: (change: FlameFrameDelta | undefined) => FlameDeltaTone | null;
-  onPick: (id: string) => void;
+  onPick: (row: FlameRankedFrame) => void;
   className: string;
   rowClass: string;
 }
 
 /** Rows of the frame list. Each is a 44px tap target that selects its frame; a removed frame has nothing to select. */
-function FrameRows({ rows, start = 1, peak, profile, selectedId, metric, basis, tone, onPick, className, rowClass }: FrameRowsProps) {
+function FrameRows({ rows, start = 1, peak, profile, isCurrent, metric, basis, tone, onPick, className, rowClass }: FrameRowsProps) {
   const unit = profile.unit;
   const share = (value: number) => formatFlameShare(profile.total > 0 ? value / profile.total : null);
   return (
@@ -1041,7 +1090,7 @@ function FrameRows({ rows, start = 1, peak, profile, selectedId, metric, basis, 
             {removed ? (
               <div className={cn(rowClass, 'cursor-default hover:bg-transparent')}>{body}</div>
             ) : (
-              <button type="button" aria-current={row.id === selectedId || undefined} className={rowClass} onClick={() => onPick(row.id)}>
+              <button type="button" aria-current={isCurrent(row) || undefined} className={rowClass} onClick={() => onPick(row)}>
                 {body}
               </button>
             )}

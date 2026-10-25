@@ -2882,6 +2882,7 @@ declare function flameDeltaTone(change: FlameFrameDelta | undefined, options?: F
 declare function formatFlameDelta(change: FlameFrameDelta, metric: 'self' | 'total', unit: FlameUnit, basis?: 'absolute' | 'share'): string;
 
 interface FlameRankedFrame {
+
     id: string;
     name: string;
     depth: number;
@@ -2889,7 +2890,11 @@ interface FlameRankedFrame {
     self: number;
 
     change?: FlameFrameDelta;
+
+    frameIds?: string[];
 }
+
+declare function rankFlameFunctions(tree: FlameTree, diff?: FlameDiff | null, metric?: 'self' | 'total'): FlameRankedFrame[];
 
 declare function rankFlameFrames(tree: FlameTree, diff?: FlameDiff | null, metric?: 'self' | 'total'): FlameRankedFrame[];
 
@@ -2951,7 +2956,7 @@ declare function windowFlame(tree: FlameTree, window: FlameWindow, depth: FlameD
 
 declare function sameFlameWindow(a: FlameWindow, b: FlameWindow): boolean;
 
-type FlameRole = 'intent.danger' | 'intent.warning' | 'intent.success' | 'accent.primary' | 'accent.tertiary' | 'accent.quiet' | 'surface.base' | 'surface.raised' | 'text.primary';
+type FlameRole = 'intent.danger' | 'intent.warning' | 'intent.success' | 'accent.primary' | 'accent.tertiary' | 'accent.quiet' | 'surface.base' | 'surface.raised' | 'text.primary' | 'text.muted';
 
 interface FlameSwatch {
 
@@ -2960,6 +2965,12 @@ interface FlameSwatch {
     label: 'fill-content-inverse' | 'fill-content-primary';
 
     mix: readonly [FlameRole] | readonly [FlameRole, number, FlameRole];
+
+    dark?: {
+        fill: string;
+        label: 'dark:fill-content-inverse' | 'dark:fill-content-primary';
+        mix: readonly [FlameRole] | readonly [FlameRole, number, FlameRole];
+    };
 }
 
 type FlamePalette = 'warm' | 'package' | 'theme';
@@ -3002,6 +3013,8 @@ interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children
     orientation?: 'flame' | 'icicle';
 
     list?: 'auto' | 'always' | 'never';
+
+    listBy?: 'function' | 'frame';
 
     defaultWindow?: FlameWindowSpec;
 
@@ -6080,6 +6093,7 @@ export {
   percentiles,
   presetRange,
   rankFlameFrames,
+  rankFlameFunctions,
   relativeLuminance,
   replayTrace,
   resolveFlameDepth,
