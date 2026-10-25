@@ -31,6 +31,8 @@ export type DistributionCompareVariant = (typeof DISTRIBUTION_COMPARE_VARIANTS.v
 const MIN_DENSITY_SAMPLES = 8;
 
 const WIDTH = 640;
+/** The drawing used below a 36rem container, at close to its natural size. */
+const NARROW_WIDTH = 360;
 const LAYOUT = {
   regular: { height: 168, left: 104, right: 16, top: 10, bottom: 28, font: 11, dot: 2.6 },
   compact: { height: 112, left: 88, right: 10, top: 6, bottom: 20, font: 9, dot: 2.1 },
@@ -38,9 +40,10 @@ const LAYOUT = {
 
 const distributionCompare = recipe({
   slots: {
-    root: 'flex min-w-0 flex-col gap-1 font-mono text-xs text-content-primary',
+    root: '@container flex min-w-0 flex-col gap-1 font-mono text-xs text-content-primary',
     title: 'text-xs uppercase tracking-wide text-content-secondary',
     chart: 'block h-auto max-w-full overflow-visible',
+    narrowChart: 'block h-auto w-full max-w-md overflow-visible',
     readout: 'flex flex-wrap gap-x-4 gap-y-1 tabular-nums text-content-secondary',
     empty: 'border border-dashed border-edge-default px-3 py-6 text-center text-content-muted',
   },
@@ -150,12 +153,8 @@ export const DistributionCompare = forwardRef<HTMLDivElement, DistributionCompar
   const useLog = scale === 'log' && min > 0;
   const span = max - min || Math.abs(max) || 1;
   const domain: [number, number] = useLog ? [min / 1.05, max * 1.05] : [min - span * 0.06, max + span * 0.06];
-  const innerWidth = WIDTH - layout.left - layout.right;
   const innerHeight = layout.height - layout.top - layout.bottom;
-  const x = (value: number) =>
-    layout.left + (useLog ? (Math.log(value / domain[0]) / Math.log(domain[1] / domain[0])) * innerWidth : ((value - domain[0]) / (domain[1] - domain[0])) * innerWidth);
   const display = benchmarkDisplayUnit(sides[0]!.summary.n ? sides[0]!.summary.median : sides[1]!.summary.median, unit);
-  const ticks = useLog ? logTicks(domain[0], domain[1], 6) : scaleLinear<number>({ domain, range: [0, innerWidth] }).ticks(6);
   const formatTick = (value: number) => formatSignificant(value / display.factor);
 
   // Lanes: strip stacks baseline over candidate; violin mirrors them about one centre line.
@@ -185,11 +184,13 @@ export const DistributionCompare = forwardRef<HTMLDivElement, DistributionCompar
   const label = title ?? 'Sample distributions';
   const summary = `${describeSide(sides[0]!)}. ${describeSide(sides[1]!)}. ${ratioText}: ${verdict}.`;
 
-  return (
-    <div ref={ref} data-slot="distribution-compare" data-variant={variant} data-classification={comparison.classification} {...props} className={styles.root({ className })}>
-      {title ? <p aria-hidden="true" className={styles.title()}>{title}</p> : null}
-      <p id={`${id}-summary`} className="sr-only">{summary}</p>
-      <svg role="img" aria-label={label} aria-describedby={`${id}-summary`} viewBox={`0 0 ${WIDTH} ${layout.height}`} width={WIDTH} height={layout.height} className={styles.chart()}>
+  const chartAt = (W: number, tickCount: number) => {
+    const innerWidth = W - layout.left - layout.right;
+    const x = (value: number) =>
+      layout.left + (useLog ? (Math.log(value / domain[0]) / Math.log(domain[1] / domain[0])) * innerWidth : ((value - domain[0]) / (domain[1] - domain[0])) * innerWidth);
+    const ticks = useLog ? logTicks(domain[0], domain[1], tickCount) : scaleLinear<number>({ domain, range: [0, innerWidth] }).ticks(tickCount);
+    return (
+      <svg role="img" aria-label={label} aria-describedby={`${id}-summary`} viewBox={`0 0 ${W} ${layout.height}`} width={W === WIDTH ? W : undefined} height={W === WIDTH ? layout.height : undefined} className={W === WIDTH ? styles.chart() : styles.narrowChart()}>
         <g aria-hidden="true">
           {ticks.map((tick) => (
             <g key={tick} data-part="tick">
@@ -197,9 +198,9 @@ export const DistributionCompare = forwardRef<HTMLDivElement, DistributionCompar
               <text x={x(tick)} y={layout.height - layout.bottom + layout.font + 6} textAnchor="middle" fontSize={layout.font} className="fill-content-muted">{formatTick(tick)}</text>
             </g>
           ))}
-          <text x={WIDTH - layout.right} y={layout.height - 2} textAnchor="end" fontSize={layout.font} className="fill-content-muted">{display.unit}</text>
-          <line x1={layout.left} x2={WIDTH - layout.right} y1={layout.top + innerHeight} y2={layout.top + innerHeight} className="stroke-edge-default" />
-          {variant === 'violin' ? <line x1={layout.left} x2={WIDTH - layout.right} y1={centre} y2={centre} className="stroke-edge-default" /> : null}
+          <text x={W - layout.right} y={layout.height - 2} textAnchor="end" fontSize={layout.font} className="fill-content-muted">{display.unit}</text>
+          <line x1={layout.left} x2={W - layout.right} y1={layout.top + innerHeight} y2={layout.top + innerHeight} className="stroke-edge-default" />
+          {variant === 'violin' ? <line x1={layout.left} x2={W - layout.right} y1={centre} y2={centre} className="stroke-edge-default" /> : null}
           {sides.map((s, sideIndex) => {
             const { from, to, sign } = lane(s.side);
             const tone = s.side === 'baseline' ? 'delta-removed' : 'delta-added';
@@ -246,6 +247,17 @@ export const DistributionCompare = forwardRef<HTMLDivElement, DistributionCompar
           })}
         </g>
       </svg>
+    );
+  };
+
+  return (
+    <div ref={ref} data-slot="distribution-compare" data-variant={variant} data-classification={comparison.classification} {...props} className={styles.root({ className })}>
+      {title ? <p aria-hidden="true" className={styles.title()}>{title}</p> : null}
+      <p id={`${id}-summary`} className="sr-only">{summary}</p>
+      {/* Two drawings, one shown by a container query: a fixed viewBox scales its type with it, so a
+          narrow container gets its own geometry at near 1:1 rather than the wide one shrunk. */}
+      <div data-size="wide" className="hidden @min-[36rem]:block">{chartAt(WIDTH, 6)}</div>
+      <div data-size="narrow" className="@min-[36rem]:hidden">{chartAt(NARROW_WIDTH, 4)}</div>
       <p data-part="readout" className={styles.readout()}>
         <span>{describeSide(sides[0]!)}</span>
         <span>{describeSide(sides[1]!)}</span>

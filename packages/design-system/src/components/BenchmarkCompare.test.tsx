@@ -34,7 +34,9 @@ describe('BenchmarkCompare', () => {
     const html = renderToStaticMarkup(<BenchmarkCompare comparisons={comparisons} />);
     const doc = new DOMParser().parseFromString(html, 'text/html');
     expect(rowNames(doc)).toEqual(['Beta.Regression', 'Delta.Improvement', 'Gamma.Small', 'Alpha.Noise']);
-    expect(doc.querySelectorAll('[data-slot="benchmark-compare-interval"]')).toHaveLength(4);
+    // One plot per table row and one per panel: `auto` renders both and a container query shows one.
+    expect(doc.querySelectorAll('[data-part="table"] [data-slot="benchmark-compare-interval"]')).toHaveLength(4);
+    expect(doc.querySelectorAll('[data-slot="benchmark-compare-panel"]')).toHaveLength(4);
     expect(doc.querySelector('button')).toBeNull();
     expect(doc.querySelector('[data-part="summary"]')?.textContent).toContain('1 slower');
   });
@@ -64,6 +66,23 @@ describe('BenchmarkCompare', () => {
     expect(screen.getByRole('columnheader', { name: 'Benchmark' }).getAttribute('aria-sort')).toBe('ascending');
     fireEvent.click(screen.getByRole('button', { name: 'Benchmark' }));
     expect(rowNames(container)).toEqual(['Alpha.Noise', 'Beta.Regression', 'Gamma.Small', 'Delta.Improvement']);
+  });
+
+  it('draws panels in impact order, with a state for a removed benchmark', () => {
+    const removed = compareBenchmarks([{ name: 'Epsilon.Gone', unit: 'ns', direction: 'lower-is-better', baseline: base }]);
+    const { container } = render(<BenchmarkCompare comparisons={[...comparisons, ...removed]} layout="panels" />);
+    expect(container.querySelector('[data-part="table"]')).toBeNull();
+    const panels = Array.from(container.querySelectorAll('[data-slot="benchmark-compare-panel"]'));
+    expect(panels.map((panel) => panel.querySelector('[data-part="headline"] span')?.textContent)).toEqual(['+20.2%', '−19.9%', '−9.0%', 'removed', '+0.1%'].map((text) => expect.stringMatching(text === 'removed' ? /^removed$/ : /%$/)));
+    expect(panels[3]!.getAttribute('data-reason')).toBe('missing-candidate');
+    expect(panels[3]!.querySelector('[data-slot="delta-value"]')?.getAttribute('data-state')).toBe('missing');
+    fireEvent.click(screen.getByRole('button', { name: 'name' }));
+    expect(container.querySelector('[data-slot="benchmark-compare-panel"] p')?.textContent).toBe('Alpha.Noise');
+  });
+
+  it('forces the table alone', () => {
+    const { container } = render(<BenchmarkCompare comparisons={comparisons} layout="table" />);
+    expect(container.querySelector('[data-part="panels"]')).toBeNull();
   });
 
   it('shows the empty state', () => {
