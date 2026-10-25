@@ -145,6 +145,7 @@ flamegraph-breadcrumb	Flamegraph
 flamegraph-chart	Flamegraph
 flamegraph-frame	Flamegraph
 flamegraph-legend	Flamegraph
+flamegraph-list	Flamegraph
 flamegraph-status	Flamegraph
 flow-diagram	FlowDiagram
 freshness-indicator	FreshnessIndicator

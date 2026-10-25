@@ -10,6 +10,7 @@ import {
   useSyncExternalStore,
   type HTMLAttributes,
   type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 import { cn, recipe } from '../lib/recipe';
 import {
@@ -20,11 +21,13 @@ import {
   formatFlameDelta,
   formatFlameShare,
   formatFlameValue,
+  rankFlameFrames,
   searchFlame,
   zoomFlame,
   type FlameDeltaTone,
   type FlameFrame,
   type FlameFrameDelta,
+  type FlameRankedFrame,
   type FlameTree,
   type FlameViewFrame,
 } from '../lib/flame';
@@ -38,17 +41,34 @@ const MIN_FRAME_PX = 0.5;
 /** Tooltip line height and padding, in pixels. */
 const TIP_LINE = 16;
 const TIP_PAD = 6;
+/**
+ * Below this container width the graph becomes an overview and the frame list
+ * carries the detail. Must match the `@max-[560px]` / `@min-[560px]` variants
+ * below — Tailwind reads those as source text, so they cannot be built from it.
+ */
+const NARROW = 560;
+/** Row height of the overview in a measured narrow container. */
+const NARROW_ROW = 16;
+/** The width labels are fitted to for a narrow container before it can be measured: a 390px phone less two 16px gutters. */
+const NARROW_ASSUMED = 358;
+/** Rows of the frame list shown before "show all". */
+const LIST_TOP = 10;
 
 const flamegraph = recipe({
   slots: {
-    root: 'flex min-w-0 flex-col gap-2 font-mono text-xs text-content-primary',
-    breadcrumb: 'flex flex-wrap items-center gap-1 text-content-secondary',
-    crumb: 'cursor-pointer border border-transparent px-1 hover:border-edge-default hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary',
-    current: 'px-1 font-bold text-content-primary',
+    root: '@container flex min-w-0 flex-col gap-2 font-mono text-xs text-content-primary',
+    breadcrumb: 'm-0 flex list-none flex-wrap items-center gap-1 p-0 text-content-secondary',
+    crumb: 'cursor-pointer border border-transparent px-1 hover:border-edge-default hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary @max-[560px]:min-h-11 @max-[560px]:max-w-40 @max-[560px]:truncate',
+    current: 'px-1 font-bold break-all text-content-primary',
     frame: 'w-full min-w-0',
     chart: 'block w-full select-none overflow-visible',
     status: 'text-content-secondary',
-    legend: 'm-0 flex list-none flex-wrap items-center gap-x-4 gap-y-1 p-0 text-content-secondary',
+    details: 'flex flex-col gap-0.5 border border-edge-default bg-surface-raised px-2 py-1.5',
+    list: 'flex-col gap-0',
+    rows: 'm-0 flex list-none flex-col p-0',
+    row: 'flex min-h-11 w-full cursor-pointer flex-col justify-center gap-1 border-b border-edge-subtle px-1 py-1.5 text-left hover:bg-surface-raised focus-visible:outline-2 focus-visible:outline-accent-primary aria-[current=true]:bg-surface-raised',
+    more: 'flex min-h-11 cursor-pointer items-center text-content-secondary hover:text-content-primary',
+    legend: 'm-0 grid list-none grid-cols-2 items-center gap-x-3 gap-y-1 p-0 text-content-secondary @min-[560px]:flex @min-[560px]:flex-wrap @min-[560px]:gap-x-4',
     removed: 'text-content-secondary',
     empty: 'text-content-muted',
   },
@@ -83,8 +103,8 @@ function useEnhanced(): boolean {
   return useSyncExternalStore(noSubscribe, () => true, () => false);
 }
 
-/** Track an element's content width; `fallback` until it reports one, and always in a static render. */
-function useMeasuredWidth(fallback: number): [(node: HTMLDivElement | null) => void, number] {
+/** Track an element's content width: 0 until it reports one, and always in a static render. */
+function useMeasuredWidth(): [(node: HTMLDivElement | null) => void, number] {
   const [node, setNode] = useState<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
   useEffect(() => {
@@ -96,7 +116,12 @@ function useMeasuredWidth(fallback: number): [(node: HTMLDivElement | null) => v
     observer.observe(node);
     return () => observer.disconnect();
   }, [node]);
-  return [setNode, width > 0 ? width : fallback];
+  return [setNode, width];
+}
+
+/** A frame name with break opportunities after each `.` and before each `(`, so `Namespace.Type.Method(args)` wraps where a reader would. */
+function breakable(name: string): ReactNode[] {
+  return name.split(/(?<=\.)|(?=\()/).flatMap((part, index) => (index ? [<wbr key={index} />, part] : [part]));
 }
 
 /** What a screen reader hears for one frame — its numbers, said in words. */
@@ -121,7 +146,7 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
   mode?: 'single' | 'diff';
   /** The profile `diff` mode compares against. Must share `profile`'s unit and order. */
   baseline?: FlameTree;
-  /** Which number a diff colours by: `self` pinpoints where time moved, `total` lights the whole path above it. Default `self`. */
+  /** Which number a diff colours and ranks by: `self` pinpoints where time moved, `total` lights the whole path above it. Default `self`. */
   diffMetric?: 'self' | 'total';
   /** Relative changes smaller than this are drawn as unchanged. Default `0.05`. */
   threshold?: number;
@@ -129,24 +154,36 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
   large?: number;
   /** Compare each frame's share of its profile instead of raw values — for profiles of different lengths. Default false. */
   normalize?: boolean;
-  /** `flame` grows up from the root at the bottom; `icicle` hangs down from it at the top. Default `flame`. */
+  /**
+   * `flame` grows up from the root at the bottom; `icicle` hangs down from it
+   * at the top. Unset, it is `flame`, turning to `icicle` in a container
+   * narrower than 560px — a phone reads downward. Set, it is honoured at every width.
+   */
   orientation?: 'flame' | 'icicle';
+  /**
+   * The frame list: the hottest frames by self time — or, in a diff, by the
+   * size of their change — one per row with the full name, shares, a bar and
+   * the delta. `auto` shows it only in a container narrower than 560px, where
+   * frame labels cannot be read; `always` and `never` do what they say.
+   * Default `auto`.
+   */
+  list?: 'auto' | 'always' | 'never';
   /** The frame id zoomed into. Controlled when defined; `null` is the whole profile. */
   zoomedId?: string | null;
   /** The frame zoomed into on mount when uncontrolled — and the zoom a static render shows. */
   defaultZoomedId?: string | null;
-  /** Called with the frame id a click, Enter or Space zooms into, or the breadcrumb zooms out to. */
+  /** Called with the frame id a click, tap, Enter or Space zooms into, or the breadcrumb zooms out to. */
   onZoomedChange?: (id: string | null) => void;
   /** Highlight frames whose name contains this text, and report the share of the profile beneath them. */
   search?: string;
   /**
    * The width, in pixels, labels are fitted to before the component can
-   * measure itself — and for good in a static render. The graph always fills
-   * its container; this only decides how much of each label is printed.
-   * Default 960.
+   * measure itself — and for good in a static render, where a narrow container
+   * is fitted to a 358px phone instead. The graph always fills its container;
+   * this only decides how much of each label is printed. Default 960.
    */
   width?: number;
-  /** Height of one frame row, in pixels. Default 20. */
+  /** Height of one frame row, in pixels. Default 20; a measured narrow container caps it at 16. */
   rowHeight?: number;
   /** Accessible name for the frame tree. Default `Flame graph`. */
   label?: string;
@@ -162,11 +199,19 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
  * script still draws and explains itself. Labels are truncated by a monospace
  * character-width estimate rather than measured — measuring needs a browser.
  * With script, the component measures its width, swaps the native tooltip for
- * one drawn in the SVG, and adds click-to-zoom with a breadcrumb back out.
+ * one drawn in the SVG on mouse hover, and adds click-to-zoom with a
+ * breadcrumb back out. A click or tap also opens the frame's numbers in a
+ * details panel under the graph — the touch equivalent of the tooltip.
+ *
+ * **Narrow.** Below 560px of *container* width (a container query, so it
+ * works without script and inside any column) the graph becomes an overview:
+ * root on top unless `orientation` is set, labels only where they fit. A frame
+ * list beneath carries the detail — the ten hottest frames, the rest behind a
+ * `<details>` disclosure, each row a 44px tap target that zooms the graph.
  *
  * **Keyboard.** The frames are a tree with one roving tab stop. Up and Down
  * move toward the leaves or the root *as drawn* (so they flip with
- * `orientation`), Left and Right move between neighbours on the same row,
+ * orientation), Left and Right move between neighbours on the same row,
  * Home returns to the root, Enter or Space zooms into a frame and Escape zooms
  * back out one level. Every frame's accessible name carries its numbers.
  *
@@ -175,8 +220,8 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
  * candidate spent more, `delta-removed` where it spent less — change, not
  * verdict. New frames are the solid added fill with a dashed edge; frames the
  * candidate no longer has cannot be drawn at candidate widths, so they are
- * listed under the legend. A change against a zero baseline is coloured by
- * sign only, and its ratio reads `n/a`.
+ * listed under the legend and ranked in the frame list. A change against a
+ * zero baseline is coloured by sign only, and its ratio reads `n/a`.
  */
 export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function Flamegraph(
   {
@@ -187,13 +232,14 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     threshold = 0.05,
     large = 0.25,
     normalize = false,
-    orientation = 'flame',
+    orientation: orientationProp,
+    list = 'auto',
     zoomedId: zoomedProp,
     defaultZoomedId = null,
     onZoomedChange,
     search,
     width: assumedWidth = 960,
-    rowHeight = 20,
+    rowHeight: rowHeightProp = 20,
     label = 'Flame graph',
     className,
     ...props
@@ -202,8 +248,17 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
 ) {
   const styles = flamegraph();
   const enhanced = useEnhanced();
-  const [measure, width] = useMeasuredWidth(assumedWidth);
+  const [measure, measured] = useMeasuredWidth();
+  const width = measured > 0 ? measured : assumedWidth;
+  const narrow = measured > 0 && measured < NARROW;
+  // Unmeasured — a static render, or the first paint — a default orientation
+  // is drawn as `flame` and flipped to `icicle` by the container query; once
+  // measured, the orientation is chosen here and drawn directly.
+  const cssFlip = orientationProp === undefined && measured === 0;
+  const orientation = orientationProp ?? (narrow ? 'icicle' : 'flame');
+  const rowHeight = narrow ? Math.min(rowHeightProp, NARROW_ROW) : rowHeightProp;
   const [zoomedId, setZoomedId] = useControllable<string | null>(zoomedProp, defaultZoomedId, onZoomedChange);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const diff = useMemo(() => (mode === 'diff' && baseline ? diffFlame(baseline, profile, { normalize }) : null), [mode, baseline, profile, normalize]);
   const changes = diff?.compatible ? diff.frames : null;
@@ -212,6 +267,10 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   const viewById = useMemo(() => new Map(view.map((entry) => [entry.frame.id, entry])), [view]);
   const found = useMemo(() => searchFlame(profile, search ?? ''), [profile, search]);
   const searching = !!search?.trim();
+  const ranked = useMemo(
+    () => (list === 'never' ? [] : rankFlameFrames(profile, diff?.compatible ? diff : null, diffMetric)),
+    [list, profile, diff, diffMetric],
+  );
 
   const rows = profile.maxDepth + 1;
   const height = rows * rowHeight;
@@ -237,7 +296,13 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const tipId = hoverId ?? focusedId;
 
-  const zoomTo = (frame: FlameFrame) => setZoomedId(frame.parentId === null ? null : frame.id);
+  /** Zoom into a frame and open its details — what a click, a tap, Enter and a list row all do. */
+  const zoomTo = (id: string) => {
+    const frame = profile.byId.get(id);
+    if (!frame) return;
+    setZoomedId(frame.parentId === null ? null : frame.id);
+    setSelectedId(frame.id);
+  };
 
   const neighbour = (entry: FlameViewFrame, step: 1 | -1) => {
     const row = view.filter((other) => other.frame.depth === entry.frame.depth).sort((a, b) => a.x - b.x);
@@ -258,7 +323,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
       case 'Home': moveTo(profile.root.id); break;
       case 'Enter':
       case ' ':
-        zoomTo(frame);
+        zoomTo(frame.id);
         break;
       case 'Escape':
         if (focus.parentId === null) return;
@@ -270,10 +335,11 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     event.preventDefault();
   };
 
-  const toneOf = (frame: FlameFrame): FlameDeltaTone | null =>
-    changes ? flameDeltaTone(changes.get(frame.id), { metric: diffMetric, threshold, large }) : null;
+  const toneOf = (change: FlameFrameDelta | undefined): FlameDeltaTone | null =>
+    changes ? flameDeltaTone(change, { metric: diffMetric, threshold, large }) : null;
 
   const unit = profile.unit;
+  const basis = diff?.compatible ? diff.basis : 'absolute';
   const summary = `${profile.frames.length - 1} frames, ${formatFlameValue(profile.total, unit)} in all, ${rows - 1} deep.`;
 
   if (mode === 'diff' && (!baseline || (diff && !diff.compatible))) {
@@ -294,24 +360,31 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   }
 
   const path = flamePath(profile, focus.id);
-  const tipEntry = tipId !== null && enhanced ? viewById.get(tipId) : undefined;
+  const tipEntry = tipId !== null && enhanced && !narrow ? viewById.get(tipId) : undefined;
+  const selected = selectedId !== null ? profile.byId.get(selectedId) : undefined;
+  const share = (value: number) => formatFlameShare(profile.total > 0 ? value / profile.total : null);
+  // Ranked largest first, so the first row is the peak every bar is scaled to.
+  const peak = ranked.length ? rankedSize(ranked[0], diffMetric) : 0;
 
   return (
-    <div ref={ref} data-slot="flamegraph" data-mode={mode} data-orientation={orientation} {...props} className={styles.root({ className })}>
+    <div ref={ref} data-slot="flamegraph" data-mode={mode} data-orientation={orientationProp ?? (measured ? orientation : undefined)} {...props} className={styles.root({ className })}>
       <p className="sr-only">{summary}</p>
       {path.length > 1 ? (
         <nav aria-label="Zoom path" data-slot="flamegraph-breadcrumb">
-          <ol className={cn(styles.breadcrumb(), 'm-0 list-none p-0')}>
+          <ol className={styles.breadcrumb()}>
             {path.map((frame, index) => (
-              <li key={frame.id} className="flex items-center gap-1">
+              // Narrow, the middle of a deep path folds to `…`: the root, the
+              // parent and the current frame stay, each a full tap target.
+              <li key={frame.id} className={cn('flex min-w-0 items-center gap-1', index > 0 && index < path.length - 2 && '@max-[560px]:hidden')}>
                 {index > 0 ? <span aria-hidden="true" className="text-content-muted">›</span> : null}
                 {index === path.length - 1 ? (
                   <span aria-current="location" className={styles.current()}>{frame.name}</span>
                 ) : (
-                  <button type="button" className={styles.crumb()} onClick={() => setZoomedId(frame.parentId === null ? null : frame.id)}>
+                  <button type="button" title={frame.name} className={styles.crumb()} onClick={() => setZoomedId(frame.parentId === null ? null : frame.id)}>
                     {frame.name}
                   </button>
                 )}
+                {index === 0 && path.length > 3 ? <span aria-hidden="true" className="hidden text-content-muted @max-[560px]:inline">› …</span> : null}
               </li>
             ))}
           </ol>
@@ -331,21 +404,23 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
           data-slot="flamegraph-chart"
           width="100%"
           height={height}
-          className={styles.chart()}
+          className={cn(styles.chart(), cssFlip && '@max-[560px]:-scale-y-100')}
           onMouseLeave={() => setHoverId(null)}
         >
           {view.map((entry) => {
             const { frame, context } = entry;
             const y = yOf(frame.depth);
-            const px = entry.width * width;
-            const text = fitFlameLabel(frame.name, px - LABEL_PAD * 2, CHAR_WIDTH);
-            const tone = toneOf(frame);
+            const text = fitFlameLabel(frame.name, entry.width * width - LABEL_PAD * 2, CHAR_WIDTH);
+            // Unmeasured, a second label fitted to a phone stands in when the container is narrow.
+            const narrowText = measured ? text : fitFlameLabel(frame.name, entry.width * NARROW_ASSUMED - LABEL_PAD * 2, CHAR_WIDTH);
             const change = changes?.get(frame.id);
+            const tone = toneOf(change);
             const matched = searching && found.ids.has(frame.id);
             const dimmed = searching && !matched;
             const look = tone ? TONE[tone] : matched ? { rect: 'fill-accent-primary', text: 'fill-content-inverse' } : context || frame.parentId === null ? { rect: 'fill-surface-sunken', text: 'fill-content-secondary' } : { rect: 'fill-surface-raised', text: 'fill-content-primary' };
             const x = `${entry.x * 100}%`;
             const w = `${entry.width * 100}%`;
+            const textClass = cn(look.text, 'text-xs', cssFlip && 'origin-center [transform-box:fill-box] @max-[560px]:-scale-y-100');
             return (
               <g
                 key={frame.id}
@@ -361,11 +436,13 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
                 data-match={matched || undefined}
                 data-context={context || undefined}
                 className={cn('group cursor-pointer outline-none!', dimmed && 'opacity-35')}
-                onClick={() => zoomTo(frame)}
+                onClick={() => zoomTo(frame.id)}
                 onKeyDown={(event) => onKeyDown(event, entry)}
                 onFocus={() => { setActiveId(frame.id); setFocusedId(frame.id); }}
                 onBlur={() => setFocusedId((current) => (current === frame.id ? null : current))}
-                onMouseEnter={() => setHoverId(frame.id)}
+                // Mouse only: a tap fires pointerenter too, and a touch reader
+                // gets the details panel instead of a tooltip over the rows.
+                onPointerEnter={(event) => { if (event.pointerType === 'mouse') setHoverId(frame.id); }}
               >
                 {enhanced ? null : <title>{describeFlameFrame(frame, profile, change, diffMetric)}</title>}
                 <rect
@@ -379,23 +456,57 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
                     tone === 'new' && 'stroke-content-primary [stroke-dasharray:4_2]',
                   )}
                 />
-                {text ? (
+                {text || narrowText ? (
                   <svg x={x} y={y} width={w} height={rowHeight} overflow="hidden" aria-hidden="true">
-                    <text x={LABEL_PAD} y={rowHeight / 2} dominantBaseline="central" className={cn(look.text, 'text-xs')}>
-                      {text}
-                    </text>
+                    {text === narrowText ? (
+                      <text x={LABEL_PAD} y={rowHeight / 2} dominantBaseline="central" className={textClass}>{text}</text>
+                    ) : (
+                      <>
+                        {text ? <text x={LABEL_PAD} y={rowHeight / 2} dominantBaseline="central" className={cn(textClass, '@max-[560px]:hidden')}>{text}</text> : null}
+                        {narrowText ? <text x={LABEL_PAD} y={rowHeight / 2} dominantBaseline="central" className={cn(textClass, 'hidden @max-[560px]:inline')}>{narrowText}</text> : null}
+                      </>
+                    )}
                   </svg>
                 ) : null}
               </g>
             );
           })}
-          {tipEntry ? <FlameTooltip entry={tipEntry} profile={profile} change={changes?.get(tipEntry.frame.id)} metric={diffMetric} basis={diff?.compatible ? diff.basis : 'absolute'} y={yOf(tipEntry.frame.depth)} rowHeight={rowHeight} height={height} /> : null}
+          {tipEntry ? <FlameTooltip entry={tipEntry} profile={profile} change={changes?.get(tipEntry.frame.id)} metric={diffMetric} basis={basis} y={yOf(tipEntry.frame.depth)} rowHeight={rowHeight} height={height} /> : null}
         </svg>
       </div>
+      {selected ? (
+        <section aria-label="Frame details" aria-live="polite" data-slot="flamegraph-details" className={styles.details()}>
+          <span className="font-bold break-words">{breakable(selected.name)}</span>
+          <span className="text-content-secondary tabular-nums">
+            total {formatFlameValue(selected.total, unit)} · {share(selected.total)} — self {formatFlameValue(selected.self, unit)} · {share(selected.self)}
+          </span>
+          {changes?.get(selected.id) ? (
+            <span className="text-content-secondary tabular-nums">Δ {diffMetric} {formatFlameDelta(changes.get(selected.id)!, diffMetric, unit, basis)}</span>
+          ) : null}
+        </section>
+      ) : null}
+      {list !== 'never' && ranked.length ? (
+        <section
+          aria-label={mode === 'diff' ? 'Largest changes' : 'Hottest frames'}
+          data-slot="flamegraph-list"
+          className={cn(styles.list(), list === 'always' ? 'flex' : 'hidden @max-[560px]:flex')}
+        >
+          <p className="m-0 pb-1 text-content-muted">
+            {mode === 'diff' ? `Largest changes in ${diffMetric} time` : 'Hottest frames by self time'}
+          </p>
+          <FrameRows rows={ranked.slice(0, LIST_TOP)} peak={peak} profile={profile} focusId={focus.id} metric={diffMetric} basis={basis} tone={toneOf} onPick={zoomTo} className={styles.rows()} rowClass={styles.row()} />
+          {ranked.length > LIST_TOP ? (
+            <details>
+              <summary className={styles.more()}>Show all {ranked.length}</summary>
+              <FrameRows rows={ranked.slice(LIST_TOP)} start={LIST_TOP + 1} peak={peak} profile={profile} focusId={focus.id} metric={diffMetric} basis={basis} tone={toneOf} onPick={zoomTo} className={styles.rows()} rowClass={styles.row()} />
+            </details>
+          ) : null}
+        </section>
+      ) : null}
       {mode === 'diff' && diff?.compatible ? (
         <div data-slot="flamegraph-legend" className="flex flex-col gap-1">
           <ul aria-label="Colour key" className={styles.legend()}>
-            <li className="text-content-muted">
+            <li className="col-span-2 text-content-muted">
               {diffMetric} {diff.basis === 'share' ? 'share' : 'time'} vs baseline, ±{formatFlameShare(threshold)} unchanged, ≥{formatFlameShare(large)} large:
             </li>
             {LEGEND_ORDER.map((tone) => (
@@ -413,7 +524,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
               {diff.removed.map((frame, index) => (
                 <span key={frame.id}>
                   {index > 0 ? '; ' : ''}
-                  <span className="text-content-primary">{frame.name}</span> ({formatFlameValue(frame.total.baseline ?? 0, unit)})
+                  <span className="break-words text-content-primary">{breakable(frame.name)}</span> ({formatFlameValue(frame.total.baseline ?? 0, unit)})
                 </span>
               ))}
             </p>
@@ -426,6 +537,72 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
 
 Flamegraph.displayName = 'Flamegraph';
 
+/** What a frame-list row's bar measures: self time, or the size of the change in a diff. */
+function rankedSize(row: FlameRankedFrame, metric: 'self' | 'total'): number {
+  return row.change ? Math.abs(row.change[metric].absolute ?? 0) : row.self;
+}
+
+interface FrameRowsProps {
+  rows: FlameRankedFrame[];
+  start?: number;
+  /** The largest size in the whole list, so bars scale alike above and below "show all". */
+  peak: number;
+  profile: FlameTree;
+  focusId: string;
+  metric: 'self' | 'total';
+  basis: 'absolute' | 'share';
+  tone: (change: FlameFrameDelta | undefined) => FlameDeltaTone | null;
+  onPick: (id: string) => void;
+  className: string;
+  rowClass: string;
+}
+
+/** Rows of the frame list. Each is a 44px tap target that zooms the graph; a removed frame has nothing to zoom to. */
+function FrameRows({ rows, start = 1, peak, profile, focusId, metric, basis, tone, onPick, className, rowClass }: FrameRowsProps) {
+  const unit = profile.unit;
+  const share = (value: number) => formatFlameShare(profile.total > 0 ? value / profile.total : null);
+  const sizeOf = (row: FlameRankedFrame) => rankedSize(row, metric);
+  return (
+    <ol start={start} className={className}>
+      {rows.map((row) => {
+        const rowTone = row.change ? tone(row.change) : null;
+        const removed = row.change?.status === 'removed';
+        const bar = rowTone ? TONE[rowTone].rect : removed ? 'fill-delta-removed' : 'fill-accent-primary';
+        const body = (
+          <>
+            <span className="break-words text-content-primary">{breakable(row.name)}</span>
+            <span className="flex items-center gap-2 text-content-secondary tabular-nums">
+              {removed ? <span>removed · was {formatFlameValue(row.change!.total.baseline ?? 0, unit)}</span> : <span className="shrink-0">self {share(row.self)} · total {share(row.total)}</span>}
+              <svg aria-hidden="true" height="6" className="h-1.5 min-w-8 flex-1">
+                <rect x="0" y="0" height="6" width={`${peak > 0 ? (sizeOf(row) / peak) * 100 : 0}%`} className={bar} />
+              </svg>
+            </span>
+            {row.change && !removed ? (
+              <span className="flex items-center gap-1.5 text-content-primary tabular-nums">
+                <svg aria-hidden="true" width="10" height="10" className="shrink-0">
+                  <rect x="0.5" y="0.5" width="9" height="9" className={cn(bar, 'stroke-edge-strong', rowTone === 'new' && '[stroke-dasharray:3_2]')} />
+                </svg>
+                {metric} {formatFlameDelta(row.change, metric, unit, basis)}
+              </span>
+            ) : null}
+          </>
+        );
+        return (
+          <li key={row.id} data-frame-id={row.id}>
+            {removed ? (
+              <div className={cn(rowClass, 'cursor-default hover:bg-transparent')}>{body}</div>
+            ) : (
+              <button type="button" aria-current={row.id === focusId || undefined} className={rowClass} onClick={() => onPick(row.id)}>
+                {body}
+              </button>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 interface FlameTooltipProps {
   entry: FlameViewFrame;
   profile: FlameTree;
@@ -437,7 +614,7 @@ interface FlameTooltipProps {
   height: number;
 }
 
-/** The enhanced tooltip, drawn inside the SVG beside its frame so placing it needs no inline style. */
+/** The enhanced mouse tooltip, drawn inside the SVG beside its frame so placing it needs no inline style. */
 function FlameTooltip({ entry, profile, change, metric, basis, y, rowHeight, height }: FlameTooltipProps) {
   const { frame } = entry;
   const unit = profile.unit;
