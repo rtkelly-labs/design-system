@@ -2,6 +2,7 @@
 
 import { scaleLinear, scaleLog } from '@visx/scale';
 import { forwardRef, useCallback, useEffect, useId, useMemo, useState, type HTMLAttributes, type KeyboardEvent, type MouseEvent } from 'react';
+import { useMeasuredWidth } from '../hooks/useMeasuredWidth';
 import { cn, recipe } from '../lib/recipe';
 import {
   bucketPercentile,
@@ -36,22 +37,6 @@ export const LATENCY_HISTOGRAM_VARIANTS = {
   density: ['regular', 'compact'],
   cumulative: [false, true],
 } as const satisfies Record<string, readonly unknown[]>;
-
-/** Track an element's content width; `FALLBACK_WIDTH` until it reports one. */
-function useMeasuredWidth(): [(node: HTMLDivElement | null) => void, number] {
-  const [node, setNode] = useState<HTMLDivElement | null>(null);
-  const [width, setWidth] = useState(0);
-  useEffect(() => {
-    if (!node) return undefined;
-    const measure = () => setWidth(Math.floor(node.getBoundingClientRect().width));
-    measure();
-    if (typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [node]);
-  return [setNode, width > 0 ? width : FALLBACK_WIDTH];
-}
 
 /** The CDF overlay: a step-free line through each bucket's upper edge at its running share. */
 function cumulativePath(buckets: readonly LatencyBucket[], total: number, x: (value: number) => number, innerHeight: number): string {
@@ -158,7 +143,7 @@ export const LatencyHistogram = forwardRef<HTMLDivElement, LatencyHistogramProps
   const MARGIN = useMemo(() => (cumulative ? { ...layout.margin, right: layout.margin.right + 26 } : layout.margin), [cumulative, layout]);
   const bucketing = binning ?? scale;
   const styles = latencyHistogram();
-  const [measureRef, width] = useMeasuredWidth();
+  const [measureRef, width] = useMeasuredWidth(FALLBACK_WIDTH);
 
   const buckets = useMemo<LatencyBucket[]>(() => {
     if (bucketsProp) return bucketsProp.filter((bucket) => Number.isFinite(bucket.from) && Number.isFinite(bucket.to) && bucket.to > bucket.from).map((bucket) => ({ ...bucket }));
