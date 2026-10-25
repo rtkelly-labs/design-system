@@ -12,6 +12,15 @@ const spans: TraceSpanInput[] = [
 ];
 
 describe('TraceViewer', () => {
+  it('zooms the waterfall to the selected span with 5% either side', () => {
+    const onWindowChange = vi.fn();
+    const { container } = render(<TraceViewer spans={spans} defaultSelectedId="b" onWindowChange={onWindowChange} />);
+    fireEvent.click(within(screen.getByRole('complementary', { name: 'Span details' })).getByRole('button', { name: 'Zoom to span' }));
+    expect(onWindowChange.mock.lastCall?.[0].start).toBeCloseTo(14);
+    expect(onWindowChange.mock.lastCall?.[0].end).toBeCloseTo(146);
+    expect(container.querySelector('[data-slot="trace-waterfall"]')!.getAttribute('data-window')).toBe('14 146');
+  });
+
   it('summarises the trace and shows the first root by default', () => {
     const ref = createRef<HTMLElement>();
     render(<TraceViewer ref={ref} spans={spans} title="checkout 4f2a" />);

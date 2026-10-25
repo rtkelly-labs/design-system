@@ -156,8 +156,6 @@ flamegraph-frame	Flamegraph
 flamegraph-legend	Flamegraph
 flamegraph-list	Flamegraph
 flamegraph-marker	Flamegraph
-flamegraph-minimap	Flamegraph
-flamegraph-minimap-window	Flamegraph
 flamegraph-status	Flamegraph
 flow-diagram	FlowDiagram
 freshness-indicator	FreshnessIndicator
@@ -197,6 +195,8 @@ metadata-grid-cell	MetadataGrid
 metadata-grid-label	MetadataGrid
 metadata-grid-value	MetadataGrid
 metric-strip	MetricStrip
+minimap	Minimap
+minimap-window	Minimap
 mobile-nav-trigger	MobileNav
 nerd-icon	NerdIcon
 note-block	NoteBlock

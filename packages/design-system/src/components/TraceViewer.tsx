@@ -1,12 +1,13 @@
 'use client';
 
-import { forwardRef, useId, useMemo, useState, type HTMLAttributes } from 'react';
+import { forwardRef, useCallback, useId, useMemo, useState, type HTMLAttributes } from 'react';
 import { useTraceReplay } from '../hooks/useTraceReplay';
 import { Button } from './Button';
 import { Input } from './Input';
 import { recipe } from '../lib/recipe';
 import { buildTrace, formatTraceDuration, replayTrace, type TraceModel, type TraceSpanInput } from '../lib/trace';
-import { TraceWaterfall } from './TraceWaterfall';
+import { fitViewportWindow } from '../lib/viewport';
+import { TraceWaterfall, type TraceWindow } from './TraceWaterfall';
 
 const traceViewer = recipe({
   slots: {
@@ -56,7 +57,18 @@ export interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'tit
   loop?: boolean;
   /** With `replay`, the initial playback rate. Default 1. */
   defaultSpeed?: number;
+  /** The waterfall's time window, in milliseconds from the trace start. Controlled when defined; `null` is the whole trace. */
+  window?: TraceWindow | null;
+  /** The window on mount when uncontrolled — and where the waterfall's Reset returns. Default: the whole trace. */
+  defaultWindow?: TraceWindow | null;
+  /** Called with the new window after a gesture, a control, the minimap or "Zoom to span". */
+  onWindowChange?: (window: TraceWindow) => void;
+  /** The waterfall's minimap: `auto` for a trace of more than 40 spans or a narrow container. Default `auto`. */
+  minimap?: 'auto' | 'always' | 'never';
 }
+
+/** Padding either side of a span when the window is zoomed to it, as a fraction of its duration. */
+const ZOOM_TO_SPAN_PAD = 0.05;
 
 /** Playback rates offered by the transport. */
 const TRACE_REPLAY_SPEEDS = [0.25, 0.5, 1, 2, 4] as const;
@@ -71,7 +83,7 @@ const TRACE_REPLAY_SPEEDS = [0.25, 0.5, 1, 2, 4] as const;
  * spans start.
  */
 export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function TraceViewer(
-  { spans, now, title = 'Trace', defaultSelectedId, defaultCollapsed, searchable = true, replay = false, autoPlay = false, loop = false, defaultSpeed = 1, className, ...props },
+  { spans, now, title = 'Trace', defaultSelectedId, defaultCollapsed, searchable = true, replay = false, autoPlay = false, loop = false, defaultSpeed = 1, window: windowProp, defaultWindow = null, onWindowChange, minimap = 'auto', className, ...props },
   ref,
 ) {
   const full = useMemo(() => buildTrace(spans, { now }), [spans, now]);
@@ -84,9 +96,18 @@ export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function Tr
   );
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(defaultSelectedId === undefined ? null : defaultSelectedId);
+  // The window is held here so "Zoom to span" can set it; a caller's `window` still controls it.
+  const [ownedWindow, setOwnedWindow] = useState<TraceWindow | null>(defaultWindow);
+  const windowValue = windowProp === undefined ? ownedWindow : windowProp;
+  const setWindow = useCallback((next: TraceWindow) => {
+    if (windowProp === undefined) setOwnedWindow(next);
+    onWindowChange?.(next);
+  }, [windowProp, onWindowChange]);
   const headingId = useId();
   const styles = traceViewer();
 
+  // The waterfall's axis: the whole trace, held still through a replay.
+  const extent = replay ? full.duration : model.duration;
   const fallback = defaultSelectedId === undefined ? model.spans[0]?.id ?? null : null;
   const selected = model.byId.get(selectedId ?? fallback ?? '') ?? null;
   const parent = selected?.parentId ? model.byId.get(selected.parentId) : undefined;
@@ -160,11 +181,29 @@ export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function Tr
           playhead={replaying ? player.elapsed : undefined}
           animate={replay}
           defaultCollapsed={defaultCollapsed}
+          window={windowValue}
+          defaultWindow={defaultWindow}
+          onWindowChange={setWindow}
+          minimap={minimap}
         />
         <aside aria-label="Span details" data-part="details" className={styles.details()}>
           {selected ? (
             <>
               <p className={styles.detailsTitle()}>{selected.name}</p>
+              {extent > 0 ? (
+                <Button
+                  appearance="outline"
+                  size="sm"
+                  variant="secondary"
+                  className="self-start"
+                  onClick={() => {
+                    const fit = fitViewportWindow(selected.offset / extent, (selected.offset + selected.duration) / extent, ZOOM_TO_SPAN_PAD);
+                    setWindow({ start: fit.start * extent, end: fit.end * extent });
+                  }}
+                >
+                  Zoom to span
+                </Button>
+              ) : null}
               <dl className={styles.list()}>
                 <dt className={styles.term()}>service</dt><dd className={styles.value()}>{selected.service}</dd>
                 {selected.kind ? <><dt className={styles.term()}>kind</dt><dd className={styles.value()}>{selected.kind}</dd></> : null}

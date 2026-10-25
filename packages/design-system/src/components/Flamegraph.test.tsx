@@ -70,12 +70,12 @@ describe('Flamegraph', () => {
     const { container } = render(<Flamegraph profile={profile} defaultWindow={[0.2, 0.6]} />);
     const root = container.querySelector('[data-slot="flamegraph"]')!;
     expect(root.getAttribute('data-window')).toBe('0.2000 0.6000');
-    expect(container.querySelector('[data-slot="flamegraph-minimap"]')).toBeTruthy();
+    expect(container.querySelector('[data-slot="minimap"]')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }));
     expect(root.getAttribute('data-window')).toBe('0.3000 0.5000');
     fireEvent.click(screen.getByRole('button', { name: 'Fit all' }));
     expect(root.getAttribute('data-window')).toBe('0.0000 1.0000');
-    expect(container.querySelector('[data-slot="flamegraph-minimap"]')).toBeNull();
+    expect(container.querySelector('[data-slot="minimap"]')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Reset' }));
     expect(root.getAttribute('data-window')).toBe('0.2000 0.6000');
     fireEvent.keyDown(frame(/^all,/), { key: '-' });
@@ -101,7 +101,7 @@ describe('Flamegraph', () => {
   it('renders a pre-zoomed, clipped window statically', () => {
     const html = renderToStaticMarkup(<Flamegraph profile={profile} defaultWindow={[0.1, 0.6]} defaultSelectedId="main;handle;parse" />);
     expect(html).toMatch(/data-frame-id="main;gc"[^>]*data-clipped="true"/);
-    expect(html).toContain('data-slot="flamegraph-minimap"');
+    expect(html).toContain('data-slot="minimap"');
     expect(html).toContain('aria-selected="true"');
     expect(html).not.toContain('data-slot="flamegraph-controls"');
   });

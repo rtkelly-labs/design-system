@@ -187,6 +187,10 @@ export * from './components/TraceViewer';
 // `Flamegraph`.
 export * from './lib/flame';
 export * from './components/Flamegraph';
+// Viewports: the 2-D window maths dense charts share (`lib/viewport`), and the
+// minimap that shows the window over the whole — used by Flamegraph and TraceWaterfall.
+export * from './lib/viewport';
+export * from './components/Minimap';
 // Observability (#407): one time window and hover cursor that every view on a
 // page shares, and the views that follow it. Each works standalone too.
 export * from './lib/timeRange';
