@@ -20,6 +20,15 @@ on:
   # rule 8. Dispatch requires this file on the default branch, so it helps the
   # next branch rather than the one that adds it.
   workflow_dispatch:
+  # The full regression, from `regression.yml` once a pull request is labelled
+  # `ready-to-merge`. On `pull_request` this file is the smoke suite: the same
+  # jobs, with the narrow-viewport a11y scan cut to `MOBILE_CASES`. `full`
+  # restores the whole matrix, as `main` runs it.
+  workflow_call:
+    inputs:
+      full:
+        type: boolean
+        default: false
 
 # Supersede an in-flight run when the branch moves on: a result for a commit
 # nobody is looking at any more is holding a runner the next push needs.
@@ -29,9 +38,11 @@ on:
 # manual re-run, the only way to refresh a bot-pushed baseline — is in its own
 # group. It therefore neither cancels the push run nor gets cancelled by one,
 # and `cancel-in-progress` is false for it, because a re-run someone asked for
-# by hand should never be thrown away.
+# by hand should never be thrown away. Keyed on the mode too: a called run
+# shares the caller's event and ref, so without it the full regression and the
+# smoke suite for the same push would cancel each other.
 concurrency:
-  group: ci-${{ github.event_name }}-${{ github.ref }}
+  group: ci-${{ github.event_name }}-${{ inputs.full && 'full' || 'smoke' }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Five jobs in parallel, then one that reports their verdict.
@@ -465,6 +476,9 @@ jobs:
       # full, with the full a11y matrix, and records the verdict it reached —
       # so `main` is where a wrong exclusion in that script would surface, one
       # run after merge, and it is also what every pull request can reuse.
+      # Only a full run records one (`main`, or the `ready-to-merge` regression),
+      # so the key means "the full matrix passed", and the `full-` segment
+      # retires every verdict a smoke run recorded before that rule existed.
       # Node is on the runner before `setup`, and this needs nothing else.
       - name: Rendering Inputs
         id: inputs
@@ -481,7 +495,7 @@ jobs:
             echo "::error::render-inputs.mjs printed '${inputs}', not a hash. Refusing to key a verdict on it."
             exit 1
           fi
-          echo "key=visual-verdict-dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e-${inputs}" >> "$GITHUB_OUTPUT"
+          echo "key=visual-verdict-full-dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e-${inputs}" >> "$GITHUB_OUTPUT"
 
       - name: Previous Verdict
         id: verdict
@@ -582,13 +596,14 @@ jobs:
       # because it needs the same Storybook build and the same browser install,
       # and building either twice is the longest thing in CI.
       # On a pull request the narrow viewport scans only the components the
-      # visual suite asserts there; on `main` it scans everything, which is
-      # what keeps that scope honest. See `scannedIn` in `tests/a11y.spec.ts`.
+      # visual suite asserts there; on `main` and in the `ready-to-merge`
+      # regression it scans everything, which is what keeps that scope honest.
+      # See `scannedIn` in `tests/a11y.spec.ts`.
       - name: Run Accessibility Tests
         if: steps.verdict.outputs.cache-hit != 'true'
         env:
           PLAYWRIGHT_JSON_OUTPUT_FILE: telemetry/a11y.json
-          A11Y_FULL_MATRIX: ${{ github.event_name == 'pull_request' && '0' || '1' }}
+          A11Y_FULL_MATRIX: ${{ (github.event_name != 'pull_request' || inputs.full) && '1' || '0' }}
         run: pnpm test:a11y
 
       # Per-story selection, in shadow mode (`scripts/select-stories.mjs`): which
@@ -669,7 +684,10 @@ jobs:
     name: verdict
     runs-on: ubuntu-latest
     needs: [visual]
-    if: needs.visual.result == 'success' && needs.visual.outputs.hit != 'true'
+    # Full runs only. A smoke run's a11y scan skipped most of the narrow
+    # viewport, so a verdict it recorded would let a full run skip the scan
+    # it exists for.
+    if: needs.visual.result == 'success' && needs.visual.outputs.hit != 'true' && (github.event_name != 'pull_request' || inputs.full)
     timeout-minutes: 5
 
     steps:
@@ -779,8 +797,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [gates, unit, package, visual, site]
     # `always()`, so this reports a verdict when a job fails rather than being
-    # skipped — a skipped required check is indistinguishable from one still
-    # running, and blocks the PR either way.
+    # skipped. Skipped is worse than it looks: GitHub reports a job skipped by
+    # a condition as Success, and a required check that reports Success lets
+    # the PR merge. (A workflow that never starts is different; its check stays
+    # "Expected" and blocks.) That is also why `regression.yml` gates the merge
+    # with a pending commit status rather than a skipped job.
     if: always()
     # Reads four strings and exits. A ceiling anyway, per rule 9: "every job",
     # including the ones that obviously cannot hang.
