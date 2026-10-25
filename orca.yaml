@@ -1,0 +1,6 @@
+# Orca runs this in each new worktree. Declared in rtkelly13/rig config/orca.json.
+scripts:
+  setup: |
+    mkdir -p temp
+    [ -e TODO.md ] || printf '# TODO: %s\n\n- [ ] Local tasks and notes (gitignored)\n' "$(git branch --show-current)" > TODO.md
+    pnpm install
