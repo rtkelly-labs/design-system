@@ -16,6 +16,7 @@ import {
 } from 'react';
 import { cn, recipe } from '../lib/recipe';
 import { Minimap, type MinimapMark, type MinimapTone } from './Minimap';
+import { flameSameSwatch, flameSwatch, type FlamePalette } from '../lib/flamePalette';
 import {
   clampFlameDepth,
   clampFlameWindow,
@@ -67,10 +68,8 @@ const TIP_PAD = 6;
  * variants below — Tailwind reads those as source text, so they cannot be built from it.
  */
 const NARROW = 560;
-/** Row height of the label-free overview in a measured narrow container: tall enough to tap. */
-const NARROW_ROW = 22;
-/** Levels a phone shows by default; a desktop shows every level the window reaches. */
-const NARROW_DEPTH_CAP = 12;
+/** Row height of the label-free overview in a measured narrow container: a 35-deep profile fits in about 450px. */
+const NARROW_ROW = 12;
 /** How far, in pixels, a tap in a row's empty space may land from a frame and still pick it. */
 const TAP_SLOP = 12;
 /** Two taps closer than this, in milliseconds and pixels, are a double tap. */
@@ -218,9 +217,16 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
   /** Compare each frame's share of its profile instead of raw values — for profiles of different lengths. Default false. */
   normalize?: boolean;
   /**
+   * How frames are filled. `warm` (default) hashes each name into a red →
+   * yellow ramp built from the danger and warning roles, the classic look;
+   * `package` gives each namespace its own role; `theme` uses the surfaces.
+   * A diff always paints on the delta roles. Every fill's label is tested to
+   * 4.5:1 on every Level.
+   */
+  palette?: FlamePalette;
+  /**
    * `flame` grows up from the root at the bottom; `icicle` hangs down from it
-   * at the top. Unset, it is `flame`, turning to `icicle` in a container
-   * narrower than 560px — a phone reads downward. Set, it is honoured at every width.
+   * at the top. Default `flame`, at every width.
    */
   orientation?: 'flame' | 'icicle';
   /**
@@ -246,8 +252,8 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
   /**
    * Where the depth window opens, and where Reset returns: `[min, max]`
    * levels, or a number of levels from the root. Default: the stack of the
-   * selected frame, or of the frame the window fits; otherwise every level the
-   * window reaches — capped at 12 levels in a narrow container, uncapped wide.
+   * frame the window fits; otherwise every level the window reaches — the
+   * whole profile, zoomed out, on a phone too.
    */
   defaultDepth?: FlameDepthSpec;
   /** The depth window, in levels (the root is 0). Controlled when defined. */
@@ -317,9 +323,13 @@ export interface FlamegraphProps extends Omit<HTMLAttributes<HTMLDivElement>, 'c
  * to the root. Space selects, Enter fits the frame, Escape fits its parent;
  * `+`, `-` and `0` zoom in, out and reset.
  *
+ * **Zoomed out by default.** It opens on the whole profile at every depth,
+ * root at the bottom, each frame filled from the `warm` palette — the stacked
+ * towers a flame graph is read by.
+ *
  * **Narrow.** Below 560px of *container* width (a container query, so it works
- * without script) the graph is a label-free overview of 22px tap rows, root on
- * top unless `orientation` is set, and a frame list beneath carries the names.
+ * without script) the graph draws bars only, 12px rows once measured so a
+ * 35-deep profile fits a phone screen, and a frame list beneath carries the names.
  *
  * **Diff.** With `mode="diff"` frames are painted on the delta roles by the
  * sign and size of their change against `baseline` — change, not verdict. New
@@ -336,6 +346,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     large = 0.25,
     normalize = false,
     orientation: orientationProp,
+    palette = 'warm',
     list = 'auto',
     defaultWindow,
     window: windowProp,
@@ -363,13 +374,9 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   const [measure, measured] = useMeasuredWidth();
   const width = measured > 0 ? measured : assumedWidth;
   const narrow = measured > 0 && measured < NARROW;
-  // Unmeasured — a static render, or the first paint — a default orientation
-  // is drawn as `flame` and flipped to `icicle` by the container query; once
-  // measured, the orientation is chosen here and drawn directly.
-  const cssFlip = orientationProp === undefined && measured === 0;
-  const orientation = orientationProp ?? (narrow ? 'icicle' : 'flame');
-  const rowHeight = narrow ? NARROW_ROW : rowHeightProp;
-  const depthCap = narrow ? NARROW_DEPTH_CAP : Infinity;
+  // Root at the bottom everywhere, as a flame graph is read; a phone only shortens the rows.
+  const orientation = orientationProp ?? 'flame';
+  const rowHeight = narrow ? Math.min(rowHeightProp, NARROW_ROW) : rowHeightProp;
 
   // The opening windows. A spec array is compared by value, so a literal in JSX does not reset the view each render.
   const windowSpec: FlameWindowSpec | undefined = defaultWindow ?? (defaultZoomedId ? { frameId: defaultZoomedId } : undefined);
@@ -381,8 +388,8 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
   const initialZoom = defaultZoomedId !== undefined ? defaultZoomedId : (windowFrame?.id ?? null);
   const defaultWin = useMemo(() => resolveFlameWindow(profile, JSON.parse(specKey) as FlameWindowSpec | null, comparable, diffMetric), [profile, specKey, comparable, diffMetric]);
   const defaultDepthWin = useMemo(
-    () => resolveFlameDepth(profile, JSON.parse(depthKey) as FlameDepthSpec | null, { window: defaultWin, anchorId: defaultSelectedId ?? windowFrame?.id ?? null, cap: depthCap }),
-    [profile, depthKey, defaultWin, defaultSelectedId, windowFrame, depthCap],
+    () => resolveFlameDepth(profile, JSON.parse(depthKey) as FlameDepthSpec | null, { window: defaultWin, anchorId: windowFrame?.id ?? null }),
+    [profile, depthKey, defaultWin, windowFrame],
   );
 
   const [zoomedId, setZoomedId] = useControllable<string | null>(zoomedProp, initialZoom, onZoomedChange);
@@ -456,7 +463,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     if (!frame) return;
     setZoomedId(frame.parentId === null ? null : frame.id);
     setWindow(fitFlameWindow(profile, frame.id));
-    setDepth(frame.parentId === null ? { min: 0, max: profile.maxDepth } : fitFlameDepth(profile, frame.id, depthCap));
+    setDepth(frame.parentId === null ? { min: 0, max: profile.maxDepth } : fitFlameDepth(profile, frame.id));
   };
   const reset = () => {
     resetWindow();
@@ -721,7 +728,25 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     </ul>
   ) : null;
 
-  /** A ▲/▼ marker for hidden levels. Unmeasured with a default orientation, it says both answers and the container query picks one. */
+  /**
+   * A frame's fill and label. A diff paints on the delta roles, its unchanged
+   * frames varied by name so neighbours separate; a search match takes the
+   * accent; the root and the fitted frame's ancestors are ground; anything
+   * else takes the palette.
+   */
+  const lookOf = (frame: FlameFrame, tone: FlameDeltaTone | null, matched: boolean, context: boolean): { rect: string; text: string } => {
+    if (tone === 'same') {
+      const same = flameSameSwatch(frame.name);
+      return { rect: same.fill, text: same.label };
+    }
+    if (tone) return TONE[tone];
+    if (matched) return { rect: 'fill-accent-primary', text: 'fill-content-inverse' };
+    if (context || frame.parentId === null) return { rect: 'fill-surface-sunken', text: 'fill-content-secondary' };
+    const swatch = flameSwatch(palette, frame.name);
+    return swatch ? { rect: swatch.fill, text: swatch.label } : { rect: 'fill-surface-raised', text: 'fill-content-primary' };
+  };
+
+  /** A ▲/▼ marker for hidden levels. */
   const marker = (edge: 'top' | 'bottom') => {
     const glyph = edge === 'top' ? '▲' : '▼';
     // Flame: deeper levels sit above. Icicle: shallower levels do.
@@ -729,15 +754,6 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
     const tall = edge === 'top' ? hiddenShallower : hiddenDeeper;
     const count = orientation === 'flame' ? wide : tall;
     const go = (orientation === 'flame') === (edge === 'top') ? deeper : shallower;
-    if (cssFlip) {
-      if (!wide && !tall) return null;
-      return (
-        <button type="button" data-slot="flamegraph-marker" data-edge={edge} className={cn(styles.marker(), !wide && '@min-[560px]:hidden', !tall && '@max-[560px]:hidden')} onClick={go}>
-          <span className="@max-[560px]:hidden">{glyph} {levelsText(wide)}</span>
-          <span className="hidden @max-[560px]:inline">{glyph} {levelsText(tall)}</span>
-        </button>
-      );
-    }
     if (!count) return null;
     return (
       <button type="button" data-slot="flamegraph-marker" data-edge={edge} aria-label={`${levelsText(count)} hidden ${go === deeper ? 'deeper' : 'shallower'}; show them`} className={styles.marker()} onClick={go}>
@@ -751,7 +767,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
       ref={ref}
       data-slot="flamegraph"
       data-mode={mode}
-      data-orientation={orientationProp ?? (measured ? orientation : undefined)}
+      data-orientation={orientation}
       data-window={`${win.start.toFixed(4)} ${win.end.toFixed(4)}`}
       data-depth={`${depth.min} ${depth.max}`}
       {...props}
@@ -810,7 +826,6 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
           rowOrder={orientation === 'flame' ? 'bottom-up' : 'top-down'}
           pixelWidth={width}
           height={MINIMAP_HEIGHT}
-          chartClassName={cssFlip ? '@max-[560px]:-scale-y-100' : undefined}
           onWindowChange={(next, nextDepth) => { setWindow(next); if (nextDepth) setDepth(nextDepth); }}
         />
       ) : null}
@@ -823,7 +838,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
           data-slot="flamegraph-chart"
           width="100%"
           height={height}
-          className={cn(styles.chart(), cssFlip && '@max-[560px]:-scale-y-100')}
+          className={styles.chart()}
           onMouseLeave={() => setHoverId(null)}
           onClick={onChartClick}
           onDoubleClick={onDoubleClick}
@@ -844,7 +859,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
             const matched = searching && found.ids.has(frame.id);
             const isSelected = frame.id === selectedId;
             const dimmed = (searching && !matched) || (stack !== null && !stack.has(frame.id));
-            const look = tone ? TONE[tone] : matched ? { rect: 'fill-accent-primary', text: 'fill-content-inverse' } : context || frame.parentId === null ? { rect: 'fill-surface-sunken', text: 'fill-content-secondary' } : { rect: 'fill-surface-raised', text: 'fill-content-primary' };
+            const look = lookOf(frame, tone, matched, context);
             const x = `${entry.x * 100}%`;
             const w = `${entry.width * 100}%`;
             return (
@@ -890,7 +905,7 @@ export const Flamegraph = forwardRef<HTMLDivElement, FlamegraphProps>(function F
                       x={LABEL_PAD}
                       y={rowHeight / 2}
                       dominantBaseline="central"
-                      className={cn(look.text, 'text-xs', !measured && '@max-[560px]:hidden', cssFlip && 'origin-center [transform-box:fill-box] @max-[560px]:-scale-y-100')}
+                      className={cn(look.text, 'text-xs', !measured && '@max-[560px]:hidden')}
                     >
                       {shown}
                     </text>
