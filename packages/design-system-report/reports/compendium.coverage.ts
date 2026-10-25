@@ -19,4 +19,8 @@ export const EXEMPT: Readonly<Record<string, { kind: ExemptionKind; reason: stri
     kind: 'kitchen-sink',
     reason: 'Renders every other component several screens tall; its plate would duplicate the compendium inside itself.',
   },
+  ObservabilityConsole: {
+    kind: 'kitchen-sink',
+    reason: 'A whole ops console composing every observability component, each of which has its own plate; at several screens per rung its plate would repeat them inside itself.',
+  },
 };

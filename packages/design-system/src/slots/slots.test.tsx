@@ -47,6 +47,10 @@ const observed = new Map<string, Set<string>>();
 const rendered = new Map<string, number>();
 const subjects = (): ExportInfo[] => analysis.exports.filter((e) => e.class === 'component' || e.class === 'part');
 
+// Static-renders every story of every exported component, so it grows with the inventory: about
+// 6s alone with the observability set (#407), whose evaluation matrices draw dozens of charts, and
+// past vitest's 10s hook default once the rest of the suite shares the machine. The work is the
+// contract; the budget is sized to it rather than trimming what it checks.
 beforeAll(async () => {
   analysis = await analyse();
   for (const e of subjects()) {
@@ -70,7 +74,7 @@ beforeAll(async () => {
     observed.set(e.name, slots);
     rendered.set(e.name, count);
   }
-});
+}, 30_000);
 
 const carries = (name: string, slots: Set<string>) => {
   const alias = ALIASES[name];
