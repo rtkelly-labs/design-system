@@ -161,3 +161,4 @@ citation names a rule that does not exist.
 12. **Gitignored Local TODO File**: a root `TODO.md` file MUST exist for local task tracking and be gitignored.
 13. **Auto-Merge Enabled**: PRs may enable auto-merge (squash).
 14. **Pinned Action SHAs**: workflows MUST use 40-character commit SHAs with the version in a trailing comment, not mutable tags. `pnpm check:governance` enforces it.
+15. **Script Language Policy**: automation scripts in `scripts/` MUST use the repository's approved language stack (JavaScript/TypeScript `.mjs`, `.js`, `.ts` for Node/pnpm). Alien scripting runtimes (`.py`, `.sh`, `.ps1`) are strictly prohibited and gated by CI.
