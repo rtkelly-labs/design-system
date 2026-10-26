@@ -9,6 +9,7 @@ import {
   AppSidebarNav,
   AppTopbar,
   Badge,
+  Button,
   Checkbox,
   ErrorSummary,
   Fieldset,
@@ -72,6 +73,16 @@ const FEATURES: { key: 'issues' | 'wiki' | 'discussions' | 'projects'; label: st
   { key: 'projects', label: 'Projects', help: 'Boards that read from issues and pull requests.' },
 ];
 
+function isValidWebsite(value: string): boolean {
+  if (!/^https?:\/\//i.test(value) || /\s/.test(value)) return false;
+  try {
+    const url = new URL(value);
+    return (url.protocol === 'http:' || url.protocol === 'https:') && url.hostname.includes('.');
+  } catch {
+    return false;
+  }
+}
+
 const countDirty = (a: Values, b: Values) =>
   (Object.keys(a) as (keyof Values)[]).filter((k) => a[k] !== b[k]).length;
 
@@ -97,6 +108,9 @@ export default function RepositorySettings() {
 
   const id = (k: string) => `${uid}${k}`;
   const dirty = countDirty(values, saved);
+  const sectionErrors = errors.filter((error) => (section === 'features') === (error.id === id('merge')));
+  const otherSection = section === 'features' ? 'general' : 'features';
+  const otherErrorCount = errors.length - sectionErrors.length;
   const errorFor = (k: string) => errors.find((e) => e.id === id(k))?.message;
   const set = <K extends keyof Values>(k: K, v: Values[K]) => setValues((c) => ({ ...c, [k]: v }));
 
@@ -105,7 +119,7 @@ export default function RepositorySettings() {
     if (!values.name.trim()) out.push({ id: id('name'), message: 'Enter a repository name' });
     else if (!/^[A-Za-z0-9._-]+$/.test(values.name)) out.push({ id: id('name'), message: 'Use letters, numbers, dots, dashes and underscores only' });
     if (values.description.length > 120) out.push({ id: id('description'), message: 'Keep the description to 120 characters or fewer' });
-    if (values.website && !/^https?:\/\/[^\s/]+\.[^\s/]+/.test(values.website)) out.push({ id: id('website'), message: 'Enter a full address starting with https://' });
+    if (values.website && !isValidWebsite(values.website)) out.push({ id: id('website'), message: 'Enter a full address starting with https://' });
     if (!values.squash && !values.rebase && !values.mergeCommit) out.push({ id: id('merge'), message: 'Allow at least one way to merge a pull request' });
     return out;
   }
@@ -154,7 +168,12 @@ export default function RepositorySettings() {
             {section === 'danger' ? <DangerZone /> : null}
             {section === 'general' || section === 'features' ? (
               <form noValidate onSubmit={save} className="flex flex-col gap-8">
-                <ErrorSummary key={attempt} errors={errors} />
+                <ErrorSummary key={`${attempt}-${section}`} errors={sectionErrors} />
+                {otherErrorCount > 0 ? (
+                  <Button type="button" variant="tertiary" onClick={() => setSection(otherSection)}>
+                    {otherErrorCount} {otherErrorCount === 1 ? 'error' : 'errors'} in {otherSection === 'features' ? 'Features & merging' : 'General'} — review
+                  </Button>
+                ) : null}
                 {section === 'general' ? (
                   <>
                     <SectionHead title="General">Name, description and the branch pull requests target.</SectionHead>
@@ -193,7 +212,7 @@ export default function RepositorySettings() {
                     </Fieldset>
                   </>
                 )}
-                <SaveBar dirtyCount={dirty} onDiscard={discard} saving={saving} />
+                {dirty > 0 ? <SaveBar dirtyCount={dirty} onDiscard={discard} saving={saving} /> : null}
               </form>
             ) : null}
           </div>

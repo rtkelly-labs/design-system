@@ -12,7 +12,7 @@
  * the quiet role, so colour is never the only signal.
  */
 
-import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { ButtonHTMLAttributes, CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import {
   Button,
@@ -327,6 +327,7 @@ function TimeGrid({
   const minW = n === 1 ? 'min-w-0' : 'min-w-[640px]';
 
   const onKey = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.defaultPrevented || e.target !== e.currentTarget) return;
     let s = slot;
     let d = anchor;
     switch (e.key) {
@@ -462,7 +463,7 @@ function TimeGrid({
                     ) : null}
                     {placed.map((p) => {
                       const overlay = p.cols >= 3;
-                      const left = overlay ? p.col * 20 : (p.col / p.cols) * 100;
+                      const left = overlay ? p.col * (100 / (p.cols + 2)) : (p.col / p.cols) * 100;
                       const width = overlay ? 100 - left : (p.span / p.cols) * 100;
                       const style: CSSProperties = {
                         top: p.top * ppm,
@@ -650,6 +651,7 @@ interface Draft { title: string; date: string; start: string; end: string; cal: 
 
 function CreateModal({ draft, setDraft, errors, onClose, onSave }: { draft: Draft | null; setDraft: (d: Draft) => void; errors: Record<string, string>; onClose: () => void; onSave: () => void }) {
   const d = draft;
+  const formId = useId();
   return (
     <Modal
       isOpen={d !== null}
@@ -658,12 +660,12 @@ function CreateModal({ draft, setDraft, errors, onClose, onSave }: { draft: Draf
       footer={
         <div className="flex justify-end gap-3">
           <Button variant="tertiary" onClick={onClose}>CANCEL</Button>
-          <Button variant="primary" bracketed onClick={onSave}>SAVE</Button>
+          <Button variant="primary" bracketed type="submit" form={formId}>SAVE</Button>
         </div>
       }
     >
       {d ? (
-        <form className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
+        <form id={formId} className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); onSave(); }}>
           <Input label="TITLE" value={d.title} error={errors.title} onChange={(e) => setDraft({ ...d, title: e.target.value })} />
           <Input label="DATE" type="date" value={d.date} error={errors.date} onChange={(e) => setDraft({ ...d, date: e.target.value })} />
           <Checkbox label="ALL DAY" checked={d.allDay} onCheckedChange={(v) => setDraft({ ...d, allDay: v })} />
@@ -713,7 +715,7 @@ export default function CalendarApp() {
   const create = (day: number, minOfDay: number | null) => {
     setErrors({});
     const s = minOfDay ?? 9 * 60;
-    setDraft({ title: '', date: isoDay(day), start: hhmm(s), end: hhmm(Math.min(s + 60, 23 * 60 + 59)), cal: 'work', allDay: minOfDay === null && view === 'month' ? false : false });
+    setDraft({ title: '', date: isoDay(day), start: hhmm(s), end: hhmm(Math.min(s + 60, 23 * 60 + 59)), cal: 'work', allDay: minOfDay === null && view === 'month' });
   };
   const save = () => {
     if (!draft) return;

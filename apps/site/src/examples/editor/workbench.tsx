@@ -676,7 +676,7 @@ export default function EditorWorkbench() {
                     <div role="search" aria-label="Find in file" className="absolute right-4 top-0 max-md:hidden lg:right-24 flex items-center gap-2 border-2 border-edge-strong bg-surface-raised px-2 py-1 shadow-[4px_4px_0_0_var(--ds-shadow-color)] print:hidden">
                       <span className="text-content-muted">find</span>
                       <span className="border-b-2 border-edge-default px-1">items</span>
-                      <span className="text-xs text-content-secondary">4 of 9</span>
+                      <span className="text-xs text-content-secondary">4 of {findAll(PAGINATE_SOURCE, 'items').length}</span>
                       <button type="button" aria-label="Close find" onClick={() => setFindOn(false)} className="flex h-5 w-5 items-center justify-center text-content-muted hover:text-content-primary focus-visible:outline-2 focus-visible:outline-accent-primary">
                         <NerdIcon name="close" size="xs" />
                       </button>

@@ -436,7 +436,13 @@ export default function KanbanBoard() {
       title: `${id} deleted`,
       description: title,
       intent: 'warning',
-      action: { label: 'UNDO', onClick: () => setState(before) },
+      action: { label: 'UNDO', onClick: () => setState((current) => {
+        if (COLUMNS.some((col) => current.order[col.id].includes(id))) return current;
+        const col = columnOf(before, id);
+        const following = before.order[col].slice(before.order[col].indexOf(id) + 1);
+        const nextId = following.find((candidate) => current.order[col].includes(candidate)) ?? null;
+        return place(current, id, col, nextId);
+      }) },
     });
   };
 
@@ -451,10 +457,12 @@ export default function KanbanBoard() {
   };
 
   const stress = () => {
+    const start = counter.current;
+    counter.current += 20;
     setState((s) => {
       let next = s;
       for (let n = 0; n < 20; n++) {
-        const id = `DS-${counter.current++}`;
+        const id = `DS-${start + n}`;
         const task: Task = {
           id,
           title: `${STRESS_TITLES[n % STRESS_TITLES.length]} (${n + 1})`,
@@ -614,6 +622,12 @@ export default function KanbanBoard() {
                       helpId={helpId}
                       onPointerDown={onPointerDown}
                       onKeyDown={onCardKey}
+                      onBlur={(id) => {
+                        // Re-parenting a keyboard-moved card restores its focus in the effect above.
+                        if (lift?.id !== id || focusId.current === id) return;
+                        setLift(null);
+                        announce(`Dropped. ${describe(stateRef.current, id)}.`);
+                      }}
                       onOpen={() => openDraft(slot)}
                       onMove={(to) => {
                         const next = place(stateRef.current, slot, to, null);
@@ -773,12 +787,13 @@ interface CardItemProps {
   helpId: string;
   onPointerDown: (e: ReactPointerEvent<HTMLElement>, id: string) => void;
   onKeyDown: (e: ReactKeyboardEvent<HTMLElement>, id: string) => void;
+  onBlur: (id: string) => void;
   onOpen: () => void;
   onMove: (to: ColumnId) => void;
   onDelete: () => void;
 }
 
-function CardItem({ task, column, lifted, helpId, onPointerDown, onKeyDown, onOpen, onMove, onDelete }: CardItemProps) {
+function CardItem({ task, column, lifted, helpId, onPointerDown, onKeyDown, onBlur, onOpen, onMove, onDelete }: CardItemProps) {
   return (
     <li
       data-card-li={task.id}
@@ -833,6 +848,7 @@ function CardItem({ task, column, lifted, helpId, onPointerDown, onKeyDown, onOp
           aria-describedby={helpId}
           aria-pressed={lifted}
           onKeyDown={(e) => onKeyDown(e, task.id)}
+          onBlur={() => onBlur(task.id)}
           onClick={onOpen}
           className="cursor-pointer outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-primary"
         >

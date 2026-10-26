@@ -143,7 +143,9 @@ export default function InboxApp() {
       const next = rows[Math.min(rows.length - 1, Math.max(0, from + delta))] as Issue;
       setCursor(next.id);
       if (extend) {
-        const a = anchor.current ?? (rows[Math.max(0, cursorIndex)] as Issue).id;
+        const a = anchor.current && rows.some((row) => row.id === anchor.current)
+          ? anchor.current
+          : (rows[Math.max(0, cursorIndex)] as Issue).id;
         anchor.current = a;
         const ai = rows.findIndex((r) => r.id === a);
         const ni = rows.findIndex((r) => r.id === next.id);
@@ -170,7 +172,7 @@ export default function InboxApp() {
   const archive = useCallback(
     (ids: readonly string[]) => {
       if (ids.length === 0) return;
-      const before = issues;
+      const archived = issues.filter((issue) => ids.includes(issue.id));
       setIssues((prev) => prev.filter((i) => !ids.includes(i.id)));
       setSelected(new Set());
       if (openId && ids.includes(openId)) setOpenId(null);
@@ -178,7 +180,11 @@ export default function InboxApp() {
       toast.show({
         title: `${ids.length} ARCHIVED`,
         intent: 'success',
-        action: { label: 'UNDO', onClick: () => setIssues(before) },
+        action: { label: 'UNDO', onClick: () => setIssues((current) => {
+          const present = new Set(current.map((issue) => issue.id));
+          return [...current, ...archived.filter((issue) => !present.has(issue.id))]
+            .sort((a, b) => b.updatedMs - a.updatedMs);
+        }) },
       });
     },
     [issues, openId, toast],
@@ -210,7 +216,8 @@ export default function InboxApp() {
   }, []);
 
   const onListKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (isTypingTarget(e.target) || e.altKey) return;
+    if (e.defaultPrevented || isTypingTarget(e.target) || e.altKey) return;
+    if (e.target instanceof HTMLElement && e.target.closest('button, a, [role="button"], [role="checkbox"]')) return;
     const cur = cursorIndex >= 0 ? (rows[cursorIndex] as Issue) : null;
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'a') {
       e.preventDefault();
@@ -368,7 +375,7 @@ export default function InboxApp() {
 
       <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_26rem]">
         {/* The list. Keys are handled here so they work whenever focus is inside it. */}
-        {/* SHIM: the package has no list or grid primitive with a key model. The handler sits on a
+        {/* SHIM (issue 432): the package has no list or grid primitive with a key model. The handler sits on a
             wrapper that is not itself a focus stop; the focusable thing is `Table`'s own region. */}
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- see SHIM above */}
         <div role="group" aria-label="Issue list" onKeyDown={onListKeyDown} className="min-w-0">

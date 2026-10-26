@@ -20,7 +20,7 @@ export interface SampleDef {
   /** The package exports the page is built from. */
   components: readonly string[];
   /** The same composition in Storybook. */
-  story: string;
+  story?: string;
   /** Fills exactly the viewport under the sample bar, scrolling inside itself (an app shell, not a page). */
   fullHeight?: boolean;
 }
@@ -52,35 +52,30 @@ export const SAMPLES: readonly SampleDef[] = [
     title: 'Kanban board',
     lede: 'A project board with draggable cards, column menus, filters and a card editor.',
     components: ['Avatar', 'Badge', 'Button', 'Menu', 'Modal', 'Progress'],
-    story: storybookUrl('/'),
   },
   {
     slug: 'inbox',
     title: 'Inbox',
     lede: 'A mail client: folders, a message list with selection and a reading pane.',
     components: ['Button', 'Input', 'Select', 'Menu'],
-    story: storybookUrl('/'),
   },
   {
     slug: 'settings',
     title: 'Settings',
     lede: 'Repository settings, API keys and a danger zone composed from form primitives.',
     components: ['Input', 'Select', 'Tabs', 'Table', 'AlertDialog'],
-    story: storybookUrl('/'),
   },
   {
     slug: 'calendar',
     title: 'Calendar',
     lede: 'A month and week calendar with events and an editor.',
     components: ['Button', 'Modal', 'Select', 'Menu'],
-    story: storybookUrl('/'),
   },
   {
     slug: 'editor',
     title: 'Editor workbench',
     lede: 'A code editor workbench: file tabs, explorer, problems and terminal panels.',
     components: ['Tabs', 'Menu', 'Button'],
-    story: storybookUrl('/'),
     fullHeight: true,
   },
 ];
