@@ -7,7 +7,7 @@ import InboxApp from '@/examples/inbox/app';
 import RepositorySettings from '@/examples/settings/repository-settings';
 import CalendarApp from '@/examples/calendar/app';
 import EditorWorkbench from '@/examples/editor/workbench';
-import { SaasLandingPage } from '@rtkelly-labs/design-system';
+import { ObservabilityConsole, SaasLandingPage } from '@rtkelly-labs/design-system';
 
 /**
  * The sample pages, keyed by the slug in `src/content/samples.ts`. Each is a
@@ -41,6 +41,7 @@ const SAMPLE_PAGES: Record<string, () => ReactNode> = {
     </main>
   ),
   editor: () => <EditorWorkbench />,
+  observability: () => <ObservabilityConsole />,
 };
 
 export function SamplePage({ slug }: { slug: string }) {

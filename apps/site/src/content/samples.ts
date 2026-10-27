@@ -41,6 +41,13 @@ export const SAMPLES: readonly SampleDef[] = [
     story: storybookUrl('/story/saas-admindashboard--finance-console'),
   },
   {
+    slug: 'observability',
+    title: 'Observability console',
+    lede: 'An ops console for a checkout service mid-incident: shared time range, latency and throughput charts, a latency heatmap, alerts, an incident timeline, filtered logs that open a replayable trace, and a service map.',
+    components: ['ObservabilityConsole', 'TimeSeriesChart', 'LatencyHeatmap', 'LogViewer', 'TraceViewer', 'ServiceMap', 'AlertList', 'IncidentTimeline'],
+    story: storybookUrl('/story/saas-observabilityconsole--checkout-incident'),
+  },
+  {
     slug: 'content-studio',
     title: 'Content studio',
     lede: 'An editorial admin with a navigation rail, publication states and a content queue.',

@@ -9,6 +9,24 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## 0.17.0
+
+Traces. `TraceWaterfall` and `TraceViewer` draw distributed traces — spans nested by parent on
+one time axis, a keyboard tree, the critical path marked, in-flight spans drawn to a `now` that
+`useTraceClock` advances. `TraceViewer replay` plays a finished trace back in real time — rows
+fade in as spans start, bars grow to a playhead on a fixed axis — with play, pause, scrub and
+speed; `useTraceReplay` and `replayTrace` do the same for a bare `TraceWaterfall`. The model is public and React-free: `buildTrace`, and
+`parseTraceDocument` / `parseOtlpTrace` for OTLP/JSON and NDJSON. Nothing to change.
+
+Observability (#407). `TimeRangeProvider` holds the window and hover cursor every view on a page
+shares; `TimeRangePicker` picks presets and resets a zoom. Views that follow it, and work
+standalone: `TimeSeriesChart` (crosshair, brush zoom), `LatencyHistogram`, `LatencyHeatmap`,
+`LogViewer`, `FilterBar`, `ServiceMap`, `AlertList`, `IncidentTimeline`, `SeverityBadge`,
+`FreshnessIndicator`, `IdChip`, with pure helpers in `lib/timeRange`, `lib/latency`, `lib/logs`,
+`lib/filters`, `lib/serviceGraph`, `lib/severity` and `lib/ids`. The charts expose their visual
+choices as props (`TIME_SERIES_VARIANTS` and friends) for evaluation in the chart lab (#418); expect
+those props to change. `ObservabilityConsole` composes all of it. Nothing to change.
+
 ## 0.16.0
 
 **The package is now `@rtkelly-labs/design-system`.** The repository moved to the

@@ -83,21 +83,17 @@ const pack = (dir) => {
   return lines[lines.length - 1];
 };
 
-// The peer range is a plain semver string rather than `workspace:^`, so nothing
-// rewrites it at publish time and nothing notices when the design system's
-// version moves past it. A consumer would find out by installing two packages
-// that cannot satisfy each other, which is the worst place to find out.
+// The peer range is `workspace:^`: inside the monorepo it resolves to the local
+// package, and `pnpm pack` rewrites it to `^<current version>`, so it can never
+// fall behind the design system's version. A hand-written range did, at every
+// minor, and failed this check until someone widened it.
 {
   const declared = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8'))
     .peerDependencies['@rtkelly-labs/design-system'];
-  const actual = JSON.parse(readFileSync(path.join(DESIGN_SYSTEM, 'package.json'), 'utf8')).version;
-  const [major, minor] = actual.split('.');
-  // Pre-1.0, `^0.3.0` admits 0.3.x only, so the guard is major *and* minor.
-  const satisfied = declared.startsWith('^') && declared.slice(1).startsWith(`${major}.${minor}.`);
   check(
-    `peer range ${declared} still admits the design system's ${actual}`,
-    satisfied,
-    'Bump the @rtkelly-labs/design-system range in packages/design-system-report/package.json.',
+    `peer range ${declared} follows the design system's version`,
+    declared === 'workspace:^',
+    'Declare @rtkelly-labs/design-system as "workspace:^" in packages/design-system-report/package.json.',
   );
 }
 
