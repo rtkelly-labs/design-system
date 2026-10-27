@@ -27,9 +27,21 @@ export default async function Page({ params }: Params) {
   const sample = SAMPLES.find((s) => s.slug === slug);
   if (!sample) notFound();
   return (
-    <div className="min-h-screen bg-surface-base text-content-primary">
+    <div
+      className={
+        sample.fullHeight
+          ? 'flex h-dvh flex-col overflow-hidden bg-surface-base text-content-primary print:block print:h-auto'
+          : 'min-h-screen bg-surface-base text-content-primary'
+      }
+    >
       <SampleBar title={sample.title} story={sample.story} />
-      <SamplePage slug={sample.slug} />
+      {sample.fullHeight ? (
+        <div className="min-h-0 flex-1 print:block">
+          <SamplePage slug={sample.slug} />
+        </div>
+      ) : (
+        <SamplePage slug={sample.slug} />
+      )}
     </div>
   );
 }

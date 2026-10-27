@@ -206,3 +206,4 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
     how the pinned one goes stale unnoticed. `check:governance` enforces all of
     it, including the trailing comment: a bare SHA cannot be reviewed or bumped
     without archaeology.
+15. **Script Language Policy**: automation scripts in `scripts/` MUST use the repository's approved language stack (JavaScript/TypeScript `.mjs`, `.js`, `.ts` for Node/pnpm). Alien scripting runtimes (`.py`, `.sh`, `.ps1`) are strictly prohibited and gated by CI.

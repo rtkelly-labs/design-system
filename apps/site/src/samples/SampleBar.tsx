@@ -7,7 +7,7 @@ import { ThemeMenu } from '@/components/chrome/ThemeMenu';
  * The one strip of site on a sample page: a way back, the same composition in
  * Storybook, and the level picker. Everything under it is the sample alone.
  */
-export function SampleBar({ title, story }: { title: string; story: string }) {
+export function SampleBar({ title, story }: { title: string; story?: string }) {
   return (
     <nav
       aria-label="Example"
@@ -20,9 +20,11 @@ export function SampleBar({ title, story }: { title: string; story: string }) {
         <span className="truncate text-content-muted">[ {title} ]</span>
       </div>
       <div className="flex items-center gap-3">
-        <a href={story} className="text-accent-primary no-underline hover:underline">
-          Storybook ↗
-        </a>
+        {story ? (
+          <a href={story} className="text-accent-primary no-underline hover:underline">
+            Storybook ↗
+          </a>
+        ) : null}
         <ThemeMenu />
       </div>
     </nav>
