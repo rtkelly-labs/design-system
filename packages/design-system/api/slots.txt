@@ -210,7 +210,9 @@ provenance-strip	ProvenanceStrip
 provenance-strip-item	ProvenanceStrip
 pull-request-check	(shared)
 pull-request-page	PullRequestPage
+pull-request-passing	(shared)
 pull-request-state	(shared)
+pull-request-status	(shared)
 radio	Radio
 radio-indicator	Radio
 report-details	ReportDetails

@@ -7,10 +7,45 @@ import { DiffView } from './DiffView';
 import { StatusMark } from './StatusMark';
 import { VerdictBand } from './VerdictBand';
 import { countDiff, type DiffHunk } from './diff';
-import { STATUS_TONE_TEXT, type AssessmentOutcome, type StatusTone } from './vocabulary';
+import { STATUS_APPEARANCE, STATUS_TONE_TEXT, type AssessmentOutcome, type StatusTone } from './vocabulary';
 
 export type PullRequestState = 'open' | 'draft' | 'merged' | 'closed';
 export type ReviewerState = 'approved' | 'changes-requested' | 'commented' | 'pending';
+
+/** The status panel's reason, under its headline. A finished pull request says how it finished; only an open one weighs checks and reviews. */
+function mergeSummary(pr: Pick<PullRequestData, 'state' | 'base' | 'reviewers'>, failing: number): string {
+  if (pr.state === 'merged') return `Merged into ${pr.base}.`;
+  if (pr.state === 'closed') return 'Closed without merging.';
+  const checks = failing > 0 ? `${failing} failing check${failing === 1 ? '' : 's'}.` : 'No failing checks.';
+  if (pr.state === 'draft') return `${checks} Still a draft, so it cannot merge yet.`;
+  const blocking = pr.reviewers.filter((r) => r.state === 'changes-requested').map((r) => r.name);
+  if (blocking.length > 0) return `Changes requested by ${blocking.join(' and ')}. ${checks}`;
+  if (pr.reviewers.length > 0 && pr.reviewers.every((r) => r.state === 'approved')) return `${checks} Approved.`;
+  return `${checks} Waiting on review.`;
+}
+
+/** The status panel's headline and its tone: whether this can merge, before any reason why. */
+function mergeHeadline(pr: Pick<PullRequestData, 'state' | 'reviewers'>, failing: number): { title: string; tone: StatusTone } {
+  if (pr.state === 'merged') return { title: 'Merged', tone: 'success' };
+  if (pr.state === 'closed') return { title: 'Closed', tone: 'neutral' };
+  if (pr.state === 'draft') return { title: 'Draft', tone: 'hollow' };
+  if (failing > 0 || pr.reviewers.some((r) => r.state === 'changes-requested')) return { title: 'Cannot merge yet', tone: 'danger' };
+  if (pr.reviewers.length > 0 && pr.reviewers.every((r) => r.state === 'approved')) return { title: 'Ready to merge', tone: 'success' };
+  return { title: 'Waiting on review', tone: 'warning' };
+}
+
+const TONE_RULE: Record<StatusTone, string> = {
+  success: 'border-intent-success',
+  warning: 'border-intent-warning',
+  danger: 'border-intent-danger',
+  info: 'border-intent-info',
+  neutral: 'border-edge-strong',
+  hollow: 'border-edge-default',
+};
+
+/** Worst first, so the tally reads as what needs attention. */
+const OUTCOME_ORDER: readonly AssessmentOutcome[] = ['fail', 'warn', 'needs-review', 'inconclusive', 'none', 'pass'];
+const REVIEWER_ORDER: readonly ReviewerState[] = ['changes-requested', 'pending', 'commented', 'approved'];
 
 /** One CI check. Its status is an Assessment outcome, because a check is a policy that ran. */
 export interface PullRequestCheck {
@@ -77,15 +112,34 @@ const label = 'font-mono text-xs font-bold uppercase tracking-wider text-content
 /** A section link above the header's own rule: an accent underline on hover, not a boxed tab. */
 const TAB = 'pb-3 pt-1 text-content-primary no-underline decoration-accent-primary decoration-[3px] underline-offset-[0.6rem] hover:underline focus-visible:underline';
 
+/** A comment is a quoted voice, not a panel: a rule beside it, the author above it, no box. */
 function Comment({ author, meta, children }: { author: string; meta?: string; children: ReactNode }) {
   return (
-    <article className="flex flex-col border border-edge-default bg-surface-raised">
-      <header className="flex flex-wrap items-baseline gap-x-2 border-b border-edge-subtle bg-surface-sunken px-3 py-2 font-mono text-xs">
+    <article className="flex flex-col gap-1.5 border-l-2 border-edge-subtle pl-4">
+      <header className="flex flex-wrap items-baseline gap-x-2 font-mono text-xs">
         <span className="font-bold text-content-primary">{author}</span>
         {meta ? <span className="text-content-muted">{meta}</span> : null}
       </header>
-      <div className="px-3 py-2.5 text-sm text-content-primary">{children}</div>
+      <div className="text-sm text-content-primary">{children}</div>
     </article>
+  );
+}
+
+/** Counts per status, worst first, each in its own tone with its glyph and word. */
+function Tally({ label: name, items }: { label: string; items: readonly { key: string; count: number; glyph: string; tone: StatusTone; word: string }[] }) {
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+      <span className={cn(label, 'w-16 shrink-0')}>{name}</span>
+      <ul aria-label={name} className="m-0 flex list-none flex-wrap gap-x-3 gap-y-1 p-0 font-mono text-xs">
+        {items.map((item) => (
+          <li key={item.key} className={cn('inline-flex items-baseline gap-1', STATUS_TONE_TEXT[item.tone])}>
+            <span aria-hidden="true">{item.glyph}</span>
+            <span className="font-bold tabular-nums">{item.count}</span>
+            <span>{item.word}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -94,6 +148,11 @@ function Comment({ author, meta, children }: { author: string; meta?: string; ch
  * conversation led by a comparison tool's verdict, reviewers and labels in a side rail, the
  * checks as status marks, and the changed files as line diffs with review comments pinned under
  * their lines.
+ *
+ * The first phone screen answers whether it can merge: the header carries a status panel with
+ * the merge headline, the reason, and the checks and reviews as tallies, worst first. Below the
+ * fold the detail stays, quieter: comments are rules rather than boxes, passing checks fold, and
+ * only files with review comments open.
  *
  * Static: the section links are anchors, the files fold as `<details>`, and nothing posts. A
  * check is drawn with the Assessment vocabulary because a check is a policy that ran; the files
@@ -110,6 +169,21 @@ export const PullRequestPage = React.forwardRef<HTMLElement, PullRequestPageProp
   const commentCount = files.reduce((sum, file) => sum + file.hunks.reduce((n, hunk) => n + hunk.lines.reduce((m, line) => m + (line.comments?.length ?? 0), 0), 0), 0);
   const failing = pr.checks.filter((check) => check.status === 'fail').length;
   const state = STATE[pr.state];
+  const headline = mergeHeadline(pr, failing);
+  const checkTally = OUTCOME_ORDER.flatMap((status) => {
+    const matching = pr.checks.filter((check) => check.status === status);
+    if (matching.length === 0) return [];
+    const look = STATUS_APPEARANCE.outcome[status];
+    // A queued run is drawn `inconclusive` but labelled `pending`; the tally says what the rows say.
+    const word = matching.every((check) => check.label === matching[0]!.label) && matching[0]!.label ? matching[0]!.label : look.word;
+    return [{ key: status, count: matching.length, glyph: look.glyph, tone: look.tone, word }];
+  });
+  const reviewTally = REVIEWER_ORDER.flatMap((reviewState) => {
+    const count = pr.reviewers.filter((reviewer) => reviewer.state === reviewState).length;
+    return count === 0 ? [] : [{ key: reviewState, count, ...REVIEWER[reviewState], word: REVIEWER[reviewState].word.replace('review ', '') }];
+  });
+  const passing = pr.checks.filter((check) => check.status === 'pass');
+  const attention = pr.checks.filter((check) => check.status !== 'pass');
 
   return (
     <main ref={ref} data-slot="pull-request-page" {...rest} className={cn('mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 font-sans text-content-primary sm:px-6', className)}>
@@ -125,13 +199,23 @@ export const PullRequestPage = React.forwardRef<HTMLElement, PullRequestPageProp
             <span aria-hidden="true">{state.glyph}</span>
             {pr.state}
           </span>
-          <span className="text-content-secondary">
+          <span className="text-xs text-content-secondary sm:text-sm">
             <span className="font-mono font-bold text-content-primary">{pr.author}</span> wants to merge{' '}
             <code className="border border-edge-subtle bg-surface-sunken px-1.5 font-mono text-xs">{pr.head}</code> into{' '}
             <code className="border border-edge-subtle bg-surface-sunken px-1.5 font-mono text-xs">{pr.base}</code> · {pr.opened}
           </span>
         </div>
-        <nav aria-label="Pull request sections" className="mt-3 flex max-w-full flex-wrap gap-x-6 font-mono text-xs font-bold uppercase tracking-wider">
+        <section data-slot="pull-request-status" aria-label="Merge status" className={cn('flex flex-col gap-2.5 border-l-4 bg-surface-sunken px-4 py-3', TONE_RULE[headline.tone])}>
+          <p className={cn('m-0 font-display text-xl font-bold leading-tight', STATUS_TONE_TEXT[headline.tone])}>{headline.title}</p>
+          <p className="m-0 text-sm text-content-secondary">{mergeSummary(pr, failing)}</p>
+          {pr.state === 'open' || pr.state === 'draft' ? (
+            <div className="flex flex-col gap-1.5">
+              <Tally label="Checks" items={checkTally} />
+              {reviewTally.length > 0 ? <Tally label="Reviews" items={reviewTally} /> : null}
+            </div>
+          ) : null}
+        </section>
+        <nav aria-label="Pull request sections" className="mt-1 flex max-w-full flex-wrap gap-x-6 font-mono text-xs font-bold uppercase tracking-wider">
           <a href="#conversation" className={TAB}>Conversation</a>
           <a href="#checks" className={TAB}>
             Checks <span className="text-content-muted">{pr.checks.length}</span>
@@ -195,20 +279,13 @@ export const PullRequestPage = React.forwardRef<HTMLElement, PullRequestPageProp
               </ul>
             </section>
           ) : null}
-          <section className="flex flex-col gap-2">
-            <h2 className={cn('m-0', label)}>Merge</h2>
-            <p className="m-0 text-content-secondary">
-              {failing > 0 ? `${failing} failing check${failing === 1 ? '' : 's'}. ` : 'No failing checks. '}
-              {pr.reviewers.some((r) => r.state === 'changes-requested') ? 'Changes requested, so it cannot merge yet.' : 'Waiting on review.'}
-            </p>
-          </section>
         </aside>
       </div>
 
       <section id="checks" aria-labelledby="checks-heading" className="flex scroll-mt-4 flex-col gap-3">
         <h2 id="checks-heading" className="m-0 border-b-2 border-edge-subtle pb-2 font-display text-xl font-bold uppercase">Checks</h2>
         <ul className="m-0 flex list-none flex-col p-0">
-          {pr.checks.map((check) => (
+          {attention.map((check) => (
             <li key={check.name} data-slot="pull-request-check" className="grid grid-cols-[minmax(7.5rem,auto)_minmax(0,1fr)] items-start gap-x-4 gap-y-1 border-b border-edge-subtle py-2.5 last:border-b-0 sm:grid-cols-[minmax(9rem,auto)_minmax(0,1fr)_auto]">
               <StatusMark vocabulary="outcome" status={check.status} label={check.label} className="w-fit" />
               <div className="flex min-w-0 flex-col gap-0.5">
@@ -219,6 +296,27 @@ export const PullRequestPage = React.forwardRef<HTMLElement, PullRequestPageProp
             </li>
           ))}
         </ul>
+        {passing.length > 0 ? (
+          <details data-slot="pull-request-passing" className="group">
+            <summary className="flex cursor-pointer list-none items-baseline gap-2 py-1 font-mono text-xs font-bold uppercase tracking-wider text-intent-success [&::-webkit-details-marker]:hidden">
+              <span aria-hidden="true" className="text-content-muted group-open:hidden">[+]</span>
+              <span aria-hidden="true" className="hidden text-content-muted group-open:inline">[−]</span>
+              ✓ {passing.length} passing
+            </summary>
+            <ul className="m-0 flex list-none flex-col p-0">
+              {passing.map((check) => (
+                <li key={check.name} data-slot="pull-request-check" className="grid grid-cols-[minmax(7.5rem,auto)_minmax(0,1fr)] items-start gap-x-4 gap-y-1 border-b border-edge-subtle py-2.5 last:border-b-0 sm:grid-cols-[minmax(9rem,auto)_minmax(0,1fr)_auto]">
+              <StatusMark vocabulary="outcome" status={check.status} label={check.label} className="w-fit" />
+              <div className="flex min-w-0 flex-col gap-0.5">
+                <span className="font-mono text-sm font-bold [overflow-wrap:anywhere]">{check.name}</span>
+                {check.summary ? <span className="text-sm text-content-secondary">{check.summary}</span> : null}
+              </div>
+              {check.duration ? <span className="col-start-2 font-mono text-xs tabular-nums text-content-muted sm:col-start-auto">{check.duration}</span> : null}
+            </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
       </section>
 
       <section id="files" aria-labelledby="files-heading" className="flex scroll-mt-4 flex-col gap-4">

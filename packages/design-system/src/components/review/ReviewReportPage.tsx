@@ -152,6 +152,7 @@ export const ReviewReportPage = React.forwardRef<HTMLElement, ReviewReportPagePr
   { report, className, ...rest },
   ref,
 ) {
+  const measured = (report.measurements?.length ?? 0) > 0;
   const sized = report.files.map((group) => ({
     title: group.title,
     files: group.files.map((file) => ({ ...file, ...countDiff(file.hunks) })),
@@ -187,12 +188,16 @@ export const ReviewReportPage = React.forwardRef<HTMLElement, ReviewReportPagePr
         </dl>
       ) : null}
 
-      {report.measurements && report.measurements.length > 0 ? (
-        <ReportSection title="Measured drift">
-          <p className="m-0 max-w-3xl text-sm text-content-secondary">
-            Each measurement with its direction. ▲ or ▼ in bold marks a move against the preferred direction. That is a fact about the number; whether it is acceptable is for a policy to decide.
-          </p>
-          {report.measurements.map((table) => (
+      {/* Caveats qualify the evidence, not the tables: a report with no
+          measurements can still carry them, so either one opens the section. */}
+      {measured || (report.caveats?.length ?? 0) > 0 ? (
+        <ReportSection title={measured ? 'Measured drift' : 'Caveats'}>
+          {measured ? (
+            <p className="m-0 max-w-3xl text-sm text-content-secondary">
+              Each measurement with its direction. Red with ▲ or ▼ in bold marks a move against the preferred direction, green a move with it; a move under 2% stays uncoloured as noise. That says which way the number went, not whether it is acceptable: that is for a policy to decide.
+            </p>
+          ) : null}
+          {report.measurements?.map((table) => (
             <MeasurementTable key={table.caption} table={table} />
           ))}
           {report.caveats?.map((caveat) => (
