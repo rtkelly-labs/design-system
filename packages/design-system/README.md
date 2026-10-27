@@ -181,7 +181,7 @@ export function App() {
           <p style={{ margin: '1rem 0' }}>
             Brutalist UI surface shared across all projects.
           </p>
-          <Button bracketed variant="tertiary">
+          <Button appearance="raised" bracketed variant="tertiary">
             EXECUTE ACTION
           </Button>
         </Card>

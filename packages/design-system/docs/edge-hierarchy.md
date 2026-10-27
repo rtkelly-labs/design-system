@@ -176,6 +176,24 @@ objects — the terminal and the recommended plan — at 0.9 a screen. The right
 the page: `Hero` and `PageTitle` keep the frame by default, and a page whose headline is the point
 leaves it on.
 
+## Buttons: one mode a group
+
+Hiding one hero button's shadow to quieten the hero made the two actions disagree, and that read
+as a broken button rather than as hierarchy. Elevation is a button's *mode*, so it is now an
+explicit choice with no default: `Button`'s `appearance` is required, and is one of
+
+| Appearance | Draws | For |
+|---|---|---|
+| `raised` | filled, on a hard offset shadow; presses into the page | the one action a page or panel is asking for |
+| `flat` | filled, no shadow; brightens on hover, darkens on press, never moves | actions in a row, a toolbar or a card, beside a heavier object |
+| `outline` | the accent's border and ink on no ground; fills on hover | a secondary action that should be seen but not compete |
+
+`flat`'s hover and press states are `brightness()` filters on the fill; measured against the
+button's `text.inverse` they hold at 5.12:1 or above on both levels. Every button renders
+`data-appearance`, and the gate below fails any story where buttons under one parent mix
+appearances. Every existing call site was migrated to `raised`, so nothing renders differently
+until a page chooses otherwise.
+
 ## The gate
 
 `pnpm test:edges` (`tests/edges.spec.ts`) measures every asserted story on `midnight` and holds
@@ -183,6 +201,8 @@ two numbers as a ratchet against `tests/edges.baseline.json`: heavy panels, and 
 not rise above its record. A story with no record — a new one — is held to the benchmark's shape
 with a little room for the brand: **at most two heavy panels, and no box deeper than a box in a
 box.**
+
+It also fails, with no baseline to lean on, any story where sibling buttons mix appearances.
 
 It runs in CI's `visual` job beside `test:a11y`, on the same Storybook build and browser.
 

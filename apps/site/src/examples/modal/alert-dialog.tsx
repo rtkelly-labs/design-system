@@ -9,11 +9,11 @@ export default function DeleteProject() {
 
   return (
     <div className="flex flex-wrap items-center gap-4">
-      <Button variant="tertiary" bracketed disabled={deleted} onClick={() => setOpen(true)}>
+      <Button appearance="raised" variant="tertiary" bracketed disabled={deleted} onClick={() => setOpen(true)}>
         {deleted ? 'DELETED' : 'DELETE PROJECT'}
       </Button>
       {deleted ? (
-        <Button size="sm" variant="inverse" onClick={() => setDeleted(false)}>
+        <Button appearance="raised" size="sm" variant="inverse" onClick={() => setDeleted(false)}>
           RESET
         </Button>
       ) : null}

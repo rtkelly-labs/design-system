@@ -78,7 +78,7 @@ export const MobileDrawer: Story = {
       <DocsLayout
         header={
           <div style={{ padding: '0.75rem' }}>
-            <Button bracketed onClick={() => setOpen((v) => !v)}>TOGGLE NAV</Button>
+            <Button appearance="raised" bracketed onClick={() => setOpen((v) => !v)}>TOGGLE NAV</Button>
           </div>
         }
         sidebar={<DocsSidebar nav={nav} currentPath="/docs" onNavigate={() => setOpen(false)} />}

@@ -14,7 +14,7 @@ export default function ConfirmDeploy() {
 
   return (
     <>
-      <Button variant="primary" bracketed onClick={() => setOpen(true)}>
+      <Button appearance="raised" variant="primary" bracketed onClick={() => setOpen(true)}>
         PROMOTE TO PRODUCTION
       </Button>
       <Modal
@@ -23,10 +23,10 @@ export default function ConfirmDeploy() {
         title="Promote billing-api"
         footer={
           <div className="flex flex-wrap justify-end gap-3">
-            <Button size="sm" variant="inverse" onClick={() => setOpen(false)}>
+            <Button appearance="raised" size="sm" variant="inverse" onClick={() => setOpen(false)}>
               CANCEL
             </Button>
-            <Button size="sm" variant="primary" bracketed onClick={promote}>
+            <Button appearance="raised" size="sm" variant="primary" bracketed onClick={promote}>
               PROMOTE
             </Button>
           </div>

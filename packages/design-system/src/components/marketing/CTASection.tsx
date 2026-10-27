@@ -55,7 +55,7 @@ const ctaSection = recipe({
  * ```tsx
  * <CTASection
  *   title="Ready when you are"
- *   actions={<Button href="/start" variant="primary" bracketed>START</Button>}
+ *   actions={<Button appearance="raised" href="/start" variant="primary" bracketed>START</Button>}
  * >
  *   No card required.
  * </CTASection>

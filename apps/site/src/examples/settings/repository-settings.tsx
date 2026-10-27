@@ -170,7 +170,7 @@ export default function RepositorySettings() {
               <form noValidate onSubmit={save} className="flex flex-col gap-8">
                 <ErrorSummary key={`${attempt}-${section}`} errors={sectionErrors} />
                 {otherErrorCount > 0 ? (
-                  <Button type="button" variant="tertiary" onClick={() => setSection(otherSection)}>
+                  <Button appearance="raised" type="button" variant="tertiary" onClick={() => setSection(otherSection)}>
                     {otherErrorCount} {otherErrorCount === 1 ? 'error' : 'errors'} in {otherSection === 'features' ? 'Features & merging' : 'General'} — review
                   </Button>
                 ) : null}

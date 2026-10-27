@@ -522,14 +522,14 @@ export default function KanbanBoard() {
           <div className="w-full sm:w-52">
             <Select label="Assignee" options={assigneeOptions} value={who} onValueChange={setWho} />
           </div>
-          <Button variant="primary" bracketed onClick={() => openDraft('new')}>
+          <Button appearance="raised" variant="primary" bracketed onClick={() => openDraft('new')}>
             NEW CARD
           </Button>
-          <Button variant="default" size="sm" onClick={stress}>
+          <Button appearance="raised" variant="default" size="sm" onClick={stress}>
             STRESS +20
           </Button>
           {filtering && (
-            <Button
+            <Button appearance="raised"
               variant="tertiary"
               size="sm"
               onClick={() => {
@@ -660,10 +660,10 @@ export default function KanbanBoard() {
                       onChange={(e) => setAddTitle(e.target.value)}
                     />
                     <div className="flex gap-2">
-                      <Button type="submit" size="sm" variant="primary">
+                      <Button appearance="raised" type="submit" size="sm" variant="primary">
                         ADD
                       </Button>
-                      <Button
+                      <Button appearance="raised"
                         type="button"
                         size="sm"
                         variant="tertiary"
@@ -677,7 +677,7 @@ export default function KanbanBoard() {
                     </div>
                   </form>
                 ) : (
-                  <Button variant="tertiary" size="sm" bracketed onClick={() => setAdding(col.id)}>
+                  <Button appearance="raised" variant="tertiary" size="sm" bracketed onClick={() => setAdding(col.id)}>
                     + ADD CARD
                   </Button>
                 )}
@@ -708,7 +708,7 @@ export default function KanbanBoard() {
         footer={
           <div className="flex w-full flex-wrap justify-between gap-2">
             {draft && draft.id !== 'new' ? (
-              <Button
+              <Button appearance="raised"
                 variant="default"
                 onClick={() => {
                   remove(draft.id);
@@ -721,10 +721,10 @@ export default function KanbanBoard() {
               <span />
             )}
             <span className="flex gap-2">
-              <Button variant="tertiary" onClick={() => setDraft(null)}>
+              <Button appearance="raised" variant="tertiary" onClick={() => setDraft(null)}>
                 CANCEL
               </Button>
-              <Button variant="primary" onClick={saveDraft} disabled={!draft || draft.title.trim() === ''}>
+              <Button appearance="raised" variant="primary" onClick={saveDraft} disabled={!draft || draft.title.trim() === ''}>
                 SAVE
               </Button>
             </span>
@@ -819,7 +819,7 @@ function CardItem({ task, column, lifted, helpId, onPointerDown, onKeyDown, onBl
             <Menu
               align="end"
               trigger={
-                <Button variant="tertiary" size="sm" aria-label={`Actions for ${task.id}`}>
+                <Button appearance="raised" variant="tertiary" size="sm" aria-label={`Actions for ${task.id}`}>
                   ...
                 </Button>
               }

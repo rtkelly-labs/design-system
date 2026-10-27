@@ -59,7 +59,7 @@ export const Actions: Story = {
   args: { defaultOpen: true },
   render: (args) => (
     <Stage>
-      <Menu {...args} trigger={<Button size="sm" bracketed>ACTIONS</Button>}>
+      <Menu {...args} trigger={<Button appearance="raised" size="sm" bracketed>ACTIONS</Button>}>
         <RowActions />
       </Menu>
     </Stage>
@@ -79,7 +79,7 @@ function ChoiceExample() {
   const [density, setDensity] = useState('comfortable');
   return (
     <Stage>
-      <Menu defaultOpen trigger={<Button size="sm">DENSITY</Button>}>
+      <Menu defaultOpen trigger={<Button appearance="raised" size="sm">DENSITY</Button>}>
         <MenuRadioGroup label="Row density" value={density} onValueChange={setDensity}>
           <MenuRadioItem value="compact">Compact</MenuRadioItem>
           <MenuRadioItem value="comfortable">Comfortable</MenuRadioItem>
@@ -98,7 +98,7 @@ function ChoiceExample() {
 export const AtTheViewportEdge: Story = {
   render: () => (
     <Stage className="justify-end px-2">
-      <Menu defaultOpen trigger={<Button size="sm">ACTIONS</Button>}>
+      <Menu defaultOpen trigger={<Button appearance="raised" size="sm">ACTIONS</Button>}>
         <RowActions />
       </Menu>
     </Stage>
@@ -113,7 +113,7 @@ export const InsideAModal: Story = {
   render: () => (
     <Modal isOpen onClose={() => {}} title="Deployments">
       <p className="mb-4">Build 1482 failed on `check:visual`.</p>
-      <Menu defaultOpen trigger={<Button size="sm">BUILD ACTIONS</Button>}>
+      <Menu defaultOpen trigger={<Button appearance="raised" size="sm">BUILD ACTIONS</Button>}>
         <MenuItem>Re-run failed gates</MenuItem>
         <MenuItem>Copy link</MenuItem>
         <MenuSeparator />
