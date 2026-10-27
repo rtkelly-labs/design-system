@@ -1,5 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { diffAnchor } from './diff';
 import { ReviewReportPage } from './ReviewReportPage';
 import { DEFAULT_REVIEW_REPORT } from './samples';
 
@@ -17,7 +18,7 @@ describe('ReviewReportPage', () => {
     const { container } = render(<ReviewReportPage report={DEFAULT_REVIEW_REPORT} />);
     const files = [...container.querySelectorAll('details[data-slot="diff-view"]')] as HTMLDetailsElement[];
     expect(files).toHaveLength(3);
-    expect(files.filter((f) => f.open).map((f) => f.id)).toEqual(['diff-metrics-parquet-sourcegenerator-metrics-txt']);
+    expect(files.filter((f) => f.open).map((f) => f.id)).toEqual([diffAnchor('metrics/Parquet.SourceGenerator.metrics.txt')]);
   });
 
   it('marks a move against a column direction', () => {
@@ -31,5 +32,13 @@ describe('ReviewReportPage', () => {
     expect(screen.queryByRole('heading', { name: 'Measured drift' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Records by identity' })).toBeNull();
     expect(screen.getByRole('heading', { name: 'Changed files' })).toBeTruthy();
+  });
+
+  it('keeps the caveats when there are no measurements', () => {
+    const caveats = [{ title: 'Methodology', body: 'Counts are per assembly.' }];
+    render(<ReviewReportPage report={{ ...DEFAULT_REVIEW_REPORT, measurements: undefined, caveats }} />);
+    expect(screen.queryByRole('heading', { name: 'Measured drift' })).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Caveats' })).toBeTruthy();
+    expect(screen.getByText('Counts are per assembly.')).toBeTruthy();
   });
 });
