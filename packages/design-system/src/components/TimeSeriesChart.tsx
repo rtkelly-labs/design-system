@@ -293,8 +293,8 @@ export interface TimeSeriesChartProps extends Omit<HTMLAttributes<HTMLDivElement
  * cursor sample by sample, Home and End jump to the ends, Escape clears it, and
  * the value text reads every visible series at that moment. Min, max and
  * latest per series are written out for screen readers. Colours are roles,
- * cycling through five; `accent-tertiary` is never used, so danger keeps its
- * meaning. Every design choice — curve, markers, grid, scale, domain, legend,
+ * cycling through three and then through dash patterns; `accent-tertiary` is
+ * never used, so danger keeps its meaning. Every design choice — curve, markers, grid, scale, domain, legend,
  * colouring, density — is a prop; `TIME_SERIES_VARIANTS` lists their values.
  */
 export const TimeSeriesChart = forwardRef<HTMLDivElement, TimeSeriesChartProps>(function TimeSeriesChart(
