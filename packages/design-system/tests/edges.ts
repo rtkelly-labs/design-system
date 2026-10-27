@@ -97,7 +97,24 @@ export function measureEdges(rootSelector: string): EdgeCensus {
   let heavyLength = 0;
   let ink = 0;
 
-  const all = [root, ...Array.from(root.querySelectorAll('*'))];
+  // A modal, drawer or popover portals to <body>, outside the story root, and is
+  // exactly the kind of heavy panel this counts. Take body-level surfaces too,
+  // by the rule story-ready's IS_STORY_SURFACE uses (kept inline: this function
+  // runs in the page and can close over nothing).
+  const ignored = ['SCRIPT', 'STYLE', 'LINK', 'TEMPLATE', 'NOSCRIPT'];
+  const portals =
+    root === document.body
+      ? []
+      : Array.from(document.body.children).filter(
+          (el) =>
+            el !== root &&
+            !ignored.includes(el.tagName) &&
+            el.id !== 'storybook-docs' &&
+            el.id !== 'storybook-highlights-root' &&
+            !el.classList.contains('sb-wrapper') &&
+            el.childElementCount > 0,
+        );
+  const all = [root, ...portals].flatMap((r) => [r, ...Array.from(r.querySelectorAll('*'))]);
   for (const el of all) {
     const style = getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue;
