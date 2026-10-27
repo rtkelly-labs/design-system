@@ -23,6 +23,8 @@ import { formatTraceDuration } from '../lib/trace';
 
 /** Width used before (or without) a measurement — jsdom, a server render. */
 const FALLBACK_WIDTH = 640;
+/** A module constant, so omitting `percentiles` keeps the markers memo stable across renders. */
+const DEFAULT_PERCENTILES: readonly number[] = [50, 90, 99];
 const LAYOUT = {
   regular: { margin: { top: 42, right: 16, bottom: 24, left: 44 }, font: 10, line: 12, height: 180, tickGap: 16 },
   compact: { margin: { top: 32, right: 8, bottom: 18, left: 34 }, font: 9, line: 10, height: 120, tickGap: 13 },
@@ -118,7 +120,7 @@ export const LatencyHistogram = forwardRef<HTMLDivElement, LatencyHistogramProps
   {
     samples,
     buckets: bucketsProp,
-    percentiles: ps = [50, 90, 99],
+    percentiles: ps = DEFAULT_PERCENTILES,
     slo,
     scale = 'log',
     binning,

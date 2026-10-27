@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { LATENCY_HISTOGRAM_VARIANTS, LatencyHistogram } from './LatencyHistogram';
 
 // 1…100ms, one sample each: p50 50.5, p90 90.1, p99 99.01.
@@ -10,6 +10,16 @@ const description = (element: Element) => document.getElementById(element.getAtt
 const active = (element: Element) => document.getElementById(element.getAttribute('aria-activedescendant') ?? '')?.getAttribute('aria-label');
 
 describe('LatencyHistogram', () => {
+  it('sorts the raw samples for percentiles once, not on every hover', () => {
+    render(<LatencyHistogram samples={samples} />);
+    const sort = vi.spyOn(Array.prototype, 'sort');
+    fireEvent.mouseMove(grid(), { clientX: 120, clientY: 40 });
+    fireEvent.mouseMove(grid(), { clientX: 240, clientY: 40 });
+    const sortedSamples = sort.mock.contexts.filter((array) => (array as unknown[]).length === samples.length);
+    sort.mockRestore();
+    expect(sortedSamples).toHaveLength(0);
+  });
+
   it('carries its slot, ref, className and spread props', () => {
     const ref = createRef<HTMLDivElement>();
     const { container } = render(<LatencyHistogram ref={ref} samples={samples} className="mt-4" data-testid="hist" />);
