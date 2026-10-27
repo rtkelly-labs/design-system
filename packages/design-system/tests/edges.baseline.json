@@ -135,6 +135,10 @@
     "heavyPanels": 0,
     "maxDepth": 0
   },
+  "components-data-latencyheatmap--bimodal": {
+    "heavyPanels": 0,
+    "maxDepth": 0
+  },
   "components-data-sparkline--primary-trend": {
     "heavyPanels": 0,
     "maxDepth": 0
@@ -180,8 +184,8 @@
     "maxDepth": 1
   },
   "components-feedback-toast--all-intents": {
-    "heavyPanels": 0,
-    "maxDepth": 0
+    "heavyPanels": 4,
+    "maxDepth": 1
   },
   "components-icons-socialicon--brand-marks": {
     "heavyPanels": 1,
@@ -284,8 +288,8 @@
     "maxDepth": 1
   },
   "components-overlays-alertdialog--destructive": {
-    "heavyPanels": 0,
-    "maxDepth": 0
+    "heavyPanels": 1,
+    "maxDepth": 1
   },
   "components-overlays-drawer--from-the-left": {
     "heavyPanels": 0,
@@ -296,24 +300,24 @@
     "maxDepth": 0
   },
   "components-overlays-menu--actions": {
-    "heavyPanels": 0,
+    "heavyPanels": 1,
     "maxDepth": 0
   },
   "components-overlays-menu--at-the-viewport-edge": {
-    "heavyPanels": 0,
+    "heavyPanels": 1,
     "maxDepth": 0
   },
   "components-overlays-modal--with-footer": {
-    "heavyPanels": 0,
-    "maxDepth": 0
+    "heavyPanels": 1,
+    "maxDepth": 1
   },
   "components-overlays-popover--at-the-viewport-edge": {
-    "heavyPanels": 0,
-    "maxDepth": 0
+    "heavyPanels": 1,
+    "maxDepth": 1
   },
   "components-overlays-popover--open": {
-    "heavyPanels": 0,
-    "maxDepth": 0
+    "heavyPanels": 1,
+    "maxDepth": 1
   },
   "components-overlays-tooltip--at-the-viewport-edge": {
     "heavyPanels": 0,
