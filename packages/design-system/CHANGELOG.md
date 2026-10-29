@@ -9,6 +9,16 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## 0.18.0
+
+A `delta` role group — `added`, `removed`, `moved`, and `deltaGround` `added`, `removed`,
+`hunk` for diff rows — as `text-delta-*`, `bg-delta-*`, `fill-delta-*` and
+`bg-delta-ground-*`. Change is not meaning, so it does not use `intent`.
+
+`FileChangeTree` and `ChangeSummary` colour changes with the `delta` roles. `FileChangeTree`
+no longer paints an added file as a success or a modified one as a warning; `ChangeSummary`'s
+signs no longer follow `palette`. Nothing to change in code. Re-baseline both figures.
+
 ## 0.17.0
 
 Traces. `TraceWaterfall` and `TraceViewer` draw distributed traces — spans nested by parent on

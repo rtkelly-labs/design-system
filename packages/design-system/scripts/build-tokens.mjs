@@ -66,6 +66,8 @@ function levelVariables(definition) {
   for (const [key, value] of Object.entries(definition.border)) push(`border-${key}`, value);
   for (const [key, value] of Object.entries(definition.accent)) push(`accent-${key}`, value);
   for (const [key, value] of Object.entries(definition.intent)) push(`intent-${key}`, value);
+  for (const [key, value] of Object.entries(definition.delta)) push(`delta-${key}`, value);
+  for (const [key, value] of Object.entries(definition.deltaGround)) push(`delta-ground-${key}`, value);
   // The Hue vocabulary, declared below the Roles above. A component may not
   // read these — see `docs/adr/0001-hues-declared-below-roles.md`. They exist
   // for Targets with no notion of jobs: ANSI's sixteen slots, a diagram
@@ -149,6 +151,12 @@ const TAILWIND_ALIASES = `  --color-surface-base: var(--ds-surface-base);
   --color-intent-success: var(--ds-intent-success);
   --color-intent-warning: var(--ds-intent-warning);
   --color-intent-danger: var(--ds-intent-danger);
+  --color-delta-added: var(--ds-delta-added);
+  --color-delta-removed: var(--ds-delta-removed);
+  --color-delta-moved: var(--ds-delta-moved);
+  --color-delta-ground-added: var(--ds-delta-ground-added);
+  --color-delta-ground-removed: var(--ds-delta-ground-removed);
+  --color-delta-ground-hunk: var(--ds-delta-ground-hunk);
   --color-palette-red: var(--ds-palette-red);
   --color-palette-orange: var(--ds-palette-orange);
   --color-palette-yellow: var(--ds-palette-yellow);
