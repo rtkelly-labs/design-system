@@ -19,6 +19,12 @@ A `delta` role group — `added`, `removed`, `moved`, and `deltaGround` `added`,
 no longer paints an added file as a success or a modified one as a warning; `ChangeSummary`'s
 signs no longer follow `palette`. Nothing to change in code. Re-baseline both figures.
 
+The review family: `VerdictBand`, `StatusMark`, `ProvenanceStrip`, `DeltaValue`,
+`ChangeCount`, `ChangeBar`, `ChangeIndex`, `DiffView`, `KeyedDiff`, with
+`parseUnifiedDiff`, `countDiff` and `diffAnchor`. `DiffView` lines take review `comments`.
+Only the verdict carries a strong border and shadow; the rest of the family is ruled or
+hairline-framed.
+
 ## 0.17.0
 
 Traces. `TraceWaterfall` and `TraceViewer` draw distributed traces — spans nested by parent on
