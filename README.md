@@ -28,7 +28,7 @@ pnpm -r test                 # every package's unit suite
 pnpm storybook               # the design system's Storybook
 pnpm site                    # build the package, then the applied site on :8101/site
 pnpm build:deploy            # what Vercel builds: Storybook at /, the site at /site/, in deploy-output/
-pnpm serve:deploy            # serve deploy-output/ as Vercel does (cleanUrls, trailing slash, headers) on :3200
+pnpm serve:deploy            # serve deploy-output/ as Vercel does (cleanUrls, trailing slash, headers) on :8104
 ```
 
 Anything narrower is a package concern: `cd packages/design-system` and use the scripts
