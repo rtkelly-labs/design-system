@@ -79,7 +79,7 @@ docs page, and each example to its story. In the other direction, Storybook's
 into the other half 404s (the site's `next dev` points at production Storybook instead).
 
 **Checking it before a deploy.** `pnpm build:deploy`, then `pnpm serve:deploy`, which serves
-`deploy-output/` on :3200 with the three settings that change whether a URL resolves:
+`deploy-output/` on :8104 with the three settings that change whether a URL resolves:
 `cleanUrls: false`, the `trailingSlash: false` redirect, and the `headers` from `vercel.json`
 through the same matcher the config test uses (`scripts/vercel-headers.mjs`). It has no
 dependency: `serve` must stay out of the lockfile (apps/site/AGENTS.md, rule 6).

@@ -196,7 +196,7 @@ built Storybook — 110 stories × both rungs of the ladder, 220 scans — gives
 
 ```bash
 pnpm build-storybook
-npx serve storybook-static -p 6006 --config ../serve.json
+npx serve storybook-static -p 8103 --config ../serve.json
 # then axe-core against /iframe.html?id=<story>&globals=level:<level>, per story per level
 ```
 

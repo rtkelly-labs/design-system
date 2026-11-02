@@ -2,7 +2,7 @@
  * Serve a static directory the way the Vercel project serves the deployment,
  * so the assembled output can be checked locally before anything deploys.
  *
- *   node scripts/serve-deploy.mjs [dir] [--port 3200] [--mount /site]
+ *   node scripts/serve-deploy.mjs [dir] [--port 8104] [--mount /site]
  *
  * `dir` defaults to `deploy-output/` (what `pnpm build:deploy` writes).
  * `--mount` serves `dir` under a prefix instead of at `/`, which is how
@@ -39,7 +39,7 @@ const flag = (name, fallback) => {
   args.splice(at, 2);
   return value;
 };
-const port = Number(flag('--port', process.env.PORT ?? '3200'));
+const port = Number(flag('--port', process.env.PORT ?? '8104'));
 const mount = (flag('--mount', '') ?? '').replace(/\/$/, '');
 const dir = path.resolve(args[0] ?? path.join(ROOT, 'deploy-output'));
 

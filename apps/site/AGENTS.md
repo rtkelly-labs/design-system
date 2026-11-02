@@ -27,9 +27,9 @@ map, as an npm consumer would.
 
 | | |
 |---|---|
-| `pnpm dev` | generate docs data, then `next dev` at http://localhost:3000/site |
+| `pnpm dev` | generate docs data, then `next dev` at http://localhost:8101/site |
 | `pnpm build` | generate docs data, then the static export to `out/` |
-| `pnpm start` | serve `out/` at http://localhost:3100/site the way Vercel serves it (`scripts/serve-deploy.mjs`) |
+| `pnpm start` | serve `out/` at http://localhost:8102/site the way Vercel serves it (`scripts/serve-deploy.mjs`) |
 | `pnpm generate` | rewrite `src/generated/docs-data.json` from the package (gitignored) |
 | `pnpm lint` | typescript-eslint, `react-hooks` and `jsx-a11y`, with zero warnings allowed |
 | `pnpm check:tokens` | the package's published `scanTokenRules` over `src/`, budget 0 |
