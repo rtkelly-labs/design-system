@@ -26,7 +26,7 @@ pnpm install                 # one install, both packages
 pnpm build                   # build every package, in dependency order
 pnpm -r test                 # every package's unit suite
 pnpm storybook               # the design system's Storybook
-pnpm site                    # build the package, then the applied site on :3000/site
+pnpm site                    # build the package, then the applied site on :8101/site
 pnpm build:deploy            # what Vercel builds: Storybook at /, the site at /site/, in deploy-output/
 pnpm serve:deploy            # serve deploy-output/ as Vercel does (cleanUrls, trailing slash, headers) on :3200
 ```

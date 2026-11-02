@@ -127,7 +127,7 @@ export default defineConfig({
     },
   },
   use: {
-    baseURL: 'http://localhost:6006',
+    baseURL: 'http://localhost:8103',
     trace: 'on-first-retry',
   },
   projects: [
@@ -161,8 +161,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npx serve storybook-static -p 6006 --config ../serve.json',
-    url: 'http://localhost:6006',
+    command: 'npx serve storybook-static -p 8103 --config ../serve.json',
+    url: 'http://localhost:8103',
     reuseExistingServer: !process.env.CI,
   },
 });
