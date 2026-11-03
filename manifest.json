@@ -1,0 +1,17 @@
+{
+  "pr": "392",
+  "head": "ec86a65ca810f8229977c40bb4f155e45eb12a94",
+  "base": "ba06459579a437754b59a212f1898ca6f090ee18",
+  "baseRef": "feat/print-paper-level",
+  "status": "rendered",
+  "total": 194,
+  "changed": [],
+  "added": [
+    "a11ymenu-open",
+    "badge-small",
+    "barchart-series-with-patterns",
+    "seriesmark-both-modes",
+    "tag-small-and-plain"
+  ],
+  "failures": []
+}
