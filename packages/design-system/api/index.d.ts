@@ -377,6 +377,13 @@ declare class Slugger {
 
 declare function childrenToText(node: unknown): string;
 
+interface FormatBytesOptions {
+
+    base?: 1024 | 1000;
+}
+
+declare function formatBytes(bytes: number, options?: FormatBytesOptions): string;
+
 interface UseCopyToClipboardResult {
 
     copied: boolean;
@@ -4224,6 +4231,7 @@ export {
   type FlowPathProps,
   type FlowRow,
   type FlowTone,
+  type FormatBytesOptions,
   FreshnessIndicator,
   type FreshnessIndicatorProps,
   type FreshnessState,
@@ -4604,6 +4612,7 @@ export {
   fontVar,
   formatAge,
   formatAlertDuration,
+  formatBytes,
   formatClock,
   formatCount,
   formatDay,
