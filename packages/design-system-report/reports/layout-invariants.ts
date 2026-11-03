@@ -94,7 +94,10 @@ export function inspectLayout(opts: InspectOptions = {}): RawViolation[] {
     return /absolute|fixed/.test(cs.position) && r.width <= 1 && r.height <= 1 && (cs.overflowX !== 'visible' || cs.clip !== 'auto' || /inset|rect/.test(cs.clipPath));
   };
   const outOfFlow = (cs: CSSStyleDeclaration) => /absolute|fixed|sticky/.test(cs.position);
-  const hiddenish = (el: Element, cs: CSSStyleDeclaration) => cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0' || isSrOnly(el, cs);
+  // A closed <details> paints only its summary, but Chromium still lays the rest out and reports
+  // their rects, which would read as an overlap with whatever follows the fold.
+  const folded = (el: Element) => el.parentElement instanceof HTMLDetailsElement && !el.parentElement.open && el.tagName !== 'SUMMARY';
+  const hiddenish = (el: Element, cs: CSSStyleDeclaration) => cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0' || folded(el) || isSrOnly(el, cs);
 
   /** True when the element or any ancestor up to `root` is not rendered for a sighted reader, or is out of flow. */
   const skipTree = (el: Element, root: Element, outOfFlowToo: boolean) => {
