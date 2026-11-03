@@ -1,0 +1,20 @@
+{
+  "pr": "389",
+  "head": "b7abfbf2bafc43b6630e218d3faa056989ef3587",
+  "base": "4572c5aed76e566466aa327d653cb4bae98f7e14",
+  "baseRef": "feat/tabs-closable",
+  "status": "rendered",
+  "total": 189,
+  "changed": [
+    "appshell-sidebar-open-mobile"
+  ],
+  "added": [
+    "alertdialog-pending",
+    "alertdialog-type-to-confirm",
+    "drawer-headerless",
+    "modal-headerless-palette",
+    "toolbar-default",
+    "toolbar-vertical"
+  ],
+  "failures": []
+}
