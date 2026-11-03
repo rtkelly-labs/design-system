@@ -362,13 +362,14 @@ export function DataTable<T>({
       : { ok: false as const, reason: typeof verdict === 'string' && verdict ? verdict : undefined };
   };
   // Every report is pruned against the data as it is now — the core model,
-  // so a row hidden by a filter keeps its selection.
+  // so a row hidden by a filter keeps its selection, and its flat rows, so a
+  // sub-row from `getSubRows` is as selectable as its parent.
   const report = (next: Set<string>) => {
     if (!onSelectionChange) return;
     const valid = new Set(
       activeTable
         .getCoreRowModel()
-        .rows.filter((row) => rowSelectability(row).ok)
+        .flatRows.filter((row) => rowSelectability(row).ok)
         .map(keyOf),
     );
     onSelectionChange(new Set([...next].filter((key) => valid.has(key))));

@@ -1,5 +1,6 @@
 import {
   getCoreRowModel,
+  getExpandedRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -615,6 +616,38 @@ describe('DataTable selection', () => {
     fireEvent.keyDown(alpha, { key: ' ' });
     fireEvent.keyUp(alpha, { key: ' ' });
     expect(checked(alpha)).toBe('true');
+  });
+
+  it('lets a sub-row from getSubRows be selected', () => {
+    interface Node extends TestItem { children?: Node[] }
+    const tree: Node[] = [{ id: 'p', name: 'Parent', count: 1, children: [{ id: 'c', name: 'Child', count: 2 }] }];
+    const onReport = vi.fn();
+    function Tree() {
+      const [keys, setKeys] = useState<ReadonlySet<string>>(new Set());
+      const table = useReactTable<Node>({
+        data: tree,
+        columns: [{ accessorKey: 'name', header: 'Name', meta: { rowHeader: true } }],
+        getSubRows: (row) => row.children,
+        state: { expanded: true },
+        getCoreRowModel: getCoreRowModel(),
+        getExpandedRowModel: getExpandedRowModel(),
+      });
+      return (
+        <DataTable<Node>
+          table={table}
+          keyExtractor={(row) => row.id}
+          selectedKeys={keys}
+          onSelectionChange={(next) => {
+            onReport(next);
+            setKeys(next);
+          }}
+        />
+      );
+    }
+    render(<Tree />);
+    fireEvent.click(box('Select Child'));
+    expect(onReport).toHaveBeenLastCalledWith(new Set(['c']));
+    expect(checked(box('Select Child'))).toBe('true');
   });
 
   it('keeps a selection with its row through a sort', () => {
