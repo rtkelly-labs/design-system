@@ -118,6 +118,8 @@ describe('semanticTokens', () => {
     expect(Object.keys(semanticTokens).sort()).toEqual([
       'accent',
       'border',
+      'delta',
+      'deltaGround',
       'font',
       'intent',
       'shadowColor',

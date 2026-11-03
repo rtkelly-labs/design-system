@@ -122,7 +122,9 @@ const CASES = [
   {
     name: 'tokens',
     imports: ['LEVELS', 'isThemeLevel'],
-    maxBytes: 2_200,
+    // +360 B: the `delta`, `deltaGround` and `deltaHue` maps on both levels — six
+    // colours and three Hue references per level, which is what LEVELS is.
+    maxBytes: 2_560,
     forbid: [...HEAVY, 'tailwind-variants', 'lucide-react'],
   },
   {
@@ -163,7 +165,8 @@ const CASES = [
     ],
     // +200 B: the data-slot markers on Card and Pagination parts, plus the
     // Pagination current-page chip fix. Both are intended.
-    maxBytes: 63_200,
+    // +600 B: LEVELS carries the `delta` role group (see the `tokens` case).
+    maxBytes: 63_800,
     forbid: HEAVY,
   },
 ];
