@@ -1,0 +1,14 @@
+{
+  "pr": "388",
+  "head": "4572c5aed76e566466aa327d653cb4bae98f7e14",
+  "base": "16c57611e34253dc52433eb1f6176902b2cd5e08",
+  "baseRef": "feat/segmented-control",
+  "status": "rendered",
+  "total": 183,
+  "changed": [],
+  "added": [
+    "tabs-case-preserved",
+    "tabs-closable-and-dirty"
+  ],
+  "failures": []
+}
