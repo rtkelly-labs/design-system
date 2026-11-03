@@ -37,6 +37,7 @@ export * from './hooks/useCopyToClipboard';
 export * from './hooks/useActiveHeading';
 export * from './hooks/useTraceClock';
 export * from './hooks/useTraceReplay';
+export * from './hooks/usePolledResource';
 
 // Primitives & Callouts
 export * from './components/Button';
@@ -197,6 +198,7 @@ export * from './components/ServiceMap';
 export * from './components/AlertList';
 export * from './components/IncidentTimeline';
 export * from './components/FreshnessIndicator';
+export * from './components/ResourceState';
 export * from './lib/ids';
 export * from './components/IdChip';
 

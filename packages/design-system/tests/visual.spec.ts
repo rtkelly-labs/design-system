@@ -283,6 +283,9 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-feedback-skeleton--loading-card', snapshot: 'skeleton-loading-card.png' },
   { id: 'components-feedback-progress--accents', snapshot: 'progress-accents.png' },
   { id: 'components-feedback-emptystate--first-run', snapshot: 'emptystate-first-run.png' },
+  // The stale state: a warning above data kept from an earlier load — the one
+  // that draws both halves of the component at once.
+  { id: 'components-feedback-resourcestate--stale', snapshot: 'resourcestate-stale.png' },
   // The page-level states (issue 251), all five: the two presets and the
   // three recipes, each on the frame it is normally served in. The 404 and
   // the 401 inside the site chrome (`fullPage`, header to footer); the 500,

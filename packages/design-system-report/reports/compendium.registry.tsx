@@ -77,6 +77,7 @@ import * as ServiceMapStories from '../../design-system/src/stories/ServiceMap.s
 import * as AlertListStories from '../../design-system/src/stories/AlertList.stories';
 import * as IncidentTimelineStories from '../../design-system/src/stories/IncidentTimeline.stories';
 import * as FreshnessIndicatorStories from '../../design-system/src/stories/FreshnessIndicator.stories';
+import * as ResourceStateStories from '../../design-system/src/stories/ResourceState.stories';
 import * as IdChipStories from '../../design-system/src/stories/IdChip.stories';
 import * as BulletChartStories from '../../design-system/src/stories/BulletChart.stories';
 import * as ActivityGridStories from '../../design-system/src/stories/ActivityGrid.stories';
@@ -392,6 +393,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'IdChip', group: 'Data display', height: 80, layout: 'stack', states: fromStories(IdChipStories, ['InTable']) },
   { component: 'SeverityBadge', group: 'Feedback', height: 39, layout: 'side', states: fromStories(SeverityBadgeStories, ['LogLevels', 'AlertStates']) },
   { component: 'FreshnessIndicator', group: 'Feedback', height: 37, layout: 'side', states: fromStories(FreshnessIndicatorStories, ['Fresh', 'Stale']) },
+  { component: 'ResourceState', group: 'Feedback', height: 119, layout: 'stack', states: fromStories(ResourceStateStories, ['Stale']) },
   { component: 'BulletChart', group: 'Data display', height: 24, layout: 'side', states: fromStories(BulletChartStories, ['PrimaryBenchmark']) },
   { component: 'ActivityGrid', group: 'Data display', height: 133, layout: 'stack', states: fromStories(ActivityGridStories, ['Commits']) },
   { component: 'AsciiGauge', group: 'Data display', height: 23, layout: 'side', states: fromStories(AsciiGaugeStories, ['Default']) },
