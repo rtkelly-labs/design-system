@@ -3,8 +3,9 @@ name: PR Evidence
 # Before and after, as images, on the pull request itself — Piece 2 of
 # `packages/design-system/docs/evidence-pipeline.md`, built as stills.
 #
-# Checks out the PR head, swaps in the visual baselines from the PR's merge
-# base, and runs the visual suite once in the pinned image. Every mismatch is
+# Checks out the PR head, swaps in "before" baselines for the PR's merge base
+# (main's committed ones, or a fresh render of a stacked PR's base branch),
+# and runs the visual suite in the pinned image. Every mismatch is
 # what this PR changes; every missing baseline is a story it adds. For a stacked
 # PR the merge base is the lower branch, so each PR shows its own increment.
 # The images go to an orphan branch `evidence/pr-<n>` (the repo is public, so
@@ -149,17 +150,35 @@ jobs:
         continue-on-error: true
         run: pnpm build-storybook
 
-      # "Before" is the merge base's committed baselines — rendered in this same
-      # image by `update-snapshots.yml` — so only the head needs rendering.
+      # "Before", against the default branch, is the merge base's committed
+      # baselines: `main` cannot merge with them failing, so they are what it
+      # renders. A stacked PR's base is another PR branch, whose baselines are
+      # only as current as its last `/update-snapshots` — trusting them made
+      # every PR in a stack show the whole stack's changes. So a non-default base
+      # is rendered here, in a worktree, and its render is the "before".
       - name: Baselines from the Merge Base
         if: steps.build.outcome == 'success'
         env:
           BASE_SHA: ${{ steps.base.outputs.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
           rm -rf tests/__snapshots__
-          if git cat-file -e "${BASE_SHA}:packages/design-system/tests/__snapshots__" 2>/dev/null; then
-            git checkout "${BASE_SHA}" -- tests/__snapshots__
+          if [ "${BASE_REF}" = "${DEFAULT_BRANCH}" ]; then
+            if git cat-file -e "${BASE_SHA}:packages/design-system/tests/__snapshots__" 2>/dev/null; then
+              git checkout "${BASE_SHA}" -- tests/__snapshots__
+            fi
+          else
+            base="${RUNNER_TEMP}/base"
+            git worktree add --detach "${base}" "${BASE_SHA}"
+            (
+              cd "${base}"
+              pnpm install --frozen-lockfile --prefer-offline
+              cd packages/design-system
+              pnpm build-storybook
+              pnpm exec playwright test tests/visual.spec.ts --update-snapshots=all --retries=0 --reporter=dot || true
+            )
+            cp -R "${base}/packages/design-system/tests/__snapshots__" tests/__snapshots__
           fi
           mkdir -p tests/__snapshots__
           find tests/__snapshots__ -name '*.png' > "${RUNNER_TEMP}/base-snapshots.txt"
