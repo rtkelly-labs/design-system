@@ -40,6 +40,7 @@ export * from './hooks/useTraceReplay';
 
 // Primitives & Callouts
 export * from './components/Button';
+export * from './components/InlineAction';
 export * from './components/Card';
 export * from './components/Badge';
 // The report frame — the page a generated report is built in. Separate from
