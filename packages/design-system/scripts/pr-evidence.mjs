@@ -67,16 +67,25 @@ export function pairsFromResults(files) {
   return [...cases.values()];
 }
 
-/** Errors that are not a pixel comparison: a story that would not render is evidence too. */
+const plain = (message) => String(message ?? '').replace(/\u001b\[[0-9;]*m/g, '');
+
+/**
+ * Errors that are not a pixel comparison: a story that would not render is evidence too.
+ * Top-level errors — Storybook's server never started, a config would not load — come
+ * first: they mean nothing was compared at all.
+ */
 export function renderFailures(report) {
-  const out = [];
+  const out = (report?.errors ?? []).map((error) => ({
+    title: 'run',
+    message: plain(error.message ?? error.value).split('\n')[0].slice(0, 240),
+  }));
   const visit = (suite, trail) => {
     for (const child of suite.suites ?? []) visit(child, [...trail, child.title]);
     for (const spec of suite.specs ?? []) {
       for (const t of spec.tests ?? []) {
         for (const result of t.results ?? []) {
           for (const error of result.errors ?? []) {
-            const message = String(error.message ?? '').replace(/\u001b\[[0-9;]*m/g, '');
+            const message = plain(error.message);
             if (/screenshot|snapshot/i.test(message)) continue;
             out.push({ title: [t.projectName, ...trail, spec.title].filter(Boolean).join(' › '), message: message.split('\n')[0].slice(0, 240) });
           }
@@ -179,6 +188,9 @@ export function renderComment(manifest, { raw, runUrl = '', dir = null } = {}) {
     lines.push('', `Storybook did not build at ${range}, so nothing could be rendered.`);
   } else if (manifest.status === 'no-report') {
     lines.push('', `The visual suite produced no report at ${range}.`);
+  } else if (!manifest.total && !changed.length && !added.length) {
+    // An all-clear needs something to have been compared.
+    lines.push('', `The visual suite compared nothing at ${range}${failures.length ? '; the errors are below' : ''}.`);
   } else if (!changed.length && !added.length) {
     lines.push('', `No asserted story renders differently: ${range}${manifest.total ? `, ${manifest.total} captures compared` : ''}.`);
   } else {

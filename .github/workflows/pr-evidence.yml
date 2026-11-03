@@ -30,12 +30,17 @@ on:
         description: 'Pull request number'
         required: true
 
-# One run per PR, the newest winning. An unrelated comment must not cancel a
-# real run, so anything that is not `/evidence` gets a group of its own.
+# One run per PR, the newest winning. A comment that `resolve` would reject —
+# not `/evidence`, not on a PR, or from someone without write access — gets a
+# group of its own, so it cannot cancel a real run.
 concurrency:
   group: >-
     pr-evidence-${{
-      (github.event_name != 'issue_comment' || startsWith(github.event.comment.body, '/evidence'))
+      (github.event_name != 'issue_comment' || (
+        github.event.issue.pull_request &&
+        startsWith(github.event.comment.body, '/evidence') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      ))
       && format('pr-{0}', github.event.pull_request.number || github.event.issue.number || inputs.pr)
       || github.run_id
     }}

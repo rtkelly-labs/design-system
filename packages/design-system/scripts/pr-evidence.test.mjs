@@ -37,6 +37,11 @@ describe('renderFailures', () => {
     };
     expect(renderFailures(report)).toEqual([{ title: 'mobile › b', message: 'Timeout waiting' }]);
   });
+
+  it('keeps top-level errors, where a run that never started records them', () => {
+    const report = { errors: [{ message: 'Error: Process from config.webServer exited early.\nstack' }], suites: [] };
+    expect(renderFailures(report)).toEqual([{ title: 'run', message: 'Error: Process from config.webServer exited early.' }]);
+  });
 });
 
 describe('order', () => {
@@ -65,5 +70,12 @@ describe('renderComment', () => {
   it('says the build failed rather than that nothing changed', () => {
     const body = renderComment({ ...base, status: 'build-failed', changed: [], added: [] }, { raw: '' });
     expect(body).toContain('Storybook did not build');
+  });
+
+  it('gives no all-clear when nothing was compared', () => {
+    const failures = [{ title: 'run', message: 'webServer exited early' }];
+    const body = renderComment({ ...base, total: 0, changed: [], added: [], failures }, { raw: '' });
+    expect(body).not.toContain('No asserted story renders differently');
+    expect(body).toContain('compared nothing');
   });
 });
