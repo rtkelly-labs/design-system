@@ -136,6 +136,12 @@ describe('usePolledResource', () => {
     expect(result.current).toMatchObject({ data: undefined, error: 'no route', loading: false });
   });
 
+  it('gives an empty rejection a message, so it never reads as success', async () => {
+    const { result } = renderHook(() => usePolledResource(() => Promise.reject(new Error()), { intervalMs: 0 }));
+    await flush();
+    expect(result.current).toMatchObject({ data: undefined, error: 'Unknown error', loading: false });
+  });
+
   it('discards an answer that arrives after a newer request', async () => {
     const slow = deferred<string>();
     const fast = deferred<string>();

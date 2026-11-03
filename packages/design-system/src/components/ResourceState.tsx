@@ -35,8 +35,8 @@ export interface ResourceStateProps<T> extends Omit<HTMLAttributes<HTMLDivElemen
 
 /** Which state the region is in, from data first: data on screen is never hidden by a failure. */
 function resourceStatus({ data, error }: Pick<ResourceStateValue<unknown>, 'data' | 'error'>): ResourceStatus {
-  if (data === undefined) return error ? 'failed' : 'loading';
-  return error ? 'stale' : 'ready';
+  if (data === undefined) return error !== undefined ? 'failed' : 'loading';
+  return error !== undefined ? 'stale' : 'ready';
 }
 
 const resourceState = recipe({
@@ -62,7 +62,7 @@ function ResourceStateInner<T>(
   const styles = resourceState();
   let body: ReactNode;
   if (state.data === undefined) {
-    body = state.error ? (
+    body = state.error !== undefined ? (
       <NoteBlock type="warning" title={errorTitle}>
         {state.error}
       </NoteBlock>
@@ -72,7 +72,7 @@ function ResourceStateInner<T>(
   } else {
     body = (
       <>
-        {state.error ? (
+        {state.error !== undefined ? (
           <NoteBlock type="important" title={staleTitle}>
             {state.error}
           </NoteBlock>

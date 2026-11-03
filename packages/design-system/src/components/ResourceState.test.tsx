@@ -36,6 +36,14 @@ describe('ResourceState', () => {
     expect(screen.getByText(/The hub API did not answer/)).toBeTruthy();
   });
 
+  it('treats an empty error message as a failure, not as loading or ready', () => {
+    const failed = render(<ResourceState state={{ data: undefined, error: '', loading: false }}>{() => 'never'}</ResourceState>);
+    expect(region(failed.container).getAttribute('data-state')).toBe('failed');
+    failed.unmount();
+    const stale = render(<ResourceState state={{ data: ['build'], error: '', loading: false }}>{() => 'data'}</ResourceState>);
+    expect(region(stale.container).getAttribute('data-state')).toBe('stale');
+  });
+
   it('keeps stale data on screen beneath a warning', () => {
     const { container } = render(
       <ResourceState state={{ data: ['build'], error: 'timeout', loading: false }}>

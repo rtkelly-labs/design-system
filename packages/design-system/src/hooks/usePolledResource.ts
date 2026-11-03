@@ -42,7 +42,8 @@ interface Snapshot<T> {
 
 /** An error, a rejection reason or a thrown string, as one line a person can read. */
 function messageOf(reason: unknown): string {
-  return reason instanceof Error ? reason.message : String(reason);
+  // `new Error()` and `reject('')` still failed; an empty message must not read as success.
+  return (reason instanceof Error ? reason.message : String(reason)) || 'Unknown error';
 }
 
 /**
