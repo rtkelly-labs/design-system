@@ -1,0 +1,30 @@
+{
+  "pr": "391",
+  "head": "5b50838aab72775bcfe8894d34ffdd88cd6d1edc",
+  "base": "fcc7dab2b27053de54eb6bd5fde85ad202bbcf4d",
+  "baseRef": "feat/tints-selection-skeleton",
+  "status": "rendered",
+  "total": 189,
+  "changed": [
+    "admin-content-studio-mobile",
+    "admin-finance-console-mobile",
+    "appshell-default-mobile",
+    "pagination-many-pages-mobile",
+    "saas-landing-mobile",
+    "admin-finance-console",
+    "appshell-sidebar-open",
+    "blog-post-foundational",
+    "blogpost-custom-author-card",
+    "blogpost-full-metadata",
+    "blogpost-guest-author",
+    "blogpost-with-avatar",
+    "divider-patterns",
+    "reportdocument-quality-gate",
+    "saas-landing-midnight",
+    "saas-landing-sketch",
+    "statcard-system-health",
+    "theme-ladder-all-levels"
+  ],
+  "added": [],
+  "failures": []
+}
