@@ -265,7 +265,7 @@ function custom(id: string, render: () => ReactNode): PlateState {
 
 export const PLATES: readonly PlateSpec[] = [
   { component: 'Button', group: 'Primitives', height: 109, layout: 'side', states: buttonStates() },
-  { component: 'InlineAction', group: 'Primitives', height: 24, layout: 'side', states: fromStories(InlineActionStories, ['Tones']) },
+  { component: 'InlineAction', group: 'Primitives', height: 21, layout: 'side', states: fromStories(InlineActionStories, ['Tones']) },
   { component: 'Badge', group: 'Primitives', height: 71, layout: 'side', states: badgeStates() },
   { component: 'Card', group: 'Primitives', height: 61, layout: 'side', states: fromStories(CardStories, ['FullCard']) },
 
