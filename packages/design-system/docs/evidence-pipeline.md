@@ -87,6 +87,17 @@ Blocked by nothing.
 
 ### Piece 2 — before and after
 
+**Built as stills:** `.github/workflows/pr-evidence.yml` and
+`scripts/pr-evidence.mjs`. It needs one Storybook build, not two: it checks out
+the PR head, swaps in the merge base's committed baselines (themselves rendered
+in the pinned image), and runs the visual suite once. Every mismatch is what the
+PR changes, every missing baseline is a story it adds. Images go to an orphan
+`evidence/pr-<n>` branch and one sticky comment per PR is edited in place. Runs
+on every PR push, on a `/evidence` comment, and on dispatch with `pr: <n>` for
+branches that predate it. Stacked PRs compare against their lower branch.
+
+The video version below is still the design for recordings of interaction.
+
 Record the same script against the merge base. The cheap way is the worktree
 convention this repo already has:
 
