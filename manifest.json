@@ -1,0 +1,29 @@
+{
+  "pr": "384",
+  "head": "d0df6901a9347bcb27aa7570fcae159ea3c076da",
+  "base": "27f95447ba0770c083ff63f04ec23ee50c79b4e3",
+  "baseRef": "main",
+  "status": "rendered",
+  "total": 177,
+  "changed": [
+    "appshell-default-mobile",
+    "saas-landing-mobile",
+    "saas-landing-product-launch-mobile",
+    "saas-landing-project-site-mobile",
+    "appshell-sidebar-open",
+    "blog-post-foundational",
+    "blogpost-custom-author-card",
+    "blogpost-full-metadata",
+    "blogpost-guest-author",
+    "blogpost-with-avatar",
+    "emptystate-first-run",
+    "hero-default",
+    "noteblock-all-types",
+    "portal-full",
+    "saas-landing-midnight",
+    "saas-landing-product-launch",
+    "saas-landing-sketch"
+  ],
+  "added": [],
+  "failures": []
+}
