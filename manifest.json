@@ -1,0 +1,16 @@
+{
+  "pr": "393",
+  "head": "ad5a1c88b91baa30d7995a0375b4f5f6fdbda0b6",
+  "base": "ec86a65ca810f8229977c40bb4f155e45eb12a94",
+  "baseRef": "feat/a11y-preferences",
+  "status": "rendered",
+  "total": 194,
+  "changed": [
+    "admin-content-studio-mobile",
+    "admin-content-studio",
+    "admin-finance-console",
+    "reportdocument-quality-gate"
+  ],
+  "added": [],
+  "failures": []
+}
