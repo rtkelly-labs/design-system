@@ -1069,6 +1069,14 @@ type DataTableSharedProps<T> = {
     containerClassName?: string;
 
     virtualize?: boolean | DataTableVirtualization;
+
+    selectedKeys?: ReadonlySet<string>;
+
+    onSelectionChange?: (keys: Set<string>) => void;
+
+    isRowSelectable?: (row: T) => boolean | string;
+
+    selectionLabel?: (row: T) => string;
 };
 type DataTableProps<T> = DataTableSharedProps<T> & ({
 
@@ -1085,7 +1093,7 @@ type DataTableProps<T> = DataTableSharedProps<T> & ({
     pageSize?: number;
 });
 
-declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, appearance, density, emptyText, className, containerClassName, virtualize, ...rest }: DataTableProps<T>): react.JSX.Element;
+declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, appearance, density, emptyText, className, containerClassName, virtualize, selectedKeys, onSelectionChange, isRowSelectable, selectionLabel, ...rest }: DataTableProps<T>): react.JSX.Element;
 
 interface ModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
     isOpen: boolean;

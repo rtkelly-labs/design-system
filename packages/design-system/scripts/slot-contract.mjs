@@ -42,7 +42,7 @@ export const ACRONYM_COMPONENTS = new Set(['TLDR']);
 export const ALIASES = {
   AsciiDivider: { kind: 'delegate', slot: 'divider', reason: 'Deprecated alias; renders Divider.' },
   BarChart: { kind: 'legacy-name', slot: 'barchart', reason: 'Predates the rule; consumers and visual tests target "barchart".' },
-  DataTable: { kind: 'delegate', family: 'table', reason: 'Renders Table (or a paginated / virtual-scroll wrapper); its elements are table-*, datatable-paginated and table-virtual-scroll.' },
+  DataTable: { kind: 'delegate', family: 'table', reason: 'Renders Table (or a paginated / virtual-scroll wrapper); its elements are table-*, datatable-paginated, datatable-select, datatable-select-all and table-virtual-scroll.' },
   Legend: { kind: 'legacy-name', slot: 'fieldset-legend', reason: 'The legend of Fieldset; named for its parent before the rule.' },
   Fieldset: { kind: 'shared-frame', slot: 'fieldset', reason: 'Rendered by GroupFrame, which RadioGroup shares; the slot comes from the frame.' },
   RadioGroup: { kind: 'shared-frame', family: 'radio', reason: 'Rendered by GroupFrame (shared with Fieldset); its items are radio and radio-indicator.' },

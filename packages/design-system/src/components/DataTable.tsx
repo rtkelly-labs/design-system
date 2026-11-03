@@ -22,6 +22,7 @@ import {
   type RefObject,
 } from 'react';
 import { cn } from '../lib/recipe';
+import { Checkbox } from './Checkbox';
 import { NerdIcon } from './NerdIcon';
 import { Pagination } from './Pagination';
 import {
@@ -35,6 +36,7 @@ import {
   type TableAppearance,
   type TableDensity,
 } from './Table';
+import { Tooltip } from './Tooltip';
 
 // Legacy column interface for backwards-compatibility
 export interface Column<T> {
@@ -59,6 +61,9 @@ interface DataTableColumnMeta {
 // What a press on a sort button does, keyed by the column's next order so the
 // description cannot disagree with the click.
 const SORT_HINT = { asc: 'Sort ascending', desc: 'Sort descending' } as const;
+
+// A stable default, so an unselected table does not build a new Set per render.
+const EMPTY_KEYS: ReadonlySet<string> = new Set();
 
 /** Virtualization geometry is runtime arithmetic; hoisted objects (the
  * `ATTACHED_STYLE` convention from CodeBlock) keep it off the inline-style
@@ -128,6 +133,37 @@ type DataTableSharedProps<T> = {
    * dataset to assistive tech, through `aria-rowcount` and `aria-rowindex`.
    */
   virtualize?: boolean | DataTableVirtualization;
+  /**
+   * The keys of the selected rows, as `keyExtractor` produces them (numbers
+   * are compared as strings). Controlled: the table never changes it, it
+   * reports the next set through `onSelectionChange`. Because selection is
+   * keyed rather than positional it survives a sort, a page change and a
+   * windowed scroll. Without a `keyExtractor` the key is TanStack's row id,
+   * which is the row's index in `data` and does not follow a row when
+   * `data` changes — pass one.
+   */
+  selectedKeys?: ReadonlySet<string>;
+  /**
+   * Turns selection on: a leading column of checkboxes, one per row, and one
+   * in the header. Called with the whole next selection on every toggle.
+   * The set it reports holds only keys of rows that are still in the data
+   * and still selectable, so a key whose row has gone, or has become
+   * unselectable, drops out on the next change rather than lingering.
+   */
+  onSelectionChange?: (keys: Set<string>) => void;
+  /**
+   * Whether a row may be selected. `false` disables its checkbox; a string
+   * disables it *and* says why, as the checkbox's accessible description and
+   * as a tooltip on hover. Every row is selectable when omitted.
+   */
+  isRowSelectable?: (row: T) => boolean | string;
+  /**
+   * The accessible name of a row's checkbox. Defaults to "Select" followed by
+   * the row-header column's value (`rowHeader` / `meta.rowHeader`), or by
+   * the row's key when there is no row header — so mark a row header, or
+   * pass this, or every checkbox is named by an id.
+   */
+  selectionLabel?: (row: T) => string;
 };
 
 export type DataTableProps<T> = DataTableSharedProps<T> &
@@ -167,6 +203,10 @@ export function DataTable<T>({
   className = '',
   containerClassName = '',
   virtualize,
+  selectedKeys = EMPTY_KEYS,
+  onSelectionChange,
+  isRowSelectable,
+  selectionLabel,
   ...rest
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -307,17 +347,96 @@ export function DataTable<T>({
     scrollMargin,
   });
 
+  // `row.index`, not the on-screen position: a key built from the position
+  // would stay with the slot while the rows move through it on a sort.
+  const keyOf = (row: (typeof rows)[number]) =>
+    String(keyExtractor ? keyExtractor(row.original, row.index) : row.id);
+
+  // Selection is drawn outside TanStack's column model, so a caller's columns,
+  // header groups and `table` instance are untouched by it.
+  const selectable = Boolean(onSelectionChange);
+  const rowSelectability = (row: (typeof rows)[number]) => {
+    const verdict = isRowSelectable ? isRowSelectable(row.original) : true;
+    return verdict === true
+      ? { ok: true as const, reason: undefined }
+      : { ok: false as const, reason: typeof verdict === 'string' && verdict ? verdict : undefined };
+  };
+  // Every report is pruned against the data as it is now — the core model,
+  // so a row hidden by a filter keeps its selection.
+  const report = (next: Set<string>) => {
+    if (!onSelectionChange) return;
+    const valid = new Set(
+      activeTable
+        .getCoreRowModel()
+        .rows.filter((row) => rowSelectability(row).ok)
+        .map(keyOf),
+    );
+    onSelectionChange(new Set([...next].filter((key) => valid.has(key))));
+  };
+  const rowHeaderColumn = activeTable
+    .getAllLeafColumns()
+    .find((column) => (column.columnDef.meta as DataTableColumnMeta | undefined)?.rowHeader);
+  const labelOf = (row: (typeof rows)[number], key: string) => {
+    if (selectionLabel) return selectionLabel(row.original);
+    const name = rowHeaderColumn ? row.getValue(rowHeaderColumn.id) : undefined;
+    return `Select ${typeof name === 'string' || typeof name === 'number' ? name : key}`;
+  };
+
+  // The header box acts on the rows the body holds: one page when paginated,
+  // every row otherwise (a virtualized body holds all of them, windowed).
+  // Selecting rows on pages the reader cannot see is how a bulk delete takes
+  // more than was meant, so it is never done implicitly.
+  const pageKeys = selectable ? rows.filter((row) => rowSelectability(row).ok).map(keyOf) : [];
+  const pageSelected = pageKeys.filter((key) => selectedKeys.has(key)).length;
+  const allLabel = rows.length < totalRows && !virtualization ? 'Select all rows on this page' : 'Select all rows';
+
+  // A refused row's checkbox is disabled, and a disabled control takes no
+  // focus — so the reason cannot live only in the tooltip. It is also the
+  // checkbox's description, read wherever the checkbox is.
+  const renderSelectCell = (row: (typeof rows)[number], rowKey: string, isSelected: boolean) => {
+    const verdict = rowSelectability(row);
+    const reasonId = `${uid}-why-${rowKey}`;
+    const box = (
+      <Checkbox
+        aria-label={labelOf(row, rowKey)}
+        aria-describedby={verdict.reason ? reasonId : undefined}
+        checked={isSelected}
+        disabled={!verdict.ok}
+        onCheckedChange={(checked) => {
+          const next = new Set(selectedKeys);
+          if (checked) next.add(rowKey);
+          else next.delete(rowKey);
+          report(next);
+        }}
+      />
+    );
+    return (
+      <TableCell data-slot="datatable-select" className="w-0">
+        {verdict.reason ? (
+          <>
+            <Tooltip content={verdict.reason}>{box}</Tooltip>
+            <span id={reasonId} hidden>
+              {verdict.reason}
+            </span>
+          </>
+        ) : (
+          box
+        )}
+      </TableCell>
+    );
+  };
+
   const renderRow = (row: (typeof rows)[number], position: number) => {
-    // `row.index`, not `position`: a key built from the on-screen position
-    // would stay with the slot while the rows move through it on a sort.
-    const rowKey = keyExtractor ? keyExtractor(row.original, row.index) : row.id;
+    const rowKey = keyOf(row);
+    const isSelected = selectable ? selectedKeys.has(rowKey) : row.getIsSelected();
 
     return (
       <TableRow
         key={rowKey}
         aria-rowindex={windowed ? headerGroups.length + pageOffset + position + 1 : undefined}
-        data-state={row.getIsSelected() && 'selected'}
+        data-state={isSelected ? 'selected' : undefined}
       >
+        {selectable && renderSelectCell(row, rowKey, isSelected)}
         {row.getVisibleCells().map((cell) => {
           const meta = cell.column.columnDef.meta as DataTableColumnMeta | undefined;
           const content = flexRender(cell.column.columnDef.cell, cell.getContext());
@@ -335,7 +454,7 @@ export function DataTable<T>({
     );
   };
 
-  const colSpan = activeTable.getAllLeafColumns().length || 1;
+  const colSpan = activeTable.getAllLeafColumns().length + (selectable ? 1 : 0) || 1;
 
   const virtualItems = virtualization ? virtualizer.getVirtualItems() : [];
   // `getVirtualItems` positions are relative to the scroll element and already
@@ -368,6 +487,28 @@ export function DataTable<T>({
       <TableHeader>
         {headerGroups.map((headerGroup, groupIdx) => (
           <TableRow key={headerGroup.id} aria-rowindex={windowed ? groupIdx + 1 : undefined}>
+            {selectable && groupIdx === 0 && (
+              <TableHead
+                data-slot="datatable-select-all"
+                rowSpan={headerGroups.length > 1 ? headerGroups.length : undefined}
+                className="w-0"
+              >
+                <Checkbox
+                  aria-label={allLabel}
+                  checked={pageKeys.length > 0 && pageSelected === pageKeys.length}
+                  indeterminate={pageSelected > 0 && pageSelected < pageKeys.length}
+                  disabled={pageKeys.length === 0}
+                  onCheckedChange={(checked) => {
+                    const next = new Set(selectedKeys);
+                    for (const key of pageKeys) {
+                      if (checked) next.add(key);
+                      else next.delete(key);
+                    }
+                    report(next);
+                  }}
+                />
+              </TableHead>
+            )}
             {headerGroup.headers.map((header, headerIdx) => {
               const canSort = !header.isPlaceholder && header.column.getCanSort();
               const isSorted = !header.isPlaceholder && header.column.getIsSorted();
