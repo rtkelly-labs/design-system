@@ -476,6 +476,31 @@ type ButtonProps = ButtonElementProps | ButtonLinkProps;
 
 declare const Button: react.ForwardRefExoticComponent<(Omit<ButtonElementProps, "ref"> | Omit<ButtonLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
 
+interface InlineActionOwnProps {
+
+    children: ReactNode;
+
+    tone?: InlineActionTone;
+
+    className?: string;
+}
+
+type InlineActionTone = 'accent' | 'quiet';
+
+type InlineActionButtonProps = InlineActionOwnProps & Omit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, 'children'> & {
+    href?: never;
+};
+
+type InlineActionLinkProps = InlineActionOwnProps & Omit<DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>, 'children'> & {
+
+    href: string;
+
+    disabled?: never;
+};
+type InlineActionProps = InlineActionButtonProps | InlineActionLinkProps;
+
+declare const InlineAction: react.ForwardRefExoticComponent<(Omit<InlineActionButtonProps, "ref"> | Omit<InlineActionLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
+
 type CardVariant = 'panel' | 'card';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
@@ -4258,6 +4283,11 @@ export {
   type IncidentTimelineProps,
   IndexedSection,
   type IndexedSectionProps,
+  InlineAction,
+  type InlineActionButtonProps,
+  type InlineActionLinkProps,
+  type InlineActionProps,
+  type InlineActionTone,
   Input,
   type InputProps,
   type IntensityScale,
