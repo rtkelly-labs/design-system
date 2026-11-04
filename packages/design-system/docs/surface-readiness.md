@@ -74,6 +74,8 @@ have survived a story. Retag each one when something depends on it.
   in the chart lab (#418), so their shape is expected to move.
 - `Components/Feedback/ResourceState`, with the `usePolledResource` hook it renders: upstreamed
   from the rig hub's panels, which have not migrated to it yet.
+- `Components/Actions & Forms/InlineAction`: written for the rig hub's job table, which has
+  not adopted it yet; until a second caller does, `tone` is the part most likely to move.
 
 The vocabulary is Storybook's own feature lifecycle — `stable`, `experimental`, `preview`,
 `deprecated` — rather than a second one to maintain. A group cannot be added to the sidebar

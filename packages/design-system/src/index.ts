@@ -31,6 +31,7 @@ export * from './theme/recommended';
 export { cn } from './lib/recipe';
 export type { ClassInput } from './lib/recipe';
 export * from './lib/slug';
+export * from './lib/units';
 
 // Hooks
 export * from './hooks/useCopyToClipboard';
@@ -41,6 +42,7 @@ export * from './hooks/usePolledResource';
 
 // Primitives & Callouts
 export * from './components/Button';
+export * from './components/InlineAction';
 export * from './components/Card';
 export * from './components/Badge';
 // The report frame — the page a generated report is built in. Separate from
