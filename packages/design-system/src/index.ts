@@ -31,6 +31,7 @@ export * from './theme/recommended';
 export { cn } from './lib/recipe';
 export type { ClassInput } from './lib/recipe';
 export * from './lib/slug';
+export * from './lib/units';
 
 // Hooks
 export * from './hooks/useCopyToClipboard';
