@@ -1,6 +1,14 @@
 import { Meta, Markdown } from '@storybook/addon-docs/blocks';
 import designMd from '../../../DESIGN.md?raw';
 
+export const GITHUB_BLOB_ROOT =
+  'https://github.com/rtkelly-labs/design-system/blob/main/packages/design-system';
+
+export const content = designMd.replace(
+  /\]\(\.\/([^)]+)\)/g,
+  `](${GITHUB_BLOB_ROOT}/$1)`
+);
+
 <Meta title="Guides/DESIGN.md" tags={['stable']} />
 
-<Markdown>{designMd}</Markdown>
+<Markdown>{content}</Markdown>

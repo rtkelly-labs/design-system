@@ -4,9 +4,11 @@
 > **Storybook Guide:** Served in Storybook under `Guides/DESIGN.md` via `packages/design-system/src/stories/guides/Design.mdx`.  
 > **Tokens:** `packages/design-system/tokens/palette.<level>.tokens.json`
 
-**Ryan Kelly · `ryankelly.dev`** · the visual language for the blog, the design system, the talks, generated graphics, and editor themes.
+**@rtkelly-labs/design-system** · the foundational visual language for rtkelly labs (`@rtkelly-labs`):
+engineering tooling (`oxbow`, `rig`, `Diffra`), documentation portals (`docs.ryankelly.dev`),
+technical publications (`ryankelly.dev`), terminal interfaces, and agent-generated presentation layers.
 
-This file is the portable form of the brand, adhering to the `design.md` agent contract. It is written for an autonomous coding agent or developer arriving with no context and asked to make something that looks like the rest of the estate.
+This file is the portable form of the brand, adhering to the `design.md` agent contract. It is written for an autonomous coding agent or engineer arriving with no context and asked to make something that looks like the rest of the estate.
 
 ---
 
