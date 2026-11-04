@@ -64,6 +64,8 @@ cta-section	CTASection
 cta-section-actions	CTASection
 cta-section-body	CTASection
 datatable-paginated	(shared)
+datatable-select	(shared)
+datatable-select-all	(shared)
 decision	Decision
 decision-option	Decision
 design-sandbox	DesignSandbox

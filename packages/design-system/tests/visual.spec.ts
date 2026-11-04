@@ -222,6 +222,8 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-data-datatable--sorted-with-caption', snapshot: 'datatable-sorted-with-caption.png' },
   // The pager under a paginated body (issue 276): the table and `Pagination` together.
   { id: 'components-data-datatable--paginated', snapshot: 'datatable-paginated.png' },
+  // Row selection: a selected row, a refused (disabled) row, and the header box mixed.
+  { id: 'components-data-datatable--selectable', snapshot: 'datatable-selectable.png' },
   { id: 'foundations-semantic-tokens--roles', snapshot: 'semantic-tokens-roles.png', fullPage: true },
   { id: 'docs-layout-docslayout--default', snapshot: 'docslayout-default.png', fullPage: true },
   { id: 'docs-layout-portal--full-portal', snapshot: 'portal-full.png', fullPage: true },
