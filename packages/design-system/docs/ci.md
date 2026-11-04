@@ -76,6 +76,11 @@ one job of nineteen serial steps, and nothing in it needed to be serial — so
 `lint`, the fastest and most frequently-failing check in the repo, reported after
 everything else had also run.
 
+The one exception is a gate that needs the built Storybook in a browser, such as
+`test:a11y` and `test:edges`. Moving it would mean building Storybook and installing a
+browser a second time, which costs more than the step does. It goes in `visual`,
+sharded with the rest.
+
 **Where the time actually goes**, so the next person optimising this starts from
 measurements rather than a guess:
 

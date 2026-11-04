@@ -34,7 +34,8 @@ being long.
 `node scripts/benchmark-edges.mjs` renders two pages from each of three systems, from their own
 published packages into the gitignored `temp/edge-benchmark/`, and runs the same function over
 them at the gate's 1280px viewport. The pages are shaped like this package's: a review or
-"check your answers" page, and an operations page with a table, tags and notices.
+"check your answers" page, and an operations page with a table, tags and notices. It imports
+`tests/edges.ts` directly, so it needs Node 22.18 or later, which strips types without a flag.
 
 - **GOV.UK Frontend 6.6.0**, through its own Nunjucks macros.
 - **Carbon** (`@carbon/react` 1.119.0, `@carbon/styles` 1.118.0), server-rendered.
@@ -189,7 +190,7 @@ It runs in CI's `visual` job beside `test:a11y`, on the same Storybook build and
 To change a recorded number on purpose, in the PR that changes the story:
 
 ```bash
-EDGES_CENSUS=1 pnpm test:edges     # measure every asserted story into temp/edges/
+pnpm edges:census                  # clear temp/edges/, then measure asserted stories into it
 node scripts/edges-baseline.mjs     # fold that census into tests/edges.baseline.json
 ```
 

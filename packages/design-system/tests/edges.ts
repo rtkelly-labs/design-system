@@ -134,7 +134,14 @@ export function measureEdges(rootSelector: string): EdgeCensus {
       if (w < 0.5 || s === 'none' || s === 'hidden') return null;
       const c = rgba(style.getPropertyValue(`border-${side.toLowerCase()}-color`));
       if (c[3] < 0.1) return null;
-      const contrast = ratio(c, behind);
+      // A translucent border shows only its blend with the ground, so measure that.
+      const over: [number, number, number, number] = [
+        c[0] * c[3] + behind[0] * (1 - c[3]),
+        c[1] * c[3] + behind[1] * (1 - c[3]),
+        c[2] * c[3] + behind[2] * (1 - c[3]),
+        1,
+      ];
+      const contrast = ratio(over, behind);
       if (contrast < 1.15) return null;
       const length = side === 'Top' || side === 'Bottom' ? rect.width : rect.height;
       return { w, contrast, length };
