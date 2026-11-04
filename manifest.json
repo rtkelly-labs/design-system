@@ -1,0 +1,13 @@
+{
+  "pr": "437",
+  "head": "1b40e19ad8cb772aad1c7358a4f5ab5162524dab",
+  "base": "75a4bf4f9e1d03f82c7750a3043b2ee739c66256",
+  "baseRef": "main",
+  "status": "rendered",
+  "total": 195,
+  "changed": [],
+  "added": [
+    "inlineaction-in-table"
+  ],
+  "failures": []
+}
