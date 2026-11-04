@@ -476,6 +476,31 @@ type ButtonProps = ButtonElementProps | ButtonLinkProps;
 
 declare const Button: react.ForwardRefExoticComponent<(Omit<ButtonElementProps, "ref"> | Omit<ButtonLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
 
+interface InlineActionOwnProps {
+
+    children: ReactNode;
+
+    tone?: InlineActionTone;
+
+    className?: string;
+}
+
+type InlineActionTone = 'accent' | 'quiet';
+
+type InlineActionButtonProps = InlineActionOwnProps & Omit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, 'children'> & {
+    href?: never;
+};
+
+type InlineActionLinkProps = InlineActionOwnProps & Omit<DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>, 'children'> & {
+
+    href: string;
+
+    disabled?: never;
+};
+type InlineActionProps = InlineActionButtonProps | InlineActionLinkProps;
+
+declare const InlineAction: react.ForwardRefExoticComponent<(Omit<InlineActionButtonProps, "ref"> | Omit<InlineActionLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
+
 type CardVariant = 'panel' | 'card';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
@@ -1076,6 +1101,14 @@ type DataTableSharedProps<T> = {
     containerClassName?: string;
 
     virtualize?: boolean | DataTableVirtualization;
+
+    selectedKeys?: ReadonlySet<string>;
+
+    onSelectionChange?: (keys: Set<string>) => void;
+
+    isRowSelectable?: (row: T) => boolean | string;
+
+    selectionLabel?: (row: T) => string;
 };
 type DataTableProps<T> = DataTableSharedProps<T> & ({
 
@@ -1092,7 +1125,7 @@ type DataTableProps<T> = DataTableSharedProps<T> & ({
     pageSize?: number;
 });
 
-declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, appearance, density, emptyText, className, containerClassName, virtualize, ...rest }: DataTableProps<T>): react.JSX.Element;
+declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, appearance, density, emptyText, className, containerClassName, virtualize, selectedKeys, onSelectionChange, isRowSelectable, selectionLabel, ...rest }: DataTableProps<T>): react.JSX.Element;
 
 interface ModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
     isOpen: boolean;
@@ -4263,6 +4296,11 @@ export {
   type IncidentTimelineProps,
   IndexedSection,
   type IndexedSectionProps,
+  InlineAction,
+  type InlineActionButtonProps,
+  type InlineActionLinkProps,
+  type InlineActionProps,
+  type InlineActionTone,
   Input,
   type InputProps,
   type IntensityScale,

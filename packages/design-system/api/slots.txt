@@ -64,6 +64,8 @@ cta-section	CTASection
 cta-section-actions	CTASection
 cta-section-body	CTASection
 datatable-paginated	(shared)
+datatable-select	(shared)
+datatable-select-all	(shared)
 decision	Decision
 decision-option	Decision
 design-sandbox	DesignSandbox
@@ -150,6 +152,7 @@ indexed-section-body	IndexedSection
 indexed-section-header	IndexedSection
 indexed-section-index	IndexedSection
 indexed-section-title	IndexedSection
+inline-action	InlineAction
 latency-heatmap	LatencyHeatmap
 latency-histogram	LatencyHistogram
 log-viewer	LogViewer
