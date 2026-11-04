@@ -1,5 +1,5 @@
 import * as react from 'react';
-import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps } from 'react';
+import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps, RefAttributes } from 'react';
 import { Table as Table$1, ColumnDef } from '@tanstack/react-table';
 import { RegisterableHotkey } from '@tanstack/react-hotkeys';
 export { ParentSize as ResponsiveChartContainer } from '@visx/responsive';
@@ -440,6 +440,29 @@ interface TraceReplay {
 }
 
 declare function useTraceReplay(duration: number, { autoPlay, loop, speed: initialSpeed, loopDelay }?: UseTraceReplayOptions): TraceReplay;
+
+interface UsePolledResourceOptions {
+
+    key?: string | number;
+
+    intervalMs?: number;
+
+    enabled?: boolean;
+}
+interface UsePolledResourceResult<T> {
+
+    data: T | undefined;
+
+    error: string | undefined;
+
+    loading: boolean;
+
+    updatedAt: number | undefined;
+
+    reload: () => void;
+}
+
+declare function usePolledResource<T>(load: () => Promise<T>, { key, intervalMs, enabled }?: UsePolledResourceOptions): UsePolledResourceResult<T>;
 
 interface ButtonOwnProps {
 
@@ -3042,6 +3065,35 @@ declare function formatAge(ms: number): string;
 
 declare const FreshnessIndicator: react.ForwardRefExoticComponent<FreshnessIndicatorProps & react.RefAttributes<HTMLSpanElement>>;
 
+type ResourceStatus = 'loading' | 'failed' | 'stale' | 'ready';
+
+interface ResourceStateValue<T> {
+
+    data: T | undefined;
+
+    error: string | undefined;
+
+    loading?: boolean;
+}
+interface ResourceStateProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+
+    state: ResourceStateValue<T>;
+
+    children: (data: T) => ReactNode;
+
+    loading?: ReactNode;
+
+    errorTitle?: string;
+
+    staleTitle?: string;
+}
+
+type ResourceStateComponent = (<T>(props: ResourceStateProps<T> & RefAttributes<HTMLDivElement>) => ReactElement | null) & {
+    displayName?: string;
+};
+
+declare const ResourceState: ResourceStateComponent;
+
 declare function truncateId(value: string, count?: number): string;
 
 interface IdChipProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'onCopy'> {
@@ -4423,6 +4475,10 @@ export {
   type ReportMetaItem,
   ReportSection,
   type ReportSectionProps,
+  ResourceState,
+  type ResourceStateProps,
+  type ResourceStateValue,
+  type ResourceStatus,
   type Rgb,
   SEVERITY_ACCENTS,
   SLIDE_DECK_HOTKEYS,
@@ -4623,6 +4679,8 @@ export {
   type UptimeStripProps,
   type UseActiveHeadingOptions,
   type UseCopyToClipboardResult,
+  type UsePolledResourceOptions,
+  type UsePolledResourceResult,
   type UseTraceClockOptions,
   type UseTraceReplayOptions,
   type VerdictTone,
@@ -4730,6 +4788,7 @@ export {
   useLinkComponent,
   useOptionalTheme,
   useOptionalToast,
+  usePolledResource,
   useTheme,
   useTimeCursor,
   useTimeRange,

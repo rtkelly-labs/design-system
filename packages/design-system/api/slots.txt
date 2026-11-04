@@ -198,6 +198,7 @@ radio-indicator	Radio
 report-details	ReportDetails
 report-document	ReportDocument
 report-section	ReportSection
+resource-state	ResourceState
 saas-landing-page	SaasLandingPage
 section-container	SectionContainer
 select-icon	Select
