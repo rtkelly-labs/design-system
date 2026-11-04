@@ -2,12 +2,14 @@
 /**
  * Fold an edge census into `tests/edges.baseline.json`.
  *
- *   EDGES_CENSUS=1 pnpm test:edges     measure every asserted story into temp/edges/
+ *   pnpm edges:census                   clear temp/edges/, then measure asserted stories into it
  *   node scripts/edges-baseline.mjs     record heavy panels and depth per story
  *
  * Re-record on purpose, in the PR that changes a story's edges, the way `/update-snapshots`
  * re-baselines pixels: the diff of the JSON is the change under review. A story the census did
- * not reach keeps its old entry, so a partial run cannot quietly loosen the ratchet.
+ * not reach keeps its old entry, so a partial run cannot quietly loosen the ratchet. That holds
+ * only if temp/edges/ holds one run: `edges:census` clears it first, outside the test workers,
+ * which may already be writing by the time any hook inside the spec runs.
  */
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';

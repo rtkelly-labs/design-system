@@ -152,7 +152,7 @@ It runs in CI's `visual` job beside `test:a11y`, on the same Storybook build and
 To change a recorded number on purpose, in the PR that changes the story:
 
 ```bash
-EDGES_CENSUS=1 pnpm test:edges     # measure every asserted story into temp/edges/
+pnpm edges:census                  # clear temp/edges/, then measure asserted stories into it
 node scripts/edges-baseline.mjs     # fold that census into tests/edges.baseline.json
 ```
 
