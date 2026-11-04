@@ -1,0 +1,281 @@
+name: PR Evidence
+
+# Before and after, as images, on the pull request itself — Piece 2 of
+# `packages/design-system/docs/evidence-pipeline.md`, built as stills.
+#
+# Checks out the PR head, swaps in "before" baselines for the PR's merge base
+# (main's committed ones, or a fresh render of a stacked PR's base branch),
+# and runs the visual suite in the pinned image. Every mismatch is
+# what this PR changes; every missing baseline is a story it adds. For a stacked
+# PR the merge base is the lower branch, so each PR shows its own increment.
+# The images go to an orphan branch `evidence/pr-<n>` (the repo is public, so
+# they render on a phone with no login) and one comment per PR is edited in
+# place, never added to.
+#
+# Not a gate: no step here can fail a build, and the `visual` job in `ci.yml`
+# is unaffected. Runs on every PR push, and on demand:
+#   - comment `/evidence` on a PR (OWNER/MEMBER/COLLABORATOR only)
+#   - dispatch with `pr: <n>` — which is how a PR whose branch predates this
+#     file gets evidence: dispatch runs this file from the ref it names, and
+#     only the PR's *head* is checked out for rendering.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'Pull request number'
+        required: true
+
+# One run per PR, the newest winning. A comment that `resolve` would reject —
+# not `/evidence`, not on a PR, or from someone without write access — gets a
+# group of its own, so it cannot cancel a real run.
+concurrency:
+  group: >-
+    pr-evidence-${{
+      (github.event_name != 'issue_comment' || (
+        github.event.issue.pull_request &&
+        startsWith(github.event.comment.body, '/evidence') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      ))
+      && format('pr-{0}', github.event.pull_request.number || github.event.issue.number || inputs.pr)
+      || github.run_id
+    }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    name: Resolve PR
+    if: >-
+      github.event_name != 'issue_comment' || (
+        github.event.issue.pull_request &&
+        startsWith(github.event.comment.body, '/evidence') &&
+        contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+      )
+    runs-on: ubuntu-latest
+    # See AGENTS.md rule 9 — no job runs to the six-hour default.
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write # reaction on the command comment
+    outputs:
+      number: ${{ steps.pr.outputs.number }}
+      head_sha: ${{ steps.pr.outputs.head_sha }}
+      base_ref: ${{ steps.pr.outputs.base_ref }}
+    steps:
+      - name: Resolve
+        id: pr
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        env:
+          INPUT_PR: ${{ inputs.pr }}
+        with:
+          script: |
+            const number = Number(context.payload.pull_request?.number ?? context.payload.issue?.number ?? process.env.INPUT_PR);
+            if (!number) throw new Error('No pull request number.');
+            if (context.eventName === 'issue_comment') {
+              await github.rest.reactions.createForIssueComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                comment_id: context.payload.comment.id, content: 'eyes',
+              });
+            }
+            const { data: pr } = await github.rest.pulls.get({ owner: context.repo.owner, repo: context.repo.repo, pull_number: number });
+            // The images are pushed to a branch of this repository and the comment
+            // is written with its token; a fork's PR gets neither.
+            if (pr.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
+              throw new Error('Evidence only runs for branches in this repository.');
+            }
+            core.setOutput('number', String(number));
+            core.setOutput('head_sha', pr.head.sha);
+            core.setOutput('base_ref', pr.base.ref);
+
+  render:
+    name: Render Before and After
+    needs: resolve
+    runs-on: ubuntu-latest
+    # The render environment, pinned — the same reference as every other job
+    # that renders, which `check:governance` holds equal. Before and after are
+    # only comparable if both sides were drawn in one environment, and the
+    # "before" side is the merge base's committed baselines, drawn in this one.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --ipc=host --init
+    defaults:
+      run:
+        shell: bash
+        working-directory: packages/design-system
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      HEAD_SHA: ${{ needs.resolve.outputs.head_sha }}
+      BASE_REF: ${{ needs.resolve.outputs.base_ref }}
+      PR_NUMBER: ${{ needs.resolve.outputs.number }}
+    steps:
+      - name: Checkout PR Head
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.resolve.outputs.head_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The collector runs from this workflow's own commit, not the PR's: a PR
+      # branch that predates it has no `pr-evidence.mjs` to run.
+      - name: Checkout Evidence Tooling
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.workflow_sha }}
+          path: .pr-evidence-tool
+          sparse-checkout: packages/design-system/scripts/pr-evidence.mjs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      # See storybook-walkthrough.yml — the container runs as root over a
+      # checkout the runner user owns.
+      - name: Trust the Workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Merge Base
+        id: base
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin "refs/heads/${BASE_REF}"
+          echo "sha=$(git merge-base HEAD FETCH_HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build Storybook
+        id: build
+        continue-on-error: true
+        run: pnpm build-storybook
+
+      # "Before", against the default branch, is the merge base's committed
+      # baselines: `main` cannot merge with them failing, so they are what it
+      # renders. A stacked PR's base is another PR branch, whose baselines are
+      # only as current as its last `/update-snapshots` — trusting them made
+      # every PR in a stack show the whole stack's changes. So a non-default base
+      # is rendered here, in a worktree, and its render is the "before".
+      - name: Baselines from the Merge Base
+        if: steps.build.outcome == 'success'
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          rm -rf tests/__snapshots__
+          if [ "${BASE_REF}" = "${DEFAULT_BRANCH}" ]; then
+            if git cat-file -e "${BASE_SHA}:packages/design-system/tests/__snapshots__" 2>/dev/null; then
+              git checkout "${BASE_SHA}" -- tests/__snapshots__
+            fi
+          else
+            base="${RUNNER_TEMP}/base"
+            git worktree add --detach "${base}" "${BASE_SHA}"
+            (
+              cd "${base}"
+              pnpm install --frozen-lockfile --prefer-offline
+              cd packages/design-system
+              pnpm build-storybook
+              pnpm exec playwright test tests/visual.spec.ts --update-snapshots=all --retries=0 --reporter=dot || true
+            )
+            cp -R "${base}/packages/design-system/tests/__snapshots__" tests/__snapshots__
+          fi
+          mkdir -p tests/__snapshots__
+          find tests/__snapshots__ -name '*.png' > "${RUNNER_TEMP}/base-snapshots.txt"
+
+      # Fails whenever the PR changes rendering — that is the output, not an error.
+      - name: Render the Head
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ runner.temp }}/evidence-run.json
+        run: pnpm exec playwright test tests/visual.spec.ts --retries=0 --reporter=json
+
+      - name: Collect
+        if: success() || failure()
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          STATUS: ${{ steps.build.outcome == 'success' && 'rendered' || 'build-failed' }}
+        run: >-
+          node "${GITHUB_WORKSPACE}/.pr-evidence-tool/packages/design-system/scripts/pr-evidence.mjs" collect
+          --results test-results
+          --snapshots tests/__snapshots__
+          --before-list "${RUNNER_TEMP}/base-snapshots.txt"
+          --report "${RUNNER_TEMP}/evidence-run.json"
+          --out "${RUNNER_TEMP}/evidence"
+          --pr "${PR_NUMBER}" --head "${HEAD_SHA}" --base "${BASE_SHA}" --base-ref "${BASE_REF}"
+          --status "${STATUS}"
+
+      - name: Upload Evidence
+        if: success() || failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pr-evidence-${{ needs.resolve.outputs.number }}
+          path: ${{ runner.temp }}/evidence/
+          retention-days: 7
+          if-no-files-found: error
+
+  publish:
+    name: Post to the PR
+    needs: [resolve, render]
+    if: (success() || failure()) && needs.resolve.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write # the orphan evidence/pr-<n> branch
+      pull-requests: write # the comment
+    env:
+      PR_NUMBER: ${{ needs.resolve.outputs.number }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout Evidence Tooling
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.workflow_sha }}
+          sparse-checkout: packages/design-system/scripts/pr-evidence.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Download Evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: pr-evidence-${{ needs.resolve.outputs.number }}
+          path: ${{ runner.temp }}/evidence
+
+      # One commit on an orphan branch, replaced on every run. Raw URLs name the
+      # commit rather than the branch, so a cached image is never a stale one.
+      - name: Push Images
+        id: push
+        run: |
+          set -euo pipefail
+          cp packages/design-system/scripts/pr-evidence.mjs "${RUNNER_TEMP}/pr-evidence.mjs"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git sparse-checkout disable
+          git checkout --quiet --orphan "evidence-${PR_NUMBER}"
+          git rm -rq --cached . && git clean -fdxq
+          cp -R "${RUNNER_TEMP}/evidence/." .
+          git add -A
+          git commit -qm "evidence: PR #${PR_NUMBER}"
+          git push --force --quiet origin "HEAD:refs/heads/evidence/pr-${PR_NUMBER}"
+          echo "raw=https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Comment
+        env:
+          RAW: ${{ steps.push.outputs.raw }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          node "${RUNNER_TEMP}/pr-evidence.mjs" comment \
+            --manifest "${RUNNER_TEMP}/evidence/manifest.json" --raw "${RAW}" --run-url "${RUN_URL}" > "${RUNNER_TEMP}/body.md"
+          existing=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
+            --jq '.[] | select(.body | startswith("<!-- pr-evidence -->")) | .id' | head -1)
+          if [ -n "${existing}" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${existing}" -F body=@"${RUNNER_TEMP}/body.md" > /dev/null
+          else
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" -F body=@"${RUNNER_TEMP}/body.md" > /dev/null
+          fi

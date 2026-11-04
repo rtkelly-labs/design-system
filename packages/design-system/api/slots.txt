@@ -152,6 +152,7 @@ indexed-section-body	IndexedSection
 indexed-section-header	IndexedSection
 indexed-section-index	IndexedSection
 indexed-section-title	IndexedSection
+inline-action	InlineAction
 latency-heatmap	LatencyHeatmap
 latency-histogram	LatencyHistogram
 log-viewer	LogViewer
