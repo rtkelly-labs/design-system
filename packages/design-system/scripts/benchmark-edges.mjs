@@ -50,9 +50,12 @@ function install() {
   mkdirSync(PAGES, { recursive: true });
   const manifest = path.join(WORK, 'package.json');
   const wanted = JSON.stringify({ name: 'edge-benchmark', private: true, dependencies: PACKAGES }, null, 2);
-  if (existsSync(manifest) && readFileSync(manifest, 'utf8') === wanted && existsSync(path.join(WORK, 'node_modules'))) return;
+  // Written only once npm succeeds, so a failed install is retried rather than taken as done.
+  const marker = path.join(WORK, '.install-complete');
+  if (existsSync(marker) && readFileSync(marker, 'utf8') === wanted && existsSync(path.join(WORK, 'node_modules'))) return;
   writeFileSync(manifest, wanted);
   execFileSync('npm', ['install', '--no-audit', '--no-fund', '--silent', '--no-package-lock'], { cwd: WORK, stdio: 'inherit' });
+  writeFileSync(marker, wanted);
 }
 
 const page = (title, css, body, htmlAttributes = '') =>
