@@ -14,7 +14,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { ThemeProvider, type ThemeLevel, AsciiGauge, Badge } from '@rtkelly13/design-system';
+import { ThemeProvider, type ThemeLevel, AsciiGauge, Badge } from '@rtkelly-labs/design-system';
 
 const SET = 'DS-MFST-01';
 const REV = 'REV 2026.10';

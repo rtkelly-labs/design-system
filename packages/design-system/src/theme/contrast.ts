@@ -15,7 +15,7 @@
  * 5.90:1 while scoring Lc -41, the weakest text pair in the system (#372).
  */
 
-import type { Emphasis, Hue, HueRef, Intent, TextTone } from '../lib/theme';
+import type { Delta, DeltaGround, Emphasis, Hue, HueRef, Intent, TextTone } from '../lib/theme';
 import type { LevelDefinition, ThemeLevel } from './levels';
 
 export interface Rgb {
@@ -330,6 +330,9 @@ export function auditHueAgreement(
     for (const [role, ref] of Object.entries(def.intentHue)) {
       check(`intent.${role}`, def.intent[role as Intent], ref);
     }
+    for (const [role, ref] of Object.entries(def.deltaHue)) {
+      check(`delta.${role}`, def.delta[role as Delta], ref);
+    }
   }
 
   return results;
@@ -392,6 +395,9 @@ export function auditContrast(
       for (const tone of ['info', 'success', 'warning', 'danger'] as const satisfies readonly Intent[]) {
         check(`intent.${tone} on ${groundName}`, def.intent[tone], ground, floor.role);
       }
+      for (const tone of ['added', 'removed', 'moved'] as const satisfies readonly Delta[]) {
+        check(`delta.${tone} on ${groundName}`, def.delta[tone], ground, floor.role);
+      }
       // ADR 0001: gate `palette` once per Hue rather than once per Role that
       // consumes it. Separate the palette, not each of its consumers.
       for (const hue of PALETTE_HUES_ORDER) {
@@ -422,6 +428,11 @@ export function auditContrast(
         floor.role,
       );
     }
+    // `FileChangeTree` prints its change mark in `text.inverse` on a `delta` fill.
+    for (const tone of ['added', 'removed', 'moved'] as const satisfies readonly Delta[]) {
+      check(`text.inverse on delta.${tone}`, def.text.inverse, def.delta[tone], floor.role);
+    }
+    check('text.inverse on text.secondary', def.text.inverse, def.text.secondary, floor.role);
     for (const tone of ['info', 'success', 'warning', 'danger'] as const satisfies readonly Intent[]) {
       check(
         `text.inverse on intent.${tone}`,
@@ -430,6 +441,13 @@ export function auditContrast(
         floor.role,
       );
     }
+    // A diff row: the line in `text.primary`, its sign in the matching `delta`
+    // role, both on that row's ground. The hunk header is `text.secondary`.
+    for (const tone of ['added', 'removed'] as const satisfies readonly DeltaGround[]) {
+      check(`diff row: text.primary on deltaGround.${tone}`, def.text.primary, def.deltaGround[tone], floor.role);
+      check(`diff sign: delta.${tone} on deltaGround.${tone}`, def.delta[tone], def.deltaGround[tone], floor.role);
+    }
+    check('diff hunk: text.secondary on deltaGround.hunk', def.text.secondary, def.deltaGround.hunk, floor.role);
     // `Select`'s open list (#164), named for the component because it used to
     // be the one surface the palette did not reach: the operating system
     // painted it. The rows are `text.primary` on `surface.raised`; a disabled

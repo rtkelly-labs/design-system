@@ -3,7 +3,7 @@ import { selectGatingChecks, summariseChecks } from './release-train-checks.mjs'
 
 const RUN = '35634057428';
 const url = (runId, jobId) =>
-  `https://github.com/rtkelly13/design-system/actions/runs/${runId}/job/${jobId}`;
+  `https://github.com/rtkelly-labs/design-system/actions/runs/${runId}/job/${jobId}`;
 
 const check = (name, over = {}) => ({
   name,

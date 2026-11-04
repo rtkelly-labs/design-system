@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Badge, Button, Modal, useToast } from '@rtkelly13/design-system';
+import { Badge, Button, Modal, useToast } from '@rtkelly-labs/design-system';
 
 export default function ConfirmDeploy() {
   const [isOpen, setOpen] = useState(false);

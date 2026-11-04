@@ -20,7 +20,7 @@ export default function OverviewPage() {
     <Article article={article}>
       <Heading article={article} id="what-it-is" />
       <p>
-        <code>@rtkelly13/design-system</code> is the visual language of ryankelly.dev, packaged as React components and
+        <code>@rtkelly-labs/design-system</code> is the visual language of ryankelly.dev, packaged as React components and
         Tailwind v4 tokens. Its character is <strong>brutalist neon terminal</strong>: monospace and condensed display
         type, bracketed labels, high-chroma accents on near-black, or ink on warm paper. It should read as a CRT and a
         drafting table, not as a SaaS dashboard.

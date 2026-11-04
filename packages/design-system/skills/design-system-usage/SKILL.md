@@ -1,8 +1,8 @@
 ---
 name: design-system-usage
 description: >
-  Build pages and components against @rtkelly13/design-system (brutalist React
-  + Tailwind 4 system). Activate when importing from @rtkelly13/design-system,
+  Build pages and components against @rtkelly-labs/design-system (brutalist React
+  + Tailwind 4 system). Activate when importing from @rtkelly-labs/design-system,
   theming with its Level ladder, or using DataTable, SlideDeck, ThemeProvider.
   Covers the token rules, the single-primitive-library rule, and the component
   surfaces an agent cannot discover from code alone.
@@ -11,14 +11,14 @@ metadata:
   version: '1.0'
 ---
 
-# Using @rtkelly13/design-system
+# Using @rtkelly-labs/design-system
 
 React-only. Import components and the `cn`/`recipe` helpers from the package
 root; styles ship as one stylesheet you must import once:
 
 ```tsx
-import '@rtkelly13/design-system/styles.css';
-import { Button, DataTable, ThemeProvider } from '@rtkelly13/design-system';
+import '@rtkelly-labs/design-system/styles.css';
+import { Button, DataTable, ThemeProvider } from '@rtkelly-labs/design-system';
 ```
 
 ## Non-negotiables

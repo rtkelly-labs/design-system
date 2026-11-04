@@ -463,7 +463,7 @@ components, and before the split all three sat in that package's peer list while
 its `exports` map and `bin` advertised a report generator to every consumer of a
 component library.
 
-`@rtkelly13/design-system` is a **peer**, resolved from the *report's* own
+`@rtkelly-labs/design-system` is a **peer**, resolved from the *report's* own
 directory. A report renders against the copy its project installed — the one its
 author's editor typechecks against — rather than a copy bundled with the tool,
 and the two version on their own clocks.
@@ -474,7 +474,7 @@ into an install instruction rather than a stack trace — see `explain()` in
 `src/cli.ts`, and keep that true.
 
 `ReportDocument`, `ReportSection` and `ReportDetails` ship from
-`@rtkelly13/design-system`: ordinary components with no Node imports, with a
+`@rtkelly-labs/design-system`: ordinary components with no Node imports, with a
 story and a visual baseline there. The dependency runs one way, so that package
 may never import from this one — which is why its story composes the frame itself
 rather than importing the sample below.

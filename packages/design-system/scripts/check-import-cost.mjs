@@ -20,7 +20,7 @@
  * ## How it measures
  *
  * Each case is a synthetic consumer entry point, `import { … } from
- * '@rtkelly13/design-system'`, bundled by esbuild through the package's own
+ * '@rtkelly-labs/design-system'`, bundled by esbuild through the package's own
  * name — so its `exports` map and its `sideEffects` field decide what is
  * reachable, exactly as they do in a consumer's `node_modules`. It is
  * minified, `react` and `react-dom` are external (the consumer already pays
@@ -122,7 +122,9 @@ const CASES = [
   {
     name: 'tokens',
     imports: ['LEVELS', 'isThemeLevel'],
-    maxBytes: 2_200,
+    // +360 B: the `delta`, `deltaGround` and `deltaHue` maps on both levels — six
+    // colours and three Hue references per level, which is what LEVELS is.
+    maxBytes: 2_560,
     forbid: [...HEAVY, 'tailwind-variants', 'lucide-react'],
   },
   {
@@ -163,7 +165,8 @@ const CASES = [
     ],
     // +200 B: the data-slot markers on Card and Pagination parts, plus the
     // Pagination current-page chip fix. Both are intended.
-    maxBytes: 63_200,
+    // +600 B: LEVELS carries the `delta` role group (see the `tokens` case).
+    maxBytes: 63_800,
     forbid: HEAVY,
   },
 ];
@@ -175,7 +178,7 @@ const packageOf = (input) => {
 
 async function measure({ imports }) {
   const contents =
-    `import { ${imports.join(', ')} } from '@rtkelly13/design-system';\n` +
+    `import { ${imports.join(', ')} } from '@rtkelly-labs/design-system';\n` +
     `globalThis.__keep(${imports.join(', ')});\n`;
   const result = await esbuild.build({
     stdin: { contents, resolveDir: PACKAGE_DIR, loader: 'js' },
@@ -196,7 +199,7 @@ async function measure({ imports }) {
   const bytesBy = new Map();
   for (const [input, { bytesInOutput }] of Object.entries(contributed)) {
     if (bytesInOutput === 0) continue;
-    const name = packageOf(input) ?? '@rtkelly13/design-system';
+    const name = packageOf(input) ?? '@rtkelly-labs/design-system';
     bytesBy.set(name, (bytesBy.get(name) ?? 0) + bytesInOutput);
   }
   return { bytes: output.length, gzip: gzipSync(output).length, bytesBy };
@@ -209,8 +212,8 @@ if (!existsSync(path.join(PACKAGE_DIR, 'package.json'))) {
   process.exit(1);
 }
 const manifest = JSON.parse(readFileSync(path.join(PACKAGE_DIR, 'package.json'), 'utf8'));
-if (manifest.name !== '@rtkelly13/design-system') {
-  console.error(`${PACKAGE_DIR} is ${manifest.name}, not @rtkelly13/design-system.`);
+if (manifest.name !== '@rtkelly-labs/design-system') {
+  console.error(`${PACKAGE_DIR} is ${manifest.name}, not @rtkelly-labs/design-system.`);
   process.exit(1);
 }
 if (PACKAGE_DIR === ROOT && !existsSync(path.join(ROOT, 'dist', 'index.js'))) {

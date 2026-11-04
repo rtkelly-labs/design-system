@@ -110,6 +110,10 @@ const MIN_STORIES = 3;
 const CEILING = 44;
 
 const EXCLUDED = {
+  'Showcase/ChartLab': {
+    propsTable:
+      'A bench, not a component (issue 418): it draws `TimeSeriesChart`, `LatencyHistogram` and `LatencyHeatmap` through stress datasets. Its controls are those charts\u2019 variation props, and each chart\u2019s own page carries the props table they come from.',
+  },
   'Showcase/DesignSandbox': {
     samples:
       'The kitchen sink — one page rendering every component at once, several screens tall. Its variants are the four theme levels, and those are the toolbar, not stories.',
@@ -155,6 +159,8 @@ const UNSTORIED = {
     'A part of the report frame, documented and asserted on `Components/Reports/ReportDocument`. It is meaningless outside one — a section with no document around it has no measure, no rhythm and nothing to be a section of — so a page of its own would show it in a context no consumer will ever build.',
   ReportDetails:
     'Same as `ReportSection`: the disclosure block belongs to the report frame and is shown in place on `Components/Reports/ReportDocument`, where its collapsed and expanded states are both visible against the surrounding document.',
+  TimeRangeProvider:
+    'Context only, like `ThemeProvider`: it renders its children and nothing else. `Components/Data/TimeRangePicker` documents it — every story there runs inside one, and `SharedCursor` shows the second, cursor-only context it provides.',
   ThemeProvider:
     'Renders no markup of its own; what a screenshot of it would show is whatever children it is given. `Foundations/Theme Ladder` documents the behaviour, including `scoped`, which is the part with a visible consequence.',
   DocsLink:

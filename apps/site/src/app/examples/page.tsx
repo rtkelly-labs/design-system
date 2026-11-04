@@ -34,9 +34,11 @@ export default function ExamplesIndex() {
                 <Link href={sampleHref(sample)} className="text-accent-primary no-underline hover:underline">
                   Open →<span className="sr-only"> {sample.title}</span>
                 </Link>
-                <a href={sample.story} className="text-accent-primary no-underline hover:underline">
-                  Storybook ↗<span className="sr-only"> for {sample.title}</span>
-                </a>
+                {sample.story ? (
+                  <a href={sample.story} className="text-accent-primary no-underline hover:underline">
+                    Storybook ↗<span className="sr-only"> for {sample.title}</span>
+                  </a>
+                ) : null}
               </div>
             </li>
           ))}

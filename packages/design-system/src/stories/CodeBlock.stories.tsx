@@ -13,7 +13,7 @@ type Story = StoryObj<typeof CodeBlock>;
 
 export const Default: Story = {
   args: {
-    children: `import { Badge } from '@rtkelly13/design-system';
+    children: `import { Badge } from '@rtkelly-labs/design-system';
 
 <Badge accent="success">HEALTHY</Badge>`,
   },

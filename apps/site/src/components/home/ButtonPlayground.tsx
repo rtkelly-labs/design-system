@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, CodeBlock, Radio, RadioGroup, Select, Switch } from '@rtkelly13/design-system';
-import type { ButtonVariant } from '@rtkelly13/design-system';
+import { Button, CodeBlock, Radio, RadioGroup, Select, Switch } from '@rtkelly-labs/design-system';
+import type { ButtonVariant } from '@rtkelly-labs/design-system';
 
 const VARIANTS: ButtonVariant[] = ['primary', 'secondary', 'tertiary', 'inverse'];
 const SIZES = [

@@ -52,3 +52,6 @@ export function catalogueEntry(name: string): CatalogueEntry {
 
 export const storybookHref = (entry: CatalogueEntry) => storybookUrl(`/docs/${entry.storyId}--docs`);
 export const sourceHref = (file: string) => `${REPO_URL}/blob/main/packages/design-system/${file}`;
+
+/** Each post's `##`/`###` headings, read from its `.mdx` file by the generator. */
+export const POST_SECTIONS = data.posts as Record<string, { id: string; title: string; depth: 2 | 3 }[]>;

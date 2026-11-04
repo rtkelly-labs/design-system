@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BarChart, Tabs, TabsList, TabsPanel, TabsTab } from '@rtkelly13/design-system';
+import { BarChart, Tabs, TabsList, TabsPanel, TabsTab } from '@rtkelly-labs/design-system';
 import { REGION_TRAFFIC } from '@/data/fixtures';
 
 const WINDOWS = ['24h', '7d', '30d'] as const;

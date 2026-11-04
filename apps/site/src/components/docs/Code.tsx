@@ -1,4 +1,4 @@
-import { CodeBlock } from '@rtkelly13/design-system';
+import { CodeBlock } from '@rtkelly-labs/design-system';
 import { highlight } from '@/lib/highlight';
 import type { CodeLanguage } from '@/lib/highlight';
 

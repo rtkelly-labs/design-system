@@ -196,7 +196,7 @@ built Storybook — 110 stories × both rungs of the ladder, 220 scans — gives
 
 ```bash
 pnpm build-storybook
-npx serve storybook-static -p 6006 --config ../serve.json
+npx serve storybook-static -p 8103 --config ../serve.json
 # then axe-core against /iframe.html?id=<story>&globals=level:<level>, per story per level
 ```
 
@@ -231,8 +231,8 @@ would have found.
 `check:contrast` passes, and it is not wrong:
 
 ```
-Contrast OK — 260 pairs across 2 levels, all at or above minimum;
-24 selection devices clear 3:1; 16 Roles agree with their declared Hue.
+Contrast OK — 296 pairs across 2 levels, all at or above minimum;
+24 selection devices clear 3:1; 22 Roles agree with their declared Hue.
 ```
 
 axe disagrees, on a colour that is in no palette:

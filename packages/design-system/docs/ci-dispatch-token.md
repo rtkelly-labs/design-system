@@ -165,11 +165,11 @@ Design A is also strictly less code: one input, no new trigger.
    (Settings → Developer settings → Personal access tokens → **Fine-grained tokens**).
 2. **Token name:** `design-system-ci-dispatch` — name it after the job, so a future
    audit of your tokens says what breaks if you revoke it.
-3. **Resource owner:** `rtkelly13`.
+3. **Resource owner:** `rtkelly-labs` (the org that owns the repo; an org may need to approve fine-grained tokens).
 4. **Expiration:** 90 days is a reasonable default. Longer trades rotation effort
    for a longer window if it leaks. Whatever you pick, see *Expiry is a silent
    failure* below.
-5. **Repository access:** *Only select repositories* → `rtkelly13/design-system`.
+5. **Repository access:** *Only select repositories* → `rtkelly-labs/design-system`.
    Never *All repositories* for this.
 6. **Repository permissions** — only these:
 
@@ -198,7 +198,7 @@ the API — so "is it there" is answered by name only:
 
 - **UI:** Settings → Secrets and variables → Actions. `CI_DISPATCH_TOKEN` should
   be listed with a *Last updated* date.
-- **CLI:** `gh secret list --repo rtkelly13/design-system` prints names and
+- **CLI:** `gh secret list --repo rtkelly-labs/design-system` prints names and
   update times.
 
 Neither shows the value, which is the point. If the name is missing, the workflow

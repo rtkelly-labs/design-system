@@ -1,6 +1,6 @@
 # shadcn/ui evaluation — September 2026
 
-Whether `@rtkelly13/design-system` should take anything from
+Whether `@rtkelly-labs/design-system` should take anything from
 [shadcn/ui](https://ui.shadcn.com), what it would take, how it would be
 integrated, and whether the licences underneath allow it.
 

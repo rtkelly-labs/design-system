@@ -1,6 +1,6 @@
 # Design System Gap Analysis
 
-A survey of where `@rtkelly13/design-system` and its two consumers (`rtkelly13/blog`,
+A survey of where `@rtkelly-labs/design-system` and its two consumers (`rtkelly13/blog`,
 `rtkelly13/ynab-budget-companion`) diverge from what this repo says about itself in
 [AGENTS.md](../AGENTS.md).
 
@@ -130,21 +130,21 @@ Worth pairing with the open tolerance question. AGENTS.md flags that
 `maxDiffPixelRatio: 0.05` was inherited from the era when every baseline was
 accidentally a "No Preview" placeholder, and is "probably looser than it needs to be now
 that baselines are real components" — which is also the substance of open issue
-[#32](https://github.com/rtkelly13/design-system/issues/32). Widening coverage at a
+[#32](https://github.com/rtkelly-labs/design-system/issues/32). Widening coverage at a
 tolerance this loose buys less than it appears to; the two should move together.
 
 ---
 
 ## 4. `ynab-budget-companion` depends on the design system and contradicts it
 
-The frontend imports `@rtkelly13/design-system/styles.css` and wraps the app in
+The frontend imports `@rtkelly-labs/design-system/styles.css` and wraps the app in
 `ThemeProvider`, then builds its own visual language on top.
 
 **Adoption is three components.** Across 1,739 lines of TSX, the only imports are:
 
 ```tsx
-import { Button, Badge, Avatar } from '@rtkelly13/design-system';   // Navbar.tsx
-import { ThemeProvider } from '@rtkelly13/design-system';           // App.tsx
+import { Button, Badge, Avatar } from '@rtkelly-labs/design-system';   // Navbar.tsx
+import { ThemeProvider } from '@rtkelly-labs/design-system';           // App.tsx
 ```
 
 **The local stylesheet inverts the system's two defining principles.** AGENTS.md opens
@@ -254,7 +254,7 @@ Gap 4 has two defensible resolutions and they lead opposite directions:
 - **Adopt** — migrate YNAB onto the brutalist system, deleting `glass-card` and
   `btn-primary`. Consistent estate, and the blog's shim pattern shows the path. Costs a
   rewrite of all seven views and discards the existing visual design.
-- **Decouple** — accept YNAB as its own aesthetic and drop the `@rtkelly13/design-system`
+- **Decouple** — accept YNAB as its own aesthetic and drop the `@rtkelly-labs/design-system`
   dependency, which today buys three components and a `ThemeProvider` that governs almost
   nothing. Honest about what is actually happening; gives up estate consistency.
 

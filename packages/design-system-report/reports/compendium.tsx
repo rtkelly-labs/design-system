@@ -1,5 +1,5 @@
 /**
- * The Compendium: one plate per component of @rtkelly13/design-system, as an A4 print document.
+ * The Compendium: one plate per component of @rtkelly-labs/design-system, as an A4 print document.
  *
  * Three jobs, in this order of importance: a golden artifact (the HTML is deterministic and every
  * plate and state carries stable `data-component` / `data-state` / `data-rung` attributes, so a text
@@ -19,7 +19,7 @@
 
 import type { ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { ThemeProvider, type ThemeLevel } from '@rtkelly13/design-system';
+import { ThemeProvider, type ThemeLevel } from '@rtkelly-labs/design-system';
 import { RUNGS, blockKey, blocksOf, orderedPlates, type Block, type PlateSpec } from './compendium.registry';
 import { FULL, paginate } from './compendium.layout';
 
@@ -147,7 +147,7 @@ export default function Compendium() {
         <Sheet key={`index-${i}`} n={i + 1} head={i === 0 ? 'Index' : 'Index (continued)'}>
           {i === 0 && (
             <div className="flex flex-col gap-3">
-              <Kicker className="text-accent-primary">[ @rtkelly13/design-system · every plate, both rungs ]</Kicker>
+              <Kicker className="text-accent-primary">[ @rtkelly-labs/design-system · every plate, both rungs ]</Kicker>
               <h1 className="m-0 font-display text-[3rem] font-bold uppercase leading-[0.9] tracking-[-0.02em]">Compendium</h1>
               <p className="m-0 max-w-[44rem] font-sans text-sm leading-snug text-content-secondary">
                 Each component as its own stories render it, on the sketch and midnight rungs. The HTML is the golden artifact: every cell carries data-component, data-state and data-rung.

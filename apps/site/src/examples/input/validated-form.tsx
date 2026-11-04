@@ -10,7 +10,7 @@ import {
   Input,
   Select,
   type ErrorSummaryError,
-} from '@rtkelly13/design-system';
+} from '@rtkelly-labs/design-system';
 
 const IDS = { name: 'token-name', scope: 'token-scope', expiry: 'token-expiry', ack: 'token-ack' };
 

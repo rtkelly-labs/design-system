@@ -6,7 +6,7 @@ import { DocsHeader } from '../components/docs/DocsHeader';
 const nav = [
   { label: 'Docs', href: '/docs', active: true },
   { label: 'Components', href: '/docs/components' },
-  { label: 'GitHub', href: 'https://github.com/rtkelly13/design-system', external: true },
+  { label: 'GitHub', href: 'https://github.com/rtkelly-labs/design-system', external: true },
 ];
 
 const meta: Meta<typeof DocsHeader> = {

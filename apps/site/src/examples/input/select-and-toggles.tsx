@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Checkbox, Radio, RadioGroup, Select, Switch } from '@rtkelly13/design-system';
+import { Checkbox, Radio, RadioGroup, Select, Switch } from '@rtkelly-labs/design-system';
 
 const REGIONS = [
   { value: 'lhr1', label: 'London (lhr1)' },

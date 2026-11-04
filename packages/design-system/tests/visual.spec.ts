@@ -253,6 +253,21 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-data-sparkline--primary-trend', snapshot: 'sparkline-primary-trend.png' },
   { id: 'components-data-bulletchart--primary-benchmark', snapshot: 'bulletchart-primary-benchmark.png' },
   { id: 'components-data-charttooltip--primary', snapshot: 'charttooltip-primary.png' },
+  { id: 'components-data-tracewaterfall--checkout', snapshot: 'tracewaterfall-checkout.png' },
+  { id: 'components-data-traceviewer--checkout', snapshot: 'traceviewer-checkout.png' },
+  { id: 'components-data-timerangepicker--last-hour', snapshot: 'timerangepicker-last-hour.png' },
+  { id: 'components-feedback-severitybadge--log-levels', snapshot: 'severitybadge-log-levels.png' },
+  { id: 'components-data-timeserieschart--latency', snapshot: 'timeserieschart-latency.png' },
+  { id: 'components-data-latencyhistogram--checkout', snapshot: 'latencyhistogram-checkout.png' },
+  { id: 'components-data-latencyheatmap--bimodal', snapshot: 'latencyheatmap-bimodal.png' },
+  { id: 'components-data-logviewer--tail', snapshot: 'logviewer-tail.png' },
+  { id: 'components-data-filterbar--default', snapshot: 'filterbar-default.png' },
+  { id: 'components-data-servicemap--checkout', snapshot: 'servicemap-checkout.png' },
+  { id: 'components-data-alertlist--mixed', snapshot: 'alertlist-mixed.png' },
+  { id: 'components-data-incidenttimeline--resolved', snapshot: 'incidenttimeline-resolved.png' },
+  { id: 'components-feedback-freshnessindicator--fresh', snapshot: 'freshnessindicator-fresh.png' },
+  { id: 'components-data-idchip--in-table', snapshot: 'idchip-in-table.png' },
+  { id: 'saas-observabilityconsole--checkout-incident', snapshot: 'observabilityconsole-checkout-incident.png', fullPage: true },
   { id: 'components-icons-socialicon--brand-marks', snapshot: 'socialicon-brand-marks.png' },
 
   // System feedback. Each row is the state that rots unseen — a loading card
@@ -531,6 +546,12 @@ const MOBILE_CASES: readonly VisualCase[] = [
   { id: 'components-feedback-notfoundpage--in-site-chrome', snapshot: 'notfoundpage-in-site-chrome-mobile.png', fullPage: true },
   { id: 'components-feedback-servererrorpage--standalone', snapshot: 'servererrorpage-standalone-mobile.png' },
   { id: 'components-feedback-statuspage--unauthorized', snapshot: 'statuspage-unauthorized-mobile.png', fullPage: true },
+  // The figures that overflow into a horizontal scroll at this width and at no
+  // other. Listing them here is also what puts them in the pull-request a11y
+  // scan at this width (`scannedIn` in a11y.spec.ts): left out, their missing
+  // keyboard access to that scroll failed only on `main`, nine days running.
+  { id: 'docs-figures-swatchcompare--default', snapshot: 'swatchcompare-default-mobile.png' },
+  { id: 'docs-figures-tokentable--default', snapshot: 'tokentable-default-mobile.png' },
 ];
 
 test.describe('Design System Visual Regression - Narrow viewport', () => {

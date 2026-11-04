@@ -9,7 +9,7 @@
  *
  * Chromium is reached through `playwright` as an optional peer resolved from
  * the *document's* directory, in the same shape `render.ts` uses for
- * `@rtkelly13/design-system`: a report is printed by the browser its own
+ * `@rtkelly-labs/design-system`: a report is printed by the browser its own
  * project installed, and a missing one is an install instruction rather than a
  * stack trace — the trade every optional peer in this package makes.
  */

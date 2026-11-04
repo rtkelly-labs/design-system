@@ -201,7 +201,11 @@ function jobsOf(file) {
 const ALL_JOBS = WORKFLOWS.flatMap(jobsOf);
 
 for (const job of ALL_JOBS) {
-  const hasCeiling = job.body.some(({ text }) => /^\s{4}timeout-minutes:\s*\d+/.test(text));
+  // A job that calls a reusable workflow in this repo cannot carry a ceiling:
+  // GitHub rejects `timeout-minutes` beside `uses:`. Its ceilings are the
+  // called workflow's jobs, which this same loop holds to the rule.
+  const calls = job.body.find(({ text }) => /^\s{4}uses:\s*\.\/\.github\/workflows\/\S+\.ya?ml\s*$/.test(text));
+  const hasCeiling = Boolean(calls) || job.body.some(({ text }) => /^\s{4}timeout-minutes:\s*\d+/.test(text));
   if (!hasCeiling) {
     problems.push(
       `${job.file}:${job.line}: job \`${job.id}\` declares no \`timeout-minutes\`. ` +
@@ -813,7 +817,7 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   const key =
     /inputs="\$\(node scripts\/render-inputs\.mjs\)"/.test(body) &&
     /\[\[ "\$\{inputs\}" =~ \^\[0-9a-f\]\{64\}\$ \]\]/.test(body) &&
-    /key=visual-verdict-[0-9a-f]{64}-\$\{inputs\}/.test(body) &&
+    /key=visual-verdict-full-[0-9a-f]{64}-\$\{inputs\}/.test(body) &&
     /set -euo pipefail/.test(body);
   if (readsVerdict && !lookup) {
     problems.push(
@@ -823,7 +827,7 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   }
   if (readsVerdict && !key) {
     problems.push(
-      'ci.yml `visual`: the verdict key must be `visual-verdict-<image digest>-${inputs}`, ' +
+      'ci.yml `visual`: the verdict key must be `visual-verdict-full-<image digest>-${inputs}`, ' +
         'with `inputs` taken from `node scripts/render-inputs.mjs` on its own line under `set -euo pipefail` ' +
         'and checked to be a 64-hex hash. Without the image a new runner reuses an old verdict; without ' +
         'the check a failing script keys every PR to the same verdict.',
@@ -882,6 +886,16 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
   for (const job of recorders) {
     const needs = /^\s{4}needs:\s*\[?[^\n]*\bvisual\b/m.test(job.body);
     const gated = /^\s{4}if:[^\n]*needs\.visual\.result == 'success'/m.test(job.body);
+    // A smoke run scans a fraction of the narrow viewport. The key means "the
+    // full matrix passed", so only `main` and the `ready-to-merge` regression
+    // may write it.
+    const fullOnly = /^\s{4}if:[^\n]*\(github\.event_name != 'pull_request' \|\| inputs\.full\)/m.test(job.body);
+    if (!fullOnly) {
+      problems.push(
+        `ci.yml \`${job.id}\` saves the visual verdict on smoke runs. Gate it on ` +
+          "`(github.event_name != 'pull_request' || inputs.full)`, or a full run reuses a scan it never had.",
+      );
+    }
     if (!needs || !gated) {
       problems.push(
         `ci.yml \`${job.id}\` saves the visual verdict but ${!needs ? 'does not `need` visual' : ''}` +
@@ -906,7 +920,7 @@ for (const job of jobsOf('.github/workflows/ci.yml')) {
             .filter(Boolean).join('; ')}). A job output holds one leg's key; legs on different runner images disagree.`,
       );
     }
-    note('verdict', needs && gated && collects && compares && saveGated && published, `ci.yml ${job.id} — records the verdict after every visual shard, only when all legs agree`);
+    note('verdict', fullOnly && needs && gated && collects && compares && saveGated && published, `ci.yml ${job.id} — records the verdict on full runs only, after every visual shard, when all legs agree`);
   }
   if (visual && /steps\.verdict\./.test(visual.body) && !recorders.length) {
     problems.push(

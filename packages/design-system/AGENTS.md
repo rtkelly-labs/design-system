@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Foundational brutalist design system for ryankelly.dev and personal web applications (`@rtkelly13/design-system`, published to public npm).
+Foundational brutalist design system for ryankelly.dev and personal web applications (`@rtkelly-labs/design-system`, published to public npm).
 
 Package manager is **pnpm** (`node >=22`). The package is **ESM only** (`"type": "module"`, one
 build, `dist/*.js`), and `verbatimModuleSyntax` is on: a binding used only as a type is imported
@@ -117,7 +117,7 @@ Load these when the task is in them, not before.
 | Rendering deterministically — for capture, print, video | [`docs/deterministic-rendering.md`](./docs/deterministic-rendering.md); `ds-report --pdf` in the report package applies all three switches for paper |
 | Visual regression — determinism contract, operating instructions | [`docs/visual-regression.md`](./docs/visual-regression.md) |
 | CI shape, and the screenshot walkthrough | [`docs/ci.md`](./docs/ci.md) |
-| Evidence on a PR — design, not yet built | [`docs/evidence-pipeline.md`](./docs/evidence-pipeline.md) |
+| Evidence on a PR — before/after stills built (`/evidence`), video still a design | [`docs/evidence-pipeline.md`](./docs/evidence-pipeline.md) |
 | Unit tests | [`docs/testing.md`](./docs/testing.md) |
 | The published API surface | [`docs/api-surface.md`](./docs/api-surface.md) |
 | Dependencies, and the ones held back | [`docs/dependencies.md`](./docs/dependencies.md) |
@@ -152,7 +152,7 @@ citation names a rule that does not exist.
 3. **Linear History**: rebase onto `main` before merging; no merge commits.
 4. **Publishing**: stable releases publish from `main` via npm Trusted Publishing — no tokens. Bump `package.json` in the PR. Comment `/publish-dev` for a prerelease.
 5. **Visual Regression Testing**: Playwright snapshots, rendered **only in the pinned Playwright image** (`mcr.microsoft.com/playwright:v1.62.1-noble@sha256:…`, in CI), `maxDiffPixels: 0` — and this suite does **not** gate colour; arithmetic does.
-6. **Required Checks**: branch protection requires the single aggregate check named **`ci`**. That name is content-free and **must stay that way** — `shared-utilities` governance matches on the string.
+6. **Required Checks**: branch protection requires the aggregate check named **`ci`** (the smoke suite, every push) and the status **`regression`** (the full suite, once the PR is labelled **`ready-to-merge`**; pending until then). Both names are content-free and **must stay that way** — `shared-utilities` governance matches on the strings.
 7. **New Components Need Baselines**: a story without a snapshot asserts nothing. `pnpm check:visual-coverage` is the gate, and its budget is **0**.
 8. **Re-baselining Happens In The PR**: comment `/update-snapshots` — say `all` when the change is *meant* to alter rendering, and name the story that forced it.
 9. **Every CI Job Has A Ceiling**: every job carries `timeout-minutes`, a job that drives a browser runs in the pinned Playwright image and installs none, and an upload step uses `if: success() || failure()`, never `always()`.
@@ -161,3 +161,4 @@ citation names a rule that does not exist.
 12. **Gitignored Local TODO File**: a root `TODO.md` file MUST exist for local task tracking and be gitignored.
 13. **Auto-Merge Enabled**: PRs may enable auto-merge (squash).
 14. **Pinned Action SHAs**: workflows MUST use 40-character commit SHAs with the version in a trailing comment, not mutable tags. `pnpm check:governance` enforces it.
+15. **Script Language Policy**: automation scripts in `scripts/` MUST use the repository's approved language stack (JavaScript/TypeScript `.mjs`, `.js`, `.ts` for Node/pnpm). Alien scripting runtimes (`.py`, `.sh`, `.ps1`) are strictly prohibited and gated by CI.

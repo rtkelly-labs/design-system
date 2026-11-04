@@ -1,6 +1,6 @@
 # Remotion evaluation — can this design system render video?
 
-An audit of `@rtkelly13/design-system` against a specific new consumer:
+An audit of `@rtkelly-labs/design-system` against a specific new consumer:
 [Remotion](https://www.remotion.dev), which renders React to MP4 by seeking a
 headless Chromium frame by frame. The motivating case is a video explaining
 context-driven development, built around the blog's `<Terminal>` component;
@@ -458,14 +458,14 @@ is the parent:
 
 | Issue | Covers |
 |---|---|
-| [#70](https://github.com/rtkelly13/design-system/issues/70) | `SlideDeck` owns the presenter's clock (§1) |
-| [#71](https://github.com/rtkelly13/design-system/issues/71) | Nothing documents deterministic rendering (§2, §3, §4) |
+| [#70](https://github.com/rtkelly-labs/design-system/issues/70) | `SlideDeck` owns the presenter's clock (§1) |
+| [#71](https://github.com/rtkelly-labs/design-system/issues/71) | Nothing documents deterministic rendering (§2, §3, §4) |
 
 Two findings here were already filed and are **not** duplicated: the display
-type scale in §6 is a sub-case of [#49](https://github.com/rtkelly13/design-system/issues/49)
+type scale in §6 is a sub-case of [#49](https://github.com/rtkelly-labs/design-system/issues/49)
 (the token layer stopped at colour — which also covers the missing motion
 tokens behind §2), and `Slide`'s hardcoded `--font-*` in §1 is already named in
-[#47](https://github.com/rtkelly13/design-system/issues/47).
+[#47](https://github.com/rtkelly-labs/design-system/issues/47).
 
 ---
 
@@ -474,7 +474,7 @@ tokens behind §2), and `Slide`'s hardcoded `--font-*` in §1 is already named i
 1. **Answer the licence question.** Personal-only needs nothing; Sentric
    product videos need a Company Licence before anything ships.
 2. **Prototype with no refactor at all.** A Remotion project importing
-   `@rtkelly13/design-system/styles.css`, `enableTailwind`, the `delayRender`
+   `@rtkelly-labs/design-system/styles.css`, `enableTailwind`, the `delayRender`
    font handshake, the transition reset, and a `<Slide>` at 1.5× scale. This
    proves the token layer, the fonts, the bundler and the scale in one pass and
    touches no existing code. It is the cheapest way to find out whether §4 or

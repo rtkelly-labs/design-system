@@ -1,6 +1,6 @@
 'use client';
 
-import { Input } from '@rtkelly13/design-system';
+import { Input } from '@rtkelly-labs/design-system';
 
 export default function BasicInput() {
   return (

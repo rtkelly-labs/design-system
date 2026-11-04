@@ -1,5 +1,5 @@
 /**
- * Recommended colours and semantic tokens for consumers of @rtkelly13/design-system.
+ * Recommended colours and semantic tokens for consumers of @rtkelly-labs/design-system.
  *
  * ## Why this exists
  *

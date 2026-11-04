@@ -1,6 +1,6 @@
 # Design-system evaluation — August 2026
 
-An audit of `@rtkelly13/design-system` as a *system* rather than a component
+An audit of `@rtkelly-labs/design-system` as a *system* rather than a component
 library: how well the token layer holds, how much of the surface is specified,
 and what the hosting change in this branch does and does not fix.
 
@@ -126,7 +126,7 @@ would align the package with its own primary consumer.
 
 ### 6. Two version-drift problems
 
-- **The blog cannot receive updates.** It depends on `"@rtkelly13/design-system": "^0.0.5"`.
+- **The blog cannot receive updates.** It depends on `"@rtkelly-labs/design-system": "^0.0.5"`.
   Under semver, a caret range on `0.0.x` matches *only* `0.0.5` — so the blog is
   pinned behind the published `0.1.2` and will never resolve forward. This is
   almost certainly unintentional, and remains the cheapest high-value fix. It

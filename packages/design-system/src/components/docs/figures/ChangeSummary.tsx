@@ -44,7 +44,10 @@ export interface ChangeSummaryProps extends React.HTMLAttributes<HTMLDivElement>
   footer?: DiffRow;
   /** Markdown list or `<Line>` content used to derive rows. */
   children?: ReactNode;
-  /** Accent palette used for additions and removals. */
+  /**
+   * Accepted for symmetry with the other figures and ignored: additions and removals take the
+   * `delta` roles, so a summary reads the same in a `multi` figure as in a `mono` one.
+   */
   palette?: FigurePalette;
   /** Additional classes for this summary. */
   className?: string;
@@ -72,9 +75,10 @@ function diffFromList(children: ReactNode): DiffLineProps[] {
   });
 }
 
-function signClass(palette: FigurePalette | undefined, sign: DiffSign): string {
-  if (sign === 'add') return 'text-accent-primary';
-  if (sign === 'remove') return palette === 'multi' ? 'text-accent-secondary' : 'text-content-secondary';
+/** Signs are change, so they take the `delta` roles whatever palette the surrounding figures use. */
+function signClass(sign: DiffSign): string {
+  if (sign === 'add') return 'text-delta-added';
+  if (sign === 'remove') return 'text-delta-removed';
   return 'text-content-primary';
 }
 
@@ -83,7 +87,7 @@ function lineText(row: DiffRow): string {
 }
 
 /** Renders additions, removals, and unchanged rows with a readable text summary. */
-export const ChangeSummary = React.forwardRef<HTMLDivElement, ChangeSummaryProps>(function ChangeSummary({ label = 'Change summary', rows: rowsProp, footer: footerProp, children, palette, className, ...rest }, ref) {
+export const ChangeSummary = React.forwardRef<HTMLDivElement, ChangeSummaryProps>(function ChangeSummary({ label = 'Change summary', rows: rowsProp, footer: footerProp, children, palette: _palette, className, ...rest }, ref) {
   const listed = diffFromList(children);
   const tagged = childItems(children, Line).map((entry) => ({ ...entry, label: entry.label ?? textOf(entry.children) }));
   const lines = listed.length > 0 ? listed : tagged;
@@ -96,7 +100,7 @@ export const ChangeSummary = React.forwardRef<HTMLDivElement, ChangeSummaryProps
         <ul className="flex flex-col gap-2" aria-label={label}>
           {rows.map((row, index) => {
             const sign = row.sign ?? 'keep';
-            const tone = signClass(palette, sign);
+            const tone = signClass(sign);
             return (
               <li className="grid grid-cols-[1.25rem_minmax(0,1fr)_8ch] items-baseline gap-x-3" key={`${lineText(row)}-${index}`} aria-label={`${sign}: ${lineText(row)}`}>
                 <span aria-hidden="true" className={cn('select-none text-center', sign === 'keep' ? 'text-content-muted' : tone)}>{sign === 'keep' ? ' ' : sign === 'add' ? '+' : '-'}</span>

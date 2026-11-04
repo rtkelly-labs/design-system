@@ -1,6 +1,6 @@
 'use client';
 
-import { DataTable } from '@rtkelly13/design-system';
+import { DataTable } from '@rtkelly-labs/design-system';
 import { DEPLOYMENTS } from '@/data/fixtures';
 
 const rows = DEPLOYMENTS.slice(0, 6);

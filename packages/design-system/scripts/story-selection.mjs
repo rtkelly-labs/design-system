@@ -78,9 +78,9 @@ export const ALIASES = { '@/': 'src/' };
 
 /**
  * Forward edges from source text. `files` is every tracked repo path; `exports`
- * is the package's `exports` map, for `@rtkelly13/design-system/<subpath>`.
+ * is the package's `exports` map, for `@rtkelly-labs/design-system/<subpath>`.
  */
-export function graphFromSource(files, read, { pkg = PKG, name = '@rtkelly13/design-system', exports = {} } = {}) {
+export function graphFromSource(files, read, { pkg = PKG, name = '@rtkelly-labs/design-system', exports = {} } = {}) {
   const tracked = new Set(files);
   const resolve = (from, spec) => {
     let base;

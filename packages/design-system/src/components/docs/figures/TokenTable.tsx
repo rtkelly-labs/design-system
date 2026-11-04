@@ -42,8 +42,9 @@ export const TokenTable = React.forwardRef<HTMLDivElement, TokenTableProps>(func
 ) {
   const hasBefore = rows.some((r) => r.before !== undefined);
   const hasNote = rows.some((r) => r.note);
+  // Focusable and named because it scrolls on a narrow screen; `Table` says why.
   return (
-    <div data-slot="token-table" ref={ref} {...rest} className={cn('min-w-0 overflow-x-auto', className)}>
+    <div data-slot="token-table" ref={ref} role="region" tabIndex={0} aria-label={`${label} scroll area`} {...rest} className={cn('min-w-0 overflow-x-auto', className)}>
       <table aria-label={label} className="w-full min-w-[34rem] border-collapse text-sm">
         <thead>
           <tr>

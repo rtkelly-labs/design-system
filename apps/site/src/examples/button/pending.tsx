@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button } from '@rtkelly13/design-system';
+import { Button } from '@rtkelly-labs/design-system';
 
 type Phase = 'idle' | 'publishing' | 'published';
 

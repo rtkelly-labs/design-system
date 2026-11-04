@@ -75,10 +75,10 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      # The report package resolves `@rtkelly13/design-system` through its
+      # The report package resolves `@rtkelly-labs/design-system` through its
       # `exports` map, so `dist/` has to exist first.
       - name: Build Package
-        run: pnpm --filter @rtkelly13/design-system build
+        run: pnpm --filter @rtkelly-labs/design-system build
 
       # Strict, with --pdf: an overflowing sheet or a lint warning fails here.
       - name: Render Manifesto

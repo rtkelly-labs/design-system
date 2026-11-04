@@ -1,7 +1,7 @@
-/* @rtkelly13/design-system — documentation & prose layer.
+/* @rtkelly-labs/design-system — documentation & prose layer.
  *
- *   @import "@rtkelly13/design-system/theme.css";   (tokens)
- *   @import "@rtkelly13/design-system/prose.css";   (this file)
+ *   @import "@rtkelly-labs/design-system/theme.css";   (tokens)
+ *   @import "@rtkelly-labs/design-system/prose.css";   (this file)
  *
  * Deliberately plain CSS. The docs chrome is layout-critical, and Tailwind v4
  * skips node_modules during automatic content detection — a consumer whose

@@ -7,7 +7,7 @@
  * prop that does not exist; React dropped it silently and the panel rendered the
  * default, which looked exactly like success.
  */
-import { Card, ReportDocument, ThemeProvider } from '@rtkelly13/design-system';
+import { Card, ReportDocument, ThemeProvider } from '@rtkelly-labs/design-system';
 
 export default function Report() {
   return (

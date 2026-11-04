@@ -32,7 +32,7 @@ export function ManifestoPage({ children }: { children: ReactNode }) {
           className="text-caption font-bold tracking-[0.24em] text-content-muted uppercase"
           style={{ fontFamily: semanticTokens.font.mono }}
         >
-          @rtkelly13/design-system
+          @rtkelly-labs/design-system
         </span>
         <span
           className="text-caption tracking-[0.16em] text-content-muted uppercase"

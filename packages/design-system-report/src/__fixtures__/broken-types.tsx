@@ -1,4 +1,4 @@
-import { StatCard, ReportDocument } from '@rtkelly13/design-system';
+import { StatCard, ReportDocument } from '@rtkelly-labs/design-system';
 
 export default function Report() {
   return (
