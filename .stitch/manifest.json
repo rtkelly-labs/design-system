@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "stitch": {
+    "projectId": "15584064052755862992",
+    "referenceScreen": {
+      "id": "15995971420617338246",
+      "route": "/",
+      "title": "Live Storybook manifesto visual reference",
+      "deviceType": "DESKTOP",
+      "extractedAt": "2026-10-06T20:59:03.255Z"
+    },
+    "referenceScreens": [
+      {
+        "id": "15995971420617338246",
+        "route": "/",
+        "title": "Live Storybook manifesto visual reference",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-06T20:59:03.255Z"
+      }
+    ]
+  }
+}

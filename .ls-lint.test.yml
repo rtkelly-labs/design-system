@@ -1,0 +1,37 @@
+
+ls:
+  .sh: exists:0
+  .bash: exists:0
+  .zsh: exists:0
+  .ps1: exists:0
+  .psm1: exists:0
+  "**":
+    .sh: exists:0
+    .bash: exists:0
+    .zsh: exists:0
+    .ps1: exists:0
+    .psm1: exists:0
+
+ignore:
+  - .git
+  - .git/**
+  - node_modules
+  - node_modules/**
+  - "**/node_modules"
+  - "**/node_modules/**"
+  - temp
+  - temp/**
+  - "**/temp"
+  - "**/temp/**"
+  - dist
+  - dist/**
+  - "**/dist/**"
+  - build
+  - build/**
+  - "**/build/**"
+  - coverage
+  - coverage/**
+  - .turbo
+  - .turbo/**
+  - storybook-static
+  - storybook-static/**
