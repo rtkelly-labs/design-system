@@ -380,11 +380,11 @@ jobs:
       # accepted file here from the dist/ just built and upload it: download
       # `api-surface`, review it, and commit it as api/index.d.ts.
       - name: Regenerate API Surface
-        if: failure() && steps.check-api.outcome == failure
+        if: failure() && steps.check-api.outcome == 'failure'
         run: node scripts/check-api.mjs --update
 
       - name: Upload API Surface
-        if: failure() && steps.check-api.outcome == failure
+        if: failure() && steps.check-api.outcome == 'failure'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: api-surface
