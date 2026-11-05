@@ -123,3 +123,122 @@ jobs:
           name: api-report
           path: packages/design-system/api/
           retention-days: 30
+
+  api-history:
+    name: api history (${{ matrix.commit }})
+    # Replays past surface changes through API Extractor, to compare its report
+    # diff with the `api/index.d.ts` diff `check:api` showed at the time. Each
+    # leg builds a commit and its parent with that tree's own setup, then runs
+    # this branch's api-extractor.json against both.
+    if: >-
+      (github.event.action == 'labeled' && github.event.label.name == 'experiment:api-history') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'experiment:api-history'))
+    concurrency:
+      group: experiments-api-history-${{ matrix.commit }}-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { commit: 65e7ddf, parent: cf98db9d131bcc6c67e0ab02ea6afd8c8868371b, sha: 65e7ddf56653cf8db8f204b5c9c2caf4068441f8 }
+          - { commit: d898532, parent: 3c41948de4cfc72b1c1fa0e6a0ccd5d70963b567, sha: d898532025714d8a44153e275632e0301c760d3f }
+          - { commit: 15c7728, parent: 9da5838bca271054cb25b4f515db7480d2d04c42, sha: 15c77288f80359a149a02aade96abf25e3477d14 }
+          - { commit: fb2846c, parent: 8b6bb95bcff77936b5cd29d16dc1efbae8a9f20d, sha: fb2846c1111f135b296ead7daa451371ba6cbfde }
+          - { commit: 82063f2, parent: 1283d0a7ea5dc580c9cb9eeb551a3dff308d6089, sha: 82063f21c558cf92284de1f3552735e36a5e9c1b }
+          - { commit: 1d8c7cf, parent: 541970bc70d19a5e5ffb4b8c2833c37046663f2b, sha: 1d8c7cf0ef13192e7b1026626610ff1751f7d88e }
+
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Keep Config
+        run: cp packages/design-system/api-extractor.json "$RUNNER_TEMP/api-extractor.json"
+
+      - name: Checkout Parent
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ matrix.parent }}
+
+      - name: Setup Parent
+        uses: ./.github/actions/setup
+
+      - name: Report Parent
+        working-directory: packages/design-system
+        run: |
+          pnpm build
+          cp "$RUNNER_TEMP/api-extractor.json" api-extractor.json
+          pnpm dlx @microsoft/api-extractor@7.60.1 run --local
+          mkdir -p "$RUNNER_TEMP/out"
+          cp api/design-system.api.md "$RUNNER_TEMP/out/before.api.md"
+          cp api/index.d.ts "$RUNNER_TEMP/out/before.d.ts"
+
+      - name: Checkout Commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ matrix.sha }}
+
+      - name: Setup Commit
+        uses: ./.github/actions/setup
+
+      - name: Report Commit
+        working-directory: packages/design-system
+        run: |
+          pnpm build
+          cp "$RUNNER_TEMP/api-extractor.json" api-extractor.json
+          pnpm dlx @microsoft/api-extractor@7.60.1 run --local
+          cp api/design-system.api.md "$RUNNER_TEMP/out/after.api.md"
+          cp api/index.d.ts "$RUNNER_TEMP/out/after.d.ts"
+
+      - name: Compare
+        working-directory: ${{ runner.temp }}/out
+        run: |
+          git diff --no-index --numstat before.d.ts after.d.ts > checkapi.numstat || true
+          git diff --no-index --numstat before.api.md after.api.md > report.numstat || true
+          git diff --no-index before.api.md after.api.md > report.diff || true
+          {
+            echo "### ${{ matrix.commit }}"
+            echo
+            echo "| view | added | removed |"
+            echo "| --- | --- | --- |"
+            awk '{ print "| check:api | " $1 " | " $2 " |" }' checkapi.numstat
+            awk '{ print "| api-extractor | " $1 " | " $2 " |" }' report.numstat
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Comparison
+        if: success() || failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: api-history-${{ matrix.commit }}
+          path: ${{ runner.temp }}/out/
+          retention-days: 30
+
+  properties:
+    name: property campaign
+    # The model-based and property files at a run count the unit job cannot
+    # afford. A failure prints the shrunk command sequence and the seed.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'experiment:properties') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'experiment:properties'))
+    concurrency:
+      group: experiments-properties-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/design-system
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Property Campaign
+        env:
+          FC_NUM_RUNS: '1000'
+        run: pnpm exec vitest run src/components/FilterBar.model.test.tsx src/components/Menu.model.test.tsx --reporter=verbose

@@ -173,6 +173,10 @@ export const MANIFEST = {
     kind: 'dev',
     why: 'Writes `api/design-system.api.md` for `pnpm api:report`: the public surface as one reviewable report, plus the findings a text diff cannot make, such as a type used by an export but not exported itself. Bundles its own TypeScript; it reads the emitted `dist/index.d.ts`, so it never needs to agree with `tsup` on how to build.',
   },
+  'fast-check': {
+    kind: 'dev',
+    why: 'Property and model-based tests: generated command sequences driven through Testing Library against a small model, and the parse/format round trip of the filter grammar.',
+  },
   '@testing-library/react': {
     kind: 'dev',
     why: 'Renders hooks and components in the unit suite, asserting behaviour through the DOM rather than internals.',
