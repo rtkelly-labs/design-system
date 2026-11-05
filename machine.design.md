@@ -9,38 +9,46 @@ colors:
   midnight:
     canvas: "#0a0a1a"
     surface_base: "#0a0a1a"
-    surface_raised: "#121316"
-    surface_sunken: "#0c0d0f"
-    text_primary: "#f1f5f9"
-    text_secondary: "#94a3b8"
-    text_muted: "#64748b"
-    border_strong: "#334155"
-    border_default: "#1e293b"
-    border_subtle: "#172033"
-    accent_primary: "#34d399" # Teal
-    accent_secondary: "#22d3ee" # Cyan
-    accent_warning: "#facc15" # Amber
-    accent_danger: "#ff586e" # Red
+    surface_raised: "#14142a"
+    surface_sunken: "#050510"
+    text_primary: "#ffffff"
+    text_secondary: "#c3c3d4"
+    text_muted: "#9d9db4"
+    border_strong: "#ffffff"
+    border_default: "#9d9db4"
+    border_subtle: "#33334d"
+    accent_primary: "#22d3ee" # Cyan
+    accent_secondary: "#facc15" # Yellow
+    accent_tertiary: "#f955a4" # Pink
+    accent_quiet: "#8b8ba3"
+    intent_info: "#38bdf8"
+    intent_success: "#39ff14"
+    intent_warning: "#ff8c00"
+    intent_danger: "#ff586e"
   sketch:
     canvas: "#f5f3ec"
     surface_base: "#f5f3ec"
     surface_raised: "#ffffff"
-    surface_sunken: "#eceae0"
-    text_primary: "#14171a"
-    text_secondary: "#4b5563"
-    text_muted: "#646a73"
-    border_strong: "#2b2d2f"
-    border_default: "#d4d0c5"
-    border_subtle: "#e5e2d6"
-    accent_primary: "#006859" # Dark Teal
-    accent_secondary: "#006675" # Dark Cyan
-    accent_warning: "#974503" # Ochre
-    accent_danger: "#bd0010" # Ink Red
+    surface_sunken: "#efeadf"
+    text_primary: "#23262e"
+    text_secondary: "#33373f"
+    text_muted: "#5c5546"
+    border_strong: "#23262e"
+    border_default: "#8f8672"
+    border_subtle: "#c8c3b4"
+    accent_primary: "#1450d7" # Blue
+    accent_secondary: "#006b2e" # Green
+    accent_tertiary: "#bd0010" # Red
+    accent_quiet: "#6a6252"
+    intent_info: "#1450d7"
+    intent_success: "#006b2e"
+    intent_warning: "#974503"
+    intent_danger: "#bd0010"
 typography:
-  display: "Space Grotesk, sans-serif"
-  body: "Inter, sans-serif"
-  mono: "IBM Plex Mono, JetBrains Mono, monospace"
-  pixel: "VT323, monospace"
+  display: 'Space Grotesk, Inter, "Symbols Nerd Font Mono", "DS Symbols", sans-serif'
+  body: 'Inter, "Symbols Nerd Font Mono", "DS Symbols", sans-serif'
+  mono: '"IBM Plex Mono", "Symbols Nerd Font Mono", "DS Symbols", "Courier New", monospace'
+  pixel: 'VT323, "Symbols Nerd Font Mono", "DS Symbols", monospace'
 rounded:
   none: "0px"
   sm: "0px"
