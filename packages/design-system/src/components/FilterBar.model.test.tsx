@@ -42,6 +42,8 @@ import { FilterBar } from './FilterBar';
  */
 
 const NUM_RUNS = Number(process.env.FC_NUM_RUNS ?? 30);
+// About 5ms per sequence on a CI runner; the floor is the vitest default.
+const TIMEOUT = Math.max(5_000, NUM_RUNS * 25);
 
 type Mode = 'uncontrolled' | 'controlled' | 'frozen';
 
@@ -310,7 +312,7 @@ describe.each(['uncontrolled', 'controlled', 'frozen'] as const)('FilterBar mode
       }),
       { numRuns: NUM_RUNS, verbose: true },
     );
-  });
+  }, TIMEOUT);
 });
 
 describe('filter grammar', () => {
