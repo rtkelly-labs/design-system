@@ -24,7 +24,8 @@ jobs:
   properties:
     name: property campaign
     # Every model-based file at a run count the unit job cannot afford. A
-    # failure prints the shrunk command sequence and the seed.
+    # failure prints the shrunk command sequence and the seed. The verbose
+    # reporter lists each file, so a filter matching nothing is visible.
     # On a pull request: when the label is added, or on a push while it is on.
     # Adding some other label must not start this one.
     if: >-
@@ -53,4 +54,5 @@ jobs:
       - name: Property Campaign
         env:
           FC_NUM_RUNS: '1000'
-        run: pnpm exec vitest run 'src/**/*.model.test.tsx' --reporter=verbose
+        # Positional filters are substrings of the path, not globs.
+        run: pnpm exec vitest run model.test --reporter=verbose
