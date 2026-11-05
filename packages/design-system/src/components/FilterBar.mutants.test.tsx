@@ -61,6 +61,39 @@ describe('FilterBar focus', () => {
   });
 });
 
+describe('FilterBar editing', () => {
+  const status: Filter = { key: 'status', operator: '!=', value: '500' };
+  const chips = () =>
+    screen
+      .getAllByRole('button', { name: /^Edit filter / })
+      .map((button) => button.getAttribute('aria-label')?.replace('Edit filter ', ''));
+
+  it('drops the chip being edited when the edit turns it into a copy of another', () => {
+    render(<FilterBar defaultFilters={[checkout, status]} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit filter status != 500' }));
+    fireEvent.change(input(), { target: { value: 'service=checkout' } });
+    fireEvent.keyDown(input(), { key: 'Enter' });
+    expect(chips()).toEqual(['service = checkout']);
+  });
+
+  it('replaces an edited chip in place, keeping its position', () => {
+    render(<FilterBar defaultFilters={[checkout, status]} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit filter service = checkout' }));
+    fireEvent.change(input(), { target: { value: 'env=prod' } });
+    fireEvent.keyDown(input(), { key: 'Enter' });
+    expect(chips()).toEqual(['env = prod', 'status != 500']);
+  });
+
+  it('cancels an edit on Escape even when the input was cleared', () => {
+    render(<FilterBar defaultFilters={[checkout]} />);
+    const chip = screen.getByRole('button', { name: 'Edit filter service = checkout' });
+    fireEvent.click(chip);
+    fireEvent.change(input(), { target: { value: '' } });
+    expect(consumed('Escape')).toBe(true);
+    expect(chip.getAttribute('aria-pressed')).toBe('false');
+  });
+});
+
 describe('FilterBar rendering', () => {
   it('suggests each field and value once, labelled by the field', () => {
     const { container } = render(
@@ -96,8 +129,8 @@ describe('FilterBar rendering', () => {
   });
 
   it('puts a caller className on the root', () => {
-    const { container } = render(<FilterBar className="caller" />);
-    expect(container.querySelector('[data-slot="filter-bar"]')?.classList.contains('caller')).toBe(true);
+    const { container } = render(<FilterBar className="mt-2" />);
+    expect(container.querySelector('[data-slot="filter-bar"]')?.classList.contains('mt-2')).toBe(true);
   });
 
   it('turns spellcheck off on the input (incidental)', () => {
