@@ -161,6 +161,14 @@ export const MANIFEST = {
     why: 'Unit suite over lib, hooks and the generated theme. Complements the Playwright suites, which assert rendering rather than logic.',
   },
   '@vitest/coverage-v8': { kind: 'dev', why: 'Coverage reporting for `pnpm test:coverage`.' },
+  '@stryker-mutator/core': {
+    kind: 'dev',
+    why: 'Mutation testing for `pnpm test:mutation`, the instrument the testing experiments are scored with. Runs in `experiments.yml` only, never as a PR gate.',
+  },
+  '@stryker-mutator/vitest-runner': {
+    kind: 'dev',
+    why: 'Lets Stryker run each mutant through the existing Vitest suite, with per-test coverage, rather than a second test runner.',
+  },
   '@testing-library/react': {
     kind: 'dev',
     why: 'Renders hooks and components in the unit suite, asserting behaviour through the DOM rather than internals.',

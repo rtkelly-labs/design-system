@@ -1,0 +1,76 @@
+name: Testing Experiments
+
+# Long-running measurements, kept out of the required checks.
+#
+# Nothing here gates a merge. Each job answers one question about the test
+# suite (how many mutants survive it, what a long property campaign finds) and
+# uploads its evidence. They are slow and their verdicts are numbers rather
+# than pass or fail, so they run on request rather than on every push.
+#
+# Two ways to ask:
+#
+# - `workflow_dispatch`, once this file is on the default branch. GitHub only
+#   offers dispatch for a workflow that exists there.
+# - A label on a pull request, which works from a branch before that: adding
+#   `experiment:mutation` runs the mutation job once, and while the label stays
+#   on, every push re-runs it. Remove the label to stop paying for it.
+on:
+  workflow_dispatch:
+    inputs:
+      mutate:
+        description: 'Override the files Stryker mutates (a glob); empty keeps stryker.config.mjs'
+        type: string
+        default: ''
+  pull_request:
+    types: [labeled, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  mutation:
+    name: mutation
+    # On a pull request: when the label is added, or on a push while it is on.
+    # Adding some other label must not start this one.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'experiment:mutation') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'experiment:mutation'))
+    # Per job, not per workflow: every push to a pull request starts a run of
+    # this file, and a workflow-level group would let a run whose jobs are all
+    # skipped cancel a measurement still in progress.
+    concurrency:
+      group: experiments-mutation-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/design-system
+    # Three modules and their related test files. The ceiling is generous on
+    # purpose for a first measurement; tighten it once the run time is known.
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Mutation Testing
+        env:
+          MUTATE: ${{ inputs.mutate }}
+        run: |
+          if [ -n "$MUTATE" ]; then
+            pnpm test:mutation --mutate "$MUTATE"
+          else
+            pnpm test:mutation
+          fi
+
+      - name: Upload Mutation Report
+        if: success() || failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: mutation-report
+          path: packages/design-system/reports/mutation/
+          retention-days: 30
