@@ -31,7 +31,7 @@ export interface PricingGridProps
 
 /**
  * A marketing section of price plans: an optional heading and line, over a
- * grid of {@link PricingTier} cells stretched to one height so their actions
+ * grid of {@link (PricingTier:variable)} cells stretched to one height so their actions
  * line up.
  *
  * Holds no prices, plan names or currency. The same grid is a SaaS plan table,

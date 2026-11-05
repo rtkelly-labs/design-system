@@ -96,7 +96,7 @@ function ResourceStateInner<T>(
 }
 
 /** `forwardRef` erases a generic; this restores it, so `children` is typed by `state`. */
-type ResourceStateComponent = (<T>(props: ResourceStateProps<T> & RefAttributes<HTMLDivElement>) => ReactElement | null) & {
+export type ResourceStateComponent = (<T>(props: ResourceStateProps<T> & RefAttributes<HTMLDivElement>) => ReactElement | null) & {
   displayName?: string;
 };
 

@@ -373,7 +373,23 @@ jobs:
       # Fails if the published type surface moved without api/index.d.ts being
       # updated — the diff in that file *is* the API change under review.
       - name: Public API Surface
+        id: check-api
         run: pnpm check:api
+
+      # `api:update` needs a local build. When the surface moved, write the
+      # accepted file here from the dist/ just built and upload it: download
+      # `api-surface`, review it, and commit it as api/index.d.ts.
+      - name: Regenerate API Surface
+        if: failure() && steps.check-api.outcome == failure
+        run: node scripts/check-api.mjs --update
+
+      - name: Upload API Surface
+        if: failure() && steps.check-api.outcome == failure
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: api-surface
+          path: packages/design-system/api/index.d.ts
+          retention-days: 7
 
       # The second package. It builds against the first one's `dist/`, so it
       # runs after `Build Package` and inside its own directory — the job's
