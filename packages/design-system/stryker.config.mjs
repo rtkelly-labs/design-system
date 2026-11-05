@@ -32,7 +32,7 @@
  *   pnpm test:mutation --mutate <glob>     another module, same settings
  */
 
-/** @type {import('@stryker-mutator/api/core').PartialStrykerOptions} */
+// Options: https://stryker-mutator.io/docs/stryker-js/configuration/
 export default {
   testRunner: 'vitest',
   vitest: {
