@@ -58,3 +58,7 @@ packages/design-system-report/reports/*.html
 packages/design-system-report/reports/*.pdf
 # Scratch output of pdf.e2e.test.ts when a run is interrupted.
 packages/design-system-report/.pdf-e2e-tmp/
+
+# Mutation testing (stryker.config.mjs): reports and the scratch directory.
+reports/mutation/
+.stryker-tmp/
