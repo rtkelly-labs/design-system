@@ -12,8 +12,8 @@ name: Testing Experiments
 # - `workflow_dispatch`, once this file is on the default branch. GitHub only
 #   offers dispatch for a workflow that exists there.
 # - A label on a pull request, which works from a branch before that: adding
-#   `experiment:mutation` runs the mutation job once, and while the label stays
-#   on, every push re-runs it. Remove the label to stop paying for it.
+#   `experiment:mutation` (or `experiment:api`) runs that job once, and while
+#   the label stays on, every push re-runs it. Remove the label to stop paying for it.
 on:
   workflow_dispatch:
     inputs:
@@ -73,4 +73,53 @@ jobs:
         with:
           name: mutation-report
           path: packages/design-system/reports/mutation/
+          retention-days: 30
+
+  api:
+    name: api report
+    # The API Extractor report, generated rather than checked: `--local` writes
+    # `api/design-system.api.md` instead of failing on a difference, and the
+    # artifact is what gets committed. Adding `experiment:api` runs it once.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'experiment:api') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'experiment:api'))
+    concurrency:
+      group: experiments-api-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/design-system
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build
+        run: pnpm build
+
+      - name: API Report
+        run: pnpm api:report:update
+
+      - name: Summarise Findings
+        run: |
+          {
+            echo '### API Extractor findings'
+            echo
+            echo '| message | count |'
+            echo '| --- | --- |'
+            { grep -o 'ae-[a-z-]*' api/design-system.api.md || true; } | sort | uniq -c | sort -rn | awk '{ print "| " $2 " | " $1 " |" }'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload API Report
+        if: success() || failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: api-report
+          path: packages/design-system/api/
           retention-days: 30

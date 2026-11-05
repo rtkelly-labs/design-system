@@ -36,6 +36,18 @@ The entrypoint's `export { … }` is exploded to one name per line, because
 the whole list as changed when one export moves. Exploded, a deleted export is
 three lines naming it.
 
+### Under trial: an API Extractor report beside it
+
+`pnpm api:report` (after `pnpm build`) writes `api/design-system.api.md` from
+the same `dist/index.d.ts`, so it adds a reader, not a second build: API
+Extractor bundles its own TypeScript and never asks `tsup` anything. It is on
+trial because it can say what the diff above cannot — a type that an export
+uses but the entry point never exports (`ae-forgotten-export`), which a
+consumer can see in a tooltip and cannot name in their own code.
+`src/public-api.types.test.tsx` is the other half: `expectTypeOf` and
+`@ts-expect-error` assertions on the contracts a consumer builds on, checked
+by `pnpm typecheck`. Pre-1.0 neither blocks a break; they make one legible.
+
 
 
 ---
