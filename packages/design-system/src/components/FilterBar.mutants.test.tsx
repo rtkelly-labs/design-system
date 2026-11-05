@@ -54,6 +54,8 @@ describe('FilterBar focus', () => {
     screen.getByRole('button', { name: 'Clear all' }).focus();
     fireEvent.click(screen.getByRole('button', { name: 'Remove filter service = checkout' }));
     expect(document.activeElement).toBe(input());
+    // Removing a chip before the one being edited keeps that edit on the same chip.
+    expect(screen.getByRole('button', { name: 'Edit filter status != 500' }).getAttribute('aria-pressed')).toBe('true');
 
     screen.getByRole('button', { name: 'Clear all' }).focus();
     fireEvent.click(screen.getByRole('button', { name: 'Clear all' }));
