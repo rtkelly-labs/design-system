@@ -19,6 +19,6 @@ export default defineConfig({
     reporters: ['default'],
     outputFile: undefined,
     coverage: { enabled: false },
-    setupFiles: [base.test?.setupFiles ?? [], 'src/stryker-setup.ts'].flat(),
+    setupFiles: [base.test?.setupFiles ?? [], 'stryker-setup.ts'].flat(),
   },
 });

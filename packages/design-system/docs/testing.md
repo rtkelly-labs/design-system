@@ -148,7 +148,7 @@ the number.
 - **Not every survivor deserves a test.** An equivalent mutant (`?.focus()` →
   `.focus()` on a ref that is always set) cannot be killed. A class list
   belongs to the visual suite.
-- **The fast-check seed is pinned under Stryker** (`src/stryker-setup.ts`). An
+- **The fast-check seed is pinned under Stryker** (`stryker-setup.ts`). An
   unpinned seed let the models kill a different set on each run, about ±1.5
   points of noise. `FC_SEED` or the dispatch `seed` input picks another seed.
 - **Comparing two `mutation.json` files:** key each mutant by its start *and*

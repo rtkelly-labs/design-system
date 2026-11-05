@@ -3,6 +3,9 @@ import fc from 'fast-check';
 /**
  * One fast-check seed for every property under Stryker.
  *
+ * Outside `src/` on purpose: the dependency check treats any non-test file
+ * there as shipped source.
+ *
  * The unit suite draws a fresh seed each run so the models keep exploring.
  * Under Stryker that same freedom is noise. The coverage dry run and every
  * mutant run would generate different sequences, so a model could cover a

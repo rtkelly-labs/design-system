@@ -7,7 +7,7 @@
     "scripts/*.mjs",
     "tests/*.ts",
     "*.config.{ts,mts,mjs}",
-    "src/stryker-setup.ts"
+    "stryker-setup.ts"
   ],
   "project": [
     "src/**/*.{ts,tsx}",
