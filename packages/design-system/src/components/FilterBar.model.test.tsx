@@ -3,15 +3,7 @@ import fc from 'fast-check';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
-import {
-  FILTER_OPERATORS,
-  FREE_TEXT_KEY,
-  describeFilter,
-  formatFilter,
-  parseFilter,
-  sameFilter,
-  tryParseFilter,
-} from '../lib/filters';
+import { FILTER_OPERATORS, FREE_TEXT_KEY, formatFilter, parseFilter, tryParseFilter } from '../lib/filters';
 import type { Filter } from '../lib/filters';
 import { FilterBar } from './FilterBar';
 
@@ -29,7 +21,9 @@ import { FilterBar } from './FilterBar';
  * The model is the specification written once, small enough to read in one
  * screen: a list, the input text, the chip being edited, and the error. The
  * parser is its oracle (`tryParseFilter`), because the parser has its own
- * tests and the subject here is the state machine that calls it.
+ * tests and the subject here is the state machine that calls it. Equality and
+ * the chip label are restated here rather than imported: a model that borrows
+ * `sameFilter` from the module under test agrees with any bug in it.
  *
  * Two command mixes run, both against the same model:
  *
@@ -65,6 +59,9 @@ interface Real {
   onFiltersChange: Mock<(filters: Filter[]) => void>;
 }
 
+const same = (a: Filter, b: Filter) => a.key === b.key && a.operator === b.operator && a.value === b.value;
+const label = (f: Filter) => (f.key === FREE_TEXT_KEY && f.operator === '~' ? `“${f.value}”` : `${f.key} ${f.operator} ${f.value}`);
+
 // ---------------------------------------------------------------------------
 // The model's transitions — what FilterBar should do, stated as data.
 // ---------------------------------------------------------------------------
@@ -89,7 +86,7 @@ function submit(m: Model) {
   }
   const index = m.editing !== null && m.editing < m.filters.length ? m.editing : null;
   const rest = index === null ? m.filters : m.filters.filter((_, at) => at !== index);
-  if (!rest.some((existing) => sameFilter(existing, result.filter))) {
+  if (!rest.some((existing) => same(existing, result.filter))) {
     const next = [...m.filters];
     if (index === null) next.push(result.filter);
     else next[index] = result.filter;
@@ -114,7 +111,7 @@ const clearButton = (r: Real) =>
 function agree(m: Model, r: Real) {
   const chips = chipsOf(r);
   expect(chips.map((chip) => editButton(chip).getAttribute('aria-label'))).toEqual(
-    m.filters.map((filter) => `Edit filter ${describeFilter(filter)}`),
+    m.filters.map((filter) => `Edit filter ${label(filter)}`),
   );
   expect(chips.map((chip) => editButton(chip).getAttribute('aria-pressed'))).toEqual(
     m.filters.map((_, index) => String(m.editing === index)),
@@ -295,7 +292,7 @@ function setup(mode: Mode, initial: Filter[]) {
 
 // Initial lists are unique: the component never creates a duplicate, and a
 // seeded one would only test the seed.
-const initialFilters = fc.uniqueArray(filter, { maxLength: 4, comparator: sameFilter });
+const initialFilters = fc.uniqueArray(filter, { maxLength: 4, comparator: same });
 
 describe.each(['uncontrolled', 'controlled', 'frozen'] as const)('FilterBar model (%s)', (mode) => {
   it.each([
