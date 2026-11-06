@@ -80,7 +80,9 @@ export const DeltaValue = React.forwardRef<HTMLSpanElement, DeltaValueProps>(fun
   const withUnit = (value: number) => (unit ? `${format(value)} ${unit}` : format(value));
   const base = 'inline-flex items-baseline gap-1.5 whitespace-nowrap font-mono text-sm tabular-nums';
 
-  if (before == null && after == null) {
+  // NaN or an infinity is not a measurement: say so rather than report a zero or infinite move.
+  const invalid = (v: number | null | undefined) => v != null && !Number.isFinite(v);
+  if ((before == null && after == null) || invalid(before) || invalid(after)) {
     return (
       <span ref={ref} data-slot="delta-value" data-state="unmeasured" {...rest} className={cn(base, 'text-content-muted', className)}>
         <span aria-hidden="true">—</span>

@@ -6,6 +6,8 @@ import { cn } from '../../lib/recipe';
 export type KeyedChange = 'added' | 'removed' | 'changed' | 'renamed' | 'unchanged';
 
 export interface KeyedDiffRow {
+  /** A stable React key for the row. Give one when rows can reorder or be inserted and `cells` hold state; the index is used otherwise. */
+  id?: string | number;
   /** The record's stable identity — a method id, a package name, a cluster key. */
   identity: ReactNode;
   /** What happened to the record. */
@@ -76,7 +78,7 @@ export const KeyedDiff = React.forwardRef<HTMLDivElement, KeyedDiffProps>(functi
             rows.map((row, index) => {
               const look = LOOK[row.change];
               return (
-                <tr key={index} data-change={row.change}>
+                <tr key={row.id ?? index} data-change={row.change}>
                   <td className={cn(cell, 'whitespace-nowrap font-mono text-xs font-bold uppercase tracking-wider', look.tone)}>
                     <span aria-hidden="true" className="pr-1.5">{look.glyph}</span>
                     {words[row.change]}

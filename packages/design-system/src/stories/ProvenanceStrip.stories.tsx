@@ -6,7 +6,7 @@ import { BASELINE_COMMIT } from './review/fixtures';
 const meta: Meta<typeof ProvenanceStrip> = {
   title: 'Components/Reports/ProvenanceStrip',
   component: ProvenanceStrip,
-  tags: ['autodocs', 'experimental'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     docs: {
       description: {

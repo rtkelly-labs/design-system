@@ -5,7 +5,7 @@ import { KeyedDiff } from '../components/review/KeyedDiff';
 const meta: Meta<typeof KeyedDiff> = {
   title: 'Components/Reports/KeyedDiff',
   component: KeyedDiff,
-  tags: ['autodocs', 'experimental'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     docs: {
       description: {
