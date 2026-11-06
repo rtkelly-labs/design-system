@@ -166,7 +166,8 @@ const CASES = [
     // +200 B: the data-slot markers on Card and Pagination parts, plus the
     // Pagination current-page chip fix. Both are intended.
     // +600 B: LEVELS carries the `delta` role group (see the `tokens` case).
-    maxBytes: 63_800,
+    // +100 B: `Card`'s `weight` prop — the quiet frame's border string.
+    maxBytes: 63_900,
     forbid: HEAVY,
   },
 ];
