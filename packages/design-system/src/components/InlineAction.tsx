@@ -9,7 +9,7 @@ import type {
 import { recipe } from '../lib/recipe';
 import { SiteLink } from './LinkProvider';
 
-interface InlineActionOwnProps {
+export interface InlineActionOwnProps {
   /**
    * The words, in the case the surrounding text is written in. Unlike
    * `Button`'s label this is read as part of a sentence or a cell, so it is
