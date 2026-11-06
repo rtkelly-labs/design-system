@@ -37,7 +37,6 @@ import {
   TabsPanel,
   TabsTab,
   useToast,
-  BracketText,
 } from '@rtkelly13/design-system';
 import type { AccentToken, TableDensity } from '@rtkelly13/design-system';
 import {
@@ -270,7 +269,7 @@ export default function InboxApp() {
     <IssueDetail issue={open} onArchive={() => archive([open.id])} onPatch={(c) => patch([open.id], c)} />
   ) : (
     <div className="flex h-full min-h-48 items-center justify-center p-6 text-center font-mono text-xs uppercase tracking-widest text-content-muted">
-      <BracketText>NO ISSUE OPEN</BracketText>
+      [&nbsp;NO ISSUE OPEN&nbsp;]
     </div>
   );
 
@@ -279,7 +278,7 @@ export default function InboxApp() {
       {/* Title + view tabs */}
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <h2 className="font-display text-2xl font-bold uppercase tracking-wider text-content-primary">
-          <BracketText>INBOX</BracketText>
+          [&nbsp;INBOX&nbsp;]
         </h2>
         <p className="text-xs uppercase tracking-widest text-content-muted">
           {rows.length} OF {issues.length} ISSUES
@@ -301,7 +300,7 @@ export default function InboxApp() {
           className="flex min-h-14 flex-wrap items-center gap-3 border-2 border-edge-strong bg-surface-raised px-3 py-2 shadow-hard-sm"
         >
           <span className="text-sm font-bold uppercase tracking-wider text-accent-primary">
-            <BracketText>{selectedRows.length} SELECTED</BracketText>
+            [&nbsp;{selectedRows.length} SELECTED&nbsp;]
           </span>
           <ButtonGroup aria-label="Apply to selection">
           <Menu trigger={<Button size="xs">STATUS</Button>}>
@@ -494,7 +493,7 @@ export default function InboxApp() {
             </Table>
           )}
           <p className="mt-2 text-xs text-content-muted">
-            <BracketText>J/K MOVE</BracketText> <BracketText>X SELECT</BracketText> <BracketText>SHIFT+J/K RANGE</BracketText> <BracketText>ENTER OPEN</BracketText> <BracketText>E ARCHIVE</BracketText> <BracketText>/ FILTER</BracketText> <BracketText>ESC CLEAR</BracketText>
+            [&nbsp;J/K MOVE&nbsp;] [&nbsp;X SELECT&nbsp;] [&nbsp;SHIFT+J/K RANGE&nbsp;] [&nbsp;ENTER OPEN&nbsp;] [&nbsp;E ARCHIVE&nbsp;] [&nbsp;/ FILTER&nbsp;] [&nbsp;ESC CLEAR&nbsp;]
           </p>
         </div>
 
