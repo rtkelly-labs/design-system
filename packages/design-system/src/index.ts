@@ -181,6 +181,7 @@ export * from './components/TickerTape';
 
 // Chart Primitives & Trend Visualizers
 export * from './components/BarChart';
+export * from './components/ResponsiveChartContainer';
 export * from './components/Sparkline';
 export * from './components/ChartTooltip';
 export * from './components/BulletChart';

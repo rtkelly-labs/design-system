@@ -18,7 +18,7 @@ export default function InspectBars() {
         ariaLabel="p95 latency by region. Select a bar for detail"
       />
       <p role="status" className="m-0 font-mono text-sm text-content-secondary">
-        {picked ? `> ${picked.label}: ${picked.value} ms p95` : '> click a bar'}
+        {picked ? `> ${picked.label}: ${picked.value} ms p95` : '> pick a bar (click, or Tab then arrow keys)'}
       </p>
     </div>
   );

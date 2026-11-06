@@ -6,11 +6,17 @@ import { Group } from '@visx/group';
 import { ParentSize } from '@visx/responsive';
 import { scaleBand, scaleLinear } from '@visx/scale';
 import { Bar } from '@visx/shape';
-import { type ForwardedRef, forwardRef, type SVGProps } from 'react';
+import {
+  type ForwardedRef,
+  forwardRef,
+  type KeyboardEvent,
+  type SVGProps,
+  useRef,
+  useState,
+} from 'react';
 import { cn } from '../lib/recipe';
 import { type AccentToken, accentVar } from '../lib/theme';
 
-export { ParentSize as ResponsiveChartContainer };
 
 export interface BarChartDatum {
   label: string;
@@ -41,12 +47,21 @@ export interface BarChartProps extends Omit<SVGProps<SVGSVGElement>, 'data'> {
   ariaLabel?: string;
   /** Inset padding between outer canvas and plotting coordinates. */
   margin?: { top: number; right: number; bottom: number; left: number };
-  /** Optional click callback for interactive bar inspection. */
+  /**
+   * Makes the bars interactive. Each bar becomes a button named "LABEL: VALUE":
+   * the chart is one tab stop, ←/→ (or ↑/↓, Home, End) move between bars and
+   * Enter or Space calls this. Without it the bars are a picture, with no
+   * pointer cursor or hover change.
+   */
   onBarClick?: (datum: BarChartDatum, index: number) => void;
 }
 
 const DEFAULT_VERTICAL_MARGIN = { top: 28, right: 24, bottom: 44, left: 48 };
 const DEFAULT_HORIZONTAL_MARGIN = { top: 20, right: 48, bottom: 36, left: 80 };
+
+/** The focus ring an interactive bar draws, matching LatencyHeatmap's chart. */
+const INTERACTIVE_BAR =
+  'cursor-pointer hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-primary';
 
 interface InternalCanvasProps extends Omit<BarChartProps, 'responsive'> {
   svgRef?: ForwardedRef<SVGSVGElement>;
@@ -68,6 +83,11 @@ function BarChartCanvas({
   svgRef,
   ...props
 }: InternalCanvasProps) {
+  // Roving tabindex: one bar is the tab stop, the arrows move it.
+  const [active, setActive] = useState(0);
+  const bars = useRef<(SVGRectElement | null)[]>([]);
+  const interactive = onBarClick !== undefined;
+
   const isHorizontal = orientation === 'horizontal';
   const margin =
     customMargin ?? (isHorizontal ? DEFAULT_HORIZONTAL_MARGIN : DEFAULT_VERTICAL_MARGIN);
@@ -116,6 +136,58 @@ function BarChartCanvas({
     padding: 0.3,
   });
 
+  const stop = Math.min(active, data.length - 1);
+  const moveTo = (index: number) => {
+    setActive(index);
+    bars.current[index]?.focus();
+  };
+  const onBarKeyDown = (event: KeyboardEvent<SVGRectElement>, index: number) => {
+    const last = data.length - 1;
+    let next: number | null = null;
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        next = Math.min(last, index + 1);
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        next = Math.max(0, index - 1);
+        break;
+      case 'Home':
+        next = 0;
+        break;
+      case 'End':
+        next = last;
+        break;
+      case 'Enter':
+      case ' ':
+        event.preventDefault();
+        onBarClick?.(data[index], index);
+        return;
+      default:
+        return;
+    }
+    event.preventDefault();
+    moveTo(next);
+  };
+  const barProps = (d: BarChartDatum, index: number) =>
+    interactive
+      ? {
+          innerRef: (el: SVGRectElement | null) => {
+            bars.current[index] = el;
+          },
+          role: 'button',
+          tabIndex: index === stop ? 0 : -1,
+          'aria-label': `${d.label}: ${d.value}`,
+          className: INTERACTIVE_BAR,
+          onClick: () => {
+            setActive(index);
+            onBarClick(d, index);
+          },
+          onKeyDown: (event: KeyboardEvent<SVGRectElement>) => onBarKeyDown(event, index),
+        }
+      : {};
+
   const valueScale = scaleLinear<number>({
     domain: [0, maxValue],
     range: isHorizontal ? [0, xMax] : [yMax, 0],
@@ -129,7 +201,9 @@ function BarChartCanvas({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      role="img"
+      // A picture until the bars take input; then a group of buttons, since an
+      // `img` hides its children from assistive technology.
+      role={interactive ? 'group' : 'img'}
       aria-label={ariaLabel ?? `Bar chart with ${data.length} categories`}
       className={cn(
         'w-full max-w-full overflow-visible border-2 border-edge-strong bg-surface-base',
@@ -174,8 +248,7 @@ function BarChartCanvas({
                   fill={fillColor}
                   stroke="var(--ds-border-strong)"
                   strokeWidth={2}
-                  className="cursor-pointer hover:opacity-80"
-                  onClick={() => onBarClick?.(d, index)}
+                  {...barProps(d, index)}
                 />
                 {showValues && (
                   <text
@@ -209,8 +282,7 @@ function BarChartCanvas({
                 fill={fillColor}
                 stroke="var(--ds-border-strong)"
                 strokeWidth={2}
-                className="cursor-pointer hover:opacity-80"
-                onClick={() => onBarClick?.(d, index)}
+                {...barProps(d, index)}
               />
               {showValues && (
                 <text
@@ -316,7 +388,12 @@ export const BarChart = forwardRef<SVGSVGElement, BarChartProps>(function BarCha
 ) {
   if (responsive) {
     return (
-      <ParentSize className={cn('w-full', props.className)}>
+      // ParentSize fills 100% of its parent's height, which is zero in an
+      // auto-height parent, and clips the chart (#306). Give it the chart's own.
+      <ParentSize
+        className={cn('w-full', props.className)}
+        parentSizeStyles={{ width: '100%', height: props.height ?? 260 }}
+      >
         {({ width: parentWidth }) => (
           <BarChartCanvas
             {...props}
