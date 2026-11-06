@@ -31,15 +31,18 @@ export * from './theme/recommended';
 export { cn } from './lib/recipe';
 export type { ClassInput } from './lib/recipe';
 export * from './lib/slug';
+export * from './lib/units';
 
 // Hooks
 export * from './hooks/useCopyToClipboard';
 export * from './hooks/useActiveHeading';
 export * from './hooks/useTraceClock';
 export * from './hooks/useTraceReplay';
+export * from './hooks/usePolledResource';
 
 // Primitives & Callouts
 export * from './components/Button';
+export * from './components/InlineAction';
 export * from './components/Card';
 export * from './components/Badge';
 // The report frame — the page a generated report is built in. Separate from
@@ -81,6 +84,9 @@ export * from './components/TLDR';
 // `Select` draws its trigger with, and a recipe's type is `tailwind-variants`'.
 export { Input, TextArea } from './components/Input';
 export type { InputProps, TextAreaProps } from './components/Input';
+// The props every field control shares. `InputProps`, `CheckboxProps` and the rest
+// extend them, so a wrapper that takes "any field" needs to name them.
+export type { BooleanFieldProps, FieldProps } from './components/fieldFrame';
 // One of a fixed set (#164): the same field as `Input`, with a listbox this
 // system paints instead of the operating system's, and `native` for the
 // platform picker when that is the better phone experience.
@@ -200,6 +206,7 @@ export * from './components/ServiceMap';
 export * from './components/AlertList';
 export * from './components/IncidentTimeline';
 export * from './components/FreshnessIndicator';
+export * from './components/ResourceState';
 export * from './lib/ids';
 export * from './components/IdChip';
 

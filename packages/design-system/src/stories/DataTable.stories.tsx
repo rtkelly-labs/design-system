@@ -141,6 +141,36 @@ export const Paginated: Story = {
   },
 };
 
+/**
+ * Rows a reader can pick for a bulk action. `onSelectionChange` turns the
+ * leading checkbox column on; the selection is controlled and keyed by
+ * `keyExtractor`, so it follows its rows through a sort or a page change. A
+ * row `isRowSelectable` refuses is disabled, and a string refusal is the
+ * checkbox's description and its tooltip: here, a deployment still building
+ * cannot be selected. The header box is mixed while some rows are picked, and
+ * acts on the page the body shows, never on rows the reader cannot see.
+ */
+export const Selectable: Story = {
+  render: () => {
+    function SelectableExample() {
+      const [selected, setSelected] = useState<ReadonlySet<string>>(new Set(['dpl_1']));
+      return (
+        <DataTable
+          columns={appearanceColumns}
+          data={rows}
+          keyExtractor={(row) => row.id}
+          caption={`Deployments, ${selected.size} selected`}
+          selectedKeys={selected}
+          onSelectionChange={setSelected}
+          isRowSelectable={(row) => (row.state === 'building' ? 'Still building' : true)}
+        />
+      );
+    }
+
+    return <SelectableExample />;
+  },
+};
+
 /** Controlled TanStack Table with multi-column sorting. */
 export const HeadlessTanStackTable: Story = {
   render: () => {

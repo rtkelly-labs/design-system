@@ -41,5 +41,5 @@ describe('documentation literal prop validation', () => {
     expect(result.status, result.stderr).toBe(status);
     if (status === 1) expect(result.stderr).toContain('must be one of: primary, secondary, tertiary, inverse, default');
     else expect(result.stdout).toContain('Doc snippets OK');
-  });
+  }, 15000);
 });

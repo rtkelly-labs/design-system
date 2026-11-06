@@ -137,7 +137,7 @@ export const StatusPage = forwardRef<HTMLElement, StatusPageProps>(function Stat
 });
 
 /** Shared by the two presets: every `StatusPage` prop, with the copy optional. */
-interface StatusPagePresetProps extends Omit<StatusPageProps, 'title'> {
+export interface StatusPagePresetProps extends Omit<StatusPageProps, 'title'> {
   /** Where the default action goes. The site root, `/`, by default. */
   homeHref?: string;
   /** The default action's label. `GO HOME` by default. */

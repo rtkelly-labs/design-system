@@ -9,9 +9,9 @@
   },
   "scripts": {
     "generate": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/generate-docs-data.mts",
-    "dev": "pnpm generate && next dev",
+    "dev": "pnpm generate && next dev -p 8101",
     "build": "pnpm generate && next build",
-    "start": "node ../../scripts/serve-deploy.mjs out --mount /site --port 3100",
+    "start": "node ../../scripts/serve-deploy.mjs out --mount /site --port 8102",
     "typecheck": "pnpm generate && tsc --noEmit",
     "check:tokens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-tokens.mjs",
     "lint": "eslint --max-warnings 0 ."

@@ -63,6 +63,15 @@ test.describe('Edge hierarchy', () => {
       await page.goto(`/iframe.html?id=${id}&viewMode=story${pinned ? '' : '&globals=level:midnight'}`);
       await waitForStoryRendered(page, id);
       await page.evaluate(() => document.fonts.ready);
+      // A default-open overlay mounts at opacity 0 and fades in, and measureEdges skips
+      // transparent elements. End every fade (as a11y.spec does), then give the positioning
+      // engine a couple of frames to place the popup.
+      await page.addStyleTag({
+        content: '*,*::before,*::after{transition:none!important;animation:none!important}',
+      });
+      await page.evaluate(
+        () => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))),
+      );
       // Overlays (Modal, Drawer, Popover, Menu, Toast…) portal to <body>, outside #storybook-root,
       // so the census measures the whole body.
       const census = await page.evaluate(measureEdges, 'body');

@@ -97,7 +97,7 @@ export const SocialIcon = forwardRef<SVGSVGElement | HTMLAnchorElement, SocialIc
 
 SocialIcon.displayName = 'SocialIcon';
 
-type NamedSocialIconProps = Omit<SocialIconProps, 'name'>;
+export type NamedSocialIconProps = Omit<SocialIconProps, 'name'>;
 
 /** GitHub brand mark. */
 export function GitHubIcon(props: NamedSocialIconProps) {

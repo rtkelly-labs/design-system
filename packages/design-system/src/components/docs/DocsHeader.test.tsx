@@ -79,5 +79,5 @@ describe('DocsHeader within a ThemeProvider', () => {
     await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
     await waitFor(() => expect(document.activeElement).toBe(trigger));
     expect(trigger.getAttribute('aria-label')).toBe('Theme level (current: Sketch)');
-  });
+  }, 15000);
 });

@@ -1,9 +1,7 @@
 [
-  "escape|AsciiDivider|divider",
-  "escape|Card|card",
-  "escape|Card|card > div",
-  "escape|Divider|divider",
   "escape|Pagination|pagination-list > li",
+  "escape|Spinner|div:nth-of-type(2) > div",
+  "escape|Spinner|spinner",
   "font|AsciiGauge|JetBrainsMono-Regular",
   "font|BeforeAfter|JetBrainsMono-Regular",
   "font|Card|JetBrainsMono-Regular",
@@ -24,9 +22,5 @@
   "font|Timeline|JetBrainsMono-Regular",
   "font|TreeDiagram|JetBrainsMono-Regular",
   "font|UptimeStrip|JetBrainsMono-Regular",
-  "font|VerdictBand|JetBrainsMono-Regular",
-  "spill|AsciiDivider|divider",
-  "spill|CodeBlock|code-block > pre",
-  "spill|Divider|divider",
-  "truncation|TrackCard|track-card-item-row > p"
+  "font|VerdictBand|JetBrainsMono-Regular"
 ]

@@ -161,6 +161,10 @@ export const MANIFEST = {
     why: 'Unit suite over lib, hooks and the generated theme. Complements the Playwright suites, which assert rendering rather than logic.',
   },
   '@vitest/coverage-v8': { kind: 'dev', why: 'Coverage reporting for `pnpm test:coverage`.' },
+  'fast-check': {
+    kind: 'dev',
+    why: 'Property and model-based tests: generated command sequences driven through Testing Library against a small model, and the parse/format round trip of the filter grammar.',
+  },
   '@testing-library/react': {
     kind: 'dev',
     why: 'Renders hooks and components in the unit suite, asserting behaviour through the DOM rather than internals.',
