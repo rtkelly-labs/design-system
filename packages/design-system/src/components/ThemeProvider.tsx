@@ -95,6 +95,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Deliberately not seeded from storage. Server and first client render must
   // agree, so both start at `defaultLevel` and the effect below reconciles.
   const [level, setLevelState] = useState<ThemeLevel>(defaultLevel);
+  // Nothing is written to the document or storage until the effect below has
+  // resolved the level. Otherwise the first pass writes `defaultLevel`, and
+  // StrictMode's remount reads that back as if the init script had chosen it,
+  // losing the stored level (#395).
+  const [resolved, setResolved] = useState(false);
 
   useEffect(() => {
     if (scoped) return;
@@ -103,17 +108,18 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     // over re-deriving, so the two can never disagree.
     if (isThemeLevel(applied)) {
       setLevelState(applied);
-      return;
+    } else {
+      setLevelState(
+        (persist ? readStoredLevel() : undefined) ??
+          (followSystem ? readSystemLevel() : undefined) ??
+          defaultLevel,
+      );
     }
-    const resolved =
-      (persist ? readStoredLevel() : undefined) ??
-      (followSystem ? readSystemLevel() : undefined) ??
-      defaultLevel;
-    setLevelState(resolved);
+    setResolved(true);
   }, [scoped, persist, followSystem, defaultLevel]);
 
   useEffect(() => {
-    if (scoped) return;
+    if (scoped || !resolved) return;
     document.documentElement.setAttribute(THEME_ATTRIBUTE, level);
     // The class mirrors the attribute for consumers whose own CSS still selects
     // on it. Removing every level first keeps switching idempotent.
@@ -125,7 +131,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     } catch {
       // See readStoredLevel.
     }
-  }, [level, persist, scoped]);
+  }, [level, persist, scoped, resolved]);
 
   const setLevel = useCallback((next: ThemeLevel) => setLevelState(next), []);
   const cycleLevel = useCallback(() => setLevelState((current) => nextLevel(current)), []);
