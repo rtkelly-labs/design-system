@@ -7,11 +7,9 @@ description: Node, pnpm, and installed dependencies.
 # between the job that writes a baseline and the job that checks it is the one
 # difference this repo can least afford.
 #
-# Browsers are deliberately not here, and are not installed anywhere: the jobs
-# that drive one run inside the pinned Playwright image, which carries them
-# (AGENTS.md rule 9). The same steps run in that container and on the bare
-# runner, so the `pnpm install` is identical wherever a baseline is written or
-# checked.
+# Browsers are deliberately not here — that is
+# `.github/actions/install-playwright`, which bounds and retries the install per
+# AGENTS.md rule 9. Only the two jobs that actually drive a browser pay for it.
 
 runs:
   using: composite
@@ -25,17 +23,6 @@ runs:
       uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
       with:
         version: 9
-
-    # Ahead of the install it guards: a lockfile that pins an SSH or
-    # out-of-repo resolution fails `pnpm install --frozen-lockfile` with a
-    # git-auth error that names nothing useful, so this reads the committed
-    # lockfile with plain node — available on the runner before `setup-node`
-    # pins 22 — and fails fast with the exact offending line. Every CI job
-    # passes through this action, so one step here guards all of them.
-    # `check:governance` asserts this ordering against the install step.
-    - name: Lockfile Protocol Guard
-      shell: bash
-      run: node packages/design-system/scripts/check-lockfile.mjs
 
     - name: Install Dependencies
       shell: bash

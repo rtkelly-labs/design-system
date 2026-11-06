@@ -1,0 +1,48 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Accessibility" tags={['stable']} />
+
+# Accessibility: what is measured, and what is not
+
+Two gates run on every change, and they answer different questions. Knowing which is which
+matters, because each is blind to what the other sees.
+
+## Measured by arithmetic
+
+`pnpm check:contrast` computes **222 pairs across two Levels** — every text role against every
+ground it can sit on, every intent, every hue, and `text.inverse` against each accent it is
+printed on. No browser, no rendering, no sampling.
+
+It is strict in places WCAG is not. The palette floor is **5.5:1** rather than 4.5, because an
+editor draws selection, current-line and find-match bands *behind* the same tokens: a palette
+solved to exactly 4.5 has one sRGB step of headroom, and at 5.5 it has twenty-two.
+
+## Measured by rendering
+
+`pnpm test:a11y` runs axe over every asserted story, on both Levels — **162 assertions**. It
+catches what arithmetic cannot: a missing accessible name, a scrollable region no keyboard can
+reach, a role that contradicts the markup around it.
+
+It found both of those on its first run. Two icon-only controls had no name, and three `<pre>`
+blocks scrolled horizontally with no way to focus them — content simply unreachable without a
+pointer.
+
+## What neither catches
+
+**`opacity` on text.** Contrast is computed from the *declared* foreground, and `opacity`
+changes it afterwards. Three affordances sat at 3.45:1 and 2.64:1 on `sketch` — permanently,
+on every touch device — while the gate reported every pair passing. They address `text.muted`
+now, which is a role the gate can see.
+
+**A composited ground.** A keyword over a selection band over a code well is neither a
+contrast pair nor a separation distance, and no current gate has the shape to express it.
+That is a known gap, written down rather than implied.
+
+**The narrow viewport, for one component.** `AdminDashboardLayout` is not responsive, and its
+heading lands over the wrong ground below ~412px. It is carried as a budget of exactly one, so
+a second instance still fails.
+
+## The honest summary
+
+Colour is measured and gated. Semantics are measured and gated. Composition of the two is
+partly measured, and the gaps are named above rather than left for someone to discover.

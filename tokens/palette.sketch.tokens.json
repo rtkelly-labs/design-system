@@ -1,0 +1,477 @@
+{
+  "$schema": "https://www.designtokens.org/schema.json",
+  "$description": "Sketch — Warm paper and pen ink. The light half of the pair. Generated from src/theme/levels.ts; do not edit. DTCG 2025.10. Token paths are identical across every level file.",
+  "$extensions": {
+    "dev.ryankelly.design-system": {
+      "level": "sketch",
+      "polarity": "light",
+      "specVersion": "2025.10",
+      "generatedFrom": "src/theme/levels.ts",
+      "contrastFloor": {
+        "palette": 5.5,
+        "paletteBright": 4.5,
+        "role": 4.5
+      }
+    }
+  },
+  "palette": {
+    "$type": "color",
+    "$description": "Hues — appearance, not job. Never addressed by a component.",
+    "red": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.502,
+          0.2048,
+          27.42
+        ],
+        "hex": "#bd0010"
+      },
+      "$description": "Danger and ANSI red."
+    },
+    "orange": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.4885,
+          0.128,
+          49.81
+        ],
+        "hex": "#974503"
+      },
+      "$description": "Warning, and the ANSI slot between red and yellow."
+    },
+    "yellow": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.476,
+          0.0974,
+          92.24
+        ],
+        "hex": "#705a00"
+      },
+      "$description": "Brand. Attention without alarm."
+    },
+    "green": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.4612,
+          0.1274,
+          149.87
+        ],
+        "hex": "#006b2e"
+      },
+      "$description": "Brand. Success and ANSI green."
+    },
+    "teal": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.4629,
+          0.085,
+          178.24
+        ],
+        "hex": "#006859"
+      },
+      "$description": "The cool half of green; ANSI has no slot for it."
+    },
+    "cyan": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.4684,
+          0.0817,
+          212.16
+        ],
+        "hex": "#006675"
+      },
+      "$description": "Brand, and the most-used hue in the estate."
+    },
+    "blue": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.489,
+          0.2151,
+          262.97
+        ],
+        "hex": "#1450d7"
+      },
+      "$description": "Information. A sky blue at 233 degrees by heritage rather than a true blue."
+    },
+    "violet": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.5162,
+          0.2836,
+          294.89
+        ],
+        "hex": "#7d00f4"
+      },
+      "$description": "Added by this work — no canonical violet existed. Fills ANSI magenta-adjacent space."
+    },
+    "magenta": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.5086,
+          0.2375,
+          325.21
+        ],
+        "hex": "#a300ad"
+      },
+      "$description": "ANSI magenta, which no Role previously reached."
+    },
+    "pink": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.5036,
+          0.2073,
+          354.09
+        ],
+        "hex": "#b4006c"
+      },
+      "$description": "Brand. Emphasis, and the neon-terminal signature."
+    },
+    "bright": {
+      "$description": "The `bright` half of each Hue. ANSI's upper eight.",
+      "red": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.4127,
+            0.1651,
+            16.3
+          ],
+          "hex": "#8f002a"
+        }
+      },
+      "orange": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.3972,
+            0.0957,
+            57.43
+          ],
+          "hex": "#6c3700"
+        }
+      },
+      "yellow": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.386,
+            0.079,
+            92.16
+          ],
+          "hex": "#534200"
+        }
+      },
+      "green": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.3709,
+            0.1255,
+            142.27
+          ],
+          "hex": "#024f00"
+        }
+      },
+      "teal": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.3718,
+            0.08,
+            163.35
+          ],
+          "hex": "#004d34"
+        }
+      },
+      "cyan": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.3787,
+            0.0658,
+            211.43
+          ],
+          "hex": "#004b56"
+        }
+      },
+      "blue": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.3992,
+            0.0832,
+            233.67
+          ],
+          "hex": "#004e6d"
+        }
+      },
+      "violet": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.4269,
+            0.2342,
+            295.17
+          ],
+          "hex": "#6000bd"
+        }
+      },
+      "magenta": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.4192,
+            0.1931,
+            327.96
+          ],
+          "hex": "#7f0080"
+        }
+      },
+      "pink": {
+        "$value": {
+          "colorSpace": "oklch",
+          "components": [
+            0.4145,
+            0.1707,
+            353.87
+          ],
+          "hex": "#8a0052"
+        }
+      }
+    }
+  },
+  "fixed": {
+    "$type": "color",
+    "$description": "Level-invariant. These three do not swap with the level, which is the point — `white` means white, not \"this level's lightest ground\".",
+    "black": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0,
+          0,
+          0
+        ],
+        "hex": "#000000"
+      }
+    },
+    "white": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          1,
+          0,
+          0
+        ],
+        "hex": "#ffffff"
+      }
+    },
+    "transparent": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0,
+          0,
+          0
+        ],
+        "alpha": 0
+      }
+    }
+  },
+  "surface": {
+    "$type": "color",
+    "$description": "Grounds, in elevation order. `base` is the page, `raised` sits above it, `sunken` is recessed into it, `overlay` is the modal scrim and the only value with alpha.",
+    "base": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.9638,
+          0.0095,
+          93.57
+        ],
+        "hex": "#f5f3ec"
+      }
+    },
+    "raised": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          1,
+          0,
+          0
+        ],
+        "hex": "#ffffff"
+      }
+    },
+    "sunken": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.9379,
+          0.0156,
+          86.43
+        ],
+        "hex": "#efeadf"
+      }
+    },
+    "overlay": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.1373,
+          0.149,
+          0.1804
+        ],
+        "alpha": 0.72
+      }
+    }
+  },
+  "text": {
+    "$type": "color",
+    "primary": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.269,
+          0.0155,
+          269.1
+        ],
+        "hex": "#23262e"
+      }
+    },
+    "secondary": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.3361,
+          0.0151,
+          264.35
+        ],
+        "hex": "#33373f"
+      }
+    },
+    "muted": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.4989,
+          0.0265,
+          84.55
+        ],
+        "hex": "#6a6252"
+      }
+    },
+    "inverse": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.9638,
+          0.0095,
+          93.57
+        ],
+        "hex": "#f5f3ec"
+      }
+    }
+  },
+  "border": {
+    "$type": "color",
+    "strong": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.269,
+          0.0155,
+          269.1
+        ],
+        "hex": "#23262e"
+      }
+    },
+    "default": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.6224,
+          0.031,
+          86.66
+        ],
+        "hex": "#8f8672"
+      }
+    },
+    "subtle": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.8171,
+          0.0213,
+          91.62
+        ],
+        "hex": "#c8c3b4"
+      }
+    }
+  },
+  "accent": {
+    "$type": "color",
+    "$description": "Emphasis Roles, aliased onto Hues by the declared `accentHue` map.",
+    "primary": {
+      "$value": "{palette.blue}"
+    },
+    "secondary": {
+      "$value": "{palette.green}"
+    },
+    "tertiary": {
+      "$value": "{palette.red}"
+    },
+    "quiet": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.4989,
+          0.0265,
+          84.55
+        ],
+        "hex": "#6a6252"
+      }
+    }
+  },
+  "intent": {
+    "$type": "color",
+    "$description": "Meaning Roles, aliased onto Hues by the declared `intentHue` map.",
+    "info": {
+      "$value": "{palette.blue}"
+    },
+    "success": {
+      "$value": "{palette.green}"
+    },
+    "warning": {
+      "$value": "{palette.orange}"
+    },
+    "danger": {
+      "$value": "{palette.red}"
+    }
+  },
+  "shadow": {
+    "$type": "color",
+    "color": {
+      "$value": {
+        "colorSpace": "oklch",
+        "components": [
+          0.269,
+          0.0155,
+          269.1
+        ],
+        "hex": "#23262e"
+      },
+      "$description": "Colour of the hard offset shadows."
+    }
+  }
+}

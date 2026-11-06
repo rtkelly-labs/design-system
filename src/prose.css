@@ -1,0 +1,766 @@
+/* @rtkelly13/design-system — documentation & prose layer.
+ *
+ *   @import "@rtkelly13/design-system/theme.css";   (tokens)
+ *   @import "@rtkelly13/design-system/prose.css";   (this file)
+ *
+ * Deliberately plain CSS. The docs chrome is layout-critical, and Tailwind v4
+ * skips node_modules during automatic content detection — a consumer whose
+ * `@source` is wrong would otherwise get a half-styled sidebar rather than an
+ * obvious failure. Everything here works with the tokens alone.
+ *
+ * Two responsibilities:
+ *   1. `prose-ladder` — maps @tailwindcss/typography's variables onto the
+ *      ladder's role tokens. Variables only; the deltas live in `Prose.tsx`.
+ *   2. `.docs-*`      — the documentation chrome components, not yet migrated.
+ */
+
+/* This file promises to work with the tokens alone, so it cannot assume a
+ * reset. Without `border-box`, every fixed-width chrome element blows out by
+ * its own padding — the contents rail is `width: 15rem` plus 2rem of padding
+ * and a 2px rule, so it renders 34px wider than its grid column and pushes the
+ * page sideways. `styles.css` consumers get this from Tailwind's preflight;
+ * `theme.css` + `prose.css` consumers previously got nothing.
+ *
+ * Scoped to the docs subtree rather than `*` so importing this file does not
+ * silently restyle the rest of a host application. */
+.docs-layout,
+.docs-layout *,
+.docs-layout *::before,
+.docs-layout *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  /* Republished by DocsHeader from its measured height. The fallback keeps
+   * anchor offsets sane when no header is mounted (Storybook, tests). */
+  --docs-header-height: 0px;
+  --docs-sidebar-width: 17rem;
+  --docs-toc-width: 15rem;
+  --docs-content-max: 48rem;
+}
+
+/* Anchor jumps must clear the sticky header. `scroll-padding-top` covers
+ * browser-driven scrolls (hash on load, in-page link clicks); the
+ * `scroll-margin-top` on headings covers programmatic scrollIntoView. */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--docs-header-height) + 1.5rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ==========================================================================
+   Anchored headings
+   ========================================================================== */
+
+.docs-anchor-heading {
+  position: relative;
+  scroll-margin-top: calc(var(--docs-header-height) + 1.5rem);
+}
+
+/* The heading itself is the focus target after a TOC jump; it gets tabindex
+ *="-1" at runtime, and the default focus ring on a block heading is ugly. */
+.docs-anchor-heading:focus {
+  outline: none;
+}
+
+.docs-anchor-heading:focus-visible {
+  outline: 2px solid var(--ds-accent-primary);
+  outline-offset: 4px;
+}
+
+.docs-anchor-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 0.6rem;
+  padding: 0.1rem 0.4rem;
+  border: 2px solid currentColor;
+  font-family: var(--ds-font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  vertical-align: middle;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+/* Revealed on hover, but never hidden from keyboard users. */
+.docs-anchor-heading:hover .docs-anchor-link,
+.docs-anchor-link:focus-visible {
+  opacity: 1;
+}
+
+.docs-anchor-link:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 0 currentColor;
+}
+
+/*
+ * Touch devices have no hover state, so the affordance would be unreachable.
+ *
+ * Shown at full opacity in a *declared* role rather than dimmed. `opacity`
+ * changes the foreground after `check:contrast` has read it, so a dimmed
+ * `text.primary` is invisible to the gate: this rule was 0.55, which composites
+ * to 3.45:1 on `sketch` and fails AA on every touch device permanently.
+ * `text.muted` is a Role the gate measures — 5.90 on midnight, 5.43 on sketch.
+ */
+@media (hover: none) {
+  .docs-anchor-link {
+    opacity: 1;
+    color: var(--ds-text-muted);
+  }
+}
+
+/* ==========================================================================
+   Prose — compiled Markdown output
+   ==========================================================================
+
+   `@tailwindcss/typography` does this job, and it is built for exactly this
+   case: "typographic defaults for HTML you don't control". A Markdown pipeline
+   emits bare tags with no class names, so there is nothing for a utility to
+   attach to — and hand-writing ~150 descendant declarations here, or the same
+   number as `[&_h2]:…` arbitrary variants on the container, is reimplementing a
+   plugin badly either way.
+
+   What stays in CSS is the part the styling-lives-in-TSX rule already sanctions:
+   variables. `prose-ladder` maps the plugin's `--tw-prose-*` knobs onto this
+   system's role tokens. The brutalist deltas — the double rule under an h1, the
+   uppercase display headings, the mono tables — are `prose-h1:` / `prose-table:`
+   modifiers on the element, in `Prose.tsx`.
+
+   Note there is no `--tw-prose-invert-*` block. The plugin needs one because it
+   models theming as a light/dark flip; the ladder does not — `--ds-*` already
+   resolves per level, so one mapping is correct on all four rungs and would be
+   correct on a fifth.
+   ========================================================================== */
+
+@plugin "@tailwindcss/typography";
+
+@utility prose-ladder {
+  --tw-prose-body: var(--ds-text-primary);
+  --tw-prose-headings: var(--ds-text-primary);
+  --tw-prose-lead: var(--ds-text-secondary);
+  --tw-prose-links: var(--ds-accent-primary);
+  --tw-prose-bold: var(--ds-text-primary);
+  --tw-prose-counters: var(--ds-accent-secondary);
+  --tw-prose-bullets: var(--ds-accent-primary);
+  --tw-prose-hr: var(--ds-border-strong);
+  --tw-prose-quotes: var(--ds-text-primary);
+  --tw-prose-quote-borders: var(--ds-accent-tertiary);
+  --tw-prose-captions: var(--ds-text-muted);
+  --tw-prose-kbd: var(--ds-text-primary);
+  --tw-prose-code: var(--ds-accent-secondary);
+  --tw-prose-pre-code: var(--ds-text-primary);
+  --tw-prose-pre-bg: var(--ds-surface-sunken);
+  --tw-prose-th-borders: var(--ds-border-strong);
+  --tw-prose-td-borders: var(--ds-border-default);
+}
+
+/* ==========================================================================
+   Code block
+   ========================================================================== */
+
+.docs-codeblock {
+  margin: 1.5rem 0;
+  border: 2px solid var(--ds-border-strong);
+  background-color: var(--ds-surface-base);
+}
+
+.docs-codeblock-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0.85rem;
+  border-bottom: 2px solid var(--ds-border-strong);
+  font-family: var(--ds-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.docs-codeblock-title {
+  color: var(--ds-accent-secondary);
+}
+
+.docs-codeblock-lang {
+  color: var(--ds-accent-tertiary);
+}
+
+.docs-codeblock-body {
+  position: relative;
+}
+
+.docs-codeblock-body pre {
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--ds-font-mono);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  /*
+   * `text.primary`, not `intent.success`. This rendered every code block in the
+   * success green — a Role that means "this worked", used as body ink — and
+   * contradicted the mapping eleven lines up, which already declares
+   * `--tw-prose-pre-code: var(--ds-text-primary)`. Set explicitly rather than
+   * inherited because `.docs-codeblock` is also used outside `.prose`, where
+   * the `--tw-prose-*` variables are not in scope.
+   */
+  color: var(--ds-text-primary);
+}
+
+.docs-codeblock-body pre code {
+  font-family: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  white-space: pre;
+}
+
+.docs-codeblock-copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  /* Above the code it sits on. */
+  z-index: var(--ds-layer-raised);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 2px solid var(--ds-border-strong);
+  background-color: var(--ds-surface-base);
+  color: var(--ds-text-primary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+
+.docs-codeblock:hover .docs-codeblock-copy,
+.docs-codeblock-copy:focus-visible {
+  opacity: 1;
+}
+
+.docs-codeblock-copy:hover {
+  background-color: var(--ds-text-primary);
+  color: var(--ds-surface-base);
+}
+
+.docs-codeblock-copy[data-copied='true'] {
+  opacity: 1;
+  border-color: var(--ds-intent-success);
+  color: var(--ds-intent-success);
+}
+
+/* Same reasoning as `.docs-anchor-link` above: 0.6 composited to 2.64:1 on
+ * `sketch`, so the copy button failed AA on every touch device. */
+@media (hover: none) {
+  .docs-codeblock-copy {
+    opacity: 1;
+    color: var(--ds-text-muted);
+  }
+}
+
+/* ==========================================================================
+   Layout shell
+   ========================================================================== */
+
+.docs-layout {
+  min-height: 100vh;
+  background-color: var(--ds-surface-base);
+  color: var(--ds-text-primary);
+}
+
+.docs-layout-body {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: start;
+  max-width: 100rem;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.docs-layout-main {
+  min-width: 0; /* lets long code blocks scroll instead of stretching the grid */
+  padding: 2rem 1.25rem 4rem;
+}
+
+.docs-layout-sidebar,
+.docs-layout-toc {
+  position: sticky;
+  top: var(--docs-header-height);
+  max-height: calc(100vh - var(--docs-header-height));
+  overflow-y: auto;
+}
+
+.docs-layout-sidebar {
+  width: var(--docs-sidebar-width);
+  padding: 1.5rem 1rem;
+  border-right: 2px solid var(--ds-border-strong);
+}
+
+.docs-layout-toc {
+  width: var(--docs-toc-width);
+  padding: 1.5rem 1rem;
+  border-left: 2px solid var(--ds-border-strong);
+}
+
+.docs-layout-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ds-layer-overlay);
+  background-color: var(--ds-surface-overlay);
+}
+
+/* Mobile: the sidebar is an off-canvas drawer. */
+@media (max-width: 1023px) {
+  .docs-layout-sidebar {
+    position: fixed;
+    top: var(--docs-header-height);
+    left: 0;
+    bottom: 0;
+    /*
+     * One above the scrim it covers. The layer scale has four rungs and this
+     * chrome needs five — scrim, then sidebar, then header — so the extra step
+     * is expressed as an offset from the token rather than as a new literal.
+     */
+    z-index: calc(var(--ds-layer-overlay) + 1);
+    max-height: none;
+    background-color: var(--ds-surface-base);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+
+  .docs-layout-sidebar[data-open='true'] {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 1024px) {
+  .docs-layout-body {
+    grid-template-columns: var(--docs-sidebar-width) minmax(0, 1fr);
+  }
+
+  .docs-layout-main {
+    padding: 2.5rem 2.5rem 5rem;
+  }
+
+  .docs-layout-scrim {
+    display: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .docs-layout-body {
+    grid-template-columns: var(--docs-sidebar-width) minmax(0, 1fr) var(--docs-toc-width);
+  }
+}
+
+/* Below xl there is no third column to put the contents rail in. */
+@media (max-width: 1279px) {
+  .docs-layout-toc {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Header
+   ========================================================================== */
+
+.docs-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--ds-layer-top);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 2px solid var(--ds-border-strong);
+  background-color: var(--ds-surface-base);
+}
+
+.docs-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.docs-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.docs-header-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--ds-font-display);
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ds-text-primary);
+  white-space: nowrap;
+}
+
+.docs-header-brand:hover {
+  color: var(--ds-accent-primary);
+}
+
+.docs-header-brand-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--ds-accent-primary);
+}
+
+.docs-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.docs-header-nav-link {
+  font-family: var(--ds-font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--ds-text-primary);
+  opacity: 0.75;
+  padding-bottom: 2px;
+  border-bottom: 2px solid transparent;
+}
+
+.docs-header-nav-link:hover {
+  opacity: 1;
+  color: var(--ds-accent-primary);
+}
+
+.docs-header-nav-link[aria-current='page'] {
+  opacity: 1;
+  color: var(--ds-accent-primary);
+  border-bottom-color: var(--ds-accent-primary);
+}
+
+.docs-header-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 2px solid var(--ds-border-strong);
+  background-color: var(--ds-surface-base);
+  color: var(--ds-text-primary);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.docs-header-icon-btn:hover {
+  background-color: var(--ds-accent-primary);
+  color: var(--ds-surface-base);
+}
+
+.docs-header-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border: 2px solid var(--ds-border-strong);
+  background-color: var(--ds-surface-base);
+  color: var(--ds-text-primary);
+  font-family: var(--ds-font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.docs-header-search:hover {
+  background-color: var(--ds-accent-primary);
+  color: var(--ds-surface-base);
+}
+
+.docs-header-kbd {
+  padding: 0 0.3rem;
+  border: 1px solid currentColor;
+  font-size: 0.65rem;
+  opacity: 0.8;
+}
+
+/* The sidebar toggle only exists below lg, where the rail is a drawer. */
+@media (min-width: 1024px) {
+  .docs-header-sidebar-toggle {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .docs-header-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .docs-header-search-label,
+  .docs-header-kbd {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Sidebar
+   ========================================================================== */
+
+.docs-sidebar-label,
+.docs-toc-label {
+  margin: 0 0 0.75rem;
+  font-family: var(--ds-font-display);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ds-accent-secondary);
+}
+
+.docs-sidebar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Nested levels indent and gain a rule to make the hierarchy legible. */
+.docs-sidebar-list[data-depth='1'],
+.docs-sidebar-list[data-depth='2'],
+.docs-sidebar-list[data-depth='3'] {
+  margin-left: 0.55rem;
+  padding-left: 0.55rem;
+  border-left: 2px solid var(--ds-border-subtle);
+}
+
+.docs-sidebar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.docs-sidebar-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: none;
+  border: 0;
+  background: none;
+  color: var(--ds-accent-primary);
+  cursor: pointer;
+}
+
+.docs-sidebar-link {
+  display: block;
+  width: 100%;
+  padding: 0.3rem 0.4rem;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: none;
+  font-family: var(--ds-font-mono);
+  font-size: 0.8rem;
+  line-height: 1.4;
+  text-align: left;
+  text-decoration: none;
+  color: var(--ds-text-primary);
+  opacity: 0.72;
+  cursor: pointer;
+  transition: opacity 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.docs-sidebar-link:hover {
+  opacity: 1;
+  color: var(--ds-accent-primary);
+}
+
+.docs-sidebar-link[data-active='true'] {
+  opacity: 1;
+  font-weight: 700;
+  color: var(--ds-accent-primary);
+  border-left-color: var(--ds-accent-primary);
+  background-color: color-mix(in oklab, var(--ds-accent-primary) 12%, transparent);
+}
+
+.docs-sidebar-group-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+}
+
+/*
+ * Muted by Role, not by opacity. At 0.55 this composited to 3.45:1 on `sketch`
+ * — readable text below AA, and invisible to `check:contrast`, which reads the
+ * declared foreground before `opacity` is applied. `text.muted` is measured.
+ */
+.docs-sidebar-link-static {
+  cursor: default;
+  color: var(--ds-text-muted);
+}
+
+/* ==========================================================================
+   Table of contents
+   ========================================================================== */
+
+.docs-toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.docs-toc-link {
+  display: block;
+  padding: 0.22rem 0.5rem;
+  border-left: 2px solid var(--ds-border-subtle);
+  font-family: var(--ds-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  text-decoration: none;
+  color: var(--ds-text-primary);
+  opacity: 0.65;
+  transition: opacity 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  /* Heading text is arbitrary and often long — `tvs metadata --readonly-only`
+   * has no break opportunity the rail can use on its own. */
+  overflow-wrap: anywhere;
+}
+
+.docs-toc-link:hover {
+  opacity: 1;
+  color: var(--ds-accent-primary);
+}
+
+.docs-toc-link[data-active='true'] {
+  opacity: 1;
+  font-weight: 700;
+  color: var(--ds-accent-primary);
+  border-left-color: var(--ds-accent-primary);
+}
+
+/* ==========================================================================
+   Breadcrumbs
+   ========================================================================== */
+
+.docs-breadcrumbs-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  font-family: var(--ds-font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.docs-breadcrumbs-link {
+  color: var(--ds-text-primary);
+  opacity: 0.65;
+  text-decoration: none;
+}
+
+.docs-breadcrumbs-link:hover {
+  opacity: 1;
+  color: var(--ds-accent-primary);
+}
+
+.docs-breadcrumbs-sep {
+  color: var(--ds-accent-tertiary);
+}
+
+.docs-breadcrumbs-current {
+  color: var(--ds-accent-secondary);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Prev/next pager
+   ========================================================================== */
+
+.docs-pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--ds-border-strong);
+}
+
+.docs-pager-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--ds-border-strong);
+  text-decoration: none;
+  color: var(--ds-text-primary);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.docs-pager-link:hover {
+  transform: translate(-2px, -2px);
+  border-color: var(--ds-accent-primary);
+  box-shadow: 4px 4px 0 0 var(--ds-accent-primary);
+}
+
+.docs-pager-next {
+  text-align: right;
+}
+
+.docs-pager-dir {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--ds-font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ds-accent-tertiary);
+}
+
+.docs-pager-next .docs-pager-dir {
+  justify-content: flex-end;
+}
+
+.docs-pager-label {
+  font-family: var(--ds-font-display);
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.25;
+}
+
+@media (max-width: 639px) {
+  .docs-pager {
+    grid-template-columns: 1fr;
+  }
+
+  .docs-pager-next {
+    text-align: left;
+  }
+
+  .docs-pager-next .docs-pager-dir {
+    justify-content: flex-start;
+  }
+}

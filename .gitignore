@@ -1,4 +1,4 @@
-node_modules
+node_modules/
 dist/
 storybook-static/
 playwright-report/
@@ -9,12 +9,6 @@ test-results/
 # Temporary files, local databases, scratch files, and git worktrees
 /temp/
 temp/
-# Agent tooling creates worktrees here regardless of rule 11 in AGENTS.md.
-.claude/worktrees/
-
-# Google Stitch local sync artifacts (deterministically generated via scripts/sync-stitch.mjs)
-stitch-assets/
-stitch-screenshots/
 
 # Local TODO file
 todo.md
@@ -30,9 +24,6 @@ walkthrough-results/
 
 # Vitest coverage output
 coverage/
-
-# CI telemetry reports (scripts/ci-telemetry.mjs)
-telemetry/
 .vercel
 
 # Book of Shapes reference SVGs - third-party artwork, no published license.
@@ -43,25 +34,3 @@ reference/bookofshapes/contact-sheet.html
 # npm pack output. Generated for local verification against a consumer before
 # publishing; never a committed artifact.
 *.tgz
-
-# The applied site: Next.js build output, the static export, and the docs data
-# generated from the package (a cache of the package, never a source).
-apps/site/.next/
-apps/site/out/
-apps/site/next-env.d.ts
-apps/site/src/generated/
-apps/site/*.tsbuildinfo
-
-# The assembled Vercel output: Storybook at the root and the site under
-# site/, written by scripts/assemble-deploy.mjs.
-deploy-output/
-
-# Repo-local reports: the .tsx files are the artefacts; the HTML and PDFs are
-# cut from them on demand and never committed.
-packages/design-system-report/reports/*.html
-packages/design-system-report/reports/*.pdf
-# Scratch output of pdf.e2e.test.ts when a run is interrupted.
-packages/design-system-report/.pdf-e2e-tmp/
-
-# Mutation testing (stryker.config.mjs) reports. Its scratch goes under /temp/.
-reports/mutation/

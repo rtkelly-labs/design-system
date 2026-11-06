@@ -1,0 +1,51 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Colour is addressed by role" tags={['stable']} />
+
+# Colour is addressed by role, never by hue
+
+A component says `bg-surface-raised` or `text-intent-danger`. It never says `cyan`.
+
+This is the system's central claim, and it is enforced: `pnpm check:tokens` holds hue-named
+call sites at **budget 0**, and the published component API contains no appearance name at
+all.
+
+## Why the distinction is not pedantry
+
+A hue name is a promise about appearance that the system cannot keep across Levels.
+
+`accent.primary` renders `#22d3ee` on `midnight` — cyan — and `#1450d7` on `sketch`, which is
+blue. A prop called `cyan` would be a lie on half the Levels, and the component asking for it
+never wanted cyan: it wanted *the primary accent*.
+
+The practical consequence is that a retheme is a change to one file rather than a
+find-and-replace across every component. That is the difference between a design system and a
+stylesheet with good intentions.
+
+## There is a hue vocabulary, and components may not touch it
+
+Some targets have no notion of jobs. A terminal has sixteen positions named by colour and no
+concept of a keyword, so a `palette` layer exists *underneath* the roles — `red`, `orange`,
+`yellow`, `green`, `teal`, `cyan`, `blue`, `violet`, `magenta`, `pink`.
+
+Roles reference those by name; the palette holds the literals. The direction matters:
+
+> Hue → Role is a declared lookup. Role → Hue is a guess.
+
+An emitter targeting ANSI would otherwise have to answer *"which of the sixteen is
+`#22d3ee`?"* by inspecting a hex — ambiguous when two roles share a value, and lossy when no
+role sits near a named hue.
+
+`auditHueAgreement` gates the two against drift. It exists because they did drift once: a
+palette pink was lifted while the role stayed behind, leaving two pinks on one Level that were
+0.036 apart in OKLab — both passing their own floors, and invisibly different.
+
+## What this costs you
+
+Nothing, unless you were hoping to name a colour. If you need a specific hue for a chart or a
+diagram, that is what the categorical `chart` scale is for — an *ordered* sequence chosen so
+that any two members read as different from each other, and so that truncating it cannot
+create a collision among the ones that remain.
+
+Full reasoning: [ADR 0001](https://github.com/rtkelly13/design-system/blob/main/docs/adr/0001-hues-declared-below-roles.md)
+and [ADR 0002](https://github.com/rtkelly13/design-system/blob/main/docs/adr/0002-one-source-many-emitted-surfaces.md).

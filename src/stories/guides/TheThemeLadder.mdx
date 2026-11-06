@@ -1,0 +1,52 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/The theme ladder" tags={['stable']} />
+
+# The ladder: two Levels, independently authored
+
+A **Level** is one complete set of colour decisions, selected at runtime by a `data-theme`
+attribute. There are two: `midnight` and `sketch`.
+
+## Neither is named for its polarity, and that is the point
+
+`midnight` has polarity `dark`; `sketch` has `light`. Calling them `dark` and `light` would
+have collapsed the Level and its polarity into one thing — and then a third Level would need a
+new vocabulary rather than a new name.
+
+`midnight` names a ground. `sketch` names a surface and a way of drawing on it. Polarity
+survives as a *declared property of* a Level, which is why `dark:` and `light:` variants still
+mean something alongside `midnight:` and `sketch:`.
+
+## Neither is derived from the other
+
+This is the expensive decision and it was deliberate. Deriving one palette from another by
+inverting lightness produces colours that are arithmetically related and perceptually wrong:
+a percentage tuned against near-black does not hold at the light end. `border.subtle` at 28%
+is a visible hairline on black and invisible on paper.
+
+So every value is a literal, authored per Level. The cost is twice the authoring; the benefit
+is that `pnpm check:contrast` can compute every pair without a browser — **222 pairs across
+two Levels** — which is what makes hand-tuned literals sustainable rather than twenty times
+the manual review.
+
+## Selecting one
+
+```tsx
+<ThemeProvider defaultLevel="midnight">
+```
+
+`persist` writes the choice to `localStorage`; `followSystem` reads `prefers-color-scheme`.
+Both are on by default, and both are the wrong thing for a capture surface — see
+[deterministic rendering](https://github.com/rtkelly13/design-system/blob/main/docs/deterministic-rendering.md),
+where `scoped` is the switch that actually does the work.
+
+## Adding a third
+
+Add it to `THEME_LEVELS` and `LEVELS` in `src/theme/levels.ts`, then run `pnpm tokens:build`.
+
+Adding a *role* is a compile error in every Level at once — that is the guarantee the
+`Record<ThemeLevel, …>` shape buys, and it is why a Level cannot half-exist. `check:contrast`
+will then tell you, in numbers, which of your new pairs do not clear their floor.
+
+Full reasoning: [ADR 0003](https://github.com/rtkelly13/design-system/blob/main/docs/adr/0003-two-levels-independently-authored.md)
+and [ADR 0004](https://github.com/rtkelly13/design-system/blob/main/docs/adr/0004-two-axes-level-and-medium.md).

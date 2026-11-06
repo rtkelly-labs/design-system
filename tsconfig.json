@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    /* Explicit `.ts` extensions on a *value* import.
+     *
+     * `tsup` emits; `tsc` only typechecks (`pnpm typecheck` is `tsc --noEmit`),
+     * so nothing here needs to rewrite a specifier and this option costs
+     * nothing.
+     *
+     * It exists because three modules now have to be importable by a plain
+     * `.mjs` script — `scripts/check-contrast.mjs`, `build-tokens.mjs`,
+     * `build-design-tokens.mjs` — and Node's native type-stripping requires
+     * the extension while tsc rejected it without this. The workarounds were
+     * accumulating: `contrast.ts` inlines its own copy of the hue list, and
+     * `auditContrast` takes its floors as a parameter rather than reading
+     * `media.ts`. Both are still fine, but the next one should not have to be
+     * invented. */
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    // tsup's dts worker injects its own `baseUrl`, which TS 6 deprecates. Remove
+    // once tsup ships a rollup-plugin-dts that no longer sets it (also what
+    // currently blocks TS 7 here).
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*"]
+}

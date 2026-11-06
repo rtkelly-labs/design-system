@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/stories/**/*.stories.tsx",
+    "src/stories/manifesto/index.ts",
+    ".storybook/{main,preview}.ts",
+    "scripts/*.mjs",
+    "tests/*.ts",
+    "*.config.{ts,mts,mjs}"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "scripts/**/*.mjs",
+    "tests/*.ts",
+    ".storybook/**/*.ts"
+  ],
+  "ignoreDependencies": [
+    "@tailwindcss/typography",
+    "@fontsource-variable/inter",
+    "@fontsource-variable/space-grotesk",
+    "@fontsource/ibm-plex-mono",
+    "@fontsource/vt323"
+  ]
+}

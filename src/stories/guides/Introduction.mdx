@@ -1,0 +1,54 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Guides/Introduction" tags={['stable']} />
+
+# The visual language for ryankelly.dev
+
+A set of colour and type decisions held in one TypeScript module, from which every
+consumable form — a stylesheet, an editor theme, a terminal scheme — is **generated rather
+than written**.
+
+That sentence is the whole design. A colour originates exactly once, in `src/theme/levels.ts`,
+and everything else is a cache of it that CI regenerates and compares.
+
+## Install
+
+```bash
+pnpm add @rtkelly13/design-system
+```
+
+```tsx
+import '@rtkelly13/design-system/styles.css';
+import { ThemeProvider, Button, Card } from '@rtkelly13/design-system';
+
+export function App() {
+  return (
+    <ThemeProvider defaultLevel="midnight">
+      <Card>
+        <Button variant="primary">EXECUTE</Button>
+      </Card>
+    </ThemeProvider>
+  );
+}
+```
+
+## Two axes, and no token varies on both
+
+**Level** varies colour and is chosen at runtime by a `data-theme` attribute. `midnight` and
+`sketch` are the two, and neither is named for its polarity — which is what keeps a third one
+cheap.
+
+**Medium** varies geometry and time — a unit system and a time base — and is chosen at build
+time by which artifact is emitted. `web`, `video`, `graphic`.
+
+The prefixes do not overlap, deliberately: `--ds-text-primary` is an ink, `--ds-type-body` is
+a size. They were renamed before shipping rather than after.
+
+## What is measured rather than reviewed
+
+Colour is chosen by arithmetic here, which is unusual and load-bearing. `pnpm check:contrast`
+audits every role pair on every Level on every build and fails CI — so a review that disagrees
+with it is wrong, and most rules about colour can be gates rather than conventions.
+
+See **Colour is addressed by role** for why a component may never name a hue, and
+**Accessibility** for what that does and does not guarantee.

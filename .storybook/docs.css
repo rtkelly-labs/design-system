@@ -1,0 +1,170 @@
+/**
+ * Storybook Docs brutalist theme overrides.
+ *
+ * Storybook's `@storybook/addon-docs` injects unlayered Emotion styles into
+ * `.sbdocs` pages, setting hardcoded white backgrounds and light-gray cards.
+ *
+ * This stylesheet enforces the design system tokens across all Docs views:
+ * hard edges (0px border-radius), 2px borders, brutalist offset shadows,
+ * semantic surface tokens, and display/mono typography.
+ */
+
+.sbdocs.sbdocs-wrapper {
+  background-color: var(--ds-surface-base) !important;
+  color: var(--ds-text-primary) !important;
+  font-family: var(--ds-font-body) !important;
+  min-height: 100vh;
+}
+
+.sbdocs .sbdocs-content {
+  color: var(--ds-text-primary) !important;
+  font-family: var(--ds-font-body) !important;
+  max-width: 1100px !important;
+}
+
+/* Typography */
+.sbdocs h1,
+.sbdocs h2,
+.sbdocs h3,
+.sbdocs h4,
+.sbdocs h5,
+.sbdocs h6 {
+  font-family: var(--ds-font-display) !important;
+  color: var(--ds-text-primary) !important;
+  letter-spacing: 0.02em;
+}
+
+.sbdocs h1 {
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--ds-border-strong) !important;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.sbdocs h2 {
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--ds-border-subtle) !important;
+  padding-bottom: 0.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.sbdocs p,
+.sbdocs li {
+  color: var(--ds-text-secondary);
+  line-height: 1.6;
+}
+
+.sbdocs a {
+  color: var(--ds-accent-primary) !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+}
+
+.sbdocs a:hover {
+  color: var(--ds-accent-secondary) !important;
+}
+
+.sbdocs hr {
+  border: none !important;
+  border-top: 2px solid var(--ds-border-strong) !important;
+  margin: 2.5rem 0 !important;
+}
+
+/* Story Canvas / Specimen Cards */
+.sbdocs .docs-story {
+  border: 2px solid var(--ds-border-strong) !important;
+  border-radius: 0 !important;
+  background-color: var(--ds-surface-raised) !important;
+  box-shadow: var(--ds-shadow-hard-sm) !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.sbdocs .docs-story > div:first-child {
+  border-bottom: 1px solid var(--ds-border-subtle) !important;
+  background-color: var(--ds-surface-raised) !important;
+}
+
+.sbdocs .sb-story {
+  background-color: var(--ds-surface-base) !important;
+  border-radius: 0 !important;
+}
+
+/* Code & Syntax Blocks */
+.sbdocs pre,
+.sbdocs code,
+.sbdocs .docblock-source {
+  font-family: var(--ds-font-mono) !important;
+  border-radius: 0 !important;
+}
+
+.sbdocs code:not(pre code) {
+  background-color: var(--ds-surface-raised) !important;
+  color: var(--ds-text-primary) !important;
+  border: 1px solid var(--ds-border-subtle) !important;
+  padding: 0.15em 0.4em !important;
+  border-radius: 0 !important;
+  font-size: 0.875em !important;
+}
+
+.sbdocs .docblock-source {
+  border: 2px solid var(--ds-border-strong) !important;
+  background-color: var(--ds-surface-raised) !important;
+  box-shadow: var(--ds-shadow-hard-sm) !important;
+}
+
+.sbdocs .docblock-source pre {
+  background-color: var(--ds-surface-raised) !important;
+}
+
+/* Controls & ArgsTable */
+.sbdocs .docblock-argstable,
+.sbdocs table.sb-argstableBlock {
+  border: 2px solid var(--ds-border-strong) !important;
+  border-radius: 0 !important;
+  background-color: var(--ds-surface-raised) !important;
+  color: var(--ds-text-primary) !important;
+  font-family: var(--ds-font-mono) !important;
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.sbdocs .docblock-argstable th,
+.sbdocs table.sb-argstableBlock th {
+  background-color: var(--ds-surface-base) !important;
+  color: var(--ds-text-secondary) !important;
+  border-bottom: 2px solid var(--ds-border-strong) !important;
+  font-family: var(--ds-font-display) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+}
+
+.sbdocs .docblock-argstable td,
+.sbdocs table.sb-argstableBlock td {
+  border-bottom: 1px solid var(--ds-border-subtle) !important;
+  color: var(--ds-text-primary) !important;
+  padding: 0.75rem 1rem !important;
+  vertical-align: top;
+}
+
+.sbdocs .docblock-argstable tr:hover td,
+.sbdocs table.sb-argstableBlock tr:hover td {
+  background-color: var(--ds-surface-overlay);
+}
+
+/* Docblock buttons (Show code, Copy, Zoom) */
+.sbdocs button {
+  border-radius: 0 !important;
+}
+
+.sbdocs .docblock-code-toggle {
+  border-radius: 0 !important;
+  border: 1px solid var(--ds-border-strong) !important;
+  background-color: var(--ds-surface-raised) !important;
+  color: var(--ds-text-primary) !important;
+  font-family: var(--ds-font-mono) !important;
+}
