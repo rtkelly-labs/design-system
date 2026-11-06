@@ -40,6 +40,44 @@ function sanitize(str) {
   return str.replace(/[^a-zA-Z0-9_-]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
 }
 
+/**
+ * Stitch answers a download with a JSON envelope whose `dataString` holds the payload,
+ * base64-encoded. Unwrap it, and accept a bare payload too in case the API stops wrapping.
+ */
+function unwrap(body, kind) {
+  try {
+    const parsed = JSON.parse(body.toString('utf8'));
+    if (typeof parsed?.dataString === 'string') {
+      const data = parsed.dataString;
+      const isMarkup = kind === 'text' && /^\s*</.test(data);
+      return isMarkup ? Buffer.from(data, 'utf8') : Buffer.from(data, 'base64');
+    }
+  } catch {
+    // Not JSON: the body is already the payload.
+  }
+  return body;
+}
+
+/** Downloads one asset. Returns its path relative to the output root, or null if none is on disk. */
+async function download(url, token, filePath, kind, title) {
+  if (!url) return null;
+  const rel = path.relative(OUTPUT_ROOT, filePath);
+  const kept = () => (fs.existsSync(filePath) ? rel : null);
+  try {
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) {
+      console.error(`    ✗ ${rel}: HTTP ${res.status} for ${title}`);
+      return kept();
+    }
+    fs.writeFileSync(filePath, unwrap(Buffer.from(await res.arrayBuffer()), kind));
+    console.log(`  ↓ ${rel}`);
+    return rel;
+  } catch (err) {
+    console.error(`    ✗ ${rel}: ${err.message}`);
+    return kept();
+  }
+}
+
 async function main() {
   console.log(`[Stitch Sync] Fetching screens for project: ${PROJECT_ID}...`);
   const token = getAuthToken();
@@ -51,13 +89,17 @@ async function main() {
   fs.mkdirSync(OUTPUT_ROOT, { recursive: true });
 
   const manifest = [];
+  const usedNames = new Set();
 
   for (const screen of screens) {
     const category = classify(screen.title);
     const catDir = path.join(OUTPUT_ROOT, category);
     fs.mkdirSync(catDir, { recursive: true });
 
-    const baseName = sanitize(screen.title || screen.id);
+    // Two titles can sanitize to the same name; the id keeps the second from overwriting the first.
+    let baseName = sanitize(screen.title || screen.id);
+    if (usedNames.has(`${category}/${baseName}`)) baseName = `${baseName}_${sanitize(screen.id)}`;
+    usedNames.add(`${category}/${baseName}`);
     const entry = {
       id: screen.id,
       title: screen.title || screen.id,
@@ -69,51 +111,10 @@ async function main() {
       htmlFile: null,
     };
 
-    // 1. Download Screenshot
-    if (screen.screenshot?.downloadUrl) {
-      const pngPath = path.join(catDir, `${baseName}.png`);
-      if (!fs.existsSync(pngPath)) {
-        console.log(`  ↓ [${category}] Downloading screenshot: ${screen.title}`);
-        try {
-          const res = await fetch(screen.screenshot.downloadUrl, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            if (data.dataString) {
-              fs.writeFileSync(pngPath, Buffer.from(data.dataString, 'base64'));
-              entry.screenshotFile = path.relative(OUTPUT_ROOT, pngPath);
-            }
-          }
-        } catch (err) {
-          console.error(`    ✗ Failed screenshot for ${screen.title}:`, err.message);
-        }
-      } else {
-        entry.screenshotFile = path.relative(OUTPUT_ROOT, pngPath);
-      }
-    }
-
-    // 2. Download HTML Code
-    if (screen.htmlCode?.downloadUrl) {
-      const htmlPath = path.join(catDir, `${baseName}.html`);
-      if (!fs.existsSync(htmlPath)) {
-        console.log(`  ↓ [${category}] Downloading HTML: ${screen.title}`);
-        try {
-          const res = await fetch(screen.htmlCode.downloadUrl, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const text = await res.text();
-            fs.writeFileSync(htmlPath, text, 'utf8');
-            entry.htmlFile = path.relative(OUTPUT_ROOT, htmlPath);
-          }
-        } catch (err) {
-          console.error(`    ✗ Failed HTML for ${screen.title}:`, err.message);
-        }
-      } else {
-        entry.htmlFile = path.relative(OUTPUT_ROOT, htmlPath);
-      }
-    }
+    // Every sync re-downloads: a screen edited in Stitch keeps its title, so a file
+    // already on disk says nothing about whether it is current.
+    entry.screenshotFile = await download(screen.screenshot?.downloadUrl, token, path.join(catDir, `${baseName}.png`), "binary", entry.title);
+    entry.htmlFile = await download(screen.htmlCode?.downloadUrl, token, path.join(catDir, `${baseName}.html`), "text", entry.title);
 
     manifest.push(entry);
   }
