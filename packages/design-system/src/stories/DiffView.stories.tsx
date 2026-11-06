@@ -5,7 +5,7 @@ import { CALLGRAPH_DIFF, DUPLICATION_DIFF } from './review/fixtures';
 const meta: Meta<typeof DiffView> = {
   title: 'Components/Reports/DiffView',
   component: DiffView,
-  tags: ['autodocs', 'experimental'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     docs: {
       description: {

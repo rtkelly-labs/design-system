@@ -115,7 +115,8 @@ interface Judged {
 }
 
 function judge(row: DiffRow & { label: string }, direction: MetricDirection | undefined, bands: DeltaSignificance | undefined): Judged {
-  const sign = row.sign ?? 'keep';
+  // A typed row with a relative move but no sign takes its sign from the move, as a Markdown row does.
+  const sign = row.sign ?? (row.relative ? (row.relative > 0 ? 'add' : 'remove') : 'keep');
   const change = sign === 'add' ? 1 : sign === 'remove' ? -1 : 0;
   return { row, sign, trend: deltaTrend(change, row.direction ?? direction), size: change === 0 ? 'noise' : deltaSignificance(row.relative, bands) };
 }

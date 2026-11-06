@@ -5,7 +5,7 @@ import { ChangeCount } from '../components/review/ChangeCount';
 const meta: Meta<typeof ChangeCount> = {
   title: 'Components/Reports/ChangeCount',
   component: ChangeCount,
-  tags: ['autodocs', 'experimental'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     docs: {
       description: {

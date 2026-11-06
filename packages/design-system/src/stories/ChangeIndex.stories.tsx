@@ -5,7 +5,7 @@ import { CHANGE_GROUPS } from './review/fixtures';
 const meta: Meta<typeof ChangeIndex> = {
   title: 'Components/Reports/ChangeIndex',
   component: ChangeIndex,
-  tags: ['autodocs', 'experimental'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     docs: {
       description: {
