@@ -40,8 +40,8 @@ export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
  *
  * It renders `role="group"` and is where D3's rule lives: **a danger Button
  * never sits beside a Button of the same hue.** Colour alone must not tell a
- * destructive action from its neighbour (WCAG 1.4.1), and on both Levels
- * `accent.tertiary` and `intent.danger` resolve to the same hue. Each Button
+ * destructive action from its neighbour (WCAG 1.4.1), and on sketch
+ * `accent.tertiary` and `intent.danger` resolve to the same red. Each Button
  * inside registers the Role it paints with; in development the group compares
  * their hues on every Level through the declared `accentHue` / `intentHue`
  * maps and `console.warn`s once per distinct collision. Production builds do no
