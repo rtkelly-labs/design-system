@@ -47,10 +47,10 @@ export const DangerBesideQuiet: Story = {
 };
 
 /**
- * A deliberate collision. `tertiary` and `danger` resolve to the same hue on
- * both Levels, pink on `midnight` and red on `sketch`, so colour alone would
- * be all that tells KEEP from DELETE (WCAG 1.4.1). In development the group
- * logs one `console.warn` naming both Levels; open the browser console on this
+ * A deliberate collision. `tertiary` and `danger` are both red on `sketch`
+ * (on `midnight` danger is red and tertiary pink), so on sketch colour alone
+ * would be all that tells KEEP from DELETE (WCAG 1.4.1). In development the
+ * group logs one `console.warn` naming the Level; open the browser console on this
  * page to see it. Production builds run no check. The fix is to make the
  * neighbour `quiet` or `secondary`, as in the story above.
  */

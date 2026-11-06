@@ -456,7 +456,7 @@
       "$value": "{palette.yellow}"
     },
     "danger": {
-      "$value": "{palette.pink}"
+      "$value": "{palette.red}"
     }
   },
   "delta": {

@@ -88,8 +88,8 @@ visual choice, a red *intent* says something is wrong.
 `delta` is separate from both. An added line is not a success and a removed one is not a
 danger: whether a change is acceptable is a policy's decision, and a diff painted in `intent`
 has made it for the reader. The groups may share a Hue (`delta.added` and `intent.success`
-are both green) and still diverge where the meanings clash: on `midnight`, `delta.removed`
-is red and `intent.danger` is pink.
+are both green, `delta.removed` and `intent.danger` both red) without sharing a meaning: the
+Role a renderer asks for says which job the colour is doing.
 
 ### Hues — what a Target addresses when it has no notion of jobs
 
