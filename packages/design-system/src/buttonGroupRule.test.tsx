@@ -181,7 +181,8 @@ describe('the danger hue rule over stories and samples', () => {
   it('keeps the deliberate collision example colliding, so its caption stays true', () => {
     const example = stories.find((r) => r.label === COLLISION_EXAMPLE);
     expect(example).toBeDefined();
-    expect(findHueCollisions(example?.roles ?? []).length).toBe(2);
+    // Sketch only: on midnight danger is red and tertiary pink (#398).
+    expect(findHueCollisions(example?.roles ?? []).map((h) => h.level)).toEqual(['sketch']);
   });
 
   it.each(SAMPLES)('finds no collision in the %s sample', (name) => {
