@@ -14,14 +14,18 @@ export type FigureTone = 'primary' | 'secondary' | 'tertiary' | 'idle' | 'empty'
 
 export const DIM_OPACITY = 0.4;
 
+/** A named glyph ramp, from empty to full. */
+export type GlyphSetName = 'shade' | 'ascii' | 'hash' | 'bar';
+
+// Spelled out above and checked here, rather than `keyof typeof GLYPH_SETS`:
+// the public type then names no internal constant.
 export const GLYPH_SETS = {
   shade: ['·', '░', '▒', '▓', '█'],
   ascii: ['.', '-', '=', '#', '@'],
   hash: ['.', ':', '+', '#', '█'],
   bar: ['▁', '▂', '▃', '▅', '█'],
-} as const;
+} as const satisfies Record<GlyphSetName, readonly string[]>;
 
-export type GlyphSetName = keyof typeof GLYPH_SETS;
 export type Glyphs = GlyphSetName | readonly string[];
 
 export function resolveGlyphs(glyphs?: Glyphs): readonly string[] {
