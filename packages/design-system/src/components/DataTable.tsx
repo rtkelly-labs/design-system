@@ -101,7 +101,7 @@ export interface DataTableVirtualization {
   scrollElementRef?: RefObject<HTMLElement | null>;
 }
 
-type DataTableSharedProps<T> = {
+export type DataTableSharedProps<T> = {
   /**
    * `grid` keeps the framed default, `quiet` removes the full cell grid, and
    * `index` adds a keyline to row headers for catalog-style scanning.

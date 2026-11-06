@@ -1,5 +1,5 @@
 export { FigureFrame } from './FigureFrame';
-export type { FigureFrameProps } from './FigureFrame';
+export type { FigureFrameProps, FigurePalette, GlyphSetName, Glyphs } from './FigureFrame';
 export * from './FlowDiagram';
 export * from './Timeline';
 export * from './ChangeSummary';

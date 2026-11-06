@@ -1,0 +1,58 @@
+name: Testing Experiments
+
+# Long-running measurements, kept out of the required checks.
+#
+# Nothing here gates a merge. Each job answers one question about the test
+# suite, such as what a long property campaign finds, and uploads its
+# evidence. These jobs are slow, so they run on request rather than on every push.
+#
+# Two ways to ask:
+#
+# - `workflow_dispatch`, once this file is on the default branch.
+# - A label on a pull request: adding `experiment:properties` runs that job
+#   once, and while the label stays on, every push re-runs it. Remove the
+#   label to stop paying for it.
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [labeled, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  properties:
+    name: property campaign
+    # Every model-based file at a run count the unit job cannot afford. A
+    # failure prints the shrunk command sequence and the seed. The verbose
+    # reporter lists each file, so a filter matching nothing is visible.
+    # On a pull request: when the label is added, or on a push while it is on.
+    # Adding some other label must not start this one.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'experiment:properties') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'experiment:properties'))
+    # Per job, not per workflow: a workflow-level group would let a run whose
+    # jobs are all skipped cancel a campaign still in progress.
+    concurrency:
+      group: experiments-properties-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/design-system
+    # About a minute at 1000 runs; the ceiling leaves room for more models.
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Property Campaign
+        env:
+          FC_NUM_RUNS: '1000'
+        # Positional filters are substrings of the path, not globs.
+        run: pnpm exec vitest run model.test --reporter=verbose

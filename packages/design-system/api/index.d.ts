@@ -3788,15 +3788,10 @@ declare function TableOfContents({ toc, fromDepth, toDepth, label, spy, classNam
 
 declare function collectHeadings(container: ParentNode | null | undefined, selector?: string): TocEntry[];
 
-type FigurePalette$1 = 'mono' | 'duo' | 'multi';
-declare const GLYPH_SETS: {
-    readonly shade: readonly ["·", "░", "▒", "▓", "█"];
-    readonly ascii: readonly [".", "-", "=", "#", "@"];
-    readonly hash: readonly [".", ":", "+", "#", "█"];
-    readonly bar: readonly ["▁", "▂", "▃", "▅", "█"];
-};
-type GlyphSetName = keyof typeof GLYPH_SETS;
-type Glyphs$1 = GlyphSetName | readonly string[];
+type FigurePalette = 'mono' | 'duo' | 'multi';
+
+type GlyphSetName = 'shade' | 'ascii' | 'hash' | 'bar';
+type Glyphs = GlyphSetName | readonly string[];
 interface FigureFrameProps extends Omit<react.ComponentProps<'figure'>, 'title'> {
 
     title?: string;
@@ -3831,7 +3826,7 @@ interface FlowDiagramProps extends react.HTMLAttributes<HTMLDivElement> {
 
     children?: ReactNode;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -3861,7 +3856,7 @@ interface TimelineProps extends react.HTMLAttributes<HTMLDivElement> {
 
     children?: ReactNode;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -3904,7 +3899,7 @@ interface ChangeSummaryProps extends react.HTMLAttributes<HTMLDivElement> {
 
     children?: ReactNode;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -3936,7 +3931,7 @@ interface BeforeAfterProps extends react.HTMLAttributes<HTMLDivElement> {
 
     children?: ReactNode;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -3963,9 +3958,9 @@ interface UptimeStripProps extends react.HTMLAttributes<HTMLDivElement> {
 
     columns?: number;
 
-    glyphs?: Glyphs$1;
+    glyphs?: Glyphs;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -4076,8 +4071,6 @@ declare const IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProp
 
 type FigureSurface = 'base' | 'sheet';
 
-type Glyphs = 'shade' | 'ascii' | 'hash' | 'bar' | readonly string[];
-type FigurePalette = 'mono' | 'duo' | 'multi';
 interface ActivityDay {
 
     date: string;
@@ -4465,6 +4458,7 @@ export {
   BlogPost,
   type BlogPostProps,
   BlueskyIcon,
+  type BooleanFieldProps,
   type BorderTone,
   BracketText,
   type BracketTextProps,
@@ -4477,6 +4471,7 @@ export {
   Button,
   type ButtonElementProps,
   type ButtonLinkProps,
+  type ButtonOwnProps,
   type ButtonProps,
   type ButtonVariant,
   CSS_MEDIUM,
@@ -4524,6 +4519,7 @@ export {
   DIVIDER_PATTERNS,
   DataTable,
   type DataTableProps,
+  type DataTableSharedProps,
   type DataTableVirtualization,
   Decision,
   type DecisionOption,
@@ -4586,10 +4582,12 @@ export {
   FeatureGrid,
   type FeatureGridProps,
   type FeatureProps,
+  type FieldProps,
   Fieldset,
   type FieldsetProps,
   FigureFrame,
   type FigureFrameProps,
+  type FigurePalette,
   type FigureSurface,
   type FileChange,
   type FileChangeNode,
@@ -4620,6 +4618,8 @@ export {
   GitHubIcon,
   Glyph,
   type GlyphProps,
+  type GlyphSetName,
+  type Glyphs,
   HEADING_EMPHASIS,
   type HeadingLevel,
   Hero,
@@ -4640,6 +4640,7 @@ export {
   InlineAction,
   type InlineActionButtonProps,
   type InlineActionLinkProps,
+  type InlineActionOwnProps,
   type InlineActionProps,
   type InlineActionTone,
   Input,
@@ -4712,6 +4713,7 @@ export {
   type ModalProps,
   type Motion,
   NERD_GLYPHS,
+  type NamedSocialIconProps,
   NerdIcon,
   type NerdIconAccent,
   type NerdIconName,
@@ -4773,6 +4775,7 @@ export {
   ReportSection,
   type ReportSectionProps,
   ResourceState,
+  type ResourceStateComponent,
   type ResourceStateProps,
   type ResourceStateValue,
   type ResourceStatus,
@@ -4848,6 +4851,7 @@ export {
   StatusMark,
   type StatusMarkProps,
   StatusPage,
+  type StatusPagePresetProps,
   type StatusPageProps,
   type StatusTone,
   type StatusVocabularies,

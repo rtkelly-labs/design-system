@@ -84,6 +84,9 @@ export * from './components/TLDR';
 // `Select` draws its trigger with, and a recipe's type is `tailwind-variants`'.
 export { Input, TextArea } from './components/Input';
 export type { InputProps, TextAreaProps } from './components/Input';
+// The props every field control shares. `InputProps`, `CheckboxProps` and the rest
+// extend them, so a wrapper that takes "any field" needs to name them.
+export type { BooleanFieldProps, FieldProps } from './components/fieldFrame';
 // One of a fixed set (#164): the same field as `Input`, with a listbox this
 // system paints instead of the operating system's, and `native` for the
 // platform picker when that is the better phone experience.

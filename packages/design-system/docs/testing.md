@@ -97,3 +97,37 @@ already shipped twice — `files` listed `LICENSE` and `license` said MIT while 
 such file existed. Note it runs before `pnpm build`, so `dist/` is asserted to be
 *declared*, not to be present.
 
+
+## 🎲 Model-based tests
+
+`*.model.test.tsx` files check an interactive component against a small model
+of itself. fast-check generates sequences of user actions (`fc.commands`). Each
+action is applied twice: to the rendered component through Testing Library,
+and to a plain-data model. After every step the test checks that the DOM says
+what the model says. A failure shrinks to the shortest sequence that still
+fails and prints it, so it reads as a reproduction rather than a seed.
+`FilterBar` and `Menu` have one.
+
+Write one when a component is a state machine the example tests can only
+sample: several keys, an edit mode, controlled and uncontrolled ownership.
+Writing a model costs more than writing examples. In return it reaches orderings
+nobody thought to write.
+
+- **The model must not import its oracle from the module under test.** Restate
+  equality and labels locally. A model that borrows `sameFilter` agrees with
+  any bug in it. That is also why the first FilterBar model could not kill
+  mutants inside `filters.ts`.
+- **Run two mixes.** *uniform* offers every command at every step. *swarm*
+  draws a random subset per run (`fc.subarray(commands).chain(...)`), which
+  reaches the long lists and deep states a uniform mix keeps resetting.
+- **Check what a user can observe.** Read the DOM, ARIA state and callbacks,
+  never component internals.
+- **`FC_NUM_RUNS`** sets sequences per property. The default (30) keeps each
+  file to a few seconds in the unit job. Scale the test timeout with it.
+  `experiments.yml` runs every model file at 1000 when a PR carries the
+  `experiment:properties` label.
+
+`src/public-api.types.test.tsx` is the type-level counterpart. Its
+`expectTypeOf` assertions and `@ts-expect-error` negatives pin promises a
+consumer builds on: narrowing, ref element types, rejected props. `check:api`
+sees the text of the surface; this file sees what that text allows.
