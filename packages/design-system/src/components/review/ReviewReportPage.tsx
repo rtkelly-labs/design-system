@@ -112,10 +112,12 @@ function valueCell(column: ReviewColumn, value: ReviewValue | undefined, key: Re
 }
 
 function MeasurementTable({ table }: { table: ReviewMeasurementTable }) {
+  const captionId = React.useId();
   return (
-    <div data-slot="review-report-measurements" className="overflow-x-auto border-t-2 border-edge-strong">
+    // A wide table scrolls sideways; the region takes focus so the keyboard can scroll it too.
+    <div data-slot="review-report-measurements" role="region" tabIndex={0} aria-labelledby={captionId} className="overflow-x-auto border-t-2 border-edge-strong">
       <table className="w-full border-collapse text-sm [&_tbody_tr:last-child>*]:border-b-0">
-        <caption className="px-3 py-2.5 text-left font-mono text-xs font-bold uppercase tracking-wider text-content-muted">{table.caption}</caption>
+        <caption id={captionId} className="px-3 py-2.5 text-left font-mono text-xs font-bold uppercase tracking-wider text-content-muted">{table.caption}</caption>
         <thead>
           <tr>
             <th scope="col" className="border-b border-edge-default px-3 py-2 text-left font-mono text-xs font-bold uppercase tracking-wider text-content-muted">{table.identityLabel}</th>
