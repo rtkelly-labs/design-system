@@ -9,7 +9,6 @@ import { dialogSurface } from './dialogSurface';
 import { usePopupRef } from './dialogPopupRef';
 import { Button } from './Button';
 import { ButtonGroup } from './ButtonGroup';
-import { BracketText } from './BracketText';
 
 /**
  * Where focus lands when a dialog opens: a ref to an element, a function that
@@ -184,7 +183,7 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(function Modal(
                 <Dialog.Title
                   data-slot="modal-title"
                   className={slots.title()}
-                  render={<h3><BracketText>{title}</BracketText></h3>}
+                  render={<h3>[&nbsp;{title}&nbsp;]</h3>}
                 />
                 <Dialog.Close
                   data-slot="modal-close"
