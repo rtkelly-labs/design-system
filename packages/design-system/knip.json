@@ -6,7 +6,8 @@
     ".storybook/{main,preview}.ts",
     "scripts/*.mjs",
     "tests/*.ts",
-    "*.config.{ts,mts,mjs}"
+    "*.config.{ts,mts,mjs}",
+    "stryker-setup.ts"
   ],
   "project": [
     "src/**/*.{ts,tsx}",
