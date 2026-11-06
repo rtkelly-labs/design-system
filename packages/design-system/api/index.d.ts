@@ -1,5 +1,5 @@
 import * as react from 'react';
-import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps } from 'react';
+import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps, RefAttributes } from 'react';
 import { Table as Table$1, ColumnDef } from '@tanstack/react-table';
 import { RegisterableHotkey } from '@tanstack/react-hotkeys';
 export { ParentSize as ResponsiveChartContainer } from '@visx/responsive';
@@ -377,6 +377,13 @@ declare class Slugger {
 
 declare function childrenToText(node: unknown): string;
 
+interface FormatBytesOptions {
+
+    base?: 1024 | 1000;
+}
+
+declare function formatBytes(bytes: number, options?: FormatBytesOptions): string;
+
 interface UseCopyToClipboardResult {
 
     copied: boolean;
@@ -434,6 +441,29 @@ interface TraceReplay {
 
 declare function useTraceReplay(duration: number, { autoPlay, loop, speed: initialSpeed, loopDelay }?: UseTraceReplayOptions): TraceReplay;
 
+interface UsePolledResourceOptions {
+
+    key?: string | number;
+
+    intervalMs?: number;
+
+    enabled?: boolean;
+}
+interface UsePolledResourceResult<T> {
+
+    data: T | undefined;
+
+    error: string | undefined;
+
+    loading: boolean;
+
+    updatedAt: number | undefined;
+
+    reload: () => void;
+}
+
+declare function usePolledResource<T>(load: () => Promise<T>, { key, intervalMs, enabled }?: UsePolledResourceOptions): UsePolledResourceResult<T>;
+
 interface ButtonOwnProps {
 
     children: ReactNode;
@@ -468,6 +498,31 @@ type ButtonLinkProps = ButtonOwnProps & DetailedHTMLProps<AnchorHTMLAttributes<H
 type ButtonProps = ButtonElementProps | ButtonLinkProps;
 
 declare const Button: react.ForwardRefExoticComponent<(Omit<ButtonElementProps, "ref"> | Omit<ButtonLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
+
+interface InlineActionOwnProps {
+
+    children: ReactNode;
+
+    tone?: InlineActionTone;
+
+    className?: string;
+}
+
+type InlineActionTone = 'accent' | 'quiet';
+
+type InlineActionButtonProps = InlineActionOwnProps & Omit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, 'children'> & {
+    href?: never;
+};
+
+type InlineActionLinkProps = InlineActionOwnProps & Omit<DetailedHTMLProps<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>, 'children'> & {
+
+    href: string;
+
+    disabled?: never;
+};
+type InlineActionProps = InlineActionButtonProps | InlineActionLinkProps;
+
+declare const InlineAction: react.ForwardRefExoticComponent<(Omit<InlineActionButtonProps, "ref"> | Omit<InlineActionLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
 
 type CardVariant = 'panel' | 'card';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
@@ -1482,6 +1537,14 @@ type DataTableSharedProps<T> = {
     containerClassName?: string;
 
     virtualize?: boolean | DataTableVirtualization;
+
+    selectedKeys?: ReadonlySet<string>;
+
+    onSelectionChange?: (keys: Set<string>) => void;
+
+    isRowSelectable?: (row: T) => boolean | string;
+
+    selectionLabel?: (row: T) => string;
 };
 type DataTableProps<T> = DataTableSharedProps<T> & ({
 
@@ -1498,7 +1561,7 @@ type DataTableProps<T> = DataTableSharedProps<T> & ({
     pageSize?: number;
 });
 
-declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, appearance, density, emptyText, className, containerClassName, virtualize, ...rest }: DataTableProps<T>): react.JSX.Element;
+declare function DataTable<T>({ table: providedTable, columns, data, keyExtractor, caption, appearance, density, emptyText, className, containerClassName, virtualize, selectedKeys, onSelectionChange, isRowSelectable, selectionLabel, ...rest }: DataTableProps<T>): react.JSX.Element;
 
 interface ModalProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
     isOpen: boolean;
@@ -3415,6 +3478,35 @@ declare function formatAge(ms: number): string;
 
 declare const FreshnessIndicator: react.ForwardRefExoticComponent<FreshnessIndicatorProps & react.RefAttributes<HTMLSpanElement>>;
 
+type ResourceStatus = 'loading' | 'failed' | 'stale' | 'ready';
+
+interface ResourceStateValue<T> {
+
+    data: T | undefined;
+
+    error: string | undefined;
+
+    loading?: boolean;
+}
+interface ResourceStateProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+
+    state: ResourceStateValue<T>;
+
+    children: (data: T) => ReactNode;
+
+    loading?: ReactNode;
+
+    errorTitle?: string;
+
+    staleTitle?: string;
+}
+
+type ResourceStateComponent = (<T>(props: ResourceStateProps<T> & RefAttributes<HTMLDivElement>) => ReactElement | null) & {
+    displayName?: string;
+};
+
+declare const ResourceState: ResourceStateComponent;
+
 declare function truncateId(value: string, count?: number): string;
 
 interface IdChipProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'onCopy'> {
@@ -3849,15 +3941,10 @@ declare function TableOfContents({ toc, fromDepth, toDepth, label, spy, classNam
 
 declare function collectHeadings(container: ParentNode | null | undefined, selector?: string): TocEntry[];
 
-type FigurePalette$1 = 'mono' | 'duo' | 'multi';
-declare const GLYPH_SETS: {
-    readonly shade: readonly ["·", "░", "▒", "▓", "█"];
-    readonly ascii: readonly [".", "-", "=", "#", "@"];
-    readonly hash: readonly [".", ":", "+", "#", "█"];
-    readonly bar: readonly ["▁", "▂", "▃", "▅", "█"];
-};
-type GlyphSetName = keyof typeof GLYPH_SETS;
-type Glyphs$1 = GlyphSetName | readonly string[];
+type FigurePalette = 'mono' | 'duo' | 'multi';
+
+type GlyphSetName = 'shade' | 'ascii' | 'hash' | 'bar';
+type Glyphs = GlyphSetName | readonly string[];
 interface FigureFrameProps extends Omit<react.ComponentProps<'figure'>, 'title'> {
 
     title?: string;
@@ -3892,7 +3979,7 @@ interface FlowDiagramProps extends react.HTMLAttributes<HTMLDivElement> {
 
     children?: ReactNode;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -3922,7 +4009,7 @@ interface TimelineProps extends react.HTMLAttributes<HTMLDivElement> {
 
     children?: ReactNode;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -3965,7 +4052,7 @@ interface ChangeSummaryProps extends react.HTMLAttributes<HTMLDivElement> {
 
     children?: ReactNode;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -3997,7 +4084,7 @@ interface BeforeAfterProps extends react.HTMLAttributes<HTMLDivElement> {
 
     children?: ReactNode;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -4024,9 +4111,9 @@ interface UptimeStripProps extends react.HTMLAttributes<HTMLDivElement> {
 
     columns?: number;
 
-    glyphs?: Glyphs$1;
+    glyphs?: Glyphs;
 
-    palette?: FigurePalette$1;
+    palette?: FigurePalette;
 
     className?: string;
 }
@@ -4126,6 +4213,8 @@ interface IndexedSectionProps extends Omit<react.HTMLAttributes<HTMLElement>, 't
 
     actions?: ReactNode;
 
+    surface?: 'base' | 'raised' | 'transparent';
+
     children?: ReactNode;
 
     className?: string;
@@ -4133,8 +4222,8 @@ interface IndexedSectionProps extends Omit<react.HTMLAttributes<HTMLElement>, 't
 
 declare const IndexedSection: react.ForwardRefExoticComponent<IndexedSectionProps & react.RefAttributes<HTMLElement>>;
 
-type Glyphs = 'shade' | 'ascii' | 'hash' | 'bar' | readonly string[];
-type FigurePalette = 'mono' | 'duo' | 'multi';
+type FigureSurface = 'base' | 'sheet';
+
 interface ActivityDay {
 
     date: string;
@@ -4522,6 +4611,7 @@ export {
   BlogPost,
   type BlogPostProps,
   BlueskyIcon,
+  type BooleanFieldProps,
   type BorderTone,
   BracketText,
   type BracketTextProps,
@@ -4534,6 +4624,7 @@ export {
   Button,
   type ButtonElementProps,
   type ButtonLinkProps,
+  type ButtonOwnProps,
   type ButtonProps,
   type ButtonVariant,
   CSS_MEDIUM,
@@ -4583,6 +4674,7 @@ export {
   DIVIDER_PATTERNS,
   DataTable,
   type DataTableProps,
+  type DataTableSharedProps,
   type DataTableVirtualization,
   Decision,
   type DecisionOption,
@@ -4645,10 +4737,13 @@ export {
   FeatureGrid,
   type FeatureGridProps,
   type FeatureProps,
+  type FieldProps,
   Fieldset,
   type FieldsetProps,
   FigureFrame,
   type FigureFrameProps,
+  type FigurePalette,
+  type FigureSurface,
   type FileChange,
   type FileChangeNode,
   FileChangeTree,
@@ -4668,6 +4763,7 @@ export {
   type FlowPathProps,
   type FlowRow,
   type FlowTone,
+  type FormatBytesOptions,
   FreshnessIndicator,
   type FreshnessIndicatorProps,
   type FreshnessState,
@@ -4677,6 +4773,8 @@ export {
   GitHubIcon,
   Glyph,
   type GlyphProps,
+  type GlyphSetName,
+  type Glyphs,
   HEADING_EMPHASIS,
   type HeadingLevel,
   Hero,
@@ -4694,6 +4792,12 @@ export {
   type IncidentTimelineProps,
   IndexedSection,
   type IndexedSectionProps,
+  InlineAction,
+  type InlineActionButtonProps,
+  type InlineActionLinkProps,
+  type InlineActionOwnProps,
+  type InlineActionProps,
+  type InlineActionTone,
   Input,
   type InputProps,
   type IntensityScale,
@@ -4764,6 +4868,7 @@ export {
   type ModalProps,
   type Motion,
   NERD_GLYPHS,
+  type NamedSocialIconProps,
   NerdIcon,
   type NerdIconAccent,
   type NerdIconName,
@@ -4829,6 +4934,11 @@ export {
   type ReportMetaItem,
   ReportSection,
   type ReportSectionProps,
+  ResourceState,
+  type ResourceStateComponent,
+  type ResourceStateProps,
+  type ResourceStateValue,
+  type ResourceStatus,
   type ReviewColumn,
   type ReviewFileGroup,
   type ReviewMeasurementTable,
@@ -4914,6 +5024,7 @@ export {
   StatusMark,
   type StatusMarkProps,
   StatusPage,
+  type StatusPagePresetProps,
   type StatusPageProps,
   type StatusTone,
   type StatusVocabularies,
@@ -5051,6 +5162,8 @@ export {
   type UptimeStripProps,
   type UseActiveHeadingOptions,
   type UseCopyToClipboardResult,
+  type UsePolledResourceOptions,
+  type UsePolledResourceResult,
   type UseTraceClockOptions,
   type UseTraceReplayOptions,
   VerdictBand,
@@ -5089,6 +5202,7 @@ export {
   fontVar,
   formatAge,
   formatAlertDuration,
+  formatBytes,
   formatClock,
   formatCount,
   formatDay,
@@ -5166,6 +5280,7 @@ export {
   useLinkComponent,
   useOptionalTheme,
   useOptionalToast,
+  usePolledResource,
   useTheme,
   useTimeCursor,
   useTimeRange,

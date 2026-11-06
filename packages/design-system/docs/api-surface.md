@@ -13,6 +13,11 @@ How a breaking type change is detected, and where it gets reviewed.
 disagree; `pnpm api:update` accepts the new surface, and **the diff in that file
 is the API change** — reviewing it in the PR is the entire point of the gate.
 
+Without a local build, push and let CI do it. When `check:api` fails, the
+`package` job writes the accepted file from the `dist/` it just built and uploads
+it as the `api-surface` artifact. `gh run download <run> -n api-surface` gives
+the file to review and commit as `api/index.d.ts`.
+
 It exists because nothing else here could see a breaking type change. `pnpm
 typecheck` proves the source is internally consistent, which it remains right up
 to the moment you delete an export; `knip` answers a different question; the

@@ -84,7 +84,7 @@ operating instructions are in [`docs/visual-regression.md`](./docs/visual-regres
 
 - **What is asserted**: three tables in `tests/visual.spec.ts`: `CASES` (desktop), `MOBILE_CASES`
   (narrow viewport) and `INTERACTIONS` (hover, focus and open states). They run against a static
-  Storybook build served on `http://localhost:6006`. `pnpm check:visual-coverage` requires every component to
+  Storybook build served on `http://localhost:8103`. `pnpm check:visual-coverage` requires every component to
   have an asserted story or a stated reason.
 - **Two projects**: `chromium` (desktop) and `mobile`. Baselines live in `tests/__snapshots__/`,
   named by file rather than story id, so retitling a story does not orphan one.

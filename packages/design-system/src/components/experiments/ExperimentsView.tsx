@@ -16,7 +16,7 @@ export interface ExperimentItem {
   /** Leading glyph. A node rather than a component type, so it can carry its own size. */
   icon?: React.ReactNode;
   /**
-   * Lifecycle state, shown as a badge and coloured by {@link STATUS_ACCENT} —
+   * Lifecycle state, shown as a badge and coloured by `STATUS_ACCENT` —
    * `success` for `active`, `info` for `experimental`, `quiet` for `archived`.
    */
   status: 'active' | 'archived' | 'experimental';
@@ -123,7 +123,7 @@ export interface ExperimentsViewProps {
  * a read-only display.
  *
  * `status` is the only place the component uses colour to mean something, and
- * it reads from {@link STATUS_ACCENT} — intent roles for the two states a
+ * it reads from `STATUS_ACCENT` — intent roles for the two states a
  * reader acts on, `quiet` for `archived`. See that constant for why the third
  * one is the exception.
  */

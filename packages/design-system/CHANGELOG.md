@@ -9,6 +9,25 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## 0.19.0
+
+Pieces for operational apps, upstreamed from the rig hub (rtkelly13/rig#274). Nothing to change.
+
+- `usePolledResource(load, { key, intervalMs, enabled })` loads, then polls while the page is
+  visible, keeps the last good answer when a later load fails, and returns `updatedAt` for
+  `FreshnessIndicator`. A new `key` clears the old answer rather than showing it as current
+  (#440).
+- `ResourceState` renders a resource's loading, failed, stale and ready states around a
+  render-prop body (#440).
+- `DataTable` takes `selectedKeys`, `onSelectionChange`, `isRowSelectable` and
+  `selectionLabel` for controlled row selection. Paginated, the header checkbox selects the
+  current page; a refused row's reason is its checkbox's description (#439).
+- `InlineAction` is a link-styled action for table cells and prose: a `button`, or an `a`
+  through `LinkProvider` when given `href` (#437).
+- `formatBytes` writes a byte count in its largest unit, binary and labelled `KiB` by
+  default, SI with `{ base: 1000 }` (#436).
+- `DrawingSheet` and `IndexedSection` take `surface`, and `FigureSurface` is exported (#420).
+
 ## 0.18.0
 
 A `delta` role group — `added`, `removed`, `moved`, and `deltaGround` `added`, `removed`,
