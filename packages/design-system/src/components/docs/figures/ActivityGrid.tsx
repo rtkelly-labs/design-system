@@ -7,13 +7,12 @@
 
 import * as React from 'react';
 import { cn } from '../../../lib/recipe';
+import type { FigurePalette, Glyphs } from './FigureFrame';
 
 const DAY_MS = 86_400_000;
 const MAX_DAYS = 3660;
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
 const DEFAULT_GLYPHS = ['·', '░', '▒', '▓', '█'];
-type Glyphs = 'shade' | 'ascii' | 'hash' | 'bar' | readonly string[];
-type FigurePalette = 'mono' | 'duo' | 'multi';
 
 function glyphsOf(glyphs?: Glyphs): readonly string[] {
   if (Array.isArray(glyphs)) return glyphs.length ? glyphs : DEFAULT_GLYPHS;

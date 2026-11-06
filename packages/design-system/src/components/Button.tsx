@@ -12,7 +12,7 @@ import type {
 import { recipe } from '../lib/recipe';
 import { Spinner } from './Spinner';
 
-interface ButtonOwnProps {
+export interface ButtonOwnProps {
   /**
    * The label. Written in caps at the call site rather than upper-cased in
    * CSS, so a screen reader is given the words rather than the shouting, and
