@@ -1,0 +1,26 @@
+{
+  "pr": "427",
+  "head": "e27058ec987525b3f77459a26f8c3590ac737213",
+  "base": "ff1316622a2f5dab7f260b5f5b799e8f60a44d14",
+  "baseRef": "ccr-794af230-tm4utf-5-quiet-weights",
+  "status": "rendered",
+  "total": 219,
+  "changed": [
+    "saas-landing-mobile",
+    "saas-landing-product-launch-mobile",
+    "saas-landing-project-site-mobile",
+    "blog-post-foundational",
+    "blogpost-custom-author-card",
+    "blogpost-full-metadata",
+    "blogpost-guest-author",
+    "blogpost-with-avatar",
+    "divider-patterns",
+    "hero-default",
+    "saas-landing-midnight",
+    "saas-landing-product-launch",
+    "saas-landing-sketch",
+    "theme-ladder-all-levels"
+  ],
+  "added": [],
+  "failures": []
+}
