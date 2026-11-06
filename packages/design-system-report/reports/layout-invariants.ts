@@ -601,14 +601,19 @@ export async function runMutations(page: Page, o: RunMutationOptions): Promise<M
   const mutate = (arg: object) => page.evaluate<{ target: string; effective: boolean } | null>(`(${mutateCell.toString()})(${JSON.stringify(arg)})`);
   const restore = () => page.evaluate(`(${restoreMutant.toString()})()`);
   for (const m of MUTANTS) {
+    // Count only mutants that are real defects: which cells come first depends on the
+    // compendium's order, and a run of cells whose text happens to fit would otherwise
+    // leave a kind with nothing effective. Attempts stay bounded.
     let done = 0;
+    let tried = 0;
     for (const cell of clean) {
-      if (done >= perMutant) break;
+      if (done >= perMutant || tried >= perMutant * 4) break;
       if (m.kind === 'missing-font' && !o.geometry?.some((g) => g.key === cell)) continue;
       const before = new Set((await runLayout(page, { only: cell })).map(kindsKey));
       const hit = await mutate({ kind: m.kind, css: m.css, cell });
       if (!hit) continue;
-      done++;
+      tried++;
+      if (hit.effective) done++;
       let by: Invariant[] = [];
       if (m.kind === 'missing-font') {
         const pageNo = o.geometry!.find((g) => g.key === cell)!.page;
