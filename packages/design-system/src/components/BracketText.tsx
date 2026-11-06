@@ -3,6 +3,8 @@ import type { AccentToken } from '../lib/theme';
 import { cn } from '../lib/recipe';
 import { accentTextClass } from '../lib/accentClasses';
 
+const NBSP = '\u00a0';
+
 export interface BracketTextProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
   /**
@@ -25,15 +27,15 @@ export function BracketText({
   // No per-render object: the map lives in `lib/accentClasses`, written once.
   const accentClass = accent ? accentTextClass(accent) : '';
 
+  // A no-break space, not a space, between each bracket and the text: a wrapping title must
+  // never strand a `]` alone on the last line, or open a line with `[` and nothing after it.
   return (
     <span data-slot="bracket-text" className={cn(accentClass, className)} {...props}>
-      <span aria-hidden="true">
-        [
-      </span>{' '}
-      {children}{' '}
-      <span aria-hidden="true">
-        ]
-      </span>
+      <span aria-hidden="true">[</span>
+      {NBSP}
+      {children}
+      {NBSP}
+      <span aria-hidden="true">]</span>
     </span>
   );
 }

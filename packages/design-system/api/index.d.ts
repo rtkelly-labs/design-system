@@ -1065,9 +1065,11 @@ interface PageTitleProps extends HTMLAttributes<HTMLHeadingElement> {
     children: ReactNode;
     subtitle?: string;
     bracketed?: boolean;
+
+    framed?: boolean;
     className?: string;
 }
-declare function PageTitle({ children, subtitle, bracketed, className, ...props }: PageTitleProps): react.JSX.Element;
+declare function PageTitle({ children, subtitle, bracketed, framed, className, ...props }: PageTitleProps): react.JSX.Element;
 
 interface PageHeaderProps {
 
@@ -1190,6 +1192,12 @@ declare function SectionContainer({ children, className }: SectionContainerProps
 type DividerVariant = 'auto' | 'terminal' | 'pencil';
 
 declare const DIVIDER_PATTERNS: Readonly<Record<Polarity, string>>;
+
+declare const DIVIDER_MARKS: Readonly<Record<Polarity, {
+    start: string;
+    fill: string;
+    end: string;
+}>>;
 interface DividerProps extends react__default.HTMLAttributes<HTMLDivElement> {
 
     variant?: DividerVariant;
@@ -2085,6 +2093,8 @@ interface HeroProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'childre
     children?: ReactNode;
 
     bracketed?: boolean;
+
+    framed?: boolean;
 
     align?: SectionAlign;
 
@@ -4686,6 +4696,7 @@ export {
   DEFAULT_PULL_REQUEST,
   DEFAULT_REVIEW_REPORT,
   DEFAULT_SIGNIFICANCE,
+  DIVIDER_MARKS,
   DIVIDER_PATTERNS,
   DataTable,
   type DataTableProps,
