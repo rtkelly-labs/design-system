@@ -406,7 +406,7 @@ export const PLATES: readonly PlateSpec[] = [
 
   { component: 'AppShell', rungs: ['sketch'], group: 'Layout', height: 135, layout: 'stack', states: fromStories(AppShellStories, ['Default']) },
 
-  { component: 'Tabs', group: 'Navigation', height: 128, layout: 'stack', states: fromStories(TabsStories, ['Default', 'Underline']) },
+  { component: 'Tabs', group: 'Navigation', height: 125, layout: 'stack', states: fromStories(TabsStories, ['Default', 'Underline']) },
   { component: 'SegmentedControl', group: 'Navigation', height: 30, layout: 'side', states: fromStories(SegmentedControlStories, ['Default']) },
 ];
 

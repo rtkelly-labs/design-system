@@ -19,7 +19,6 @@ import {
   Tooltip,
   TreeDiagram,
   useOptionalTheme,
-  BracketText,
 } from '@rtkelly13/design-system';
 import type { NerdIconName } from '@rtkelly13/design-system';
 import {
@@ -352,9 +351,9 @@ function Explorer({ active, onOpen }: { active: string; onOpen: (id: string) => 
   const toggle = useCallback((id: string) => setOpen((o) => ({ ...o, [id]: !o[id] })), []);
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-auto">
-      <h2 className="m-0 px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest text-content-muted"><BracketText>Explorer</BracketText></h2>
+      <h2 className="m-0 px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest text-content-muted">[&nbsp;Explorer&nbsp;]</h2>
       <TreeRows entries={FILE_TREE} depth={0} open={open} toggle={toggle} active={active} onOpen={onOpen} />
-      <h2 className="m-0 mt-4 px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest text-content-muted"><BracketText>Outline</BracketText></h2>
+      <h2 className="m-0 mt-4 px-3 py-2 font-mono text-xs font-bold uppercase tracking-widest text-content-muted">[&nbsp;Outline&nbsp;]</h2>
       <div className="px-2 pb-4 text-xs">
         <TreeDiagram
           label="paginate.ts outline"
@@ -583,7 +582,7 @@ export default function EditorWorkbench() {
         >
           <NerdIcon name="folder" size="sm" />
         </Button>
-        <span className="font-display text-base font-bold uppercase tracking-wider text-accent-primary"><BracketText>rtk.edit</BracketText></span>
+        <span className="font-display text-base font-bold uppercase tracking-wider text-accent-primary">[&nbsp;rtk.edit&nbsp;]</span>
         <span className="hidden truncate text-content-muted sm:inline">pagination-kit</span>
         <button
           ref={paletteTrigger}
@@ -689,7 +688,7 @@ export default function EditorWorkbench() {
               </TabsPanel>
             ))}
             {files.length === 0 ? (
-              <div className="flex flex-1 items-center justify-center text-content-muted"><BracketText>no editors open — Ctrl K</BracketText></div>
+              <div className="flex flex-1 items-center justify-center text-content-muted">[&nbsp;no editors open — Ctrl K&nbsp;]</div>
             ) : null}
           </Tabs>
 
