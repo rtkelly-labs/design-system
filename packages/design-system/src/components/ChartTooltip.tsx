@@ -5,7 +5,6 @@ import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '../lib/recipe';
 import type { AccentToken } from '../lib/theme';
 import { Card } from './Card';
-import { BracketText } from './BracketText';
 
 export { useTooltip as useChartTooltip };
 
@@ -45,7 +44,7 @@ export const ChartTooltip = forwardRef<HTMLDivElement, ChartTooltipProps>(
               data-slot="chart-tooltip-title"
               className="mb-1 border-b border-edge-subtle pb-1 font-bold uppercase tracking-wider text-content-muted"
             >
-              <BracketText>{title}</BracketText>
+              [&nbsp;{title}&nbsp;]
             </div>
           )}
           <div data-slot="chart-tooltip-body" className="space-y-0.5 text-content-primary">

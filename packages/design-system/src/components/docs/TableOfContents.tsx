@@ -4,7 +4,6 @@ import { useCallback, useMemo } from 'react';
 import type { MouseEvent } from 'react';
 import { useActiveHeading } from '../../hooks/useActiveHeading';
 import { cn } from '../../lib/recipe';
-import { BracketText } from '../BracketText';
 
 export interface TocEntry {
   /** Anchor id, without the leading `#`. */
@@ -72,7 +71,7 @@ export function TableOfContents({
 
   return (
     <nav data-slot="table-of-contents" className={cn('not-prose', className)} aria-label="Table of contents">
-      {label && <p className="docs-toc-label"><BracketText>{label}</BracketText></p>}
+      {label && <p className="docs-toc-label">[&nbsp;{label}&nbsp;]</p>}
       <ul className="docs-toc-list">
         {visible.map((entry) => (
           <li
