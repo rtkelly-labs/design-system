@@ -48,6 +48,33 @@ export const EmptyState: Story = {
   },
 };
 
+/**
+ * `responsive` inside a parent with no height of its own, like a card or a tab
+ * panel. The chart keeps its `height` and takes the parent's width.
+ */
+export const Responsive: Story = {
+  render: (args) => (
+    <div className="w-[420px] border border-dashed border-edge-subtle p-2">
+      <BarChart {...args} />
+    </div>
+  ),
+  args: {
+    data: SAMPLE_DATA,
+    height: 240,
+    responsive: true,
+  },
+};
+
+/** With `onBarClick` the chart is one tab stop and the arrows move between bars. */
+export const Interactive: Story = {
+  args: {
+    data: SAMPLE_DATA,
+    width: 540,
+    height: 280,
+    onBarClick: () => {},
+  },
+};
+
 export const SketchTheme: Story = {
   render: (args) => (
     <ThemeProvider defaultLevel="sketch" scoped persist={false} followSystem={false}>

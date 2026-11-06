@@ -9,6 +9,10 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## Unreleased
+
+- `BarChart` with `onBarClick` renders `role="group"` with bar buttons named "LABEL: VALUE" instead of `role="img"`. Update any test that finds that chart by `img` role. Without `onBarClick` the bars no longer show a pointer cursor or hover fade.
+
 ## 0.20.0
 
 Review surfaces and lighter page weight. Re-baseline snapshots of anything showing a page title,

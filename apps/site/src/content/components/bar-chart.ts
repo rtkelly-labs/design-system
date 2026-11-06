@@ -41,16 +41,16 @@ export const barChart: ComponentPageDef = {
       id: 'inspect',
       title: 'Inspecting a bar',
       description:
-        '`onBarClick` receives the datum and its index. Today it only works with a pointer: the bars are not focusable, so a keyboard user cannot reach this interaction (issue 311). Offer the same detail another way, such as a table, until the chart supports it.',
+        '`onBarClick` receives the datum and its index. Setting it turns each bar into a button named "LABEL: VALUE": the chart becomes one tab stop, the arrow keys move between bars, and Enter or Space inspects the focused one.',
       file: 'bar-chart/inspect.tsx',
     },
   ],
   accessibility: {
     notes: [
-      'The SVG is one `role="img"` with an accessible name. Screen readers read the `ariaLabel`, not the bars, so put the takeaway in the label or in nearby text.',
+      'Without `onBarClick` the SVG is one `role="img"` with an accessible name. Screen readers read the `ariaLabel`, not the bars, so put the takeaway in the label or in nearby text.',
       'Next to a chart whose exact values matter, provide the same data as a `DataTable`. A chart shows the shape of the data. A table gives the numbers.',
       'The value labels on the bars (`showValues`) are the only non-colour encoding of each value. Keep them on unless the same values are printed nearby.',
-      '`onBarClick` is pointer-only. The bars do not take focus and have no key handler, so do not make it the only way to reach information.',
+      'With `onBarClick` the SVG becomes a `role="group"` of bar buttons, reachable by keyboard: Tab enters on one bar, ←/→ (or ↑/↓, Home, End) move, Enter or Space activates.',
     ],
   },
 };

@@ -260,6 +260,7 @@ const CASES: readonly VisualCase[] = [
 
   // Chart Primitives
   { id: 'components-data-barchart--vertical', snapshot: 'barchart-vertical.png' },
+  { id: 'components-data-barchart--responsive', snapshot: 'barchart-responsive.png' },
   { id: 'components-data-sparkline--primary-trend', snapshot: 'sparkline-primary-trend.png' },
   { id: 'components-data-bulletchart--primary-benchmark', snapshot: 'bulletchart-primary-benchmark.png' },
   { id: 'components-data-charttooltip--primary', snapshot: 'charttooltip-primary.png' },

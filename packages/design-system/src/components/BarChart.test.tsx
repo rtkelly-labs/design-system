@@ -72,4 +72,60 @@ describe('BarChart', () => {
     expect(bars.length).toBe(3);
     expect(bars[1].getAttribute('width')).toBeDefined();
   });
+
+  it('leaves bars as a picture without onBarClick', () => {
+    const { container } = render(<BarChart data={SAMPLE_DATA} />);
+
+    expect(container.querySelector('svg')?.getAttribute('role')).toBe('img');
+    const bar = container.querySelector('rect.visx-bar');
+    expect(bar?.getAttribute('tabindex')).toBeNull();
+    expect(bar?.getAttribute('class')).not.toContain('cursor-pointer');
+  });
+
+  it('makes bars a keyboard-reachable set of buttons with onBarClick (issue 311)', () => {
+    const onBarClick = vi.fn();
+    render(<BarChart data={SAMPLE_DATA} onBarClick={onBarClick} />);
+
+    const bars = screen.getAllByRole('button');
+    expect(bars.map((b) => b.getAttribute('aria-label'))).toEqual(['ALPHA: 45', 'BETA: 90', 'GAMMA: 30']);
+    // One tab stop.
+    expect(bars.map((b) => b.getAttribute('tabindex'))).toEqual(['0', '-1', '-1']);
+
+    bars[0].focus();
+    fireEvent.keyDown(bars[0], { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(bars[1]);
+    expect(bars[1].getAttribute('tabindex')).toBe('0');
+    expect(bars[0].getAttribute('tabindex')).toBe('-1');
+
+    fireEvent.keyDown(bars[1], { key: 'End' });
+    expect(document.activeElement).toBe(bars[2]);
+    fireEvent.keyDown(bars[2], { key: 'ArrowRight' });
+    expect(document.activeElement).toBe(bars[2]);
+
+    fireEvent.keyDown(bars[2], { key: 'Enter' });
+    expect(onBarClick).toHaveBeenCalledWith(SAMPLE_DATA[2], 2);
+    fireEvent.keyDown(bars[2], { key: 'Home' });
+    fireEvent.keyDown(bars[0], { key: ' ' });
+    expect(onBarClick).toHaveBeenLastCalledWith(SAMPLE_DATA[0], 0);
+  });
+
+  it('gives a responsive chart its height in an auto-height parent (issue 306)', () => {
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+    const { container } = render(
+      <div>
+        <BarChart responsive height={240} data={SAMPLE_DATA} />
+      </div>,
+    );
+
+    const wrapper = container.firstElementChild?.firstElementChild as HTMLElement;
+    expect(wrapper.style.height).toBe('240px');
+    vi.unstubAllGlobals();
+  });
 });
