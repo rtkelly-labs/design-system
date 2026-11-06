@@ -1,0 +1,27 @@
+{
+  "pr": "426",
+  "head": "ff1316622a2f5dab7f260b5f5b799e8f60a44d14",
+  "base": "e47ec9a34b0a6fd3de8a58bf9beacf495a9db69a",
+  "baseRef": "ccr-794af230-tm4utf-4-edge-gate",
+  "status": "rendered",
+  "total": 219,
+  "changed": [
+    "account-flows-create-account-failed-mobile",
+    "account-flows-sign-in-rejected-mobile",
+    "admin-finance-console-mobile",
+    "saas-landing-mobile",
+    "account-flows-create-account",
+    "account-flows-create-account-failed",
+    "account-flows-reset-password",
+    "account-flows-reset-password-mismatch",
+    "account-flows-reset-password-sent",
+    "account-flows-sign-in",
+    "account-flows-sign-in-rejected",
+    "admin-finance-console",
+    "reportdocument-quality-gate",
+    "saas-landing-midnight",
+    "saas-landing-sketch"
+  ],
+  "added": [],
+  "failures": []
+}
