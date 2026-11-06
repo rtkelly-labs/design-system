@@ -7,6 +7,7 @@ import { cn } from '../lib/recipe';
 import { usePortalThemeAttribute } from './portalTheme';
 import { dialogSurface } from './dialogSurface';
 import { Button } from './Button';
+import { ButtonGroup } from './ButtonGroup';
 
 export interface AlertDialogProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children' | 'className'> {
@@ -124,7 +125,7 @@ export const AlertDialog = forwardRef<HTMLDivElement, AlertDialogProps>(function
               {children}
             </BaseAlertDialog.Description>
 
-            <div data-slot="alert-dialog-footer" className={slots.footer()}>
+            <ButtonGroup data-slot="alert-dialog-footer" className={slots.footer()}>
               {footer || (
                 <>
                   {/*
@@ -135,17 +136,17 @@ export const AlertDialog = forwardRef<HTMLDivElement, AlertDialogProps>(function
                     */}
                   <BaseAlertDialog.Close
                     render={
-                      <Button variant="default" size="sm">
+                      <Button variant="quiet" size="sm">
                         {cancelLabel}
                       </Button>
                     }
                   />
-                  <Button onClick={onConfirm} variant="tertiary" bracketed size="sm">
+                  <Button onClick={onConfirm} variant="danger" bracketed size="sm">
                     {confirmLabel}
                   </Button>
                 </>
               )}
-            </div>
+            </ButtonGroup>
           </BaseAlertDialog.Popup>
         </BaseAlertDialog.Viewport>
       </BaseAlertDialog.Portal>
