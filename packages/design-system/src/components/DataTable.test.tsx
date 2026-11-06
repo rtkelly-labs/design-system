@@ -1,10 +1,12 @@
 import {
   getCoreRowModel,
+  getExpandedRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DataTable } from './DataTable';
 
@@ -518,5 +520,232 @@ describe('DataTable virtualized row count', () => {
     // Page two holds data rows 11-20, which are table rows 12-21.
     expect(indices).toEqual(Array.from({ length: 10 }, (_, i) => String(i + 12)));
     expect(dataRows()[0].textContent).toBe('row-0010');
+  });
+});
+
+describe('DataTable selection', () => {
+  const columns = [
+    { header: 'Name', accessor: 'name' as const, rowHeader: true },
+    { header: 'Count', accessor: 'count' as const },
+  ];
+  const twelve: TestItem[] = Array.from({ length: 12 }, (_, i) => ({
+    id: `id-${i}`,
+    name: `row-${String(i).padStart(2, '0')}`,
+    count: i,
+  }));
+
+  interface SelectableProps {
+    initial?: string[];
+    onReport?: (keys: Set<string>) => void;
+    rows?: TestItem[];
+    columns?: typeof columns | { header: string; accessor: 'name' }[];
+    pageSize?: number;
+    virtualize?: { rowHeight: number };
+    isRowSelectable?: (row: TestItem) => boolean | string;
+    selectionLabel?: (row: TestItem) => string;
+  }
+
+  /** A real controlled owner, so a toggle round-trips through the props. */
+  function Selectable({
+    initial = [],
+    onReport,
+    rows = testData,
+    columns: cols = columns,
+    ...rest
+  }: SelectableProps) {
+    const [keys, setKeys] = useState<ReadonlySet<string>>(new Set(initial));
+    return (
+      <DataTable<TestItem>
+        columns={cols}
+        data={rows}
+        keyExtractor={(row) => row.id}
+        selectedKeys={keys}
+        onSelectionChange={(next) => {
+          onReport?.(next);
+          setKeys(next);
+        }}
+        {...rest}
+      />
+    );
+  }
+
+  const box = (name: string) => screen.getByRole('checkbox', { name });
+  const checked = (el: HTMLElement) => el.getAttribute('aria-checked');
+
+  it('renders no selection column unless onSelectionChange is given', () => {
+    render(<DataTable columns={columns} data={testData} keyExtractor={(row) => row.id} />);
+    expect(screen.queryByRole('checkbox')).toBeNull();
+  });
+
+  it('names each row checkbox by its row header, and the header box by its scope', () => {
+    render(<Selectable />);
+    expect(box('Select Zeta')).toBeDefined();
+    expect(box('Select Alpha')).toBeDefined();
+    expect(box('Select all rows')).toBeDefined();
+  });
+
+  it('falls back to the key without a row header, or takes selectionLabel', () => {
+    const { unmount } = render(<Selectable columns={[{ header: 'Name', accessor: 'name' }]} />);
+    expect(box('Select 1')).toBeDefined();
+    unmount();
+    render(<Selectable selectionLabel={(row) => `Pick ${row.name} (${row.count})`} />);
+    expect(box('Pick Beta (99)')).toBeDefined();
+  });
+
+  it('toggles a row, reports keys, and marks the row selected without aria-selected', () => {
+    const onReport = vi.fn();
+    const { container } = render(<Selectable onReport={onReport} />);
+    fireEvent.click(box('Select Alpha'));
+    expect(onReport).toHaveBeenLastCalledWith(new Set(['2']));
+    expect(checked(box('Select Alpha'))).toBe('true');
+    const row = box('Select Alpha').closest('tr')!;
+    expect(row.getAttribute('data-state')).toBe('selected');
+    // aria-selected belongs to a grid's rows, not a plain table's.
+    expect(container.querySelector('[aria-selected]')).toBeNull();
+
+    fireEvent.click(box('Select Alpha'));
+    expect(onReport).toHaveBeenLastCalledWith(new Set());
+    expect(row.hasAttribute('data-state')).toBe(false);
+  });
+
+  it('is reachable by Tab and toggled by Space', () => {
+    render(<Selectable />);
+    const alpha = box('Select Alpha');
+    expect(alpha.tabIndex).toBe(0);
+    alpha.focus();
+    fireEvent.keyDown(alpha, { key: ' ' });
+    fireEvent.keyUp(alpha, { key: ' ' });
+    expect(checked(alpha)).toBe('true');
+  });
+
+  it('lets a sub-row from getSubRows be selected', () => {
+    interface Node extends TestItem { children?: Node[] }
+    const tree: Node[] = [{ id: 'p', name: 'Parent', count: 1, children: [{ id: 'c', name: 'Child', count: 2 }] }];
+    const onReport = vi.fn();
+    function Tree() {
+      const [keys, setKeys] = useState<ReadonlySet<string>>(new Set());
+      const table = useReactTable<Node>({
+        data: tree,
+        columns: [{ accessorKey: 'name', header: 'Name', meta: { rowHeader: true } }],
+        getSubRows: (row) => row.children,
+        state: { expanded: true },
+        getCoreRowModel: getCoreRowModel(),
+        getExpandedRowModel: getExpandedRowModel(),
+      });
+      return (
+        <DataTable<Node>
+          table={table}
+          keyExtractor={(row) => row.id}
+          selectedKeys={keys}
+          onSelectionChange={(next) => {
+            onReport(next);
+            setKeys(next);
+          }}
+        />
+      );
+    }
+    render(<Tree />);
+    fireEvent.click(box('Select Child'));
+    expect(onReport).toHaveBeenLastCalledWith(new Set(['c']));
+    expect(checked(box('Select Child'))).toBe('true');
+  });
+
+  it('keeps a selection with its row through a sort', () => {
+    render(<Selectable initial={['3']} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Name' }));
+    expect(screen.getAllByRole('row')[1].textContent).toContain('Alpha');
+    expect(checked(box('Select Beta'))).toBe('true');
+    expect(checked(box('Select Alpha'))).toBe('false');
+  });
+
+  it('shows the header box as mixed on a partial selection, and fills it on press', () => {
+    const onReport = vi.fn();
+    render(<Selectable initial={['1']} onReport={onReport} />);
+    const all = box('Select all rows');
+    expect(checked(all)).toBe('mixed');
+    fireEvent.click(all);
+    expect(onReport).toHaveBeenLastCalledWith(new Set(['1', '2', '3']));
+    expect(checked(all)).toBe('true');
+    fireEvent.click(all);
+    expect(onReport).toHaveBeenLastCalledWith(new Set());
+    expect(checked(all)).toBe('false');
+  });
+
+  it('selects the current page only when paginated, and keeps other pages', () => {
+    const onReport = vi.fn();
+    render(<Selectable rows={twelve} pageSize={5} initial={['id-11']} onReport={onReport} />);
+    const all = box('Select all rows on this page');
+    expect(checked(all)).toBe('false');
+    fireEvent.click(all);
+    expect(onReport).toHaveBeenLastCalledWith(
+      new Set(['id-11', 'id-0', 'id-1', 'id-2', 'id-3', 'id-4']),
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Page 2' }));
+    expect(checked(box('Select all rows on this page'))).toBe('false');
+    fireEvent.click(screen.getByRole('button', { name: 'Page 1' }));
+    expect(checked(box('Select row-03'))).toBe('true');
+    expect(checked(box('Select all rows on this page'))).toBe('true');
+  });
+
+  it('disables a refused row, describes why, and leaves it out of select-all', () => {
+    const onReport = vi.fn();
+    render(
+      <Selectable
+        onReport={onReport}
+        isRowSelectable={(row) => (row.id === '1' ? 'Has uncommitted changes' : row.id !== '3')}
+      />,
+    );
+    const zeta = box('Select Zeta');
+    expect(zeta.getAttribute('aria-disabled')).toBe('true');
+    const describedBy = zeta.getAttribute('aria-describedby') ?? '';
+    const reasons = describedBy.split(' ').map((id) => document.getElementById(id)?.textContent);
+    expect(reasons).toContain('Has uncommitted changes');
+
+    // `false` disables without a reason to give.
+    const beta = box('Select Beta');
+    expect(beta.getAttribute('aria-disabled')).toBe('true');
+    expect(beta.hasAttribute('aria-describedby')).toBe(false);
+
+    fireEvent.click(zeta);
+    expect(onReport).not.toHaveBeenCalled();
+
+    fireEvent.click(box('Select all rows'));
+    expect(onReport).toHaveBeenLastCalledWith(new Set(['2']));
+    expect(checked(box('Select all rows'))).toBe('true');
+  });
+
+  it('disables the header box when nothing on the page can be selected', () => {
+    render(<Selectable isRowSelectable={() => false} />);
+    expect(box('Select all rows').getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('drops keys of rows that have left the data from the next report', () => {
+    const onReport = vi.fn();
+    render(<Selectable rows={testData.slice(1)} initial={['1', '2', 'gone']} onReport={onReport} />);
+    fireEvent.click(box('Select Beta'));
+    expect(onReport).toHaveBeenLastCalledWith(new Set(['2', '3']));
+  });
+
+  it('widens the empty state over the selection column', () => {
+    const { container } = render(<Selectable rows={[]} />);
+    const cell = container.querySelector('[data-slot="table-body"] td');
+    expect(cell?.getAttribute('colspan')).toBe('3');
+  });
+
+  it('selects every row, not the window, in a virtualized table', () => {
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(480);
+    vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(800);
+    const many: TestItem[] = Array.from({ length: 500 }, (_, i) => ({
+      id: `id-${i}`,
+      name: `row-${i}`,
+      count: i,
+    }));
+    const onReport = vi.fn();
+    render(<Selectable rows={many} virtualize={{ rowHeight: 44 }} onReport={onReport} />);
+    expect(screen.getAllByRole('checkbox').length).toBeLessThan(60);
+    fireEvent.click(box('Select all rows'));
+    expect((onReport.mock.lastCall?.[0] as Set<string>).size).toBe(500);
+    vi.restoreAllMocks();
   });
 });

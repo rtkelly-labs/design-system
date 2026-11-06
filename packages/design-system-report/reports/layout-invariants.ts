@@ -521,6 +521,9 @@ export function mutateCell(arg: { kind: MutantKind; css: string; cell: string })
   };
 
   if (arg.kind === 'missing-font') {
+    // A cell that prints no glyphs (Skeleton's placeholder bars) has no font to lose: skip it
+    // rather than count a mutant that cannot change anything.
+    if (!body.innerText.trim()) return null;
     const s = document.createElement('style');
     s.id = '__mut_style';
     s.textContent = `[data-component="${cell.dataset.component}"][data-state="${cell.dataset.state}"][data-rung="${cell.dataset.rung}"] * { ${arg.css} }`;

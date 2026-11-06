@@ -72,6 +72,8 @@ cta-section	CTASection
 cta-section-actions	CTASection
 cta-section-body	CTASection
 datatable-paginated	(shared)
+datatable-select	(shared)
+datatable-select-all	(shared)
 decision	Decision
 decision-option	Decision
 delta-value	DeltaValue
@@ -164,6 +166,7 @@ indexed-section-body	IndexedSection
 indexed-section-header	IndexedSection
 indexed-section-index	IndexedSection
 indexed-section-title	IndexedSection
+inline-action	InlineAction
 keyed-diff	KeyedDiff
 latency-heatmap	LatencyHeatmap
 latency-histogram	LatencyHistogram
@@ -212,6 +215,7 @@ radio-indicator	Radio
 report-details	ReportDetails
 report-document	ReportDocument
 report-section	ReportSection
+resource-state	ResourceState
 saas-landing-page	SaasLandingPage
 section-container	SectionContainer
 select-icon	Select

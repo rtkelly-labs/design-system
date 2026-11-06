@@ -187,6 +187,9 @@ const CASES: readonly VisualCase[] = [
   // `pending`, between enabled and disabled: the held press, the spinner over
   // the label's box, and the width it keeps — asserted against both.
   { id: 'components-actions-forms-button--pending', snapshot: 'button-pending.png' },
+  // `InlineAction` in the table cells it was made for: the button form, a
+  // disabled one, and the `href` form side by side.
+  { id: 'components-actions-forms-inlineaction--in-table', snapshot: 'inlineaction-in-table.png' },
   // The account flows (#252), every state a reader meets on the way through:
   // each flow at rest and after a failed submit, the reset flow's middle step,
   // and the settings page in `AppShell`. The a11y suite reads these ids, so
@@ -219,6 +222,8 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-data-datatable--sorted-with-caption', snapshot: 'datatable-sorted-with-caption.png' },
   // The pager under a paginated body (issue 276): the table and `Pagination` together.
   { id: 'components-data-datatable--paginated', snapshot: 'datatable-paginated.png' },
+  // Row selection: a selected row, a refused (disabled) row, and the header box mixed.
+  { id: 'components-data-datatable--selectable', snapshot: 'datatable-selectable.png' },
   { id: 'foundations-semantic-tokens--roles', snapshot: 'semantic-tokens-roles.png', fullPage: true },
   { id: 'docs-layout-docslayout--default', snapshot: 'docslayout-default.png', fullPage: true },
   { id: 'docs-layout-portal--full-portal', snapshot: 'portal-full.png', fullPage: true },
@@ -283,6 +288,9 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-feedback-skeleton--loading-card', snapshot: 'skeleton-loading-card.png' },
   { id: 'components-feedback-progress--accents', snapshot: 'progress-accents.png' },
   { id: 'components-feedback-emptystate--first-run', snapshot: 'emptystate-first-run.png' },
+  // The stale state: a warning above data kept from an earlier load — the one
+  // that draws both halves of the component at once.
+  { id: 'components-feedback-resourcestate--stale', snapshot: 'resourcestate-stale.png' },
   // The page-level states (issue 251), all five: the two presets and the
   // three recipes, each on the frame it is normally served in. The 404 and
   // the 401 inside the site chrome (`fullPage`, header to footer); the 500,
