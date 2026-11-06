@@ -21,9 +21,8 @@ an element rather than blurring under it. 2px drawn borders. High-chroma accents
 near-black ground, or ink on warm paper. It should read as a CRT and a drafting table, not as a
 SaaS dashboard.
 
-The form carries the identity; the type mostly gets out of the way. Monospace and bracketed
-labels — `[ LATEST POSTS ]`, `> FULL_STACK_ENGINEER.exe` — are the loudest marks the system
-has, so they are spent rarely and big. See the type budget in §7.
+The form carries the identity. Monospace and bracketed labels are the loudest marks the
+system has, so they are spent rarely and big (§7's type budget).
 
 **What it is not:** soft shadows, gradients, rounded cards, Inter-on-white, an indigo accent,
 glassmorphism, emoji as section markers. If a generated design drifts toward any of those, it
