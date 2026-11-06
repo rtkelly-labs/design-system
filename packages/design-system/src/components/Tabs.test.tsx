@@ -2,7 +2,7 @@ import { createRef } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { Tabs, TabsList, TabsPanel, TabsTab } from './Tabs';
-import type { TabsOrientation, TabsProps } from './Tabs';
+import type { TabsOrientation } from './Tabs';
 
 /**
  * The keyboard assertions here are the ones `CodeTabs.test.tsx` has carried
@@ -242,33 +242,6 @@ describe('Tabs', () => {
     expect(panel.current?.className).toContain('p-4');
   });
 
-  it('renders sans-serif by default and mono when font="mono"', () => {
-    const { unmount } = render(
-      <Tabs defaultValue="a">
-        <TabsList label="Default">
-          <TabsTab value="a">a</TabsTab>
-        </TabsList>
-        <TabsPanel value="a">a</TabsPanel>
-      </Tabs>,
-    );
-    const defaultTab = screen.getByRole('tab');
-    expect(defaultTab.className).toContain('font-sans');
-    expect(defaultTab.className).not.toContain('font-mono');
-    unmount();
-
-    render(
-      <Tabs defaultValue="a" font="mono">
-        <TabsList label="Mono">
-          <TabsTab value="a">a</TabsTab>
-        </TabsList>
-        <TabsPanel value="a">a</TabsPanel>
-      </Tabs>,
-    );
-    const monoTab = screen.getByRole('tab');
-    expect(monoTab.className).toContain('font-mono');
-    expect(monoTab.className).toContain('uppercase');
-  });
-
   it('refuses to render a part outside a Tabs', () => {
     const quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => render(<TabsTab value="orphan">orphan</TabsTab>)).toThrow(
@@ -359,38 +332,32 @@ describe('Tabs', () => {
 });
 
 describe('Tabs: case', () => {
-  const UPPER = /(^|\s)uppercase(\s|$)/;
-  const NONE = /(^|\s)normal-case(\s|$)/;
-  const cased = (props: Partial<TabsProps>) => {
-    const { unmount } = render(
-      <Tabs defaultValue="a" {...props}>
+  it('uppercases by default and preserves case with transform="none"', () => {
+    const { rerender } = render(
+      <Tabs defaultValue="a">
         <TabsList label="Files">
           <TabsTab value="a">README.md</TabsTab>
         </TabsList>
       </Tabs>,
     );
-    const className = screen.getByRole('tab').className;
-    unmount();
-    return UPPER.test(className) && !NONE.test(className) ? 'upper' : NONE.test(className) && !UPPER.test(className) ? 'as written' : 'both';
-  };
-
-  // Unset, the font decides; an explicit transform overrides it either way.
-  it.each([
-    [{}, 'as written'],
-    [{ font: 'mono' }, 'upper'],
-    [{ font: 'mono', transform: 'none' }, 'as written'],
-    [{ transform: 'uppercase' }, 'upper'],
-    [{ font: 'sans', transform: 'none' }, 'as written'],
-    [{ font: 'mono', transform: 'uppercase' }, 'upper'],
-  ] as const)('%o sets the label %s', (props, expected) => {
-    expect(cased(props)).toBe(expected);
+    expect(screen.getByRole('tab').className).toContain('uppercase');
+    expect(screen.getByRole('tab').className).not.toContain('normal-case');
+    rerender(
+      <Tabs defaultValue="a" transform="none">
+        <TabsList label="Files">
+          <TabsTab value="a">README.md</TabsTab>
+        </TabsList>
+      </Tabs>,
+    );
+    expect(screen.getByRole('tab').className).toContain('normal-case');
+    expect(screen.getByRole('tab').className).not.toMatch(/(^|\s)uppercase(\s|$)/);
   });
 });
 
 describe('Tabs: closable and dirty', () => {
   function Files({ onClose }: { onClose: (id: string) => void }) {
     return (
-      <Tabs defaultValue="b.ts" font="mono" transform="none">
+      <Tabs defaultValue="b.ts" transform="none">
         <TabsList label="Open editors">
           {['a.ts', 'b.ts', 'c.ts'].map((f) => (
             <TabsTab key={f} value={f} dirty={f === 'a.ts'} onClose={() => onClose(f)}>

@@ -9,7 +9,6 @@ import { Divider } from '../components/Divider';
 import { LEVELS, THEME_LEVELS } from '../theme/levels';
 import type { ThemeLevel } from '../theme/levels';
 import { auditContrast } from '../theme/contrast';
-import { BracketText } from '../components/BracketText';
 
 /**
  * The ladder rendered against itself.
@@ -48,7 +47,7 @@ function LevelPanel({ level }: { level: ThemeLevel }) {
         <span className="font-mono text-xs uppercase tracking-[0.18em] text-content-muted">
           {definition.polarity}
         </span>
-        <span className="font-display text-2xl font-bold"><BracketText>{definition.label}</BracketText></span>
+        <span className="font-display text-2xl font-bold">[&nbsp;{definition.label}&nbsp;]</span>
         <span className="text-sm text-content-secondary">{definition.description}</span>
       </div>
 
@@ -124,7 +123,7 @@ export const ContrastMatrix: Story = {
           return (
             <div key={level} className="mb-6">
               <h3 className="font-display text-lg font-bold mb-2">
-                <BracketText>{LEVELS[level].label}</BracketText> tightest 8 of{' '}
+                [ {LEVELS[level].label} ] tightest 8 of{' '}
                 {results.filter((r) => r.level === level).length}
               </h3>
               <table className="w-full border-collapse border-2 border-edge-strong">
