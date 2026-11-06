@@ -26,4 +26,19 @@ describe('DocsLayout', () => {
     fireEvent.keyDown(document.body, { key: 'Escape' });
     expect(onCloseSidebar).not.toHaveBeenCalled();
   });
+
+  it('hides the closed drawer below lg so its links leave the tab order (issue 309)', () => {
+    const { container, rerender } = render(
+      <DocsLayout sidebar={<a href="/x">Getting started</a>}>Body</DocsLayout>,
+    );
+    const aside = container.querySelector('.docs-layout-sidebar');
+    expect(aside?.className).toContain('max-lg:invisible');
+
+    rerender(
+      <DocsLayout sidebar={<a href="/x">Getting started</a>} sidebarOpen>
+        Body
+      </DocsLayout>,
+    );
+    expect(aside?.className).not.toContain('max-lg:invisible');
+  });
 });
