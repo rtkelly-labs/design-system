@@ -153,13 +153,13 @@ not opt in renders exactly as before.
 
 ### Proposal: the landing page's one object
 
-`SaasLandingPage` still has three heavy objects: the double-ruled headline, the shadowed
-terminal, and the recommended plan. Three ways to keep one, mocked by overriding styles in the
-browser and measured the same way — none is applied:
+Before this change `SaasLandingPage` had three heavy objects: the double-ruled headline, the
+shadowed terminal, and the recommended plan. Three ways to keep one, mocked by overriding styles
+in the browser and measured the same way against that earlier state:
 
 | Option | What changes | Heavy panels | / screen | Heavy edge share |
 |---|---|---:|---:|---:|
-| as committed | — | 3 | 1.4 | 0.68 |
+| before (all three heavy) | — | 3 | 1.4 | 0.68 |
 | A — the terminal leads | headline unboxed, the secondary hero button loses its shadow | 2 | 1.0 | 0.63 |
 | B — the headline leads | terminal drawn as a 1px `border.default` frame with no shadow, secondary button flat | 2 | 1.0 | 0.53 |
 | C — the recommended plan leads | headline unboxed, terminal quiet, both hero buttons flat | 1 | 0.5 | 0.45 |
