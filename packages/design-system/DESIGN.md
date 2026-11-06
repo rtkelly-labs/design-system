@@ -17,10 +17,13 @@ Module 2025.10, installable as `@rtkelly-labs/design-system/tokens/midnight.toke
 ## 1. The character, in one paragraph
 
 **Brutalist neon terminal.** Hard edges and no rounding at all. Offset shadows that sit beside
-an element rather than blurring under it. Monospace and condensed display type. Bracketed
-labels — `[ LATEST POSTS ]`, `> FULL_STACK_ENGINEER.exe`. High-chroma accents on a near-black
-ground, or ink on warm paper. It should read as a CRT and a drafting table, not as a SaaS
-dashboard.
+an element rather than blurring under it. 2px drawn borders. High-chroma accents on a
+near-black ground, or ink on warm paper. It should read as a CRT and a drafting table, not as a
+SaaS dashboard.
+
+The form carries the identity; the type mostly gets out of the way. Monospace and bracketed
+labels — `[ LATEST POSTS ]`, `> FULL_STACK_ENGINEER.exe` — are the loudest marks the system
+has, so they are spent rarely and big. See the type budget in §7.
 
 **What it is not:** soft shadows, gradients, rounded cards, Inter-on-white, an indigo accent,
 glassmorphism, emoji as section markers. If a generated design drifts toward any of those, it
@@ -201,6 +204,27 @@ has no shipped glyph in any of the four stacks, and when a component writes a fo
 own instead of using one of the four, since that skips the symbol faces entirely. `--list` prints
 the census.
 
+### The type budget — where each face goes
+
+The terminal flavour comes from a few loud marks on a quiet page, not from setting the whole
+page in them. Monospace is an aggressive face: at display size and weight it is the signature,
+and at caption size it is the hardest text on the screen to read. Dashboards are where this
+fails first, because they are mostly small, dense, scanned text.
+
+| Face | Use it for | Never for |
+|---|---|---|
+| **Body** (Inter) | Everything people read or scan: running text, labels, descriptions, table headers and cells, captions, notes, buttons, nav | — it is the default; reach for it first |
+| **Display** (Space Grotesk) | Headings. Uppercase only at title scale | small labels, body copy |
+| **Mono** (IBM Plex Mono) | Large and bold: stat values, a hero label, step numbers. And real code, paths, hashes and commands, inline or in blocks | running text, captions, table cells, kickers, form controls, anything small and dense |
+| **Pixel** (VT323) | A single decorative mark on a neon surface | anything that has to be read |
+
+**Brackets are a budget of one or two per page.** The page or app title, and at most the one
+primary action. Never section headings, table headers, tags, badges or nav items: a bracket on
+every heading is no longer a mark, it is noise, and the page reads as a costume.
+
+When a design feels too plain without them, the fix is the form — a heavier border, an offset
+shadow in the section's accent, a sunken well — not another bracket or another mono label.
+
 **Geometry and time are the second axis, and they are declared.** A Level varies colour and is
 picked at runtime; a **Medium** varies geometry and time and is picked at build time by which
 artifact is being emitted. There are three — `web` (CSS pixels, wall clock), `video` (a fixed
@@ -225,17 +249,19 @@ those 46 are the number that moves first.
 
 ## 8. Voice
 
-Terse. Technical. Lowercase in code contexts, `UPPERCASE_SNAKE` for terminal-flavoured labels.
-Bracketed section headings. No exclamation marks, no marketing adjectives, no "seamlessly" or
-"effortlessly". A control says exactly what happens: `PUBLISH`, then `PUBLISHED`.
+Terse. Technical. Lowercase in code contexts, `UPPERCASE_SNAKE` for the rare terminal-flavoured
+label. Plain section headings; brackets are spent per §7. No exclamation marks, no marketing
+adjectives, no "seamlessly" or "effortlessly". A control says exactly what happens: `PUBLISH`, then `PUBLISHED`.
 
 ## 9. If you are an agent building something on this brand
 
 1. Read the token files, not this prose, for values — `tokens/palette.<theme>.tokens.json`.
 2. Address Roles. If you find yourself writing a hue name in a component, stop.
 3. Zero radius, hard offset shadows, 2px borders.
-4. Both themes, always. Test `sketch`; it is the one that breaks.
-5. Never use pure black as a page ground. `surface.base` is `#121316` on dark, and the darkest
+4. Set text in Inter. Monospace only large and bold, or for real code; brackets on one or two
+   marks per page at most. If a dashboard is mostly mono labels in brackets, it is wrong.
+5. Both themes, always. Test `sketch`; it is the one that breaks.
+6. Never use pure black as a page ground. `surface.base` is `#121316` on dark, and the darkest
    declared value anywhere is `#0c0d0f`.
-6. Contrast is a gate, not a guideline. If `pnpm check:contrast` fails, the colour is wrong —
+7. Contrast is a gate, not a guideline. If `pnpm check:contrast` fails, the colour is wrong —
    not the gate.

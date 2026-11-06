@@ -240,8 +240,8 @@ export default function ManifestoC() {
           <div className="grid grid-cols-[1.6fr_1fr] gap-6">
             <p className="m-0 font-sans text-base leading-[1.55] text-content-primary">
               <strong>Brutalist neon terminal.</strong> Hard edges and no rounding at all. Offset shadows that sit beside an element rather than blurring under
-              it. Monospace and condensed display type. Bracketed labels. High-chroma accents on a near-black ground, or ink on warm paper. It should read as
-              a CRT and a drafting table, not as a SaaS dashboard.
+              it. 2px drawn borders. High-chroma accents on a near-black ground, or ink on warm paper. It should read as a CRT and a drafting table, not as a
+              SaaS dashboard. The form carries the identity; monospace and bracketed labels are the loudest marks, spent rarely and big.
             </p>
             <div className="flex flex-col gap-1 border-l-2 border-intent-danger pl-4">
               <Kicker className="text-intent-danger">What it is not</Kicker>
@@ -589,7 +589,7 @@ export default function ManifestoC() {
           <ClaimHead index="H" title={CLAIMS[7].title} section="§8 · voice" />
           <div className="grid grid-cols-[1.3fr_1fr] gap-6">
             <p className="m-0 font-sans text-[1.0625rem] leading-[1.55] text-content-primary">
-              Terse. Technical. Lowercase in code contexts, <Code>UPPERCASE_SNAKE</Code> for terminal-flavoured labels. Bracketed section headings. No
+              Terse. Technical. Lowercase in code contexts, <Code>UPPERCASE_SNAKE</Code> for the rare terminal-flavoured label. Plain section headings; brackets are spent per §7. No
               exclamation marks, no marketing adjectives, no &ldquo;seamlessly&rdquo; or &ldquo;effortlessly&rdquo;.
             </p>
             <Inset label="[ voice test ]">
