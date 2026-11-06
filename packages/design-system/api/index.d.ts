@@ -847,6 +847,8 @@ declare const DiffView: react.ForwardRefExoticComponent<DiffViewProps & react.Re
 type KeyedChange = 'added' | 'removed' | 'changed' | 'renamed' | 'unchanged';
 interface KeyedDiffRow {
 
+    id?: string | number;
+
     identity: ReactNode;
 
     change: KeyedChange;
