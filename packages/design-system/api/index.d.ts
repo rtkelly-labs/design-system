@@ -1,8 +1,8 @@
 import * as react from 'react';
 import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps, RefAttributes } from 'react';
 import { Table as Table$1, ColumnDef } from '@tanstack/react-table';
-import { RegisterableHotkey } from '@tanstack/react-hotkeys';
 export { ParentSize as ResponsiveChartContainer } from '@visx/responsive';
+import { RegisterableHotkey } from '@tanstack/react-hotkeys';
 export { useTooltip as useChartTooltip } from '@visx/tooltip';
 
 type Emphasis = 'primary' | 'secondary' | 'tertiary' | 'quiet';

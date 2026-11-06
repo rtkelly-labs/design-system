@@ -60,6 +60,17 @@ for (const name of MANIFESTO_SPECIMENS) {
   EXCLUDED[name] ??= 'A manifesto specimen — rendered inside one page, takes no props.';
 }
 
+/**
+ * A prop each named component declares itself. A count cannot tell whose props
+ * were documented: `BarChart` once published visx `ParentSize`'s seven (#312)
+ * and passed. These canaries catch a record that belongs to something else.
+ */
+const OWN_PROP = {
+  BarChart: 'onBarClick',
+};
+
+const propNames = new Map();
+
 function docgenProps() {
   const counts = new Map();
   for (const file of readdirSync(ASSETS)) {
@@ -75,6 +86,9 @@ function docgenProps() {
               [...after.slice(at, at + 20000).matchAll(/(\w+):\{defaultValue/g)].map((m) => m[1]),
             );
       counts.set(match[1], Math.max(counts.get(match[1]) ?? 0, names.size));
+      const all = propNames.get(match[1]) ?? new Set();
+      for (const n of names) all.add(n);
+      propNames.set(match[1], all);
     }
   }
   return counts;
@@ -157,6 +171,16 @@ console.log(
 if (manifestProblems.length) {
   console.error(`\nComponents manifest check failed:\n`);
   for (const p of manifestProblems) console.error(`  - ${p}`);
+  process.exit(1);
+}
+
+const foreign = Object.entries(OWN_PROP).filter(([name, prop]) => !propNames.get(name)?.has(prop));
+if (foreign.length) {
+  console.error('\nDocgen props check failed — a props table that is not the component\'s own:\n');
+  for (const [name, prop] of foreign) {
+    console.error(`  - ${name} documents [${[...(propNames.get(name) ?? [])].join(', ')}], without its own \`${prop}\``);
+  }
+  console.error('\nUsually a second component exported from the same file. Move it to its own module.');
   process.exit(1);
 }
 

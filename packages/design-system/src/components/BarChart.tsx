@@ -17,7 +17,6 @@ import {
 import { cn } from '../lib/recipe';
 import { type AccentToken, accentVar } from '../lib/theme';
 
-export { ParentSize as ResponsiveChartContainer };
 
 export interface BarChartDatum {
   label: string;
