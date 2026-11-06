@@ -57,7 +57,7 @@ export function DangerZone() {
             </div>
             <Button
               type="button"
-              variant="tertiary"
+              variant="danger"
               bracketed
               disabled={done.includes(r.id)}
               onClick={() => setAction(r.id)}
@@ -75,10 +75,10 @@ export function DangerZone() {
         title={row ? `${row.title}?` : ''}
         footer={
           <>
-            <Button type="button" variant="inverse" onClick={close}>
+            <Button type="button" onClick={close}>
               KEEP IT
             </Button>
-            <Button type="button" variant="tertiary" bracketed disabled={!ready} onClick={confirm}>
+            <Button type="button" variant="danger" bracketed disabled={!ready} onClick={confirm}>
               {row?.label ?? ''} {REPO.split('/')[1]}
             </Button>
           </>
