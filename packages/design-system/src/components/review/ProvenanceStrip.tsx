@@ -39,8 +39,11 @@ export const ProvenanceStrip = React.forwardRef<HTMLElement, ProvenanceStripProp
         {items.map((item, index) => (
           <div key={`${item.label}-${index}`} data-slot="provenance-strip-item" className="flex min-w-0 flex-col gap-1.5 py-3">
             <dt className="font-mono text-[0.7rem] font-bold uppercase tracking-[0.08em] text-content-muted">{item.label}</dt>
-            <dd className="m-0 font-mono text-sm text-content-primary [overflow-wrap:anywhere]">{item.value}</dd>
-            {item.note != null ? <dd className="m-0 text-xs text-content-muted">{item.note}</dd> : null}
+            {/* The note explains the value, so it shares its <dd>: a second <dd> would be an alternative value. */}
+            <dd className="m-0 flex flex-col gap-1.5">
+              <span className="font-mono text-sm text-content-primary [overflow-wrap:anywhere]">{item.value}</span>
+              {item.note != null ? <span className="text-xs text-content-muted">{item.note}</span> : null}
+            </dd>
           </div>
         ))}
       </dl>

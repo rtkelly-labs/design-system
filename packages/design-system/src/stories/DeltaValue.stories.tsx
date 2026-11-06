@@ -4,12 +4,12 @@ import { DeltaValue } from '../components/review/DeltaValue';
 const meta: Meta<typeof DeltaValue> = {
   title: 'Components/Reports/DeltaValue',
   component: DeltaValue,
-  tags: ['autodocs', 'experimental'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     docs: {
       description: {
         component:
-          'A measured change, `before → after +n`. Direction is a fact about the metric, not a verdict, so it changes emphasis and never colour: a move against the preferred direction is drawn heavier with ▲ or ▼. New, missing and unchanged values say so in words.',
+          'A measured change, `before → after +n`. With a declared direction, a move toward it reads as success and one against it as danger, drawn heavier with ▲ or ▼; a move inside the noise band, or with no direction, stays neutral. New, missing and unchanged values say so in words.',
       },
     },
   },
