@@ -85,15 +85,15 @@ what, and — only when a policy ran — whether that is acceptable. Every row i
 | State the outcome | `VerdictBand` — an Assessment outcome, or `none` for a report that carries no verdict | `ready` | |
 | Name a status | `StatusMark` — the outcome, Delta, Evidence and trust vocabularies; a fixed glyph and word, colour repeating them | `ready` | |
 | Show where it came from | `ProvenanceStrip` — subject, baseline role and commit, digest, trust, comparator | `ready` | |
-| Show a measured change | `DeltaValue` — before → after, signed change, unit, declared direction as emphasis, new / gone / ÷0 | `ready` | |
+| Show a measured change | `DeltaValue` — before → after, signed change, unit, declared direction as success or danger colour (noise and undirected stay neutral), new / gone / ÷0 | `ready` | |
 | Count a change | `ChangeCount` + `ChangeBar` — `delta` roles, one shared scale | `ready` | |
 | Index changed files | `ChangeIndex` — groups, then files, each linking to its diff | `ready` | |
 | Read a line diff | `DiffView` + `parseUnifiedDiff` — hunks, two gutters, sign column, `delta` grounds, folds as `<details>` | `ready` | |
 | Compare keyed records | `KeyedDiff` — one row per stable identity, so a signature change is one change | `ready` | |
 | Comment on a line | `DiffView` line `comments` — pinned under the line, readable at phone width | `ready` | |
-| Move through a long review | none: filter and `j`/`k` need script, and a report has none | `absent` | not yet filed |
-| Show a trend against a baseline | `Sparkline`, with no baseline rule or candidate point | `partial` | not yet filed |
-| Compare images | `BeforeAfter` pairs measurements; no overlay, blink, wipe or heatmap | `partial` | not yet filed |
+| Move through a long review | none: filter and `j`/`k` need script, and a report has none | `absent` | #455 |
+| Show a trend against a baseline | `Sparkline`, with no baseline rule or candidate point | `partial` | #456 |
+| Compare images | `BeforeAfter` pairs measurements; no overlay, blink, wipe or heatmap | `partial` | #457 |
 
 Edges step down from the verdict, using the system's own lighter shapes rather than a 2px box on
 everything: the `VerdictBand` is the one object with a strong border and an offset shadow; a file's
