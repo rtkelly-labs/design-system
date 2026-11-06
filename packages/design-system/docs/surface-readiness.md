@@ -57,7 +57,7 @@ consumer sees it without reading this file.
 | `SaaS/*` | `experimental` | ~20–25%, "screenshots of one specific product" |
 | `Showcase/*` | `experimental` | a sandbox, not a component |
 
-Twenty entries depart from their group, all tagged `preview` rather than `stable` for the same
+Twenty-nine entries depart from their group, all tagged `preview` rather than `stable` for the same
 reason. Each is gated end to end like everything else in the group, but no consumer depends on
 it yet, so its API has not met a caller. `stable` claims a shape has survived use, and these
 have survived a story. Retag each one when something depends on it.
@@ -76,6 +76,10 @@ have survived a story. Retag each one when something depends on it.
   from the rig hub's panels, which have not migrated to it yet.
 - `Components/Actions & Forms/InlineAction`: written for the rig hub's job table, which has
   not adopted it yet; until a second caller does, `tone` is the part most likely to move.
+- The review family under `Components/Reports` (#423): `StatusMark`, `VerdictBand`,
+  `ProvenanceStrip`, `DeltaValue`, `ChangeCount`, `ChangeBar`, `ChangeIndex`, `DiffView` and
+  `KeyedDiff`. Their callers are the review pages in this repository; no PR-review tool renders
+  them yet.
 
 The vocabulary is Storybook's own feature lifecycle — `stable`, `experimental`, `preview`,
 `deprecated` — rather than a second one to maintain. A group cannot be added to the sidebar

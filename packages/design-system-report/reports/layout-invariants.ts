@@ -533,11 +533,17 @@ export function mutateCell(arg: { kind: MutantKind; css: string; cell: string })
   if (arg.kind === 'fixed-width' || arg.kind === 'nowrap-hidden') {
     const t = els.filter((e) => !/^(inline|contents)$/.test(getComputedStyle(e).display)).sort((a, b) => ownText(b).length - ownText(a).length)[0];
     if (!t || ownText(t).length < 12) return null;
+    // Real defect by direct measurement: the text's own rect pokes out of the box that holds it,
+    // and did not before. A fill clipped on purpose (a divider's rule) already pokes out; the
+    // mutant adds nothing there.
+    const pokesOut = () => {
+      const tb = textBox(t);
+      const tr = t.getBoundingClientRect();
+      return tb.right > tr.right + 1 || tb.bottom > tr.bottom + 1;
+    };
+    const already = pokesOut();
     apply(t);
-    // Real defect by direct measurement: the text's own rect pokes out of the box that holds it.
-    const tb = textBox(t);
-    const tr = t.getBoundingClientRect();
-    const eff = tb.right > tr.right + 1 || tb.bottom > tr.bottom + 1;
+    const eff = !already && pokesOut();
     return { target: name(t), effective: eff };
   }
   if (arg.kind === 'flex-min-width') {
@@ -601,14 +607,19 @@ export async function runMutations(page: Page, o: RunMutationOptions): Promise<M
   const mutate = (arg: object) => page.evaluate<{ target: string; effective: boolean } | null>(`(${mutateCell.toString()})(${JSON.stringify(arg)})`);
   const restore = () => page.evaluate(`(${restoreMutant.toString()})()`);
   for (const m of MUTANTS) {
+    // Count only mutants that are real defects: which cells come first depends on the
+    // compendium's order, and a run of cells whose text happens to fit would otherwise
+    // leave a kind with nothing effective. Attempts stay bounded.
     let done = 0;
+    let tried = 0;
     for (const cell of clean) {
-      if (done >= perMutant) break;
+      if (done >= perMutant || tried >= perMutant * 4) break;
       if (m.kind === 'missing-font' && !o.geometry?.some((g) => g.key === cell)) continue;
       const before = new Set((await runLayout(page, { only: cell })).map(kindsKey));
       const hit = await mutate({ kind: m.kind, css: m.css, cell });
       if (!hit) continue;
-      done++;
+      tried++;
+      if (hit.effective) done++;
       let by: Invariant[] = [];
       if (m.kind === 'missing-font') {
         const pageNo = o.geometry!.find((g) => g.key === cell)!.page;
