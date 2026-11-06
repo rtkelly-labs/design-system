@@ -92,4 +92,26 @@ describe('ButtonGroup', () => {
     );
     expect(warn).not.toHaveBeenCalled();
   });
+
+  it('warns once when a group holds two primary buttons', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(
+      <ButtonGroup>
+        <Button variant="primary">SAVE</Button>
+        <Button variant="primary">PUBLISH</Button>
+      </ButtonGroup>,
+    );
+    expect(warn.mock.calls.filter(([m]) => String(m).includes('primary Buttons'))).toHaveLength(1);
+  });
+
+  it('does not warn for one primary beside quiet buttons', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(
+      <ButtonGroup>
+        <Button>CANCEL</Button>
+        <Button variant="primary">SAVE</Button>
+      </ButtonGroup>,
+    );
+    expect(warn).not.toHaveBeenCalled();
+  });
 });

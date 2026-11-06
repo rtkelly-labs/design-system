@@ -132,7 +132,9 @@ const CASES = [
     imports: ['Button'],
     // #320 adds pending activation guards and Spinner. Measured at 44,394 B
     // minified with the per-module build; retain about 2% headroom.
-    maxBytes: 45_300,
+    // The Button weight ladder: quiet and danger variants, xs and icon sizes, and the
+    // ButtonGroup context the same-hue check reads (46,068 B).
+    maxBytes: 47_000,
     forbid: [...HEAVY, 'lucide-react'],
   },
   {
@@ -167,7 +169,8 @@ const CASES = [
     // Pagination current-page chip fix. Both are intended.
     // +600 B: LEVELS carries the `delta` role group (see the `tokens` case).
     // +100 B: `Card`'s `weight` prop — the quiet frame's border string.
-    maxBytes: 63_900,
+    // +1,566 B: the Button weight ladder above (65,466 B).
+    maxBytes: 66_200,
     forbid: HEAVY,
   },
 ];

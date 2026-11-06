@@ -9,6 +9,15 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
+## Unreleased
+
+`Button` defaults to the new `quiet` variant (it was `tertiary`), and `secondary` is now an
+outline with a hard shadow rather than an accent fill. Add `variant="tertiary"` where the old
+default was wanted, and re-baseline anything showing a button. New: `variant="danger"`, sizes
+`xs`, `icon` and `icon-touch` (icon sizes require `aria-label`), and `ButtonGroup`, which warns
+in development when a danger button sits beside a same-hue one. Modal and AlertDialog footers
+are ButtonGroups. `sm` is 40px tall, as measured.
+
 ## 0.20.0
 
 Review surfaces and lighter page weight. Re-baseline snapshots of anything showing a page title,

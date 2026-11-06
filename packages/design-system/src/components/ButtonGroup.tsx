@@ -47,6 +47,9 @@ export interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
  * maps and `console.warn`s once per distinct collision. Production builds do no
  * work at all.
  *
+ * It also warns when a group holds more than one `primary` Button: a group
+ * has one main action, and the rest step down the ladder.
+ *
  * `Modal` and `AlertDialog` render their footers as a ButtonGroup, so the rule
  * applies there without the caller opting in. `findHueCollisions` is the same
  * check as a pure function, for a test.
@@ -81,6 +84,15 @@ export const ButtonGroup = forwardRef<HTMLDivElement, ButtonGroupProps>(function
             hits.map((hit) => `${hit.hue} on ${hit.level}`).join(', ') +
             '). Colour alone must not tell a destructive action from its neighbour — ' +
             'make the neighbour variant="quiet" or "secondary".',
+        );
+      }
+      // One main action per group: two filled primaries leave the reader to pick.
+      const primaries = list.filter((r) => r.kind === 'accent' && r.role === 'primary').length;
+      if (primaries > 1 && !warned.current.has('primary')) {
+        warned.current.add('primary');
+        console.warn(
+          `[design-system] ButtonGroup: ${primaries} primary Buttons in one group. A group has one main ` +
+            'action; make the others variant="quiet" or "secondary".',
         );
       }
     }
