@@ -65,6 +65,7 @@ export default {
   clearTextReporter: { allowColor: false, reportScoreTable: true, reportMutants: true },
   jsonReporter: { fileName: 'reports/mutation/mutation.json' },
   htmlReporter: { fileName: 'reports/mutation/mutation.html' },
-  tempDirName: '.stryker-tmp',
+  // Scratch lives under the repository-root temp/ (AGENTS.md rule 11).
+  tempDirName: '../../temp/stryker',
   cleanTempDir: true,
 };
