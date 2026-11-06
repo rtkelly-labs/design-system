@@ -29,13 +29,13 @@ describe('DocsLayout', () => {
 
   it('hides the closed drawer below lg so its links leave the tab order (issue 309)', () => {
     const { container, rerender } = render(
-      <DocsLayout sidebar={<a href="/x">Link</a>}>Body</DocsLayout>,
+      <DocsLayout sidebar={<a href="/x">Getting started</a>}>Body</DocsLayout>,
     );
     const aside = container.querySelector('.docs-layout-sidebar');
     expect(aside?.className).toContain('max-lg:invisible');
 
     rerender(
-      <DocsLayout sidebar={<a href="/x">Link</a>} sidebarOpen>
+      <DocsLayout sidebar={<a href="/x">Getting started</a>} sidebarOpen>
         Body
       </DocsLayout>,
     );
