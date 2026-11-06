@@ -1,0 +1,33 @@
+{
+  "pr": "423",
+  "head": "595b171004e73adb2603b1f2876dd97b96bdcba4",
+  "base": "36dceb919135cedcf921f22c981b2fc68c712d5e",
+  "baseRef": "main",
+  "status": "rendered",
+  "total": 215,
+  "changed": [
+    "changesummary-default",
+    "changesummary-sketch"
+  ],
+  "added": [
+    "changebar-shared-scale",
+    "changebar-sketch",
+    "changecount-sketch",
+    "changecount-with-bar",
+    "changeindex-default",
+    "changeindex-sketch",
+    "deltavalue-sketch",
+    "deltavalue-states",
+    "diffview-default",
+    "diffview-sketch",
+    "keyeddiff-default",
+    "keyeddiff-sketch",
+    "provenancestrip-default",
+    "provenancestrip-sketch",
+    "statusmark-all-vocabularies",
+    "statusmark-sketch",
+    "verdictband-all-outcomes",
+    "verdictband-sketch"
+  ],
+  "failures": []
+}
