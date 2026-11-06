@@ -526,9 +526,18 @@ export function mutateCell(arg: { kind: MutantKind; css: string; cell: string })
   };
 
   if (arg.kind === 'missing-font') {
-    // A cell that prints no glyphs (Skeleton's placeholder bars) has no font to lose: skip it
-    // rather than count a mutant that cannot change anything.
-    if (!body.innerText.trim()) return null;
+    // A cell that prints no glyphs (Skeleton's placeholder bars, a Spinner whose only text is its
+    // `sr-only` label) has no font to lose: skip it rather than count a mutant that cannot change
+    // anything. Visible means the text's own box is bigger than the 1px an `sr-only` clip leaves.
+    const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+    let painted = false;
+    for (let n = walker.nextNode(); n && !painted; n = walker.nextNode()) {
+      const parent = n.parentElement;
+      if (!parent || !(n.nodeValue ?? '').trim()) continue;
+      const r = parent.getBoundingClientRect();
+      painted = r.width > 1 && r.height > 1;
+    }
+    if (!painted) return null;
     const s = document.createElement('style');
     s.id = '__mut_style';
     s.textContent = `[data-component="${cell.dataset.component}"][data-state="${cell.dataset.state}"][data-rung="${cell.dataset.rung}"] * { ${arg.css} }`;

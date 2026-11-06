@@ -8,7 +8,7 @@ export default function BasicModal() {
 
   return (
     <>
-      <Button variant="inverse" onClick={() => setOpen(true)}>
+      <Button variant="secondary" onClick={() => setOpen(true)}>
         WHAT CHANGED
       </Button>
       <Modal isOpen={isOpen} onClose={() => setOpen(false)} title="Release 2026.38">
