@@ -252,7 +252,7 @@ breaks Storybook's asset preloading and yields exactly that empty preview. Both
 Playwright configs therefore start it as:
 
 ```
-npx serve storybook-static -p 6006 --config ../serve.json
+npx serve storybook-static -p 8103 --config ../serve.json
 ```
 
 The path is relative to the **served directory**, not the repo root. Do not drop

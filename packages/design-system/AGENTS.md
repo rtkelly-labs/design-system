@@ -119,7 +119,7 @@ Load these when the task is in them, not before.
 | Edge hierarchy — the census, the gate, and the GOV.UK / Primer / Carbon benchmark | [`docs/edge-hierarchy.md`](./docs/edge-hierarchy.md) |
 | Visual regression — determinism contract, operating instructions | [`docs/visual-regression.md`](./docs/visual-regression.md) |
 | CI shape, and the screenshot walkthrough | [`docs/ci.md`](./docs/ci.md) |
-| Evidence on a PR — design, not yet built | [`docs/evidence-pipeline.md`](./docs/evidence-pipeline.md) |
+| Evidence on a PR — before/after stills built (`/evidence`), video still a design | [`docs/evidence-pipeline.md`](./docs/evidence-pipeline.md) |
 | Unit tests | [`docs/testing.md`](./docs/testing.md) |
 | The published API surface | [`docs/api-surface.md`](./docs/api-surface.md) |
 | Dependencies, and the ones held back | [`docs/dependencies.md`](./docs/dependencies.md) |

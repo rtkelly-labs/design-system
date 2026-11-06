@@ -67,7 +67,7 @@ None of them puts more than one heavy object on a screen, and none nests deeper 
 
 ## Where this package sits
 
-All 180 asserted stories, measured on `midnight`:
+The asserted stories at the first census (180; the set has grown since, and `pnpm edges:census` re-measures it), on `midnight`:
 
 | | Median | 90th percentile | Max |
 |---|---:|---:|---:|
@@ -117,7 +117,7 @@ the changes below:
 And the primitives that are heavy by default, which is where those pages get their weight:
 `Card`, `StatCard`, `NoteBlock`, `IndexedSection`, `PricingTier`, `Feature`, `Hero`,
 `CTASection`, `TLDR`, a grid `DataTable`, `CodeBlock`, `Terminal`, and `FigureFrame` (its dashed
-edge is 2px strong, so it counts). 102 of the 180 stories carry at least one heavy panel; 78 carry
+edge is 2px strong, so it counts). At that census, 102 of the 180 stories carried at least one heavy panel; 78 carried
 none.
 
 `VerdictBand/AllOutcomes` and `Foundations/ThemeLadder` also rank high, and are not problems:

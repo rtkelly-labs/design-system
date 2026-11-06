@@ -1,9 +1,10 @@
 # DESIGN.md — the brand outline
 
-**Ryan Kelly · `ryankelly.dev`** · the visual language for the blog, the design system, the
-talks, generated graphics and editor themes.
+**@rtkelly-labs/design-system** · the foundational visual language for rtkelly labs (`@rtkelly-labs`):
+engineering tooling (`oxbow`, `rig`, `Diffra`), documentation portals (`docs.ryankelly.dev`),
+technical publications (`ryankelly.dev`), terminal interfaces, and agent-generated presentation layers.
 
-This file is the portable form of the brand. It is written for a person or an agent arriving
+This file is the portable form of the brand. It is written for an autonomous coding agent or engineer arriving
 with no context and asked to make something that looks like the rest of it. Everything here is
 generated from or verified against `src/theme/levels.ts`, which is the only place a colour
 originates — see [`docs/adr/0002`](./docs/adr/0002-one-source-many-emitted-surfaces.md).

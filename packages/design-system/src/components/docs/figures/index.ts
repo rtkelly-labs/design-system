@@ -1,5 +1,5 @@
 export { FigureFrame } from './FigureFrame';
-export type { FigureFrameProps } from './FigureFrame';
+export type { FigureFrameProps, FigurePalette, GlyphSetName, Glyphs } from './FigureFrame';
 export * from './FlowDiagram';
 export * from './Timeline';
 export * from './ChangeSummary';
@@ -9,6 +9,7 @@ export * from './TreeDiagram';
 export * from './FileChangeTree';
 export * from './DrawingSheet';
 export * from './IndexedSection';
+export type { FigureSurface } from './FigureSurfaceContext';
 export * from './ActivityGrid';
 export * from './GanttChart';
 export * from './Terminal';

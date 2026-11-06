@@ -57,7 +57,7 @@ export default defineConfig({
   // Three themes captured per test, each with a reload and a render check.
   timeout: 120_000,
   use: {
-    baseURL: 'http://localhost:6006',
+    baseURL: 'http://localhost:8103',
     viewport: { width: 1440, height: 900 },
     // Fixed DPR keeps the report's size predictable across machines.
     deviceScaleFactor: 1,
@@ -72,8 +72,8 @@ export default defineConfig({
     // `--config` is load-bearing: serve rewrites /iframe.html to /iframe by
     // default and drops the query string, so Storybook gets no story id. The
     // path is relative to the served directory, not the repo root.
-    command: 'npx serve storybook-static -p 6006 --config ../serve.json',
-    url: 'http://localhost:6006',
+    command: 'npx serve storybook-static -p 8103 --config ../serve.json',
+    url: 'http://localhost:8103',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
