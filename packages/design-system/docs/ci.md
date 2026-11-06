@@ -37,7 +37,7 @@ trigger is the post-merge signal for the default branch specifically.
 | `gates` | `tokens:check`, `tokens:design:check`, `check:contrast`, `check:docs`, `check:doc-snippets`, `check:skills`, `check:component-docs`, `check:story-docs`, `check:component-contract`, `check:slots`, `check:licences`, `check:reference-material`, `check:lint-budget`, `check:css`, `check:tokens`, `ansi:check`, `check:fonts`, `check:deps`, `check:governance` | 55s | 10m |
 | `unit` | `typecheck`, `test:coverage` | 95s | 10m |
 | `package` | `build`, `check:bundle-size`, `check:dep-cost`, `check:import-cost`, `check:api`, and the report generator | 85s | 10m |
-| `visual` | `build-storybook`, `check:visual-coverage`, `check:docgen-props`, `check:story-conventions`, `test:visual`, `test:a11y` | 430s | 25m |
+| `visual` | `build-storybook`, `check:visual-coverage`, `check:docgen-props`, `check:story-conventions`, `test:visual`, `test:a11y`, `test:edges` | 430s | 25m |
 | `record` | nothing — saves the verdict key once every `visual` shard passed; not in `verify`'s `needs` | 5s | 5m |
 | `site` | builds this package, then the applied site in `apps/site` against its `dist/`: docgen, lint and the published colour scanner at zero, a typecheck and the static Next.js export | 90s | 15m |
 | `verify` | nothing — fails unless the five above succeeded | 10s | 5m |
@@ -75,6 +75,11 @@ install and a screenshot suite is what made this slow in the first place. It was
 one job of nineteen serial steps, and nothing in it needed to be serial — so
 `lint`, the fastest and most frequently-failing check in the repo, reported after
 everything else had also run.
+
+The one exception is a gate that needs the built Storybook in a browser, such as
+`test:a11y` and `test:edges`. Moving it would mean building Storybook and installing a
+browser a second time, which costs more than the step does. It goes in `visual`,
+sharded with the rest.
 
 **Where the time actually goes**, so the next person optimising this starts from
 measurements rather than a guess:
