@@ -21,9 +21,9 @@ export default function OverviewPage() {
       <Heading article={article} id="what-it-is" />
       <p>
         <code>@rtkelly-labs/design-system</code> is the visual language of ryankelly.dev, packaged as React components and
-        Tailwind v4 tokens. Its character is <strong>brutalist neon terminal</strong>: monospace and condensed display
-        type, bracketed labels, high-chroma accents on near-black, or ink on warm paper. It should read as a CRT and a
-        drafting table, not as a SaaS dashboard.
+        Tailwind v4 tokens. Its character is <strong>brutalist neon terminal</strong>: hard edges, offset shadows, 2px
+        borders, high-chroma accents on near-black, or ink on warm paper. It should read as a CRT and a drafting table,
+        not as a SaaS dashboard. Monospace and bracketed labels are its loudest marks, so they are spent rarely and big.
       </p>
       <p>
         Every colour starts in one TypeScript module. The Tailwind theme, the DTCG token files and the terminal schemes
