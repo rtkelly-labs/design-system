@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { DocsLink } from './DocsLinkProvider';
 import { cn } from '../../lib/recipe';
-import { BracketText } from '../BracketText';
 
 export interface DocsNavNode {
   label: string;
@@ -55,7 +54,7 @@ export function DocsSidebar({
 
   return (
     <nav data-slot="docs-sidebar" className={cn('not-prose print:hidden', className)} aria-label="Documentation">
-      {label && <p className="docs-sidebar-label"><BracketText>{label}</BracketText></p>}
+      {label && <p className="docs-sidebar-label">[&nbsp;{label}&nbsp;]</p>}
       <NodeList
         nodes={nav}
         currentPath={currentPath}

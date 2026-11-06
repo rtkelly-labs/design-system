@@ -8,7 +8,6 @@ import { usePortalThemeAttribute } from './portalTheme';
 import { dialogSurface } from './dialogSurface';
 import { usePopupRef } from './dialogPopupRef';
 import { Button } from './Button';
-import { BracketText } from './BracketText';
 
 /**
  * Which edge the drawer is anchored to.
@@ -182,7 +181,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
               <Dialog.Title
                 data-slot="drawer-title"
                 className={slots.title()}
-                render={<h3><BracketText>{title}</BracketText></h3>}
+                render={<h3>[&nbsp;{title}&nbsp;]</h3>}
               />
               <Dialog.Close
                 data-slot="drawer-close"
