@@ -72,7 +72,10 @@ export function DocsLayout({
               />
             )}
             <aside
-              className="docs-layout-sidebar"
+              // Closed below `lg` the drawer is off-screen and also hidden, so
+              // its links leave the tab order and the accessibility tree
+              // (#309). From `lg` it is the rail and always shown.
+              className={cn('docs-layout-sidebar', !sidebarOpen && 'max-lg:invisible')}
               data-open={sidebarOpen ? 'true' : undefined}
             >
               {sidebar}

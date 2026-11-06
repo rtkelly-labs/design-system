@@ -115,16 +115,13 @@ export function Dashboard() {
           </TabsList>
           {WINDOWS.map((w) => (
             <TabsPanel key={w} value={w} className="pt-4">
-              {/* Sized wrapper: a responsive BarChart has no height of its own (issue 306). */}
-              <div className="h-[240px]">
-                <BarChart
-                  responsive
-                  height={240}
-                  data={[...REGION_TRAFFIC[w]]}
-                  accent="tertiary"
-                  ariaLabel={`Requests by region over ${w}, in thousands`}
-                />
-              </div>
+              <BarChart
+                responsive
+                height={240}
+                data={[...REGION_TRAFFIC[w]]}
+                accent="tertiary"
+                ariaLabel={`Requests by region over ${w}, in thousands`}
+              />
             </TabsPanel>
           ))}
         </Tabs>
@@ -146,7 +143,7 @@ export function Dashboard() {
         title={promoting ? `Promote ${promoting.service}` : 'Promote'}
         footer={
           <div className="flex flex-wrap justify-end gap-3">
-            <Button size="sm" variant="inverse" onClick={() => setPromoting(null)}>
+            <Button size="sm" onClick={() => setPromoting(null)}>
               CANCEL
             </Button>
             <Button

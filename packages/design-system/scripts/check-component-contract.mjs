@@ -55,7 +55,7 @@ const PROVIDERS = {
 
 /** Counts on the day this landed. Lower a line as it is paid down; delete at zero. */
 const BUDGET = {
-  untested: 20,
+  untested: 17,
   inlineStyle: 91,
   ref: 31,
   displayName: 0,

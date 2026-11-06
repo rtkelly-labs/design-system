@@ -1,3 +1,4 @@
+import { StrictMode } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ThemeProvider, useTheme } from './ThemeProvider';
@@ -54,6 +55,37 @@ describe('ThemeProvider', () => {
 
     screen.getByRole('button', { name: 'Midnight' }).click();
     await waitFor(() => expect(screen.getByTestId('level').textContent).toBe('midnight'));
+  });
+
+  it('keeps the stored level under StrictMode (issue 395)', async () => {
+    // StrictMode mounts, unmounts and remounts. The first pass must not write the
+    // default to the document or storage, or the remount trusts it over the stored level.
+    const store = new Map<string, string>([[THEME_STORAGE_KEY, 'midnight']]);
+    const original = Object.getOwnPropertyDescriptor(window, 'localStorage');
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: (key: string) => store.get(key) ?? null,
+        setItem: (key: string, value: string) => void store.set(key, value),
+        removeItem: (key: string) => void store.delete(key),
+      },
+    });
+    try {
+      render(
+        <StrictMode>
+          <ThemeProvider defaultLevel="sketch" followSystem={false}>
+            <Probe />
+          </ThemeProvider>
+        </StrictMode>,
+      );
+
+      await waitFor(() => expect(screen.getByTestId('level').textContent).toBe('midnight'));
+      expect(document.documentElement.getAttribute(THEME_ATTRIBUTE)).toBe('midnight');
+      expect(store.get(THEME_STORAGE_KEY)).toBe('midnight');
+    } finally {
+      if (original) Object.defineProperty(window, 'localStorage', original);
+      else Reflect.deleteProperty(window, 'localStorage');
+    }
   });
 
   it('uses the system mapping when no stored level or document level exists', async () => {

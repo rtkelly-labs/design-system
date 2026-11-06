@@ -94,7 +94,10 @@ export function inspectLayout(opts: InspectOptions = {}): RawViolation[] {
     return /absolute|fixed/.test(cs.position) && r.width <= 1 && r.height <= 1 && (cs.overflowX !== 'visible' || cs.clip !== 'auto' || /inset|rect/.test(cs.clipPath));
   };
   const outOfFlow = (cs: CSSStyleDeclaration) => /absolute|fixed|sticky/.test(cs.position);
-  const hiddenish = (el: Element, cs: CSSStyleDeclaration) => cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0' || isSrOnly(el, cs);
+  // A closed <details> paints only its summary, but Chromium still lays the rest out and reports
+  // their rects, which would read as an overlap with whatever follows the fold.
+  const folded = (el: Element) => el.parentElement instanceof HTMLDetailsElement && !el.parentElement.open && el.tagName !== 'SUMMARY';
+  const hiddenish = (el: Element, cs: CSSStyleDeclaration) => cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0' || folded(el) || isSrOnly(el, cs);
 
   /** True when the element or any ancestor up to `root` is not rendered for a sighted reader, or is out of flow. */
   const skipTree = (el: Element, root: Element, outOfFlowToo: boolean) => {
@@ -376,6 +379,8 @@ export const ALLOWLIST: readonly Allow[] = [
   { inv: 'spill', component: 'ActivityGrid', where: 'activity-grid > span', reason: 'same month labels: spill into the empty neighbouring column is the layout' },
   { inv: 'font', component: 'ColophonCard', reason: 'the section-mark watermark is set in the system serif stack on purpose (font-serif); which serif a machine has differs, so the font name is not a stable key' },
   { inv: 'spill', component: 'AnchorHeading', where: 'anchor-heading', reason: 'a heading box at tight leading: the descender of the last line sits 2px past the line box, painted and unclipped' },
+  { inv: 'escape', where: 'divider-fill', reason: "Divider's fill is a long run of its mark, sized to whole characters with CSS round() and clipped there on purpose; it renders wherever a page draws a rule" },
+  { inv: 'spill', where: 'divider-fill', reason: 'same fill: the clipped tail is the remainder past the last whole character, never text a reader needs' },
 ];
 
 // Filtered in the page, not here (each is a general rule, not a finding to list):
@@ -521,9 +526,18 @@ export function mutateCell(arg: { kind: MutantKind; css: string; cell: string })
   };
 
   if (arg.kind === 'missing-font') {
-    // A cell that prints no glyphs (Skeleton's placeholder bars) has no font to lose: skip it
-    // rather than count a mutant that cannot change anything.
-    if (!body.innerText.trim()) return null;
+    // A cell that prints no glyphs (Skeleton's placeholder bars, a Spinner whose only text is its
+    // `sr-only` label) has no font to lose: skip it rather than count a mutant that cannot change
+    // anything. Visible means the text's own box is bigger than the 1px an `sr-only` clip leaves.
+    const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+    let painted = false;
+    for (let n = walker.nextNode(); n && !painted; n = walker.nextNode()) {
+      const parent = n.parentElement;
+      if (!parent || !(n.nodeValue ?? '').trim()) continue;
+      const r = parent.getBoundingClientRect();
+      painted = r.width > 1 && r.height > 1;
+    }
+    if (!painted) return null;
     const s = document.createElement('style');
     s.id = '__mut_style';
     s.textContent = `[data-component="${cell.dataset.component}"][data-state="${cell.dataset.state}"][data-rung="${cell.dataset.rung}"] * { ${arg.css} }`;
@@ -533,11 +547,17 @@ export function mutateCell(arg: { kind: MutantKind; css: string; cell: string })
   if (arg.kind === 'fixed-width' || arg.kind === 'nowrap-hidden') {
     const t = els.filter((e) => !/^(inline|contents)$/.test(getComputedStyle(e).display)).sort((a, b) => ownText(b).length - ownText(a).length)[0];
     if (!t || ownText(t).length < 12) return null;
+    // Real defect by direct measurement: the text's own rect pokes out of the box that holds it,
+    // and did not before. A fill clipped on purpose (a divider's rule) already pokes out; the
+    // mutant adds nothing there.
+    const pokesOut = () => {
+      const tb = textBox(t);
+      const tr = t.getBoundingClientRect();
+      return tb.right > tr.right + 1 || tb.bottom > tr.bottom + 1;
+    };
+    const already = pokesOut();
     apply(t);
-    // Real defect by direct measurement: the text's own rect pokes out of the box that holds it.
-    const tb = textBox(t);
-    const tr = t.getBoundingClientRect();
-    const eff = tb.right > tr.right + 1 || tb.bottom > tr.bottom + 1;
+    const eff = !already && pokesOut();
     return { target: name(t), effective: eff };
   }
   if (arg.kind === 'flex-min-width') {
@@ -601,14 +621,19 @@ export async function runMutations(page: Page, o: RunMutationOptions): Promise<M
   const mutate = (arg: object) => page.evaluate<{ target: string; effective: boolean } | null>(`(${mutateCell.toString()})(${JSON.stringify(arg)})`);
   const restore = () => page.evaluate(`(${restoreMutant.toString()})()`);
   for (const m of MUTANTS) {
+    // Count only mutants that are real defects: which cells come first depends on the
+    // compendium's order, and a run of cells whose text happens to fit would otherwise
+    // leave a kind with nothing effective. Attempts stay bounded.
     let done = 0;
+    let tried = 0;
     for (const cell of clean) {
-      if (done >= perMutant) break;
+      if (done >= perMutant || tried >= perMutant * 4) break;
       if (m.kind === 'missing-font' && !o.geometry?.some((g) => g.key === cell)) continue;
       const before = new Set((await runLayout(page, { only: cell })).map(kindsKey));
       const hit = await mutate({ kind: m.kind, css: m.css, cell });
       if (!hit) continue;
-      done++;
+      tried++;
+      if (hit.effective) done++;
       let by: Invariant[] = [];
       if (m.kind === 'missing-font') {
         const pageNo = o.geometry!.find((g) => g.key === cell)!.page;

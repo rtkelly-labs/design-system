@@ -14,6 +14,13 @@ import type { AccentToken } from '../lib/theme';
  */
 export type CardVariant = 'panel' | 'card';
 
+/**
+ * How heavily the card is drawn. `strong` is the brand's 2px `border.strong` box. `quiet` is a
+ * 1px `border.default` frame, for a card that sits beside or inside other boxes and should not
+ * compete with the one that matters — see `docs/edge-hierarchy.md`. The accent stripe is kept.
+ */
+export type CardWeight = 'strong' | 'quiet';
+
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   /**
    * Card heading. With no `variant` set, its presence is also what selects the
@@ -83,6 +90,8 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
    * already rely on it. New code should say which form it wants.
    */
   variant?: CardVariant;
+  /** `strong` by default. `quiet` draws a 1px `border.default` frame and keeps the accent stripe. */
+  weight?: CardWeight;
 }
 
 /**
@@ -128,6 +137,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
   badge,
   panel = false,
   variant,
+  weight = 'strong',
   style,
   ...props
 }, ref) {
@@ -146,7 +156,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(function Card({
   const baseCardStyle: CSSProperties = {
     backgroundColor: semanticTokens.surface.base,
     color: semanticTokens.text.primary,
-    border: `2px solid ${semanticTokens.border.strong}`,
+    border: weight === 'quiet' ? `1px solid ${semanticTokens.border.default}` : `2px solid ${semanticTokens.border.strong}`,
     transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
     ...(accentColor ? { borderLeftWidth: '4px', borderLeftColor: accentColor } : {}),
     ...style,

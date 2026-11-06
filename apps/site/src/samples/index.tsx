@@ -7,7 +7,7 @@ import InboxApp from '@/examples/inbox/app';
 import RepositorySettings from '@/examples/settings/repository-settings';
 import CalendarApp from '@/examples/calendar/app';
 import EditorWorkbench from '@/examples/editor/workbench';
-import { ObservabilityConsole, SaasLandingPage } from '@rtkelly-labs/design-system';
+import { DEFAULT_PULL_REQUEST, DEFAULT_REVIEW_REPORT, ObservabilityConsole, PullRequestPage, ReviewReportPage, SaasLandingPage } from '@rtkelly-labs/design-system';
 
 /**
  * The sample pages, keyed by the slug in `src/content/samples.ts`. Each is a
@@ -42,6 +42,12 @@ const SAMPLE_PAGES: Record<string, () => ReactNode> = {
   ),
   editor: () => <EditorWorkbench />,
   observability: () => <ObservabilityConsole />,
+  'review-report': () => (
+    <main id="main-content" className="bg-surface-base text-content-primary">
+      <ReviewReportPage report={DEFAULT_REVIEW_REPORT} />
+    </main>
+  ),
+  'pull-request': () => <PullRequestPage id="main-content" pullRequest={DEFAULT_PULL_REQUEST} />,
 };
 
 export function SamplePage({ slug }: { slug: string }) {

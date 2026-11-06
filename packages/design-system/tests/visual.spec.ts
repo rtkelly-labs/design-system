@@ -190,6 +190,12 @@ const CASES: readonly VisualCase[] = [
   // `InlineAction` in the table cells it was made for: the button form, a
   // disabled one, and the `href` form side by side.
   { id: 'components-actions-forms-inlineaction--in-table', snapshot: 'inlineaction-in-table.png' },
+  // The weight ladder (D1-D4): quiet, secondary, primary, inverse in one row.
+  // Baseline to be generated with `/update-snapshots` on the PR.
+  { id: 'components-actions-forms-button--variants', snapshot: 'button-variants.png' },
+  // D3: a quiet cancel beside a danger confirm — what a ButtonGroup asks for.
+  // Baseline to be generated with `/update-snapshots` on the PR.
+  { id: 'components-actions-forms-button-group--danger-beside-quiet', snapshot: 'buttongroup-danger-beside-quiet.png' },
   // The account flows (#252), every state a reader meets on the way through:
   // each flow at rest and after a failed submit, the reset flow's middle step,
   // and the settings page in `AppShell`. The a11y suite reads these ids, so
@@ -244,6 +250,11 @@ const CASES: readonly VisualCase[] = [
   // shipped, now a story fixture, and an unrelated CMS. Neither pins a Level,
   // so the a11y suite axes both on both, at both widths.
   { id: 'saas-admindashboard--finance-console', snapshot: 'admin-finance-console.png', fullPage: true },
+  // The developer-tooling pages: a comparison tool's report and a pull request under review.
+  { id: 'saas-reviewreport--default', snapshot: 'review-report-default.png', fullPage: true },
+  { id: 'saas-reviewreport--sketch-theme', snapshot: 'review-report-sketch.png', fullPage: true },
+  { id: 'saas-pullrequest--default', snapshot: 'pull-request-default.png', fullPage: true },
+  { id: 'saas-pullrequest--sketch-theme', snapshot: 'pull-request-sketch.png', fullPage: true },
   { id: 'saas-admindashboard--content-studio', snapshot: 'admin-content-studio.png', fullPage: true },
   { id: 'saas-landingpage--dark-mode', snapshot: 'saas-landing-midnight.png', fullPage: true },
   { id: 'saas-landingpage--sketch-mode', snapshot: 'saas-landing-sketch.png', fullPage: true },
@@ -255,6 +266,7 @@ const CASES: readonly VisualCase[] = [
 
   // Chart Primitives
   { id: 'components-data-barchart--vertical', snapshot: 'barchart-vertical.png' },
+  { id: 'components-data-barchart--responsive', snapshot: 'barchart-responsive.png' },
   { id: 'components-data-sparkline--primary-trend', snapshot: 'sparkline-primary-trend.png' },
   { id: 'components-data-bulletchart--primary-benchmark', snapshot: 'bulletchart-primary-benchmark.png' },
   { id: 'components-data-charttooltip--primary', snapshot: 'charttooltip-primary.png' },
@@ -344,6 +356,26 @@ const CASES: readonly VisualCase[] = [
   { id: 'docs-content-terminal--sketch-theme', snapshot: 'terminal-sketch.png' },
   { id: 'docs-content-steps--default', snapshot: 'steps-default.png' },
   { id: 'docs-content-steps--sketch-theme', snapshot: 'steps-sketch.png' },
+  // The review family. Each has its main story and its `sketch` twin, which is the level
+  // where tinted diff grounds and dashed could-not-tell marks are most likely to fade.
+  { id: 'components-reports-statusmark--all-vocabularies', snapshot: 'statusmark-all-vocabularies.png' },
+  { id: 'components-reports-statusmark--sketch-theme', snapshot: 'statusmark-sketch.png' },
+  { id: 'components-reports-verdictband--all-outcomes', snapshot: 'verdictband-all-outcomes.png' },
+  { id: 'components-reports-verdictband--sketch-theme', snapshot: 'verdictband-sketch.png' },
+  { id: 'components-reports-provenancestrip--default', snapshot: 'provenancestrip-default.png' },
+  { id: 'components-reports-provenancestrip--sketch-theme', snapshot: 'provenancestrip-sketch.png' },
+  { id: 'components-reports-deltavalue--states', snapshot: 'deltavalue-states.png' },
+  { id: 'components-reports-deltavalue--sketch-theme', snapshot: 'deltavalue-sketch.png' },
+  { id: 'components-reports-changecount--with-bar', snapshot: 'changecount-with-bar.png' },
+  { id: 'components-reports-changecount--sketch-theme', snapshot: 'changecount-sketch.png' },
+  { id: 'components-reports-changebar--shared-scale', snapshot: 'changebar-shared-scale.png' },
+  { id: 'components-reports-changebar--sketch-theme', snapshot: 'changebar-sketch.png' },
+  { id: 'components-reports-changeindex--default', snapshot: 'changeindex-default.png' },
+  { id: 'components-reports-changeindex--sketch-theme', snapshot: 'changeindex-sketch.png' },
+  { id: 'components-reports-diffview--default', snapshot: 'diffview-default.png' },
+  { id: 'components-reports-diffview--sketch-theme', snapshot: 'diffview-sketch.png' },
+  { id: 'components-reports-keyeddiff--default', snapshot: 'keyeddiff-default.png' },
+  { id: 'components-reports-keyeddiff--sketch-theme', snapshot: 'keyeddiff-sketch.png' },
 ];
 
 /**

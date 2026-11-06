@@ -1,8 +1,8 @@
 import * as react from 'react';
-import react__default, { ReactNode, DetailedHTMLProps, ButtonHTMLAttributes, AnchorHTMLAttributes, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps, RefAttributes } from 'react';
+import react__default, { ReactNode, ButtonHTMLAttributes, AnchorHTMLAttributes, DetailedHTMLProps, HTMLAttributes, ElementType, MouseEventHandler, InputHTMLAttributes, TextareaHTMLAttributes, TableHTMLAttributes, TdHTMLAttributes, ThHTMLAttributes, RefObject, ReactElement, SVGProps, RefAttributes } from 'react';
 import { Table as Table$1, ColumnDef } from '@tanstack/react-table';
-import { RegisterableHotkey } from '@tanstack/react-hotkeys';
 export { ParentSize as ResponsiveChartContainer } from '@visx/responsive';
+import { RegisterableHotkey } from '@tanstack/react-hotkeys';
 export { useTooltip as useChartTooltip } from '@visx/tooltip';
 
 type Emphasis = 'primary' | 'secondary' | 'tertiary' | 'quiet';
@@ -464,20 +464,31 @@ interface UsePolledResourceResult<T> {
 
 declare function usePolledResource<T>(load: () => Promise<T>, { key, intervalMs, enabled }?: UsePolledResourceOptions): UsePolledResourceResult<T>;
 
-interface ButtonOwnProps {
+interface ButtonBaseProps {
 
     children: ReactNode;
 
     variant?: ButtonVariant;
-
-    size?: 'sm' | 'md' | 'lg';
 
     bracketed?: boolean;
 
     className?: string;
 }
 
-type ButtonVariant = 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'default';
+interface ButtonLabelledSize {
+
+    size?: 'xs' | 'sm' | 'md' | 'lg';
+}
+
+interface ButtonIconSize {
+
+    size: 'icon' | 'icon-touch';
+
+    'aria-label': string;
+}
+type ButtonOwnProps = ButtonBaseProps & (ButtonLabelledSize | ButtonIconSize);
+
+type ButtonVariant = 'quiet' | 'primary' | 'secondary' | 'tertiary' | 'inverse' | 'danger' | 'default';
 
 type ButtonElementProps = ButtonOwnProps & DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & {
     href?: never;
@@ -497,7 +508,33 @@ type ButtonLinkProps = ButtonOwnProps & DetailedHTMLProps<AnchorHTMLAttributes<H
 };
 type ButtonProps = ButtonElementProps | ButtonLinkProps;
 
-declare const Button: react.ForwardRefExoticComponent<(Omit<ButtonElementProps, "ref"> | Omit<ButtonLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
+declare const Button: react.ForwardRefExoticComponent<(Omit<ButtonBaseProps & ButtonLabelledSize & react.ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+
+    pending?: boolean;
+
+    pendingLabel?: string;
+}, "ref"> | Omit<ButtonBaseProps & ButtonIconSize & react.ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & {
+    href?: never;
+
+    pending?: boolean;
+
+    pendingLabel?: string;
+}, "ref"> | Omit<ButtonBaseProps & ButtonLabelledSize & react.ClassAttributes<HTMLAnchorElement> & AnchorHTMLAttributes<HTMLAnchorElement> & {
+
+    href: string;
+
+    pending?: never;
+
+    pendingLabel?: never;
+}, "ref"> | Omit<ButtonBaseProps & ButtonIconSize & react.ClassAttributes<HTMLAnchorElement> & AnchorHTMLAttributes<HTMLAnchorElement> & {
+
+    href: string;
+
+    pending?: never;
+
+    pendingLabel?: never;
+}, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
 
 interface InlineActionOwnProps {
 
@@ -524,7 +561,73 @@ type InlineActionProps = InlineActionButtonProps | InlineActionLinkProps;
 
 declare const InlineAction: react.ForwardRefExoticComponent<(Omit<InlineActionButtonProps, "ref"> | Omit<InlineActionLinkProps, "ref">) & react.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
 
+type ButtonColourRole = {
+    readonly kind: 'accent';
+    readonly role: Emphasis;
+} | {
+    readonly kind: 'intent';
+    readonly role: Intent;
+} | {
+    readonly kind: 'neutral';
+};
+
+interface HueCollision {
+    readonly level: ThemeLevel;
+
+    readonly hue: HueRef;
+
+    readonly danger: readonly number[];
+
+    readonly others: readonly number[];
+}
+
+declare function hueOfRole(level: ThemeLevel, role: ButtonColourRole): HueRef;
+
+declare function findHueCollisions(roles: readonly ButtonColourRole[], levels?: readonly ThemeLevel[]): HueCollision[];
+
+declare const BUTTON_COLOUR_ROLE: {
+    readonly primary: {
+        readonly kind: "accent";
+        readonly role: "primary";
+    };
+    readonly default: {
+        readonly kind: "accent";
+        readonly role: "primary";
+    };
+    readonly tertiary: {
+        readonly kind: "accent";
+        readonly role: "tertiary";
+    };
+    readonly danger: {
+        readonly kind: "intent";
+        readonly role: "danger";
+    };
+    readonly secondary: {
+        readonly kind: "neutral";
+    };
+    readonly quiet: {
+        readonly kind: "neutral";
+    };
+    readonly inverse: {
+        readonly kind: "neutral";
+    };
+};
+
+interface ButtonGroupContextValue {
+    register: (id: string, role: ButtonColourRole) => () => void;
+}
+
+declare const buttonGroupContext: react.Context<ButtonGroupContextValue | null>;
+interface ButtonGroupProps extends HTMLAttributes<HTMLDivElement> {
+
+    children: ReactNode;
+}
+
+declare const ButtonGroup: react.ForwardRefExoticComponent<ButtonGroupProps & react.RefAttributes<HTMLDivElement>>;
+
 type CardVariant = 'panel' | 'card';
+
+type CardWeight = 'strong' | 'quiet';
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
 
     title?: string;
@@ -550,6 +653,8 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
     panel?: boolean;
 
     variant?: CardVariant;
+
+    weight?: CardWeight;
 }
 
 declare const Card: react.ForwardRefExoticComponent<CardProps & react.RefAttributes<HTMLDivElement>>;
@@ -608,6 +713,421 @@ interface ReportDetailsProps extends HTMLAttributes<HTMLDetailsElement> {
 }
 declare const ReportDetails: react.ForwardRefExoticComponent<ReportDetailsProps & react.RefAttributes<HTMLDetailsElement>>;
 
+type AssessmentOutcome = 'pass' | 'warn' | 'fail' | 'needs-review' | 'inconclusive' | 'none';
+
+type DeltaStatus = 'unchanged' | 'changed' | 'unavailable' | 'invalid' | 'incompatible' | 'inconclusive' | 'unsupported';
+
+type EvidenceStatus = 'produced' | 'unavailable' | 'invalid' | 'inconclusive';
+
+type TrustStatus = 'trusted' | 'candidate' | 'untrusted' | 'missing' | 'corrupt' | 'incompatible';
+
+interface StatusVocabularies {
+    outcome: AssessmentOutcome;
+    delta: DeltaStatus;
+    evidence: EvidenceStatus;
+    trust: TrustStatus;
+}
+type StatusVocabulary = keyof StatusVocabularies;
+
+type StatusTone = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'hollow';
+interface StatusAppearance {
+    glyph: string;
+    tone: StatusTone;
+
+    word: string;
+}
+declare const STATUS_APPEARANCE: {
+    readonly [V in StatusVocabulary]: Readonly<Record<StatusVocabularies[V], StatusAppearance>>;
+};
+
+declare const STATUS_TONE_TEXT: Readonly<Record<StatusTone, string>>;
+
+declare function statusAppearance<V extends StatusVocabulary>(vocabulary: V, status: StatusVocabularies[V]): StatusAppearance;
+
+type DiffLineKind = 'added' | 'removed' | 'context';
+
+interface DiffLineComment {
+
+    author: string;
+
+    meta?: string;
+
+    body: ReactNode;
+}
+interface DiffLine {
+
+    kind: DiffLineKind;
+
+    oldNumber?: number;
+
+    newNumber?: number;
+
+    text: string;
+
+    comments?: readonly DiffLineComment[];
+}
+interface DiffHunk {
+
+    header: string;
+
+    lines: DiffLine[];
+}
+
+declare function parseUnifiedDiff(text: string): DiffHunk[];
+
+declare function countDiff(hunks: readonly DiffHunk[]): {
+    added: number;
+    removed: number;
+};
+
+declare function diffAnchor(path: string): string;
+
+type StatusMarkOwnProps = {
+    [V in StatusVocabulary]: {
+
+        vocabulary: V;
+
+        status: StatusVocabularies[V];
+    };
+}[StatusVocabulary];
+type StatusMarkProps = StatusMarkOwnProps & Omit<react.HTMLAttributes<HTMLSpanElement>, 'children'> & {
+
+    label?: string;
+
+    className?: string;
+};
+
+declare const StatusMark: react.ForwardRefExoticComponent<StatusMarkProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface VerdictBandProps extends Omit<react.HTMLAttributes<HTMLDivElement>, 'title'> {
+
+    outcome: AssessmentOutcome;
+
+    title: ReactNode;
+
+    children?: ReactNode;
+
+    label?: string;
+
+    className?: string;
+}
+
+declare const VerdictBand: react.ForwardRefExoticComponent<VerdictBandProps & react.RefAttributes<HTMLDivElement>>;
+
+interface ProvenanceItem {
+
+    label: string;
+
+    value: ReactNode;
+
+    note?: ReactNode;
+}
+interface ProvenanceStripProps extends react.HTMLAttributes<HTMLElement> {
+
+    label?: string;
+
+    items: readonly ProvenanceItem[];
+
+    className?: string;
+}
+
+declare const ProvenanceStrip: react.ForwardRefExoticComponent<ProvenanceStripProps & react.RefAttributes<HTMLElement>>;
+
+type MetricDirection = 'higher-is-better' | 'lower-is-better';
+interface DeltaValueProps extends Omit<react.HTMLAttributes<HTMLSpanElement>, 'children'> {
+
+    before?: number | null;
+
+    after?: number | null;
+
+    unit?: string;
+
+    direction?: MetricDirection;
+
+    significance?: DeltaSignificance;
+
+    relative?: boolean;
+
+    format?: (value: number) => string;
+
+    className?: string;
+}
+
+declare function deltaTrend(change: number, direction?: MetricDirection): 'against' | 'with' | undefined;
+
+interface DeltaSignificance {
+    noise?: number;
+    major?: number;
+}
+declare const DEFAULT_SIGNIFICANCE: Required<DeltaSignificance>;
+
+declare function deltaSignificance(relative: number | undefined, bands?: DeltaSignificance): 'noise' | 'notable' | 'major';
+
+declare function trendTone(trend: 'against' | 'with' | undefined, significance: 'noise' | 'notable' | 'major'): string;
+
+declare const DeltaValue: react.ForwardRefExoticComponent<DeltaValueProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface ChangeCountProps extends Omit<react.HTMLAttributes<HTMLSpanElement>, 'children'> {
+
+    added: number;
+
+    removed: number;
+
+    moved?: number;
+
+    noun?: readonly [one: string, other: string];
+
+    className?: string;
+}
+
+declare const ChangeCount: react.ForwardRefExoticComponent<ChangeCountProps & react.RefAttributes<HTMLSpanElement>>;
+
+interface ChangeBarProps extends Omit<react.SVGAttributes<SVGSVGElement>, 'children'> {
+
+    added: number;
+
+    removed: number;
+
+    max?: number;
+
+    label?: string;
+
+    className?: string;
+}
+
+declare const ChangeBar: react.ForwardRefExoticComponent<ChangeBarProps & react.RefAttributes<SVGSVGElement>>;
+
+interface ChangeIndexFile {
+
+    path: string;
+
+    added: number;
+
+    removed: number;
+
+    href?: string;
+}
+interface ChangeIndexGroup {
+
+    title: string;
+
+    files: readonly ChangeIndexFile[];
+}
+interface ChangeIndexProps extends react.HTMLAttributes<HTMLElement> {
+
+    label?: string;
+
+    groups: readonly ChangeIndexGroup[];
+
+    emptyText?: react.ReactNode;
+
+    className?: string;
+}
+
+declare const ChangeIndex: react.ForwardRefExoticComponent<ChangeIndexProps & react.RefAttributes<HTMLElement>>;
+
+interface DiffViewProps extends Omit<react.HTMLAttributes<HTMLElement>, 'children'> {
+
+    path: string;
+
+    hunks: readonly DiffHunk[];
+
+    collapsible?: boolean;
+
+    defaultOpen?: boolean;
+
+    wrap?: boolean;
+
+    max?: number;
+
+    className?: string;
+}
+
+declare const DiffView: react.ForwardRefExoticComponent<DiffViewProps & react.RefAttributes<HTMLElement>>;
+
+type KeyedChange = 'added' | 'removed' | 'changed' | 'renamed' | 'unchanged';
+interface KeyedDiffRow {
+
+    id?: string | number;
+
+    identity: ReactNode;
+
+    change: KeyedChange;
+
+    cells?: readonly ReactNode[];
+}
+interface KeyedDiffProps extends react.HTMLAttributes<HTMLDivElement> {
+
+    caption: ReactNode;
+
+    identityLabel?: string;
+
+    columns?: readonly string[];
+
+    rows: readonly KeyedDiffRow[];
+
+    emptyText?: ReactNode;
+
+    changeLabels?: Partial<Record<KeyedChange, string>>;
+
+    className?: string;
+}
+
+declare const KeyedDiff: react.ForwardRefExoticComponent<KeyedDiffProps & react.RefAttributes<HTMLDivElement>>;
+
+interface ReviewValue {
+    before?: number | null;
+    after?: number | null;
+    direction?: MetricDirection;
+    unit?: string;
+}
+interface ReviewColumn {
+
+    label: string;
+    direction?: MetricDirection;
+    unit?: string;
+}
+
+interface ReviewMeasurementTable {
+    caption: string;
+
+    identityLabel: string;
+    columns: readonly ReviewColumn[];
+    rows: readonly {
+        identity: string;
+        values: readonly ReviewValue[];
+    }[];
+}
+
+interface ReviewRecordTable {
+    caption: string;
+    identityLabel: string;
+    columns: readonly ReviewColumn[];
+    rows: readonly {
+        identity: string;
+        change: KeyedChange;
+        values: readonly ReviewValue[];
+    }[];
+}
+
+interface ReviewFileGroup {
+    title: string;
+    files: readonly {
+        path: string;
+        hunks: readonly DiffHunk[];
+    }[];
+}
+
+interface ReviewReportData {
+    title: string;
+
+    subtitle?: string;
+
+    meta?: readonly ReportMetaItem[];
+
+    outcome: AssessmentOutcome;
+
+    verdict: string;
+
+    verdictContext?: string;
+
+    provenance: readonly ProvenanceItem[];
+
+    figures?: readonly {
+        label: string;
+        value: string;
+        note?: string;
+    }[];
+
+    measurements?: readonly ReviewMeasurementTable[];
+
+    records?: ReviewRecordTable;
+
+    caveats?: readonly {
+        title: string;
+        body: ReactNode;
+    }[];
+
+    files: readonly ReviewFileGroup[];
+}
+interface ReviewReportPageProps extends Omit<react.HTMLAttributes<HTMLElement>, 'title'> {
+
+    report: ReviewReportData;
+
+    className?: string;
+}
+
+declare const ReviewReportPage: react.ForwardRefExoticComponent<ReviewReportPageProps & react.RefAttributes<HTMLElement>>;
+
+type PullRequestState = 'open' | 'draft' | 'merged' | 'closed';
+type ReviewerState = 'approved' | 'changes-requested' | 'commented' | 'pending';
+
+interface PullRequestCheck {
+    name: string;
+    status: AssessmentOutcome;
+
+    label?: string;
+
+    summary?: string;
+
+    duration?: string;
+}
+
+interface PullRequestData {
+
+    repository: string;
+    number: number;
+    title: string;
+    state: PullRequestState;
+    author: string;
+
+    base: string;
+
+    head: string;
+
+    opened: string;
+    labels?: readonly string[];
+
+    description: readonly ReactNode[];
+    reviewers: readonly {
+        name: string;
+        state: ReviewerState;
+    }[];
+    checks: readonly PullRequestCheck[];
+
+    verdict?: {
+        outcome: AssessmentOutcome;
+        title: string;
+        context?: string;
+    };
+
+    conversation?: readonly {
+        author: string;
+        meta?: string;
+        body: ReactNode;
+    }[];
+
+    files: readonly {
+        path: string;
+        hunks: readonly DiffHunk[];
+    }[];
+}
+interface PullRequestPageProps extends react.HTMLAttributes<HTMLElement> {
+
+    pullRequest: PullRequestData;
+
+    className?: string;
+}
+
+declare const PullRequestPage: react.ForwardRefExoticComponent<PullRequestPageProps & react.RefAttributes<HTMLElement>>;
+
+declare const SAMPLE_BASELINE_COMMIT = "216f6fc28cec75077f5b8fa90cd3d7055e81db7b";
+declare const SAMPLE_DUPLICATION_HUNKS: DiffHunk[];
+declare const SAMPLE_METRICS_HUNKS: DiffHunk[];
+declare const SAMPLE_CALLGRAPH_HUNKS: DiffHunk[];
+declare const DEFAULT_REVIEW_REPORT: ReviewReportData;
+declare const DEFAULT_PULL_REQUEST: PullRequestData;
+
 interface TokenRule {
     id: 'hex' | 'rawPalette' | 'legacyAlias' | 'darkVariant';
     label: string;
@@ -646,9 +1166,11 @@ interface PageTitleProps extends HTMLAttributes<HTMLHeadingElement> {
     children: ReactNode;
     subtitle?: string;
     bracketed?: boolean;
+
+    framed?: boolean;
     className?: string;
 }
-declare function PageTitle({ children, subtitle, bracketed, className, ...props }: PageTitleProps): react.JSX.Element;
+declare function PageTitle({ children, subtitle, bracketed, framed, className, ...props }: PageTitleProps): react.JSX.Element;
 
 interface PageHeaderProps {
 
@@ -771,6 +1293,12 @@ declare function SectionContainer({ children, className }: SectionContainerProps
 type DividerVariant = 'auto' | 'terminal' | 'pencil';
 
 declare const DIVIDER_PATTERNS: Readonly<Record<Polarity, string>>;
+
+declare const DIVIDER_MARKS: Readonly<Record<Polarity, {
+    start: string;
+    fill: string;
+    end: string;
+}>>;
 interface DividerProps extends react__default.HTMLAttributes<HTMLDivElement> {
 
     variant?: DividerVariant;
@@ -1055,6 +1583,8 @@ interface SwatchGroupProps extends HTMLAttributes<HTMLElement> {
 declare const SwatchGroup: react.ForwardRefExoticComponent<SwatchGroupProps & react.RefAttributes<HTMLElement>>;
 
 type StatCardAccent = AccentToken;
+
+type StatCardAppearance = 'boxed' | 'quiet';
 interface StatCardProps {
     title: string;
     value: string | number;
@@ -1065,9 +1595,11 @@ interface StatCardProps {
         className?: string;
     }>;
     accent?: StatCardAccent;
+
+    appearance?: StatCardAppearance;
     className?: string;
 }
-declare function StatCard({ title, value, change, changeType, subtitle, icon: Icon, accent, className, }: StatCardProps): react.JSX.Element;
+declare function StatCard({ title, value, change, changeType, subtitle, icon: Icon, accent, appearance, className, }: StatCardProps): react.JSX.Element;
 
 type TableAppearance = 'grid' | 'quiet' | 'index';
 
@@ -1663,6 +2195,8 @@ interface HeroProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'childre
 
     bracketed?: boolean;
 
+    framed?: boolean;
+
     align?: SectionAlign;
 
     className?: string;
@@ -1694,6 +2228,8 @@ interface FeatureProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
 
     accent?: AccentToken;
 
+    weight?: CardWeight;
+
     children?: ReactNode;
 
     className?: string;
@@ -1722,6 +2258,8 @@ type PricingTierAccent = 'primary' | 'secondary' | 'tertiary';
 interface PricingTierProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
 
     name: ReactNode;
+
+    weight?: CardWeight;
 
     price: ReactNode;
 
@@ -3616,6 +4154,10 @@ interface DiffRow {
     label?: string;
     value: string;
     sign?: DiffSign;
+
+    relative?: number;
+
+    direction?: MetricDirection;
 }
 interface DiffLineProps extends DiffRow {
 
@@ -3628,6 +4170,10 @@ interface ChangeSummaryProps extends react.HTMLAttributes<HTMLDivElement> {
     rows?: DiffRow[];
 
     footer?: DiffRow;
+
+    direction?: MetricDirection;
+
+    significance?: DeltaSignificance;
 
     children?: ReactNode;
 
@@ -4176,8 +4722,10 @@ export {
   AsciiGauge,
   type AsciiGaugeProps,
   type AsciiGaugeVariant,
+  type AssessmentOutcome,
   Avatar,
   type AvatarProps,
+  BUTTON_COLOUR_ROLE,
   Badge,
   type BadgeProps,
   BarChart,
@@ -4200,7 +4748,14 @@ export {
   BulletChart,
   type BulletChartProps,
   Button,
+  type ButtonBaseProps,
+  type ButtonColourRole,
   type ButtonElementProps,
+  ButtonGroup,
+  type ButtonGroupContextValue,
+  type ButtonGroupProps,
+  type ButtonIconSize,
+  type ButtonLabelledSize,
   type ButtonLinkProps,
   type ButtonOwnProps,
   type ButtonProps,
@@ -4212,6 +4767,15 @@ export {
   Card,
   type CardProps,
   type CardVariant,
+  type CardWeight,
+  ChangeBar,
+  type ChangeBarProps,
+  ChangeCount,
+  type ChangeCountProps,
+  ChangeIndex,
+  type ChangeIndexFile,
+  type ChangeIndexGroup,
+  type ChangeIndexProps,
   ChangeSummary,
   type ChangeSummaryProps,
   ChartTooltip,
@@ -4238,6 +4802,10 @@ export {
   DEFAULT_EXPERIMENTS,
   DEFAULT_LEVEL,
   DEFAULT_PRICING_TIERS,
+  DEFAULT_PULL_REQUEST,
+  DEFAULT_REVIEW_REPORT,
+  DEFAULT_SIGNIFICANCE,
+  DIVIDER_MARKS,
   DIVIDER_PATTERNS,
   DataTable,
   type DataTableProps,
@@ -4248,10 +4816,20 @@ export {
   type DecisionProps,
   type Delta,
   type DeltaGround,
+  type DeltaSignificance,
+  type DeltaStatus,
+  DeltaValue,
+  type DeltaValueProps,
   DesignSandbox,
+  type DiffHunk,
+  type DiffLine,
+  type DiffLineComment,
+  type DiffLineKind,
   type DiffLineProps,
   type DiffRow,
   type DiffSign,
+  DiffView,
+  type DiffViewProps,
   Divider,
   type DividerProps,
   type DividerVariant,
@@ -4282,6 +4860,7 @@ export {
   type ErrorSummaryError,
   type ErrorSummaryProps,
   Event,
+  type EvidenceStatus,
   type ExperimentItem,
   ExperimentsView,
   type ExperimentsViewProps,
@@ -4337,6 +4916,7 @@ export {
   type HeroProps,
   type Hue,
   type HueAgreementCheck,
+  type HueCollision,
   type HueRef,
   INK_WEIGHT,
   IdChip,
@@ -4358,6 +4938,10 @@ export {
   type InputProps,
   type IntensityScale,
   type Intent,
+  type KeyedChange,
+  KeyedDiff,
+  type KeyedDiffProps,
+  type KeyedDiffRow,
   LATENCY_HEATMAP_VARIANTS,
   LATENCY_HISTOGRAM_VARIANTS,
   LEVELS,
@@ -4410,6 +4994,7 @@ export {
   type MetadataGridProps,
   type MetadataGridSeries,
   type Metric,
+  type MetricDirection,
   MetricStrip,
   type MetricStripProps,
   type MetricTone,
@@ -4456,6 +5041,14 @@ export {
   type ProgressProps,
   Prose,
   type ProseProps,
+  type ProvenanceItem,
+  ProvenanceStrip,
+  type ProvenanceStripProps,
+  type PullRequestCheck,
+  type PullRequestData,
+  PullRequestPage,
+  type PullRequestPageProps,
+  type PullRequestState,
   RECOMMENDED_COLOURS,
   RECOMMENDED_COLOUR_CLASSES,
   RECOMMENDED_COLOUR_NAMESPACES,
@@ -4482,10 +5075,25 @@ export {
   type ResourceStateProps,
   type ResourceStateValue,
   type ResourceStatus,
+  type ReviewColumn,
+  type ReviewFileGroup,
+  type ReviewMeasurementTable,
+  type ReviewRecordTable,
+  type ReviewReportData,
+  ReviewReportPage,
+  type ReviewReportPageProps,
+  type ReviewValue,
+  type ReviewerState,
   type Rgb,
+  SAMPLE_BASELINE_COMMIT,
+  SAMPLE_CALLGRAPH_HUNKS,
+  SAMPLE_DUPLICATION_HUNKS,
+  SAMPLE_METRICS_HUNKS,
   SEVERITY_ACCENTS,
   SLIDE_DECK_HOTKEYS,
   SLOTS,
+  STATUS_APPEARANCE,
+  STATUS_TONE_TEXT,
   SYSTEM_LEVEL,
   SaasLandingPage,
   type SaasLandingPageProps,
@@ -4547,10 +5155,17 @@ export {
   type SpinnerProps,
   StatCard,
   type StatCardAccent,
+  type StatCardAppearance,
   type StatCardProps,
+  type StatusAppearance,
+  StatusMark,
+  type StatusMarkProps,
   StatusPage,
   type StatusPagePresetProps,
   type StatusPageProps,
+  type StatusTone,
+  type StatusVocabularies,
+  type StatusVocabulary,
   Step,
   type StepProps,
   type StepState,
@@ -4676,6 +5291,7 @@ export {
   TreeDiagram,
   type TreeDiagramProps,
   type TreeNode,
+  type TrustStatus,
   type TypeStep,
   type TypeStepName,
   type UptimeStatus,
@@ -4687,6 +5303,8 @@ export {
   type UsePolledResourceResult,
   type UseTraceClockOptions,
   type UseTraceReplayOptions,
+  VerdictBand,
+  type VerdictBandProps,
   type VerdictTone,
   WEB_FLOOR,
   XIcon,
@@ -4703,17 +5321,23 @@ export {
   bucketPercentile,
   bucketTimes,
   buildTrace,
+  buttonGroupContext,
   childrenToText,
   clampToRange,
   cn,
   collectHeadings,
   composite,
   contrastRatio,
+  countDiff,
   createAnchorHeading,
+  deltaSignificance,
+  deltaTrend,
   describeFilter,
   describeLogEntry,
   describeTraceSpan,
+  diffAnchor,
   filterLogEntries,
+  findHueCollisions,
   fontVar,
   formatAge,
   formatAlertDuration,
@@ -4737,6 +5361,7 @@ export {
   heatmapCells,
   highlightLogText,
   histogram,
+  hueOfRole,
   inLogRange,
   intensityLevel,
   intensityThresholds,
@@ -4762,6 +5387,7 @@ export {
   parseFilter,
   parseOtlpTrace,
   parseTraceDocument,
+  parseUnifiedDiff,
   percentile,
   percentiles,
   presetRange,
@@ -4779,10 +5405,12 @@ export {
   slugify,
   sortAlerts,
   sortLogEntries,
+  statusAppearance,
   summariseIncident,
   surfaceVar,
   textVar,
   timeTicks,
+  trendTone,
   truncateId,
   tryParseFilter,
   useActiveHeading,

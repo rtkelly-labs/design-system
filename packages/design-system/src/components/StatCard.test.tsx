@@ -102,4 +102,11 @@ describe('StatCard', () => {
       expect(node.className, `${node.tagName} pins a palette entry`).not.toMatch(FORBIDDEN);
     }
   });
+
+  it('drops the box in its quiet appearance', () => {
+    const { container } = render(<StatCard appearance="quiet" title="Checks" value={11} />);
+    const root = container.querySelector('[data-slot="stat-card"]')!;
+    expect(root.className).not.toContain('border-2');
+    expect(root.className).toContain('border-dashed');
+  });
 });

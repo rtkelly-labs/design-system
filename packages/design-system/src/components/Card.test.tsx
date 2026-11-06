@@ -76,3 +76,19 @@ describe('Card ref', () => {
     expect(card.current?.dataset.testid).toBe('card');
   });
 });
+
+describe('Card weight', () => {
+  it('draws a 2px strong edge by default and a 1px default edge when quiet', () => {
+    const { container, rerender } = render(<Card variant="panel">x</Card>);
+    const root = () => container.querySelector('[data-slot="card"]') as HTMLElement;
+    expect(root().style.border).toContain('2px');
+    rerender(<Card variant="panel" weight="quiet">x</Card>);
+    expect(root().style.border).toContain('1px');
+    expect(root().style.border).toContain('var(--ds-border-default)');
+  });
+
+  it('keeps the accent stripe when quiet', () => {
+    const { container } = render(<Card variant="panel" weight="quiet" accent="danger">x</Card>);
+    expect((container.querySelector('[data-slot="card"]') as HTMLElement).style.borderLeftWidth).toBe('4px');
+  });
+});

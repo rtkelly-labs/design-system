@@ -337,7 +337,14 @@ html {
     max-height: none;
     background-color: var(--ds-surface-base);
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    /*
+     * `visibility` (set closed in DocsLayout.tsx, #309) interpolates as visible
+     * while either end is, so the drawer stays painted through the slide-out
+     * and is visible at once on the way in.
+     */
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s;
   }
 
   .docs-layout-sidebar[data-open='true'] {

@@ -131,3 +131,26 @@ nobody thought to write.
 `expectTypeOf` assertions and `@ts-expect-error` negatives pin promises a
 consumer builds on: narrowing, ref element types, rejected props. `check:api`
 sees the text of the surface; this file sees what that text allows.
+
+## 🧬 Mutation testing
+
+`pnpm test:mutation` runs StrykerJS over the modules named in
+`stryker.config.mjs`. Stryker changes one operator or condition at a time and
+reports which change no test noticed. It is an instrument, not a gate. It runs
+in `experiments.yml` when a PR carries the `experiment:mutation` label, takes
+7–9 minutes, and nothing fails on the score. Read the **survivor list**, not
+the number.
+
+- **Tests written against survivors** live in `*.mutants.test.*`. Each one names
+  the behaviour a survivor exposed, such as a consumed key, focus, or a
+  datalist entry, and never names the mutant. One marked *incidental* pins a
+  detail rather than a promise, and is the first to drop.
+- **Not every survivor deserves a test.** An equivalent mutant (`?.focus()` →
+  `.focus()` on a ref that is always set) cannot be killed. A class list
+  belongs to the visual suite.
+- **The fast-check seed is pinned under Stryker** (`stryker-setup.ts`). An
+  unpinned seed let the models kill a different set on each run, about ±1.5
+  points of noise. `FC_SEED` or the dispatch `seed` input picks another seed.
+- **Comparing two `mutation.json` files:** key each mutant by its start *and*
+  end location. Start alone collides (`a && b` and `a` share one) and invents
+  status changes.

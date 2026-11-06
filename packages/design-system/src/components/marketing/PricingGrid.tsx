@@ -3,7 +3,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import { recipe } from '../../lib/recipe';
 import { ACCENT_CLASS_MAPS, accentTextClass, canonicalAccent } from '../../lib/accentClasses';
-import { Card } from '../Card';
+import { Card, type CardWeight } from '../Card';
 import { SectionGrid } from './SectionGrid';
 import type { SectionAlign, SectionColumns } from './SectionGrid';
 
@@ -84,6 +84,11 @@ export interface PricingTier {
 export interface PricingTierProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   /** The plan's name, set as the tier's `<h3>`. */
   name: ReactNode;
+  /**
+   * The tier's weight. Leave the recommended tier `strong` and set the others `quiet`, so the
+   * plan the page recommends is the one heavy object in the row.
+   */
+  weight?: CardWeight;
   /** The price as displayed — currency and all, since only the caller knows the locale. */
   price: ReactNode;
   /** What the price is per — `/month`, `/seat`, `one-off`. Set small, in the muted ink. */

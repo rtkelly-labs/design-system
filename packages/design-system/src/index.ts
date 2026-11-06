@@ -43,6 +43,8 @@ export * from './hooks/usePolledResource';
 // Primitives & Callouts
 export * from './components/Button';
 export * from './components/InlineAction';
+export * from './components/ButtonGroup';
+export * from './components/buttonHues';
 export * from './components/Card';
 export * from './components/Badge';
 // The report frame — the page a generated report is built in. Separate from
@@ -51,6 +53,9 @@ export * from './components/Badge';
 // measure, the header strip and the print behaviour, and everything inside it
 // is ordinary composition.
 export * from './components/ReportDocument';
+// Reviewing a change — the verdict, provenance, measured deltas and line diffs a review report
+// is built from. Separate from the report frame because an application can show a review too.
+export * from './components/review';
 
 // The colour-instead-of-role rules, and the scanner over them. Published
 // because a tool generating markup against this system should be able to hold
@@ -176,6 +181,7 @@ export * from './components/TickerTape';
 
 // Chart Primitives & Trend Visualizers
 export * from './components/BarChart';
+export * from './components/ResponsiveChartContainer';
 export * from './components/Sparkline';
 export * from './components/ChartTooltip';
 export * from './components/BulletChart';
