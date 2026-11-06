@@ -14,7 +14,7 @@ The aesthetic is **Brutalist Neon Terminal** (`midnight` dark default) meets **A
 
 * **Information Density:** High. Favor compact data presentations, technical grids, and dense command surfaces over sprawling whitespace.
 * **Structural Edges:** Edges are razor-sharp and drawn with high contrast. Never imply boundaries with background gradients; draw them with 1px or 2px solid rules.
-* **Tone:** Terse, technical, operational. Controls state exact verbs (`EXECUTE`, `DIFF`, `DISPATCH`). Section headers use bracketed uppercase monospace (`[ 01 // OVERVIEW ]`, `[ PR-104 // TRIAGE ]`).
+* **Tone:** Terse, technical, operational. Controls state exact verbs (`EXECUTE`, `DIFF`, `DISPATCH`). Section headers are plain Space Grotesk. Monospace and brackets are the loudest marks the brand has, so they are spent rarely and big (see the type budget in §4).
 * **Metaphor:** The interface should read like a CRT debugger cockpit or a mechanical drafting blueprint, not a modern consumer SaaS app.
 
 ---
@@ -24,11 +24,11 @@ The aesthetic is **Brutalist Neon Terminal** (`midnight` dark default) meets **A
 When constructing a screen or report:
 
 1. **Lead with Context & Primary Metrics:**
-   * Ground views with a persistent header or high-level status strip (`[ STATUS: HEALTHY ]`, `[ BRANCH // MAIN ]`).
+   * Ground views with a persistent header or high-level status strip. The app or page title may carry the page's one bracket (`[ RIG ]`); status values do not.
    * Key indicators use `StatCard` or dense metadata grids rather than oversized hero illustrations.
 2. **Evidence & Data Presentation:**
    * Tabular data and diffs should span the full available width of their container.
-   * Tables must use tabular monospace numbers (`IBM Plex Mono`) with explicit uppercase column headers.
+   * Table headers and cells are set in `Inter` with tabular numerals (`tabular-nums`). Mono only for real code, paths, hashes and commands inside a cell.
    * Diffs are presented as structured multi-pane comparisons, not wall-of-text dumps.
 3. **Hierarchy of Grounds:**
    * Page canvas sits on `surface.base`.
@@ -49,12 +49,14 @@ Do not treat themes as an inverted "light and dark" switch. Neither theme is der
 ## 4. Component Construction Rules
 
 * **Containers & Cards:** Strictly zero border-radius (`rounded-none`). Load-bearing 2px solid borders. Brutalist hard-offset box shadows with **0px blur radius** (`2px 2px 0 0`, `4px 4px 0 0`). Never use diffuse, blurred drop shadows.
-* **Buttons:** Solid accent fill or high-contrast 2px border, uppercase monospace or display font, 0px radius. State what happens directly (`BUILD`, `REVERT`).
-* **Section Markers & Badges:** Monospace text enclosed in square brackets: `[ 01 // OVERVIEW ]`, `[ PR-104 ]`.
-* **Typography:**
-  * Display & Headers: `Space Grotesk`, uppercase, heavy, with subtle letter-spacing and bottom border underlines.
-  * Body: `Inter`, clean legibility, 1.5 line height.
-  * Code & Metrics: `IBM Plex Mono` / `JetBrains Mono`.
+* **Buttons:** Solid accent fill or high-contrast 2px border, `Inter` or the display face, 0px radius. State what happens directly (`BUILD`, `REVERT`).
+* **Section Markers & Badges:** Plain text. Brackets are a budget of one or two per page: the page or app title, and at most the one primary action. Never section headings, table headers, tags, badges or nav items.
+* **Typography — the type budget:**
+  * Body: `Inter`, 1.5 line height. Everything people read or scan: running text, labels, table headers and cells, captions, buttons, nav. Reach for it first.
+  * Display & Headers: `Space Grotesk`, heavy, with subtle letter-spacing and bottom border underlines. Uppercase only at title scale.
+  * Mono: `IBM Plex Mono`, only large and bold (stat values, a hero label, step numbers) or for real code. Never captions, kickers, table cells or anything small and dense — at caption size it is the hardest text on the screen to read.
+  * Pixel: `VT323`, a single decorative mark on a neon surface, never anything that has to be read.
+  * When a screen feels too plain, the fix is the form — a heavier border, an offset shadow in the section's accent, a sunken well — not another bracket or mono label.
 
 ---
 
@@ -64,7 +66,8 @@ Do not treat themes as an inverted "light and dark" switch. Neither theme is der
 * ❌ **DON'T** use soft, blurry drop shadows (`shadow-md`, `shadow-lg`, blurred rgba glows).
 * ❌ **DON'T** use pastel gradients, mesh backgrounds, or multi-color linear gradient buttons.
 * ❌ **DON'T** default to Inter-on-white with indigo accents (the standard generic SaaS template).
-* ❌ **DON'T** use emoji as section markers or bullet icons. Use ASCII glyphs (`>`, `[+]`, `✓`, `•`) or monospace brackets (`[ METRIC ]`).
+* ❌ **DON'T** use emoji as section markers or bullet icons. Use ASCII glyphs (`>`, `✓`, `•`) or the form itself.
+* ❌ **DON'T** bracket every heading or set dashboards in small mono labels. A bracket on every heading is noise, and the page reads as a costume.
 * ❌ **DON'T** hardcode arbitrary Tailwind color classes (`bg-blue-500`, `text-purple-400`). Use semantic role tokens (`bg-surface-raised`, `text-accent-primary`).
 * ✅ **DO** verify designs in both `midnight` (neon on dark slate) and `sketch` (ink on warm paper).
 * ✅ **DO** keep information density compact, structured, and legible for developer workflows.
