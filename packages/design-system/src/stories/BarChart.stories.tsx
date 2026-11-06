@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BarChart, type BarChartDatum } from '../components/BarChart';
+import { ResponsiveChartContainer } from '../components/ResponsiveChartContainer';
 import { ThemeProvider } from '../components/ThemeProvider';
 
 const SAMPLE_DATA: BarChartDatum[] = [
@@ -13,6 +14,8 @@ const SAMPLE_DATA: BarChartDatum[] = [
 const meta: Meta<typeof BarChart> = {
   title: 'Components/Data/BarChart',
   component: BarChart,
+  // The width tracker `responsive` uses, exported for a custom chart: a part of BarChart.
+  subcomponents: { ResponsiveChartContainer },
   tags: ['autodocs', 'stable'],
 };
 
