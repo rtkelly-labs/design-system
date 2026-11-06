@@ -57,7 +57,7 @@ describe('ThemeProvider', () => {
     await waitFor(() => expect(screen.getByTestId('level').textContent).toBe('midnight'));
   });
 
-  it('keeps the stored level under StrictMode (#395)', async () => {
+  it('keeps the stored level under StrictMode (issue 395)', async () => {
     // StrictMode mounts, unmounts and remounts. The first pass must not write the
     // default to the document or storage, or the remount trusts it over the stored level.
     const store = new Map<string, string>([[THEME_STORAGE_KEY, 'midnight']]);
