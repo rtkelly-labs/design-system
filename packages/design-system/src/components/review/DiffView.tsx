@@ -88,7 +88,8 @@ export const DiffView = React.forwardRef<HTMLElement, DiffViewProps>(function Di
     hunks.length === 0 ? (
       <p className="m-0 px-3 py-3 text-sm text-content-muted">No line changes.</p>
     ) : (
-      <div className={styles.scroll()}>
+      // A long line scrolls sideways; the region takes focus so the keyboard can scroll it too.
+      <div className={styles.scroll()} tabIndex={0} role="region" aria-label={`Diff of ${path}`}>
         <table data-slot="diff-view-table" className={styles.table()}>
           <caption className="sr-only">{`Changes to ${path}: ${added} added, ${removed} removed`}</caption>
           {hunks.map((hunk, h) => (

@@ -5,7 +5,7 @@ import { STATUS_APPEARANCE, type StatusVocabulary } from '../components/review/v
 const meta: Meta<typeof StatusMark> = {
   title: 'Components/Reports/StatusMark',
   component: StatusMark,
-  tags: ['autodocs', 'experimental'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     docs: {
       description: {

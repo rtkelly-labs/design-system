@@ -4,7 +4,7 @@ import { ChangeBar } from '../components/review/ChangeBar';
 const meta: Meta<typeof ChangeBar> = {
   title: 'Components/Reports/ChangeBar',
   component: ChangeBar,
-  tags: ['autodocs', 'experimental'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     docs: {
       description: {

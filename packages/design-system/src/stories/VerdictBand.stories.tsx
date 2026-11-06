@@ -4,7 +4,7 @@ import { VerdictBand } from '../components/review/VerdictBand';
 const meta: Meta<typeof VerdictBand> = {
   title: 'Components/Reports/VerdictBand',
   component: VerdictBand,
-  tags: ['autodocs', 'experimental'],
+  tags: ['autodocs', 'preview'],
   parameters: {
     docs: {
       description: {
