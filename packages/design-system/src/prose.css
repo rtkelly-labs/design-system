@@ -337,11 +337,24 @@ html {
     max-height: none;
     background-color: var(--ds-surface-base);
     transform: translateX(-100%);
-    transition: transform 0.2s ease;
+    /*
+     * Closed is off-screen *and* hidden (#309): without `visibility` every link
+     * stays in the tab order and the accessibility tree, and focus walks
+     * through a navigation tree nobody can see. The visibility flip waits for
+     * the slide-out to finish, and happens at once on the way in.
+     */
+    visibility: hidden;
+    transition:
+      transform 0.2s ease,
+      visibility 0s linear 0.2s;
   }
 
   .docs-layout-sidebar[data-open='true'] {
     transform: translateX(0);
+    visibility: visible;
+    transition:
+      transform 0.2s ease,
+      visibility 0s;
   }
 }
 
