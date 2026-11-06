@@ -1,0 +1,71 @@
+# design.md — rtkelly labs design judgment & agent contract
+
+> **Mechanics & Stylesheet:** Implemented in `@rtkelly-labs/design-system/styles.css` and `theme.css`.  
+> **Machine-Readable Tokens:** [`machine.design.md`](./machine.design.md) & `packages/design-system/tokens/`.  
+> **Storybook:** Served under `Guides/design.md`.
+
+This document is the visual contract and design judgment guide for `@rtkelly-labs`. It teaches autonomous coding agents (Claude Code, Cursor, Codex, Google Stitch) how to think like the brand and construct on-brand interfaces across the product estate (`oxbow`, `rig`, `Diffra`, `docs`, `blog`).
+
+---
+
+## 1. Product Feel & Identity
+
+The aesthetic is **Brutalist Neon Terminal** (`midnight` dark default) meets **Architectural Drafting Table** (`sketch` warm paper light).
+
+* **Information Density:** High. Favor compact data presentations, technical grids, and dense command surfaces over sprawling whitespace.
+* **Structural Edges:** Edges are razor-sharp and drawn with high contrast. Never imply boundaries with background gradients; draw them with 1px or 2px solid rules.
+* **Tone:** Terse, technical, operational. Controls state exact verbs (`EXECUTE`, `DIFF`, `DISPATCH`). Section headers use bracketed uppercase monospace (`[ 01 // OVERVIEW ]`, `[ PR-104 // TRIAGE ]`).
+* **Metaphor:** The interface should read like a CRT debugger cockpit or a mechanical drafting blueprint, not a modern consumer SaaS app.
+
+---
+
+## 2. Layout & Composition Hierarchy
+
+When constructing a screen or report:
+
+1. **Lead with Context & Primary Metrics:**
+   * Ground views with a persistent header or high-level status strip (`[ STATUS: HEALTHY ]`, `[ BRANCH // MAIN ]`).
+   * Key indicators use `StatCard` or dense metadata grids rather than oversized hero illustrations.
+2. **Evidence & Data Presentation:**
+   * Tabular data and diffs should span the full available width of their container.
+   * Tables must use tabular monospace numbers (`IBM Plex Mono`) with explicit uppercase column headers.
+   * Diffs are presented as structured multi-pane comparisons, not wall-of-text dumps.
+3. **Hierarchy of Grounds:**
+   * Page canvas sits on `surface.base`.
+   * Grouped content and interactive cards lift into `surface.raised`.
+   * Form inputs, code blocks, and data wells are recessed into `surface.sunken`.
+
+---
+
+## 3. Two Independent Themes (The Theme Ladder)
+
+Do not treat themes as an inverted "light and dark" switch. Neither theme is derived from the other:
+
+* **`midnight` (Dark Default):** Neon accents on deep slate/blue-black ground (`#0a0a1a`). High-chroma technical accents (Teal, Cyan, Pink).
+* **`sketch` (Warm Paper Light):** Deep graphite ink on warm architectural drafting paper (`#f5f3ec`). Pen-colored accents (India ink, 2H pencil, technical ochre).
+
+---
+
+## 4. Component Construction Rules
+
+* **Containers & Cards:** Strictly zero border-radius (`rounded-none`). Load-bearing 2px solid borders. Brutalist hard-offset box shadows with **0px blur radius** (`2px 2px 0 0`, `4px 4px 0 0`). Never use diffuse, blurred drop shadows.
+* **Buttons:** Solid accent fill or high-contrast 2px border, uppercase monospace or display font, 0px radius. State what happens directly (`BUILD`, `REVERT`).
+* **Section Markers & Badges:** Monospace text enclosed in square brackets: `[ 01 // OVERVIEW ]`, `[ PR-104 ]`.
+* **Typography:**
+  * Display & Headers: `Space Grotesk`, uppercase, heavy, with subtle letter-spacing and bottom border underlines.
+  * Body: `Inter`, clean legibility, 1.5 line height.
+  * Code & Metrics: `IBM Plex Mono` / `JetBrains Mono`.
+
+---
+
+## 5. Strict Do's and Don'ts (Negative Guardrails)
+
+* ❌ **DON'T** use border-radius (`rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-full`). All shapes must be razor-sharp rectangles.
+* ❌ **DON'T** use soft, blurry drop shadows (`shadow-md`, `shadow-lg`, blurred rgba glows).
+* ❌ **DON'T** use pastel gradients, mesh backgrounds, or multi-color linear gradient buttons.
+* ❌ **DON'T** default to Inter-on-white with indigo accents (the standard generic SaaS template).
+* ❌ **DON'T** use emoji as section markers or bullet icons. Use ASCII glyphs (`>`, `[+]`, `✓`, `•`) or monospace brackets (`[ METRIC ]`).
+* ❌ **DON'T** hardcode arbitrary Tailwind color classes (`bg-blue-500`, `text-purple-400`). Use semantic role tokens (`bg-surface-raised`, `text-accent-primary`).
+* ✅ **DO** verify designs in both `midnight` (neon on dark slate) and `sketch` (ink on warm paper).
+* ✅ **DO** keep information density compact, structured, and legible for developer workflows.
+* ✅ **DO** ensure high contrast: all text-to-ground pairs must clear WCAG AA (4.5:1) floor minimums.

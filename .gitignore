@@ -12,6 +12,10 @@ temp/
 # Agent tooling creates worktrees here regardless of rule 11 in AGENTS.md.
 .claude/worktrees/
 
+# Google Stitch local sync artifacts (deterministically generated via scripts/sync-stitch.mjs)
+stitch-assets/
+stitch-screenshots/
+
 # Local TODO file
 todo.md
 TODO.md
