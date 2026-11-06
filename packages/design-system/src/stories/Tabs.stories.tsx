@@ -14,7 +14,6 @@ const meta: Meta<typeof Tabs> = {
   argTypes: {
     variant: { control: 'select', options: ['merged', 'underline', 'segmented'] },
     orientation: { control: 'inline-radio', options: ['horizontal', 'vertical'] },
-    font: { control: 'inline-radio', options: ['sans', 'mono'] },
     accent: {
       control: 'select',
       options: ['primary', 'secondary', 'tertiary', 'quiet', 'info', 'success', 'warning', 'danger'],
@@ -142,23 +141,11 @@ export const Controlled: Story = {
 };
 
 /**
- * Technical / code-oriented tab styling with `font="mono"`, retaining monospace
- * and uppercase tracking for package managers or developer toolbars.
- */
-export const Monospace: Story = {
-  args: {
-    defaultValue: 'profile',
-    font: 'mono',
-    children: settings,
-  },
-};
-
-/**
  * Labels as written, for filenames and other identifiers where case means
- * something: `transform="none"` keeps the case on a mono strip, which would otherwise set it in capitals.
+ * something: `transform="none"` turns off the house all-caps for the whole set.
  */
 export const CasePreserved: Story = {
-  args: { defaultValue: 'readme', variant: 'underline', font: 'mono', transform: 'none' },
+  args: { defaultValue: 'readme', variant: 'underline', transform: 'none' },
   render: (args) => (
     <Tabs {...args}>
       <TabsList label="Project files">
@@ -196,7 +183,7 @@ export const ClosableAndDirty: Story = {
     ]);
     const [active, setActive] = useState('paginate.ts');
     return (
-      <Tabs value={active} onValueChange={setActive} variant="underline" font="mono" transform="none">
+      <Tabs value={active} onValueChange={setActive} variant="underline" transform="none">
         <TabsList label="Open editors">
           {files.map((f) => (
             <TabsTab

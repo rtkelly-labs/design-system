@@ -849,8 +849,6 @@ declare const Pagination: react.ForwardRefExoticComponent<PaginationProps & reac
 
 type TabsOrientation = 'horizontal' | 'vertical';
 
-type TabsFont = 'sans' | 'mono';
-
 type TabsVariant = 'merged' | 'underline' | 'segmented';
 
 type TabsTransform = 'uppercase' | 'none';
@@ -865,8 +863,6 @@ interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
     orientation?: TabsOrientation;
 
     variant?: TabsVariant;
-
-    font?: TabsFont;
 
     transform?: TabsTransform;
 
@@ -3909,7 +3905,6 @@ export {
   type TableOfContentsProps,
   TableRow,
   Tabs,
-  type TabsFont,
   TabsList,
   type TabsListProps,
   type TabsOrientation,

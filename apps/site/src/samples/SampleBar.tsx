@@ -2,7 +2,6 @@
 
 import { A11yMenu, SiteLink } from '@rtkelly13/design-system';
 import { ThemeMenu } from '@/components/chrome/ThemeMenu';
-import { BracketText } from '@rtkelly13/design-system';
 
 /**
  * The one strip of site on a sample page: a way back, the same composition in
@@ -18,7 +17,7 @@ export function SampleBar({ title, story }: { title: string; story: string }) {
         <SiteLink href="/examples" className="text-accent-primary no-underline hover:underline">
           ← Examples
         </SiteLink>
-        <span className="truncate text-content-muted"><BracketText>{title}</BracketText></span>
+        <span className="truncate text-content-muted">[&nbsp;{title}&nbsp;]</span>
       </div>
       <div className="flex items-center gap-3">
         <SiteLink href={story} className="text-accent-primary no-underline hover:underline">

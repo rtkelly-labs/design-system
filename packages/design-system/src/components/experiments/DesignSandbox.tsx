@@ -22,7 +22,6 @@ import { LoremIpsumPost } from '../blog/LoremIpsumPost';
 import { useTheme } from '../ThemeProvider';
 import { LEVELS } from '../../theme/levels';
 import { Activity, ShieldCheck, Cpu, DollarSign, Layers, Search, ShoppingBag } from 'lucide-react';
-import { BracketText } from '../BracketText';
 
 interface UserRecord {
   id: string;
@@ -126,7 +125,7 @@ export const DesignSandbox: React.FC = () => {
           {/* Card & Button Primitives */}
           <Card>
             <h3 className="font-display text-xl font-bold text-accent-primary mb-4">
-              <BracketText>BADGES & BUTTON VARIANTS</BracketText>
+              [&nbsp;BADGES & BUTTON VARIANTS&nbsp;]
             </h3>
             <div className="flex gap-3 flex-wrap mb-6">
               <Badge accent="primary">CYAN BADGE</Badge>
@@ -145,7 +144,7 @@ export const DesignSandbox: React.FC = () => {
           {/* Form Primitives */}
           <div className="bg-surface-raised border-2 border-edge-strong p-6">
             <h3 className="font-display text-xl font-bold text-accent-secondary mb-4">
-              <BracketText>FORM & INPUT PRIMITIVES</BracketText>
+              [&nbsp;FORM & INPUT PRIMITIVES&nbsp;]
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <Input label="System API Key" placeholder="sk-brutalist-..." helperText="Required for cloud SDK initialization" />
@@ -175,7 +174,7 @@ export const DesignSandbox: React.FC = () => {
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center flex-wrap gap-4">
             <h2 className="font-display text-2xl font-bold text-accent-primary uppercase">
-              <BracketText>CLOUD OPERATIONS COMMAND CENTER</BracketText>
+              [&nbsp;CLOUD OPERATIONS COMMAND CENTER&nbsp;]
             </h2>
             <div className="w-full sm:w-72">
               <Input
@@ -197,7 +196,7 @@ export const DesignSandbox: React.FC = () => {
           {/* Data Table */}
           <div className="mt-4">
             <h3 className="font-display text-lg font-bold text-content-primary mb-3 uppercase">
-              <BracketText>AUTHORIZED WORKSPACE OPERATORS</BracketText>
+              [&nbsp;AUTHORIZED WORKSPACE OPERATORS&nbsp;]
             </h3>
             <DataTable<UserRecord>
               keyExtractor={(r) => r.id}
