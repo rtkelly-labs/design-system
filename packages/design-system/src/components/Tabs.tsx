@@ -48,21 +48,15 @@ import type { AccentToken } from '../lib/theme';
 export type TabsOrientation = 'horizontal' | 'vertical';
 
 /**
- * The font style for the tabs strip: 'sans' for general UI/app navigation,
- * or 'mono' for technical/code block contexts.
- */
-export type TabsFont = 'sans' | 'mono';
-
-/**
  * The three tab-strip shapes, loudest first. Named for the part rather than
  * the colour, because the accent is a separate axis.
  */
 export type TabsVariant = 'merged' | 'underline' | 'segmented';
 
 /**
- * How tab labels are cased, overriding the font's own casing: sans tabs keep a
- * label as written and mono tabs set it in capitals. `none` matters for
- * filenames on a mono strip — `README.md` and `readme.md` are different files.
+ * How tab labels are cased. `uppercase` is the house look; `none` preserves
+ * the label as written, which a filename needs: `README.md` and `readme.md`
+ * are different files.
  */
 export type TabsTransform = 'uppercase' | 'none';
 
@@ -72,25 +66,16 @@ const tabs_ = recipe({
     // `CodeTabs` supplies its own `my-6`.
     root: '',
     strip: 'relative z-10 flex border-2 border-edge-strong',
-    caption: 'truncate text-xs text-content-secondary',
+    caption:
+      'truncate font-mono text-xs font-bold uppercase tracking-widest text-content-secondary',
     list: 'flex items-end',
-    tab: 'shrink-0 whitespace-nowrap transition-colors focus-visible:ring-2 focus-visible:ring-[var(--tabs-accent)] focus-visible:ring-inset',
+    tab: 'shrink-0 whitespace-nowrap font-mono text-xs font-bold uppercase tracking-widest transition-colors focus-visible:ring-2 focus-visible:ring-[var(--tabs-accent)] focus-visible:ring-inset',
     // The close button, drawn over the tab's trailing edge from the strip's
     // close layer. Its ink follows the tab it sits on: inverse on an accent fill.
     close:
       'pointer-events-auto absolute flex size-6 items-center justify-center font-mono text-sm leading-none text-content-muted hover:bg-surface-raised hover:text-content-primary focus-visible:ring-2 focus-visible:ring-[var(--tabs-accent)] focus-visible:ring-inset',
   },
   variants: {
-    font: {
-      sans: {
-        tab: 'font-sans text-sm font-semibold tracking-normal normal-case',
-        caption: 'font-sans text-xs font-semibold uppercase tracking-wider',
-      },
-      mono: {
-        tab: 'font-mono text-xs font-bold uppercase tracking-widest',
-        caption: 'font-mono text-xs font-bold uppercase tracking-widest',
-      },
-    },
     variant: {
       // The loudest: a solid accent tab standing on the panel, its bottom rule
       // dropped so the fill runs into what it labels.
@@ -133,18 +118,12 @@ const tabs_ = recipe({
       true: {},
       false: {},
     },
-    // Case, when the caller says so. Unset, the font decides: sans as written,
-    // mono in capitals. Declared after `font` so an explicit choice wins the merge.
+    // Case. `uppercase` is the house look and adds nothing; `none` hands the
+    // label back as written, for a filename or any case-sensitive identifier.
     transform: {
-      uppercase: { tab: 'uppercase tracking-widest' },
+      uppercase: {},
       none: { tab: 'normal-case tracking-normal' },
     },
-  },
-  defaultVariants: {
-    font: 'sans',
-    variant: 'merged',
-    orientation: 'horizontal',
-    selected: false,
   },
   compoundVariants: [
     {
@@ -219,6 +198,12 @@ const tabs_ = recipe({
       class: { tab: 'border-b-2 border-r-0 last:border-b-0' },
     },
   ],
+  defaultVariants: {
+    variant: 'merged',
+    orientation: 'horizontal',
+    selected: false,
+    transform: 'uppercase',
+  },
 });
 
 interface TabsContextValue {
@@ -226,8 +211,7 @@ interface TabsContextValue {
   select: (value: string) => void;
   orientation: TabsOrientation;
   variant: TabsVariant;
-  font: TabsFont;
-  transform: TabsTransform | undefined;
+  transform: TabsTransform;
   tabId: (value: string) => string;
   panelId: (value: string) => string;
 }
@@ -291,15 +275,10 @@ export interface TabsProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChang
   /** The strip's shape. See {@link TabsVariant}. */
   variant?: TabsVariant;
   /**
-   * The font styling family. Defaults to `'sans'` for UI navigation, or
-   * `'mono'` for technical/code block contexts.
-   */
-  font?: TabsFont;
-  /**
-   * Label casing for every tab in the set. Unset, it follows `font`: sans
-   * keeps the label as written, mono sets it in capitals. `none` keeps the case
-   * on a mono strip, for filenames, branch names and any identifier where case
-   * carries meaning; `uppercase` sets a sans strip in capitals.
+   * Label casing for every tab in the set. `uppercase` by default; `none`
+   * keeps the case the label was written in, for filenames, branch names and
+   * any identifier where case carries meaning. All-caps is also harder to read
+   * in long labels, which is the other reason to turn it off.
    */
   transform?: TabsTransform;
   /**
@@ -353,8 +332,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
     onValueChange,
     orientation = 'horizontal',
     variant = 'merged',
-    font = 'sans',
-    transform,
+    transform = 'uppercase',
     accent = 'primary',
     children,
     className,
@@ -384,15 +362,14 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
       select,
       orientation,
       variant,
-      font,
       transform,
       tabId: (v) => `${uid}-tab-${idPart(v)}`,
       panelId: (v) => `${uid}-panel-${idPart(v)}`,
     }),
-    [selected, select, orientation, variant, font, transform, uid],
+    [selected, select, orientation, variant, transform, uid],
   );
 
-  const styles = tabs_({ variant, orientation, font });
+  const styles = tabs_({ variant, orientation });
 
   // The accent is a runtime value, so it travels as a custom property that the
   // fill and edge utilities read — a utility cannot be assembled at build time
@@ -507,8 +484,8 @@ export const TabsList = forwardRef<HTMLDivElement, TabsListProps>(function TabsL
   },
   ref,
 ) {
-  const { orientation, variant, font } = useTabsContext('TabsList');
-  const styles = tabs_({ variant, orientation, font });
+  const { orientation, variant } = useTabsContext('TabsList');
+  const styles = tabs_({ variant, orientation });
   const [closeLayer, setCloseLayer] = useState<HTMLElement | null>(null);
 
   return (
@@ -640,7 +617,6 @@ export const TabsTab = forwardRef<HTMLButtonElement, TabsTabProps>(function Tabs
   const styles = tabs_({
     variant: context.variant,
     orientation: context.orientation,
-    font: context.font,
     selected,
     transform: context.transform,
   });
