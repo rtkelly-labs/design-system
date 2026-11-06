@@ -536,11 +536,17 @@ export function mutateCell(arg: { kind: MutantKind; css: string; cell: string })
   if (arg.kind === 'fixed-width' || arg.kind === 'nowrap-hidden') {
     const t = els.filter((e) => !/^(inline|contents)$/.test(getComputedStyle(e).display)).sort((a, b) => ownText(b).length - ownText(a).length)[0];
     if (!t || ownText(t).length < 12) return null;
+    // Real defect by direct measurement: the text's own rect pokes out of the box that holds it,
+    // and did not before. A fill clipped on purpose (a divider's rule) already pokes out; the
+    // mutant adds nothing there.
+    const pokesOut = () => {
+      const tb = textBox(t);
+      const tr = t.getBoundingClientRect();
+      return tb.right > tr.right + 1 || tb.bottom > tr.bottom + 1;
+    };
+    const already = pokesOut();
     apply(t);
-    // Real defect by direct measurement: the text's own rect pokes out of the box that holds it.
-    const tb = textBox(t);
-    const tr = t.getBoundingClientRect();
-    const eff = tb.right > tr.right + 1 || tb.bottom > tr.bottom + 1;
+    const eff = !already && pokesOut();
     return { target: name(t), effective: eff };
   }
   if (arg.kind === 'flex-min-width') {
