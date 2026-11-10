@@ -266,6 +266,7 @@ social-icon	SocialIcon
 sparkline	Sparkline
 spinner	Spinner
 spinner-mark	Spinner
+spinner-quarter	Spinner
 stat-card	StatCard
 statcard-change	(shared)
 statcard-detail	(shared)

@@ -65,8 +65,8 @@ describe('theme.css alone generates the animations the components use', () => {
     // instead of needing it edited — but the three from #302 must be among them.
     expect(candidates).toEqual(
       expect.arrayContaining([
-        'animate-ds-spin',
-        'motion-reduce:animate-ds-spin-slow',
+        'animate-ds-step',
+        'motion-reduce:animate-ds-step-slow',
         'animate-ds-pulse',
         'data-[indeterminate]:animate-ds-track',
         'motion-reduce:data-[indeterminate]:animate-ds-pulse',
@@ -96,9 +96,9 @@ describe('theme.css alone generates the animations the components use', () => {
   });
 
   it('keeps the reduced-motion partners behind the media query', async () => {
-    const css = await compileConsumer(['motion-reduce:animate-ds-spin-slow']);
+    const css = await compileConsumer(['motion-reduce:animate-ds-step-slow']);
     expect(css).toMatch(
-      /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.motion-reduce\\:animate-ds-spin-slow\s*\{\s*animation: var\(--animate-ds-spin-slow\)/,
+      /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.motion-reduce\\:animate-ds-step-slow\s*\{\s*animation: var\(--animate-ds-step-slow\)/,
     );
   });
 });

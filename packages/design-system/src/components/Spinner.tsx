@@ -1,33 +1,43 @@
-import { forwardRef } from 'react';
+import { forwardRef, useId } from 'react';
 import type { HTMLAttributes } from 'react';
 import { recipe } from '../lib/recipe';
 import { accentTextClass } from '../lib/accentClasses';
 import type { AccentToken } from '../lib/theme';
 
 /**
- * A square that turns. No radius, no arc, no gradient — the mark is the border
- * of a box with one edge picked out in the accent, which is the same treatment
- * `Card` and `Button` give an edge and the only rotation in the package.
+ * The quadrant: a square edged in `border.subtle` with one quarter drawn in the
+ * accent, stepping clockwise round its four positions, one `considered` each
+ * (`DESIGN.md` §8). It jumps rather than turns: motion steps, it does not
+ * glide, which is the time-domain form of zero radius. The box never changes
+ * size, so nothing beside it moves.
  *
- * `border-t-current` rather than a second accent map: the accent is already on
- * the element as a colour, so the leading edge inherits it and the eight roles
- * stay one table in `accentClasses`. `border-edge-subtle` is the rest of the
- * box, so the mark reads as a ring at rest rather than as three missing sides.
+ * **The drawing varies by Level; the clock does not** (ADR 0007). On
+ * `midnight` the quarter is a lit cell, a block cursor on a CRT. On `sketch` it
+ * is hatched in pen with 45° section lines over the square, which reads as a
+ * 2H construction line: a solid blue cell on paper is the midnight drawing with
+ * the lights turned up. Both drawings are in the markup and the `sketch:`
+ * variant shows one, so a nested provider draws its own Level. Box, strokes,
+ * steps and period are identical on both, and no prop chooses between them.
  */
 const spinner = recipe({
   slots: {
     root: 'inline-flex items-center justify-center align-middle',
+    // The square. Its accent is a *text* colour so the quarter can be
+    // `currentColor`: one accent map, eight roles, no second table.
+    mark: 'relative block flex-none border-edge-subtle',
     /*
-     * `motion-reduce:animate-ds-spin-slow`, not `motion-reduce:animate-none`.
+     * `motion-reduce:animate-ds-step-slow`, not `motion-reduce:animate-none`.
      *
      * A spinner that has stopped is indistinguishable from a page that has
      * hung, and `prefers-reduced-motion` asks for less vestibular load, not for
-     * less information. A rotation this small translates nothing across the
-     * viewport; what the preference gets is a third of the angular speed.
+     * less information. A quarter jumping inside a 12px box translates nothing
+     * across the viewport; what the preference gets is a third of the speed.
      * `Skeleton` is the component where the preference removes the motion
      * outright, because there the motion carries nothing.
      */
-    mark: 'block animate-ds-spin border-edge-subtle border-t-current motion-reduce:animate-ds-spin-slow',
+    quarter: 'absolute top-0 left-0 block size-1/2 animate-ds-step motion-reduce:animate-ds-step-slow',
+    cell: 'block size-full bg-current sketch:hidden',
+    hatch: 'hidden size-full sketch:block',
   },
   variants: {
     /** Stroke scales with the box: a 4px border on a 12px square is a blob. */
@@ -100,6 +110,7 @@ export const Spinner = forwardRef<HTMLSpanElement, SpinnerProps>(function Spinne
   ref,
 ) {
   const styles = spinner({ size });
+  const hatch = useId();
 
   return (
     <span
@@ -115,17 +126,33 @@ export const Spinner = forwardRef<HTMLSpanElement, SpinnerProps>(function Spinne
       <span
         aria-hidden="true"
         data-slot="spinner-mark"
-        // The accent is a *text* colour so the leading edge can be
-        // `border-t-current`. One map, eight roles, no second table to drift.
         // Through the recipe's `class` slot rather than appended, so a caller
         // who reaches the mark through `className` still wins the conflict.
         className={styles.mark({
           // `current` is for a spinner on a fill (a pending Button): `edge-subtle`
-          // is as light as the leading edge there and the mark reads as one flat
-          // ring, so the resting edge is the text colour at low alpha instead.
-          class: accent === 'current' ? 'border-current/30 border-t-current' : accentTextClass(accent),
+          // is as light as the quarter there and the mark reads as one flat
+          // box, so the square is the text colour at low alpha instead.
+          class: accent === 'current' ? 'border-current/30' : accentTextClass(accent),
         })}
-      />
+      >
+        <span data-slot="spinner-quarter" className={styles.quarter()}>
+          <span className={styles.cell()} />
+          {/*
+           * Section hatching, drawn rather than faked with a gradient: a pattern
+           * of 45° pen lines inside a pen outline. `non-scaling-stroke` keeps
+           * every line one device pixel at all three sizes.
+           */}
+          <svg className={styles.hatch()} viewBox="0 0 8 8" preserveAspectRatio="none" focusable="false">
+            <defs>
+              <pattern id={hatch} width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <rect width="1" height="3" fill="currentColor" />
+              </pattern>
+            </defs>
+            <rect width="8" height="8" fill={`url(#${hatch})`} />
+            <rect x="0.5" y="0.5" width="7" height="7" fill="none" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          </svg>
+        </span>
+      </span>
       <span className="sr-only">{label}</span>
     </span>
   );

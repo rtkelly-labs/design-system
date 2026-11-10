@@ -273,9 +273,10 @@ information is removed outright.
 **Text is swapped, never animated.** A phase label is replaced. It does not type itself out,
 shimmer or cross-fade.
 
-**What does not follow this yet.** Three loops predate this section: `ds-spin`, the continuous
-rotation `Spinner` draws today; `ds-pulse`, an eased opacity on `Skeleton`; and `ds-track`, an
-eased slide on indeterminate `Progress`. Each is to be replaced, not grandfathered.
+**What does not follow this yet.** Two loops predate this section: `ds-pulse`, an eased
+opacity on `Skeleton`, and `ds-track`, an eased slide on indeterminate `Progress`. Each is to be
+replaced, not grandfathered. `ds-spin`, the rotation `Spinner` used to draw, no longer draws any
+component; its tokens stay only because `theme.css` is a consumer contract.
 
 ## 9. Agent surfaces
 

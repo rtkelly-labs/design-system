@@ -189,26 +189,31 @@ ${ROLE_GLOWS}
 /**
  * Match elements whose NEAREST themed ancestor-or-self is `level`.
  *
- * Reads as: inside this level (or being it), and neither inside nor being any
- * differently-themed element. That handles a themed panel nested in a
- * differently-themed page at any depth. It does not handle re-entering the same
- * level after leaving it (midnight > bright > midnight), where the innermost
- * subtree is excluded — the variables themselves still resolve correctly there,
- * so only the variant escape hatch is affected.
+ * Reads as: inside this level (or being it), and not inside (or being) a
+ * differently-themed element that is itself inside this level. The exclusion is
+ * anchored to the level on purpose. Unanchored — "not inside any other level"
+ * — it also excluded a sketch panel scoped inside a midnight page, so inside
+ * every nested provider neither variant matched, and nothing noticed until a
+ * component varied its drawing by Level (ADR 0007). `theme.css.test.ts` pins
+ * the nested cases.
+ *
+ * Still not handled: re-entering a level after leaving it inside itself
+ * (midnight > sketch > midnight), where the innermost subtree is excluded. The
+ * variables themselves resolve correctly there; only the variant is affected.
  */
 function levelVariant(level) {
-  const other = `[data-theme]:not([data-theme="${level}"])`;
-  return `&:where([data-theme="${level}"], [data-theme="${level}"] *):not(:where(${other}, ${other} *))`;
+  const self = `[data-theme="${level}"]`;
+  const other = `[data-theme]:not(${self})`;
+  return `&:where(${self}, ${self} *):not(:where(${self} ${other}, ${self} ${other} *))`;
 }
 
 /** The same test, for a set of levels — used for the polarity variants. */
 function polarityVariant(levels) {
-  const inside = levels
-    .flatMap((level) => [`[data-theme="${level}"]`, `[data-theme="${level}"] *`])
-    .join(', ');
-  const other = levels.map((level) => `:not([data-theme="${level}"])`).join('');
-  const outside = `[data-theme]${other}`;
-  return `&:where(${inside}):not(:where(${outside}, ${outside} *))`;
+  const selves = levels.map((level) => `[data-theme="${level}"]`);
+  const inside = selves.flatMap((self) => [self, `${self} *`]).join(', ');
+  const outside = `[data-theme]${levels.map((level) => `:not([data-theme="${level}"])`).join('')}`;
+  const excluded = selves.flatMap((self) => [`${self} ${outside}`, `${self} ${outside} *`]).join(', ');
+  return `&:where(${inside}):not(:where(${excluded}))`;
 }
 
 /**
@@ -334,7 +339,7 @@ function mediumTheme(medium) {
 function loopTheme() {
   const lines = [];
   for (const [name, loop] of Object.entries(LOOPS)) {
-    const easing = loop.easing === 'linear' ? 'linear' : 'var(--ds-ease)';
+    const easing = { linear: 'linear', steps: 'steps(1, end)', medium: 'var(--ds-ease)' }[loop.easing];
     lines.push(
       `  --animate-ds-${name}: ds-${loop.keyframes} calc(var(--ds-duration-considered) * ${loop.periods}) ${easing} infinite;`,
     );
@@ -465,7 +470,7 @@ ${mediumVariables(CSS_MEDIUM)}
 ${mediumTheme(CSS_MEDIUM)}
 }
 
-/* Looping animations — \`animate-ds-spin\`, \`-spin-slow\`, \`-pulse\`, \`-track\`.
+/* Looping animations — \`animate-ds-step\`, \`-step-slow\`, \`-spin\`, \`-spin-slow\`, \`-pulse\`, \`-track\`.
  * Declared in \`src/theme/media.ts\` (\`LOOPS\`); the period is a multiple of
  * the Medium's \`considered\` duration and the keyframes are invariant.
  * \`prefers-reduced-motion\` is answered at the call site with \`motion-reduce:\`. */

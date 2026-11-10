@@ -2452,7 +2452,7 @@ interface SocialIconProps extends Omit<SVGProps<SVGSVGElement>, 'color'> {
     rel?: string;
 }
 
-declare const SocialIcon: react.ForwardRefExoticComponent<Omit<SocialIconProps, "ref"> & react.RefAttributes<HTMLAnchorElement | SVGSVGElement>>;
+declare const SocialIcon: react.ForwardRefExoticComponent<Omit<SocialIconProps, "ref"> & react.RefAttributes<SVGSVGElement | HTMLAnchorElement>>;
 type NamedSocialIconProps = Omit<SocialIconProps, 'name'>;
 
 declare function GitHubIcon(props: NamedSocialIconProps): react.JSX.Element;
