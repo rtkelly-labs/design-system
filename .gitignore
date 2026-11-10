@@ -28,6 +28,10 @@ test-results/
 walkthrough-report/
 walkthrough-results/
 
+# Cross-browser run (playwright.cross-browser.config.ts)
+cross-browser-report/
+cross-browser-results/
+
 # Vitest coverage output
 coverage/
 
