@@ -169,8 +169,13 @@ jobs:
       - name: Build Storybook
         run: pnpm build-storybook
 
+      # `HOME=/root`: the container runs as root but the runner sets HOME to
+      # `/github/home`, owned by `pwuser`, and Firefox refuses to start as root
+      # in another user's home — every Firefox test failed at launch without it.
+      # Chromium and WebKit do not mind; Playwright's CI guide says the same.
       - name: Run Cross-Browser Tests
         env:
+          HOME: /root
           PLAYWRIGHT_JSON_OUTPUT_FILE: telemetry/cross-browser.json
         run: pnpm test:cross-browser
 
