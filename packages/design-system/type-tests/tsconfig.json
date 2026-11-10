@@ -1,0 +1,18 @@
+{
+  // A consumer's compiler settings, not this package's: no `paths`, no
+  // `allowImportingTsExtensions`, and the package reached by its own name, so
+  // `exports` sends every import to `dist/index.d.ts`. Read by `pnpm test:types`
+  // (vitest.types.config.mts) and, with `files` swapped per case, by
+  // `pnpm check:type-cost`. Both need `pnpm build` first.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": []
+  },
+  "include": ["*.test-d.tsx"]
+}

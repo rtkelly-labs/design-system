@@ -132,6 +132,47 @@ nobody thought to write.
 consumer builds on: narrowing, ref element types, rejected props. `check:api`
 sees the text of the surface; this file sees what that text allows.
 
+## 🔡 Type tests against the build
+
+`type-tests/*.test-d.tsx` asks the same kind of question of the **built**
+declarations. It imports `@rtkelly-labs/design-system` by name, so `exports`
+sends it to `dist/index.d.ts`, and compiles with `type-tests/tsconfig.json` — a
+consumer's settings, without this package's `paths` or
+`allowImportingTsExtensions`. `pnpm test:types` runs it in Vitest's typecheck
+mode (`vitest.types.config.mts`, `typecheck.only`), which reports a failed
+assertion against the `it` it sits in. It needs `pnpm build`, so it runs in the
+`build` job, not `test`.
+
+It exists beside `src/public-api.types.test.tsx` because the two can differ:
+tsup's declaration bundler rewrites types on the way out — `ButtonProps` leaves
+as four distributed `Omit<…, "ref">` members — and a promise that holds in
+`src/` and not in `dist/` is broken for every consumer. It covers what a
+consumer leans on: closed variant unions (and roles, not hues — rule 3),
+required props, the `href` switch on `Button`, forwarded ref types, value-typed
+change handlers, and `DataTable`'s row type flowing from `data` into every
+callback. Keep it to promises; one assertion per component is not the goal.
+
+Two things to know when writing one:
+
+- **A ref negative only works in one direction.** DOM element types are
+  structural, and `HTMLInputElement` satisfies `HTMLDivElement` (both have
+  `align`), so `<Card ref={inputRef}>` compiles. A ref can be rejected only
+  when its element lacks members the rendered one has — a div ref on a button.
+- **Vitest's typecheck mode is a second `tsc`.** Pointed at `src/` it re-checks
+  the whole package — 15s measured, the same work `pnpm typecheck` already
+  did — which is why the source-level file stays inside `pnpm typecheck` and
+  only the consumer-level one runs through Vitest, over 156 files in ~4s.
+
+`pnpm check:type-cost` weighs what the same consumer setup pays.
+`type-tests/cost/` holds three files — the blog's twelve imports, `DataTable`
+over both column forms, and every export named once under
+`skipLibCheck: false` — and the gate compiles each with
+`tsc --extendedDiagnostics` and holds its **instantiation count** under a
+ceiling written in `scripts/check-type-cost.mjs` (measured + 5%). The count is
+deterministic for a given tree and TypeScript; check time and memory are
+printed by `--list` and never gated. A TypeScript upgrade moves every count,
+so that PR re-measures them all.
+
 ## 🧬 Mutation testing
 
 `pnpm test:mutation` runs StrykerJS over the modules named in

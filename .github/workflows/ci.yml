@@ -336,7 +336,8 @@ jobs:
         # this once per job keeps each step reading exactly as it did when the
         # package was the repository.
         working-directory: packages/design-system
-    # ~85s: a tsup build, the gates that read it, and the report generator.
+    # ~85s: a tsup build, the gates that read it, and the report generator;
+    # the type tests and type cost add ~10s of tsc against the same dist/.
     timeout-minutes: 10
 
     steps:
@@ -368,6 +369,18 @@ jobs:
       # could see it — they weigh what ships, not what a subset costs.
       - name: Import Cost
         run: pnpm check:import-cost
+
+      # The type surface as a consumer compiles it: `type-tests/` imports the
+      # package by name, so `exports` sends it to the dist/index.d.ts just
+      # built. `test:types` is Vitest's typecheck mode over the assertions
+      # (`expectTypeOf`, `@ts-expect-error`) — inference, required props, refs,
+      # handlers, DataTable's row type. `check:type-cost` holds what compiling
+      # three consumer files costs tsc, in instantiations. ~4s and ~6s.
+      - name: Type Tests
+        run: pnpm test:types
+
+      - name: Type Cost
+        run: pnpm check:type-cost
 
       # Reads dist/index.d.ts, so it belongs in this job, after the build.
       # Fails if the published type surface moved without api/index.d.ts being
