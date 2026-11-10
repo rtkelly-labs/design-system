@@ -17,6 +17,18 @@
  * render is a pure function of its inputs and a story or a snapshot is
  * deterministic. Feed a growing span list and an advancing `now` and the
  * waterfall grows live; see `useTraceClock`.
+ *
+ * ## Agent runs
+ *
+ * A span can also be part of an agent run: a model call, a tool call, a
+ * sub-agent, or a decision waiting on a person (`DESIGN.md` §9). Its kind comes
+ * from `agentKind` on the input, or from the OpenTelemetry GenAI conventions'
+ * `gen_ai.operation.name`. Tokens come from `gen_ai.usage.*` and the model from
+ * `gen_ai.response.model` (or `gen_ai.request.model`). Cost is not in the
+ * conventions, so it comes from the caller: a numeric attribute they name, or a
+ * `price` function. The package holds no price table. Every span then carries
+ * its own usage and its subtree's, and a trace with any agent span is
+ * `agentic`, which is what the components key their agent views on.
  */
 
 /** A span attribute value, as OTLP's `AnyValue` flattens to. */
@@ -24,6 +36,22 @@ export type TraceAttributeValue = string | number | boolean;
 
 /** Outcome of a span. `unset` is OTLP's default: nothing was recorded. */
 export type TraceSpanStatus = 'ok' | 'error' | 'unset';
+
+/**
+ * What a span is in an agent run. `decision` is a span waiting on a person: it
+ * has no GenAI operation name, so it is only ever set explicitly.
+ */
+export type TraceAgentKind = 'agent' | 'llm' | 'tool' | 'decision';
+
+/** Tokens and money, for one span or for a span and everything under it. */
+export interface TraceUsage {
+  inputTokens: number;
+  outputTokens: number;
+  /** Absent when nothing counted has a cost. */
+  cost?: number;
+  /** Something counted is still in flight, so the figures will grow. */
+  partial: boolean;
+}
 
 /** One span as a caller hands it over. */
 export interface TraceSpanInput {
@@ -47,6 +75,8 @@ export interface TraceSpanInput {
   kind?: string;
   /** Flat key/value attributes, shown in the span details. */
   attributes?: Record<string, TraceAttributeValue>;
+  /** What the span is in an agent run. Read from `gen_ai.operation.name` when absent. */
+  agentKind?: TraceAgentKind;
 }
 
 /** A span after layout. Offsets are relative to the trace start. */
@@ -72,6 +102,18 @@ export interface TraceSpan {
   inFlight: boolean;
   /** On the chain of spans that determined the trace's end. */
   critical: boolean;
+  /** What the span is in an agent run, if it is part of one. */
+  agentKind?: TraceAgentKind;
+  /** The model a `llm` or `agent` span ran on, from `gen_ai.response.model` or `gen_ai.request.model`. */
+  model?: string;
+  /** This span's own tokens and cost. */
+  usage: TraceUsage;
+  /** This span's and every descendant's, summed. */
+  total: TraceUsage;
+  /** The finished leaf that took longest, in an agentic trace. */
+  slowest: boolean;
+  /** The finished leaf that cost most, in an agentic trace that has costs. */
+  costliest: boolean;
 }
 
 /** A trace laid out for drawing. */
@@ -89,6 +131,10 @@ export interface TraceModel {
   inFlightCount: number;
   /** Ids on the critical path, root first. */
   criticalPath: string[];
+  /** Any span is part of an agent run. */
+  agentic: boolean;
+  /** The whole trace's tokens and cost, with how many of each agent kind it holds. */
+  usage: TraceUsage & { modelCalls: number; toolCalls: number; agents: number };
 }
 
 export interface BuildTraceOptions {
@@ -98,9 +144,40 @@ export interface BuildTraceOptions {
    * trace's edge rather than to nothing.
    */
   now?: number;
+  /** A numeric attribute holding each span's cost. Read before `price`. */
+  costAttribute?: string;
+  /**
+   * Each span's cost from its usage, for spans without `costAttribute`. Called
+   * once per span with `agentKind`, `model` and `usage` (tokens only) filled in.
+   */
+  price?: (span: TraceSpan) => number | undefined;
 }
 
 const UNKNOWN_SERVICE = 'unknown';
+
+/** `gen_ai.operation.name` values, as the OpenTelemetry GenAI conventions write them. */
+const GEN_AI_KINDS: Readonly<Record<string, TraceAgentKind>> = {
+  chat: 'llm',
+  text_completion: 'llm',
+  generate_content: 'llm',
+  embeddings: 'llm',
+  execute_tool: 'tool',
+  invoke_agent: 'agent',
+  create_agent: 'agent',
+};
+
+/** What a span is in an agent run, from its GenAI attributes, or nothing. */
+export function traceAgentKind(attributes: Readonly<Record<string, TraceAttributeValue>>): TraceAgentKind | undefined {
+  const operation = attributes['gen_ai.operation.name'];
+  return typeof operation === 'string' ? GEN_AI_KINDS[operation] : undefined;
+}
+
+/** A non-negative count from an attribute, or 0. */
+function count(value: TraceAttributeValue | undefined): number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 0;
+}
+
+const NO_USAGE: TraceUsage = { inputTokens: 0, outputTokens: 0, partial: false };
 
 /** True when `value` is a finite number. */
 function finite(value: unknown): value is number {
@@ -162,7 +239,22 @@ export function buildTrace(input: readonly TraceSpanInput[] | TraceModel, option
       selfTime: 0,
       inFlight,
       critical: false,
+      agentKind: span.agentKind ?? traceAgentKind(span.attributes ?? {}),
+      usage: NO_USAGE,
+      total: NO_USAGE,
+      slowest: false,
+      costliest: false,
     };
+    const model = laid.attributes['gen_ai.response.model'] ?? laid.attributes['gen_ai.request.model'];
+    if (typeof model === 'string' && model) laid.model = model;
+    laid.usage = {
+      inputTokens: count(laid.attributes['gen_ai.usage.input_tokens']),
+      outputTokens: count(laid.attributes['gen_ai.usage.output_tokens']),
+      partial: inFlight,
+    };
+    const named = options.costAttribute ? laid.attributes[options.costAttribute] : undefined;
+    const cost = typeof named === 'number' ? named : options.price?.(laid);
+    if (finite(cost) && cost >= 0) laid.usage = { ...laid.usage, cost };
     byId.set(span.id, laid);
     spans.push(laid);
     for (const child of childrenOf.get(span.id) ?? []) {
@@ -176,6 +268,13 @@ export function buildTrace(input: readonly TraceSpanInput[] | TraceModel, option
   for (const span of [...valid].sort((a, b) => a.start - b.start)) if (!byId.has(span.id)) visit(span, null, 0);
 
   for (const span of spans) span.selfTime = selfTime(span, byId);
+  // Pre-order, so walking it backwards meets every child before its parent.
+  for (let index = spans.length - 1; index >= 0; index--) {
+    const span = spans[index];
+    span.total = span.children.reduce((sum, id) => addUsage(sum, byId.get(id)!.total), span.usage);
+  }
+  const agentic = spans.some((span) => span.agentKind !== undefined);
+  if (agentic) markOutliers(spans);
 
   const duration = spans.reduce((max, span) => Math.max(max, span.offset + span.duration), 0);
   const criticalPath = computeCriticalPath(spans, byId);
@@ -183,6 +282,8 @@ export function buildTrace(input: readonly TraceSpanInput[] | TraceModel, option
 
   const services: string[] = [];
   for (const span of spans) if (!services.includes(span.service)) services.push(span.service);
+
+  const usage = spans.filter((span) => span.parentId === null).reduce((sum, root) => addUsage(sum, root.total), NO_USAGE);
 
   return {
     spans,
@@ -193,7 +294,39 @@ export function buildTrace(input: readonly TraceSpanInput[] | TraceModel, option
     errorCount: spans.filter((span) => span.status === 'error').length,
     inFlightCount: spans.filter((span) => span.inFlight).length,
     criticalPath,
+    agentic,
+    usage: {
+      ...usage,
+      modelCalls: spans.filter((span) => span.agentKind === 'llm').length,
+      toolCalls: spans.filter((span) => span.agentKind === 'tool').length,
+      agents: spans.filter((span) => span.agentKind === 'agent').length,
+    },
   };
+}
+
+/** Two usages summed. A cost only appears if either side has one. */
+function addUsage(a: TraceUsage, b: TraceUsage): TraceUsage {
+  const sum: TraceUsage = {
+    inputTokens: a.inputTokens + b.inputTokens,
+    outputTokens: a.outputTokens + b.outputTokens,
+    partial: a.partial || b.partial,
+  };
+  if (a.cost !== undefined || b.cost !== undefined) sum.cost = (a.cost ?? 0) + (b.cost ?? 0);
+  return sum;
+}
+
+/**
+ * The finished leaf that took longest, and the one that cost most. Leaves,
+ * because a parent's time and money are its children's, and finished, because
+ * an in-flight span's figures are still moving.
+ */
+function markOutliers(spans: readonly TraceSpan[]): void {
+  const leaves = spans.filter((span) => !span.children.length && !span.inFlight);
+  const slowest = leaves.reduce<TraceSpan | undefined>((best, span) => (!best || span.duration > best.duration ? span : best), undefined);
+  if (slowest && slowest.duration > 0) slowest.slowest = true;
+  const priced = leaves.filter((span) => (span.usage.cost ?? 0) > 0);
+  const costliest = priced.reduce<TraceSpan | undefined>((best, span) => (!best || span.usage.cost! > best.usage.cost! ? span : best), undefined);
+  if (costliest) costliest.costliest = true;
 }
 
 /** The part of a span's own interval no child covers. */
@@ -285,6 +418,25 @@ export function formatTraceDuration(ms: number): string {
   if (ms < 59_995) return `${(ms / 1000).toFixed(2).replace(/\.?0+$/, '')}s`;
   const total = Math.round(ms / 1000);
   return `${Math.floor(total / 60)}m ${String(total % 60).padStart(2, '0')}s`;
+}
+
+/** `640`, `3.8k`, `81k`, `1.2M`. */
+export function formatTraceTokens(tokens: number): string {
+  if (!finite(tokens) || tokens < 0) return '—';
+  if (tokens < 1000) return String(Math.round(tokens));
+  if (tokens < 9_950) return `${(tokens / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+  if (tokens < 999_500) return `${Math.round(tokens / 1000)}k`;
+  return `${(tokens / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+}
+
+/**
+ * `$0.35`, and three decimals under a cent (`$0.004`), so a cheap call does not
+ * read as free. The currency is the caller's, since the cost is.
+ */
+export function formatTraceCost(cost: number, currency = 'USD'): string {
+  if (!finite(cost) || cost < 0) return '—';
+  const digits = cost > 0 && cost < 0.01 ? 3 : 2;
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: digits, maximumFractionDigits: digits }).format(cost);
 }
 
 // ---------------------------------------------------------------------------
@@ -403,8 +555,10 @@ function isSpanInput(value: unknown): value is TraceSpanInput {
 
 /**
  * The trace as it stood `elapsed` milliseconds after it began: spans that had
- * not started are absent, and spans still running are open — no end, and no
- * status, because a status is only known once a span finishes. Feed it a
+ * not started are absent, and spans still running are open — no end, no
+ * status and no `gen_ai.usage.*`, because those are only known once a span
+ * finishes. A cost attribute the caller named is not known to this function
+ * and stays. Feed it a
  * clock and a finished trace plays back as it was recorded.
  */
 export function replayTrace(input: readonly TraceSpanInput[] | TraceModel, elapsed: number): TraceSpanInput[] {
@@ -420,9 +574,15 @@ export function replayTrace(input: readonly TraceSpanInput[] | TraceModel, elaps
         name: span.name,
         service: span.service,
         kind: span.kind,
-        attributes: span.attributes,
+        agentKind: span.agentKind,
+        // Usage, like status, is reported when a span finishes.
+        attributes: done ? span.attributes : withoutUsage(span.attributes),
         start: span.offset,
         ...(done ? { end: span.offset + span.duration, status: span.status } : {}),
       };
     });
+}
+
+function withoutUsage(attributes: Readonly<Record<string, TraceAttributeValue>>): Record<string, TraceAttributeValue> {
+  return Object.fromEntries(Object.entries(attributes).filter(([key]) => !key.startsWith('gen_ai.usage.')));
 }

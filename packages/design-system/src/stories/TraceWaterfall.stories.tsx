@@ -4,7 +4,7 @@ import { TraceWaterfall } from '../components/TraceWaterfall';
 import { useTraceClock } from '../hooks/useTraceClock';
 import { useTraceReplay } from '../hooks/useTraceReplay';
 import { buildTrace, replayTrace } from '../lib/trace';
-import { checkoutTrace, deployTrace, orderTrace } from './traceFixtures';
+import { AGENT_RUN_NOW, agentRunTrace, checkoutTrace, deployTrace, orderTrace, samplePrice } from './traceFixtures';
 
 const meta: Meta<typeof TraceWaterfall> = {
   title: 'Components/Data/TraceWaterfall',
@@ -26,6 +26,16 @@ type Story = StoryObj<typeof TraceWaterfall>;
 export const Checkout: Story = {
   args: { spans: checkoutTrace, defaultSelectedId: 'e1' },
   parameters: { docs: { description: { story: 'Nine spans across seven services. The payment call timed out, so the critical path runs through it.' } } },
+};
+
+/**
+ * An agent run. Each row names what the span is, carries `duration · cost`,
+ * and the slowest and costliest finished calls are marked in words. The open
+ * decision at the end is an outline that says "needs you".
+ */
+export const AgentRun: Story = {
+  args: { spans: agentRunTrace, now: AGENT_RUN_NOW, price: samplePrice },
+  parameters: { docs: { description: { story: 'Kinds come from `gen_ai.operation.name`, so an OTLP export from an agent framework draws this way with no mapping. Bars are painted by outcome as before; only an in-flight call is hatched and a waiting decision outlined.' } } },
 };
 
 /** Collapsing a subtree hides its spans but keeps the axis. */

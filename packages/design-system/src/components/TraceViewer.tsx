@@ -5,7 +5,7 @@ import { useTraceReplay } from '../hooks/useTraceReplay';
 import { Button } from './Button';
 import { Input } from './Input';
 import { recipe } from '../lib/recipe';
-import { buildTrace, formatTraceDuration, replayTrace, type TraceModel, type TraceSpanInput } from '../lib/trace';
+import { buildTrace, formatTraceCost, formatTraceDuration, formatTraceTokens, replayTrace, type BuildTraceOptions, type TraceModel, type TraceSpanInput } from '../lib/trace';
 import { TraceWaterfall } from './TraceWaterfall';
 
 const traceViewer = recipe({
@@ -29,6 +29,11 @@ const traceViewer = recipe({
     speed: 'cursor-pointer border-l border-edge-default px-2 py-1 text-xs tabular-nums text-content-secondary first:border-l-0 hover:bg-surface-raised hover:text-content-primary aria-pressed:bg-accent-primary aria-pressed:text-content-inverse',
     scrubber: 'min-w-32 flex-1 accent-accent-primary',
     clock: 'tabular-nums text-xs text-content-secondary',
+  },
+  variants: {
+    // An agent run's figures are what a reader came for, so they are set at
+    // stat scale: mono, large and bold, which is where the type budget lets mono be.
+    agentic: { true: { statValue: 'text-lg font-bold leading-none' } },
   },
 });
 
@@ -54,6 +59,12 @@ export interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'tit
   loop?: boolean;
   /** With `replay`, the initial playback rate. Default 1. */
   defaultSpeed?: number;
+  /** Each span's cost, for an agent run. See `buildTrace`. Ignored when `spans` is a model. */
+  price?: BuildTraceOptions['price'];
+  /** A numeric attribute holding each span's cost. Ignored when `spans` is a model. */
+  costAttribute?: string;
+  /** The currency costs are shown in. Default `USD`. */
+  currency?: string;
 }
 
 /** Playback rates offered by the transport. */
@@ -67,35 +78,53 @@ const TRACE_REPLAY_SPEEDS = [0.25, 0.5, 1, 2, 4] as const;
  * `parseTraceDocument`. With `replay`, a finished trace plays back in real
  * time — play, pause, scrub, change speed — and the rows fade in as their
  * spans start.
+ *
+ * For an agent run the strip leads with what it cost: duration, cost, tokens,
+ * model calls, tool calls and errors, and how many decisions need you. The
+ * details add the span's kind, model, tokens and cost, its own and its
+ * subtree's. Pass `price` or `costAttribute` for costs; there is no price table.
  */
 export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function TraceViewer(
-  { spans, now, title = 'Trace', defaultSelectedId, searchable = true, replay = false, autoPlay = false, loop = false, defaultSpeed = 1, className, ...props },
+  { spans, now, title = 'Trace', defaultSelectedId, searchable = true, replay = false, autoPlay = false, loop = false, defaultSpeed = 1, price, costAttribute, currency, className, ...props },
   ref,
 ) {
-  const full = useMemo(() => buildTrace(spans, { now }), [spans, now]);
+  const full = useMemo(() => buildTrace(spans, { now, price, costAttribute }), [spans, now, price, costAttribute]);
   const player = useTraceReplay(full.duration, { autoPlay: replay && autoPlay, loop, speed: defaultSpeed });
   // Not replaying, or replayed to the end: the trace itself, untouched.
   const replaying = replay && player.elapsed < full.duration;
   const model = useMemo(
-    () => (replaying ? buildTrace(replayTrace(full, player.elapsed), { now: player.elapsed }) : full),
-    [replaying, full, player.elapsed],
+    () => (replaying ? buildTrace(replayTrace(full, player.elapsed), { now: player.elapsed, price, costAttribute }) : full),
+    [replaying, full, player.elapsed, price, costAttribute],
   );
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(defaultSelectedId === undefined ? null : defaultSelectedId);
   const headingId = useId();
-  const styles = traceViewer();
+  const styles = traceViewer({ agentic: model.agentic });
 
   const fallback = defaultSelectedId === undefined ? model.spans[0]?.id ?? null : null;
   const selected = model.byId.get(selectedId ?? fallback ?? '') ?? null;
   const parent = selected?.parentId ? model.byId.get(selected.parentId) : undefined;
 
-  const stats: Array<[string, string]> = [
-    ['Duration', formatTraceDuration(model.duration)],
-    ['Spans', String(model.spans.length)],
-    ['Services', String(model.services.length)],
-    ['Errors', String(model.errorCount)],
-    ...(model.inFlightCount ? [['In flight', String(model.inFlightCount)] as [string, string]] : []),
-  ];
+  const waiting = model.spans.filter((span) => span.agentKind === 'decision' && span.inFlight).length;
+  // Worded, not an ellipsis: `…` after a figure reads as truncated text.
+  const partial = model.usage.partial ? ' so far' : '';
+  const stats: Array<[string, string]> = model.agentic
+    ? [
+        ['Duration', formatTraceDuration(model.duration)],
+        ...(model.usage.cost !== undefined ? [['Cost', formatTraceCost(model.usage.cost, currency) + partial] as [string, string]] : []),
+        ['Tokens', formatTraceTokens(model.usage.inputTokens + model.usage.outputTokens) + partial],
+        ['Model calls', String(model.usage.modelCalls)],
+        ['Tool calls', String(model.usage.toolCalls)],
+        ['Errors', String(model.errorCount)],
+        ...(waiting ? [['Needs you', String(waiting)] as [string, string]] : []),
+      ]
+    : [
+        ['Duration', formatTraceDuration(model.duration)],
+        ['Spans', String(model.spans.length)],
+        ['Services', String(model.services.length)],
+        ['Errors', String(model.errorCount)],
+        ...(model.inFlightCount ? [['In flight', String(model.inFlightCount)] as [string, string]] : []),
+      ];
 
   return (
     <section ref={ref} data-slot="trace-viewer" aria-labelledby={headingId} {...props} className={styles.root({ className })}>
@@ -105,7 +134,8 @@ export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function Tr
           {stats.map(([term, value]) => (
             <div key={term} className={styles.stat()}>
               <dt className={styles.statLabel()}>{term}</dt>
-              <dd className={styles.statValue()}>{value}</dd>
+              {/* The one emphasised count is the one that needs a person (DESIGN.md §9). */}
+              <dd className={styles.statValue({ class: term === 'Needs you' ? 'text-intent-warning' : undefined })}>{value}</dd>
             </div>
           ))}
         </dl>
@@ -150,6 +180,7 @@ export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function Tr
       <div className={styles.body()}>
         <TraceWaterfall
           spans={model}
+          currency={currency}
           filter={query}
           selectedId={selected?.id ?? null}
           onSelectedChange={setSelectedId}
@@ -164,9 +195,27 @@ export const TraceViewer = forwardRef<HTMLElement, TraceViewerProps>(function Tr
               <p className={styles.detailsTitle()}>{selected.name}</p>
               <dl className={styles.list()}>
                 <dt className={styles.term()}>service</dt><dd className={styles.value()}>{selected.service}</dd>
+                {selected.agentKind ? <><dt className={styles.term()}>agent kind</dt><dd className={styles.value()}>{selected.agentKind}</dd></> : null}
+                {selected.model ? <><dt className={styles.term()}>model</dt><dd className={styles.value()}>{selected.model}</dd></> : null}
+                {selected.usage.inputTokens || selected.usage.outputTokens ? (
+                  <><dt className={styles.term()}>tokens</dt><dd className={styles.value()}>{formatTraceTokens(selected.usage.inputTokens)} in · {formatTraceTokens(selected.usage.outputTokens)} out</dd></>
+                ) : null}
+                {selected.usage.cost !== undefined ? <><dt className={styles.term()}>cost</dt><dd className={styles.value()}>{formatTraceCost(selected.usage.cost, currency)}</dd></> : null}
+                {selected.children.length && (selected.total.inputTokens || selected.total.outputTokens) ? (
+                  <>
+                    <dt className={styles.term()}>subtree</dt>
+                    <dd className={styles.value()}>
+                      {formatTraceTokens(selected.total.inputTokens + selected.total.outputTokens)} tokens
+                      {selected.total.cost !== undefined ? ` · ${formatTraceCost(selected.total.cost, currency)}` : ''}
+                      {selected.total.partial ? ', so far' : ''}
+                    </dd>
+                  </>
+                ) : null}
                 {selected.kind ? <><dt className={styles.term()}>kind</dt><dd className={styles.value()}>{selected.kind}</dd></> : null}
                 <dt className={styles.term()}>status</dt>
-                <dd className={selected.status === 'error' ? 'text-intent-danger' : styles.value()}>{selected.inFlight ? 'in flight' : selected.status}</dd>
+                <dd className={selected.status === 'error' ? 'text-intent-danger' : selected.agentKind === 'decision' && selected.inFlight ? 'text-intent-warning' : styles.value()}>
+                  {selected.agentKind === 'decision' && selected.inFlight ? 'needs you' : selected.inFlight ? 'in flight' : selected.status}
+                </dd>
                 <dt className={styles.term()}>start</dt><dd className={styles.value()}>+{formatTraceDuration(selected.offset)}</dd>
                 <dt className={styles.term()}>duration</dt><dd className={styles.value()}>{formatTraceDuration(selected.duration)}</dd>
                 <dt className={styles.term()}>self time</dt><dd className={styles.value()}>{formatTraceDuration(selected.selfTime)}</dd>

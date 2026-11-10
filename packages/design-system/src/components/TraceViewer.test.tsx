@@ -4,6 +4,7 @@ import { act } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TraceSpanInput } from '../lib/trace';
 import { TraceViewer } from './TraceViewer';
+import { AGENT_RUN_NOW, agentRunTrace, checkoutTrace, samplePrice } from '../stories/traceFixtures';
 
 const spans: TraceSpanInput[] = [
   { id: 'a', name: 'GET /checkout', service: 'web', kind: 'server', start: 0, end: 400 },
@@ -80,5 +81,42 @@ describe('TraceViewer', () => {
       render(<TraceViewer spans={spans} />);
       expect(screen.queryByRole('group', { name: 'Replay' })).toBeNull();
     });
+  });
+});
+
+describe('TraceViewer on an agent run', () => {
+  const stat = (term: string) => {
+    const dt = screen.getAllByText(term).find((node) => node.tagName === 'DT');
+    return dt?.nextElementSibling?.textContent;
+  };
+
+  it('leads the strip with cost, tokens and calls, and how many decisions need you', () => {
+    render(<TraceViewer spans={agentRunTrace} now={AGENT_RUN_NOW} price={samplePrice} title="Rebaseline" />);
+    expect(stat('Cost')).toMatch(/^\$0\.\d\d so far$/);
+    expect(stat('Tokens')).toMatch(/k so far$/);
+    expect(stat('Model calls')).toBe('5');
+    expect(stat('Tool calls')).toBe('7');
+    expect(stat('Errors')).toBe('1');
+    expect(stat('Needs you')).toBe('1');
+    expect(screen.queryByText('Services')).toBeNull();
+  });
+
+  it('omits cost when nothing has one, rather than showing zero', () => {
+    render(<TraceViewer spans={agentRunTrace} now={AGENT_RUN_NOW} title="Rebaseline" />);
+    expect(screen.queryByText('Cost')).toBeNull();
+    expect(stat('Tokens')).toMatch(/k so far$/);
+  });
+
+  it('shows a span\'s own usage and its subtree\'s in the details', () => {
+    render(<TraceViewer spans={agentRunTrace} now={AGENT_RUN_NOW} price={samplePrice} defaultSelectedId="ver" />);
+    const details = within(screen.getByRole('complementary', { name: 'Span details' }));
+    expect(details.getByText('agent')).toBeDefined();
+    expect(details.getByText(/8\.6k tokens · \$0\.03/)).toBeDefined();
+  });
+
+  it('keeps the original strip for a trace that is not an agent run', () => {
+    render(<TraceViewer spans={checkoutTrace} title="checkout" />);
+    expect(stat('Services')).toBe('8');
+    expect(screen.queryByText('Tokens')).toBeNull();
   });
 });
