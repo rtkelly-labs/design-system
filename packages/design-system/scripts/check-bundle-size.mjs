@@ -43,8 +43,12 @@ const BUDGETS = {
     // `step-slow` loops and the `ds-quadrant` keyframes, and the level variants
     // gain the anchored exclusion that makes them match inside a nested
     // provider: 29,531 B raw, 5,421 B gzip locally. Same ~2% headroom.
-    maxRaw: 30_120,
-    maxGzip: 5_530,
+    // The stepped `march` and `blink` loops (DESIGN.md §8) replace the eased
+    // `track` and `pulse` on Progress, Skeleton and FreshnessIndicator; the old
+    // tokens stay as consumer contract: 30,153 B raw, 5,532 B gzip. Same
+    // ~2% headroom over the quadrant's measurement plus this addition.
+    maxRaw: 30_760,
+    maxGzip: 5_640,
     desc: 'Design token CSS',
   },
 };

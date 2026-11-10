@@ -253,7 +253,7 @@
   --ease-brutalist: var(--ds-ease);
 }
 
-/* Looping animations — `animate-ds-step`, `-step-slow`, `-spin`, `-spin-slow`, `-pulse`, `-track`.
+/* Looping animations — `animate-ds-step`, `-step-slow`, `-march`, `-march-slow`, `-blink`, `-spin`, `-spin-slow`, `-pulse`, `-track`.
  * Declared in `src/theme/media.ts` (`LOOPS`); the period is a multiple of
  * the Medium's `considered` duration and the keyframes are invariant.
  * `prefers-reduced-motion` is answered at the call site with `motion-reduce:`. */
@@ -264,6 +264,9 @@
   --animate-ds-track: ds-track calc(var(--ds-duration-considered) * 5) var(--ds-ease) infinite;
   --animate-ds-step: ds-quadrant calc(var(--ds-duration-considered) * 4) steps(1, end) infinite;
   --animate-ds-step-slow: ds-quadrant calc(var(--ds-duration-considered) * 12) steps(1, end) infinite;
+  --animate-ds-march: ds-march calc(var(--ds-duration-considered) * 3) steps(1, end) infinite;
+  --animate-ds-march-slow: ds-march calc(var(--ds-duration-considered) * 9) steps(1, end) infinite;
+  --animate-ds-blink: ds-blink calc(var(--ds-duration-considered) * 4) steps(1, end) infinite;
 
   @keyframes ds-spin {
     to {
@@ -301,6 +304,27 @@
     }
     75% {
       transform: translate(0, 100%);
+    }
+  }
+
+  @keyframes ds-march {
+    0% {
+      transform: translateX(0);
+    }
+    33.333% {
+      transform: translateX(100%);
+    }
+    66.667%, 100% {
+      transform: translateX(200%);
+    }
+  }
+
+  @keyframes ds-blink {
+    0% {
+      opacity: 1;
+    }
+    50%, 100% {
+      opacity: 0.45;
     }
   }
 }

@@ -67,9 +67,9 @@ describe('theme.css alone generates the animations the components use', () => {
       expect.arrayContaining([
         'animate-ds-step',
         'motion-reduce:animate-ds-step-slow',
-        'animate-ds-pulse',
-        'data-[indeterminate]:animate-ds-track',
-        'motion-reduce:data-[indeterminate]:animate-ds-pulse',
+        'animate-ds-blink',
+        'data-[indeterminate]:animate-ds-march',
+        'motion-reduce:data-[indeterminate]:animate-ds-march-slow',
       ]),
     );
   });

@@ -45,7 +45,7 @@ const freshness = recipe({
       paused: { root: 'text-content-muted', dot: 'bg-content-muted' },
     },
     pulse: {
-      true: { dot: 'animate-ds-pulse motion-reduce:animate-none' },
+      true: { dot: 'animate-ds-blink motion-reduce:animate-none' },
     },
   },
 });
@@ -59,8 +59,8 @@ const freshness = recipe({
  * the page's clock ticks and renders identically in a story. The age sits in
  * a `<time>` whose `dateTime` is the update's ISO instant.
  *
- * `live` adds a dot that pulses while the data is fresh, holds still in the
- * warning role once stale, and greys out when paused. The pulse stops under
+ * `live` adds a dot that blinks, in steps, while the data is fresh, holds still in the
+ * warning role once stale, and greys out when paused. The blink stops under
  * `prefers-reduced-motion`. It is decoration; the words carry the state.
  */
 export const FreshnessIndicator = forwardRef<HTMLSpanElement, FreshnessIndicatorProps>(function FreshnessIndicator(

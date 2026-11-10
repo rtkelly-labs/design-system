@@ -63,7 +63,7 @@ layer down — silent, plausible-looking, wrong output.
 
 ### 3. Turn the transitions off
 
-There are 72 CSS transitions and **4** `@keyframes`. Most of the transitions are hover- or focus-intent — the observability
+There are 72 CSS transitions and **6** `@keyframes`. Most of the transitions are hover- or focus-intent — the observability
 set (#407) adds only hover colour on legend toggles, filter chips and alert rows — so they are
 inert wherever there is no pointer — but since #162 that is no longer all of them. `Modal`,
 `AlertDialog` and `Drawer` fade their backdrop and popup on open and close, driven by Base UI's
@@ -111,9 +111,9 @@ snaps.
 This belongs to the consumer rather than the package — a stylesheet that suppressed its own
 transitions would be wrong in a browser.
 
-The four `@keyframes` are the reason the reset names `animation` as well as `transition`, and they
+The six `@keyframes` are the reason the reset names `animation` as well as `transition`, and they
 are a harder case than a transition in one specific way: they are **infinite loops**, generated into
-`theme.css` as `--animate-ds-*` tokens (from `LOOPS` in `src/theme/media.ts`) and worn by `Spinner`, `Skeleton` and `Progress`. A
+`theme.css` as `--animate-ds-*` tokens (from `LOOPS` in `src/theme/media.ts`) and worn by `Spinner`, `Skeleton`, `Progress` and `FreshnessIndicator`. A
 transition is inert until something changes; a loop is never at rest, so a capture taken at an
 arbitrary moment lands on an arbitrary frame. Nothing about that is a race the harness can wait out
 — the only deterministic frame is the one where the animation is not running.

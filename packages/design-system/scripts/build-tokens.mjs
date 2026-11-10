@@ -470,7 +470,7 @@ ${mediumVariables(CSS_MEDIUM)}
 ${mediumTheme(CSS_MEDIUM)}
 }
 
-/* Looping animations — \`animate-ds-step\`, \`-step-slow\`, \`-spin\`, \`-spin-slow\`, \`-pulse\`, \`-track\`.
+/* Looping animations — \`animate-ds-step\`, \`-step-slow\`, \`-march\`, \`-march-slow\`, \`-blink\`, \`-spin\`, \`-spin-slow\`, \`-pulse\`, \`-track\`.
  * Declared in \`src/theme/media.ts\` (\`LOOPS\`); the period is a multiple of
  * the Medium's \`considered\` duration and the keyframes are invariant.
  * \`prefers-reduced-motion\` is answered at the call site with \`motion-reduce:\`. */
