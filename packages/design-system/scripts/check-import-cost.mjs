@@ -170,7 +170,9 @@ const CASES = [
     // +600 B: LEVELS carries the `delta` role group (see the `tokens` case).
     // +100 B: `Card`'s `weight` prop — the quiet frame's border string.
     // +1,566 B: the Button weight ladder above (65,466 B).
-    maxBytes: 66_200,
+    // +55 B: Button's pending Spinner is the stepped quadrant, with a `still`
+    // variant for the one-live-mark rule (DESIGN.md §8): 66,255 B.
+    maxBytes: 66_300,
     forbid: HEAVY,
   },
 ];

@@ -49,6 +49,13 @@ describe('Spinner', () => {
     expect(quarter?.className).not.toContain('motion-reduce:animate-none');
   });
 
+  it('holds the first frame when still, so a region can keep one live mark', () => {
+    const { container } = render(<Spinner still />);
+    const quarter = container.querySelector('[data-slot="spinner-quarter"]');
+
+    expect(quarter?.className).not.toMatch(/(^|\s)animate-ds-step(\s|$)/);
+  });
+
   // DESIGN.md §8: motion steps, it does not glide, and it moves the mark, never
   // the layout. The square holds still; only the quarter inside it moves.
   it('steps a quarter inside a square that does not move', () => {

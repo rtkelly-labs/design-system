@@ -190,6 +190,8 @@ export * from './components/BulletChart';
 export * from './lib/trace';
 export * from './components/TraceWaterfall';
 export * from './components/TraceViewer';
+// Agent tool calls (DESIGN.md §9): one row per call, folded into groups.
+export * from './components/ToolCall';
 // Observability (#407): one time window and hover cursor that every view on a
 // page shares, and the views that follow it. Each works standalone too.
 export * from './lib/timeRange';

@@ -151,6 +151,8 @@ const EXCLUDED = {
  * without this.
  */
 const UNSTORIED = {
+  ToolCallGroup:
+    'A part of `ToolCall`, documented in place on `Components/Data/ToolCall`: its `Group` and `Live` stories show the folded header, the one live mark and the one live region against the calls it folds. A group with no calls in it has nothing to show.',
   AsciiDivider:
     'Deprecated alias of `Divider`, kept for existing call sites. A story is a recommendation, and this is not one — `Components/Layout/Divider` documents the alias in its description.',
   TextArea:

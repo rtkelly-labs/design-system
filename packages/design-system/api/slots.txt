@@ -319,6 +319,8 @@ time-series-chart	TimeSeriesChart
 timeline	Timeline
 tldr	TLDR
 token-table	TokenTable
+tool-call	ToolCall
+tool-call-group	ToolCallGroup
 trace-viewer	TraceViewer
 trace-waterfall	TraceWaterfall
 track-card	TrackCard
