@@ -46,6 +46,13 @@ describe('WorkingLine', () => {
     expect(container.querySelector('[data-slot="spinner-quarter"]')?.className).not.toMatch(/animate-ds-step/);
   });
 
+  it('carries a data-slot on every part', () => {
+    const { container } = render(<WorkingLine phase="x" startedAt={0} now={1000} />);
+    for (const slot of ['working-line-mark', 'working-line-phase', 'working-line-elapsed']) {
+      expect(container.querySelector(`[data-slot="${slot}"]`), slot).not.toBeNull();
+    }
+  });
+
   it('forwards its ref and props', () => {
     const ref = createRef<HTMLDivElement>();
     render(<WorkingLine ref={ref} phase="x" data-testid="line" />);

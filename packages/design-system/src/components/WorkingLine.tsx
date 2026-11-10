@@ -88,7 +88,7 @@ export const WorkingLine = forwardRef<HTMLDivElement, WorkingLineProps>(function
 
   return (
     <div ref={ref} role="status" data-slot="working-line" data-status={status} {...props} className={styles.root({ className })}>
-      <span aria-hidden="true" data-part="mark" className={styles.mark()}>
+      <span aria-hidden="true" data-slot="working-line-mark" className={styles.mark()}>
         {status === 'working' ? (
           <Spinner size="sm" accent="current" still={still} label="" />
         ) : status === 'waiting' ? (
@@ -99,9 +99,9 @@ export const WorkingLine = forwardRef<HTMLDivElement, WorkingLineProps>(function
           '✕'
         )}
       </span>
-      {words ? <span className={styles.phase()}>{words}</span> : null}
+      {words ? <span data-slot="working-line-phase" className={styles.phase()}>{words}</span> : null}
       {time ? (
-        <span aria-hidden="true" className={styles.elapsed()}>
+        <span aria-hidden="true" data-slot="working-line-elapsed" className={styles.elapsed()}>
           {time}
         </span>
       ) : null}
