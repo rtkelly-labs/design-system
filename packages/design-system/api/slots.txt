@@ -341,3 +341,4 @@ verdict-band	VerdictBand
 verdict-band-context	VerdictBand
 verdict-band-outcome	VerdictBand
 verdict-band-title	VerdictBand
+working-line	WorkingLine

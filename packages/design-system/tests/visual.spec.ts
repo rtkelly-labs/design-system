@@ -274,6 +274,7 @@ const CASES: readonly VisualCase[] = [
   { id: 'components-data-traceviewer--checkout', snapshot: 'traceviewer-checkout.png' },
   { id: 'components-data-traceviewer--agent-run', snapshot: 'traceviewer-agent-run.png' },
   { id: 'components-data-toolcall--group', snapshot: 'toolcall-group.png' },
+  { id: 'components-feedback-workingline--states', snapshot: 'workingline-states.png' },
   { id: 'components-data-timerangepicker--last-hour', snapshot: 'timerangepicker-last-hour.png' },
   { id: 'components-feedback-severitybadge--log-levels', snapshot: 'severitybadge-log-levels.png' },
   { id: 'components-data-timeserieschart--latency', snapshot: 'timeserieschart-latency.png' },
