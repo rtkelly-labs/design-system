@@ -39,7 +39,7 @@ describe('Spinner', () => {
 
   // The rule the issue names for `Skeleton` applies here in the opposite
   // direction: a stopped spinner reads as a hung page, so the preference slows
-  // the rotation rather than removing it.
+  // the stepping rather than removing it.
   it('slows rather than stops under prefers-reduced-motion', () => {
     const { container } = render(<Spinner />);
     const quarter = container.querySelector('[data-slot="spinner-quarter"]');
@@ -47,6 +47,13 @@ describe('Spinner', () => {
     expect(quarter?.className).toContain('animate-ds-step');
     expect(quarter?.className).toContain('motion-reduce:animate-ds-step-slow');
     expect(quarter?.className).not.toContain('motion-reduce:animate-none');
+  });
+
+  it('holds the first frame when still, so a region can keep one live mark', () => {
+    const { container } = render(<Spinner still />);
+    const quarter = container.querySelector('[data-slot="spinner-quarter"]');
+
+    expect(quarter?.className).not.toMatch(/(^|\s)animate-ds-step(\s|$)/);
   });
 
   // DESIGN.md §8: motion steps, it does not glide, and it moves the mark, never

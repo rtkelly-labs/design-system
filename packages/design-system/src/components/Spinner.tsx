@@ -35,11 +35,17 @@ const spinner = recipe({
      * `Skeleton` is the component where the preference removes the motion
      * outright, because there the motion carries nothing.
      */
-    quarter: 'absolute top-0 left-0 block size-1/2 animate-ds-step motion-reduce:animate-ds-step-slow',
+    quarter: 'absolute top-0 left-0 block size-1/2',
     cell: 'block size-full bg-current sketch:hidden',
     hatch: 'hidden size-full sketch:block',
   },
   variants: {
+    // DESIGN.md §8: one live mark per region. The rest hold the first frame,
+    // so a still spinner carries no animation class at all.
+    still: {
+      false: { quarter: 'animate-ds-step motion-reduce:animate-ds-step-slow' },
+      true: { quarter: '' },
+    },
     /** Stroke scales with the box: a 4px border on a 12px square is a blob. */
     size: {
       sm: { mark: 'size-3 border-2' },
@@ -77,6 +83,12 @@ export interface SpinnerProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'cla
    */
   accent?: AccentToken | 'current';
   /**
+   * Hold the first frame instead of stepping. Motion is a budget of one live
+   * mark per region (`DESIGN.md` §8): a group header steps, and the rows inside
+   * it hold still, so their elapsed time is what moves. Default false.
+   */
+  still?: boolean;
+  /**
    * Merged onto the wrapper, which is what positions the spinner. The mark
    * itself is sized by `size`.
    */
@@ -106,10 +118,10 @@ export interface SpinnerProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'cla
  * as a name and once as an unlabelled box.
  */
 export const Spinner = forwardRef<HTMLSpanElement, SpinnerProps>(function Spinner(
-  { label = 'Loading', size = 'md', accent = 'primary', className, ...props },
+  { label = 'Loading', size = 'md', accent = 'primary', still = false, className, ...props },
   ref,
 ) {
-  const styles = spinner({ size });
+  const styles = spinner({ size, still });
   const hatch = useId();
 
   return (

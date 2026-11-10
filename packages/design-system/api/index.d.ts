@@ -1833,6 +1833,8 @@ interface SpinnerProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'className'
 
     accent?: AccentToken | 'current';
 
+    still?: boolean;
+
     className?: string;
 }
 
@@ -2844,6 +2846,70 @@ interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
 }
 
 declare const TraceViewer: react.ForwardRefExoticComponent<TraceViewerProps & react.RefAttributes<HTMLElement>>;
+
+type ToolCallStatus = 'running' | 'ok' | 'error' | 'cancelled';
+
+declare function formatToolPayload(value: unknown): string;
+interface ToolCallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'onToggle'> {
+
+    name: string;
+
+    summary?: ReactNode;
+
+    status: ToolCallStatus;
+
+    startedAt?: number;
+
+    endedAt?: number;
+
+    duration?: number;
+
+    now?: number;
+
+    args?: unknown;
+
+    result?: unknown;
+
+    error?: ReactNode;
+
+    onRetry?: () => void;
+
+    open?: boolean;
+
+    defaultOpen?: boolean;
+
+    onOpenChange?: (open: boolean) => void;
+
+    maxLines?: number;
+
+    still?: boolean;
+}
+
+declare function toolCallDuration({ status, startedAt, endedAt, duration, now }: Pick<ToolCallProps, 'status' | 'startedAt' | 'endedAt' | 'duration' | 'now'>): number | undefined;
+
+declare const ToolCall: react.ForwardRefExoticComponent<ToolCallProps & react.RefAttributes<HTMLDivElement>>;
+
+declare function describeToolCalls(calls: ReadonlyArray<Pick<ToolCallProps, 'status' | 'startedAt' | 'endedAt' | 'duration' | 'now'>>): {
+    count: number;
+    running: number;
+    failed: number;
+    total: number;
+    text: string;
+};
+interface ToolCallGroupProps extends HTMLAttributes<HTMLDivElement> {
+
+    children: ReactNode;
+
+    open?: boolean;
+
+    defaultOpen?: boolean;
+
+    onOpenChange?: (open: boolean) => void;
+}
+
+declare const ToolCallGroup: react.ForwardRefExoticComponent<ToolCallGroupProps & react.RefAttributes<HTMLDivElement>>;
+
+declare function toolCallFromSpan(span: TraceSpan): Pick<ToolCallProps, 'name' | 'status' | 'startedAt' | 'endedAt' | 'args' | 'result' | 'error'>;
 
 interface TimeRange {
     from: number;
@@ -5329,6 +5395,11 @@ export {
   type TokenRule,
   TokenTable,
   type TokenTableProps,
+  ToolCall,
+  ToolCallGroup,
+  type ToolCallGroupProps,
+  type ToolCallProps,
+  type ToolCallStatus,
   Tooltip,
   type TooltipProps,
   type TraceAgentKind,
@@ -5393,6 +5464,7 @@ export {
   deltaTrend,
   describeFilter,
   describeLogEntry,
+  describeToolCalls,
   describeTraceSpan,
   diffAnchor,
   filterLogEntries,
@@ -5414,6 +5486,7 @@ export {
   formatShare,
   formatTimeTick,
   formatTimestamp,
+  formatToolPayload,
   formatTraceCost,
   formatTraceDuration,
   formatTraceTokens,
@@ -5471,6 +5544,8 @@ export {
   surfaceVar,
   textVar,
   timeTicks,
+  toolCallDuration,
+  toolCallFromSpan,
   traceAgentKind,
   trendTone,
   truncateId,
