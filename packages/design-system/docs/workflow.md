@@ -91,6 +91,8 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    - `pnpm check:bundle-size` (built bundle and CSS stay within raw and gzip byte budgets)
    - `pnpm check:dep-cost` (what each runtime dependency costs a consumer, against a recorded baseline)
    - `pnpm check:import-cost` (what a consumer pays for a subset of imports — `Button` alone, one Base UI control, the blog's twelve names — against recorded ceilings)
+   - `pnpm test:types` (type-level assertions against the built `dist/index.d.ts`, compiled as a consumer compiles them)
+   - `pnpm check:type-cost` (what compiling three consumer files costs `tsc`, in instantiations, against recorded ceilings)
    - `pnpm check:api` (the published type surface matches `api/index.d.ts`)
    - `pnpm build-storybook`
    - `pnpm test:visual` (Linux CI)
