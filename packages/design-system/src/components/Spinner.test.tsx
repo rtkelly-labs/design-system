@@ -4,9 +4,10 @@ import { describe, expect, it } from 'vitest';
 import { Spinner } from './Spinner';
 
 /**
- * The claims worth pinning are the accessible ones. A rotating square is a
- * screenshot's problem; whether the rotation is *announced*, and whether the
- * preference for less motion is honoured, are this file's.
+ * The claims worth pinning are the accessible ones and the motion contract. How
+ * the quadrant looks is a screenshot's problem; whether it is *announced*,
+ * whether it steps, and whether the preference for less motion is honoured,
+ * are this file's.
  */
 describe('Spinner', () => {
   it('announces itself as a status region with a default name', () => {
@@ -41,11 +42,52 @@ describe('Spinner', () => {
   // the rotation rather than removing it.
   it('slows rather than stops under prefers-reduced-motion', () => {
     const { container } = render(<Spinner />);
-    const mark = container.querySelector('[data-slot="spinner-mark"]');
+    const quarter = container.querySelector('[data-slot="spinner-quarter"]');
 
-    expect(mark?.className).toContain('animate-ds-spin');
-    expect(mark?.className).toContain('motion-reduce:animate-ds-spin-slow');
-    expect(mark?.className).not.toContain('motion-reduce:animate-none');
+    expect(quarter?.className).toContain('animate-ds-step');
+    expect(quarter?.className).toContain('motion-reduce:animate-ds-step-slow');
+    expect(quarter?.className).not.toContain('motion-reduce:animate-none');
+  });
+
+  // DESIGN.md §8: motion steps, it does not glide, and it moves the mark, never
+  // the layout. The square holds still; only the quarter inside it moves.
+  it('steps a quarter inside a square that does not move', () => {
+    const { container } = render(<Spinner />);
+    const mark = container.querySelector('[data-slot="spinner-mark"]');
+    const quarter = container.querySelector('[data-slot="spinner-quarter"]');
+
+    expect(mark?.className).not.toMatch(/animate-/);
+    expect(quarter?.className).toContain('size-1/2');
+    expect(quarter?.parentElement).toBe(mark);
+  });
+
+  // ADR 0007: the Level picks the drawing through `sketch:`, not a prop. Both
+  // are always in the markup, so a nested provider draws its own Level.
+  it('carries both drawings and lets the sketch variant choose', () => {
+    const { container } = render(<Spinner />);
+    const quarter = container.querySelector('[data-slot="spinner-quarter"]');
+    const [cell, hatch] = Array.from(quarter?.children ?? []);
+
+    expect(cell?.getAttribute('class')).toContain('sketch:hidden');
+    expect(hatch?.tagName.toLowerCase()).toBe('svg');
+    expect(hatch?.getAttribute('class')).toContain('hidden');
+    expect(hatch?.getAttribute('class')).toContain('sketch:block');
+  });
+
+  // Two spinners on one page must not share a pattern id, or the second
+  // hatches with the first one's pattern and an unmounted first leaves it blank.
+  it('gives each spinner its own hatch pattern', () => {
+    const { container } = render(
+      <>
+        <Spinner />
+        <Spinner />
+      </>,
+    );
+    const ids = Array.from(container.querySelectorAll('pattern')).map((p) => p.id);
+
+    expect(ids).toHaveLength(2);
+    expect(new Set(ids).size).toBe(2);
+    for (const id of ids) expect(container.querySelector(`rect[fill="url(#${id})"]`)).not.toBeNull();
   });
 
   it.each([
@@ -64,7 +106,7 @@ describe('Spinner', () => {
     const mark = container.querySelector('[data-slot="spinner-mark"]');
 
     expect(mark?.className).not.toMatch(/(^|\s)text-/);
-    expect(mark?.className).toContain('border-t-current');
+    expect(mark?.className).toContain('border-current/30');
   });
 
   it.each([

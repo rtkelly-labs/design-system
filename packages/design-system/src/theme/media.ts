@@ -265,17 +265,24 @@ export const MEDIA_DEFINITIONS: Readonly<Record<Medium, MediumDefinition>> = {
  * loop accelerates and decelerates once per revolution, which reads as a
  * stutter rather than as work in progress. The two with a beginning and an end
  * take the Medium's easing.
+ *
+ * `step` is the quadrant `Spinner` draws (`DESIGN.md` §8): four positions held
+ * for one `considered` each and jumped between, so `steps` is its easing. Motion
+ * steps rather than glides, which is the time-domain form of zero radius.
+ * `step-slow` is its reduced-motion partner, a third of the speed, never
+ * stopped. `spin` and `spin-slow` no longer draw any component and stay only
+ * because `theme.css` is a consumer contract; §8 names them for retirement.
  */
 export interface Loop {
   /** Which entry of `LOOP_KEYFRAMES` it runs. Two loops may share one shape. */
   readonly keyframes: LoopKeyframesName;
   /** The period, as a multiple of the Medium's `motion.considered`. */
   readonly periods: number;
-  /** `linear`, or the Medium's own `motion.easing`. */
-  readonly easing: 'linear' | 'medium';
+  /** `linear`, the Medium's own `motion.easing`, or `steps`: hold each keyframe, then jump. */
+  readonly easing: 'linear' | 'medium' | 'steps';
 }
 
-export type LoopKeyframesName = 'spin' | 'pulse' | 'track';
+export type LoopKeyframesName = 'spin' | 'pulse' | 'track' | 'quadrant';
 
 /** A keyframe as selector → declarations. Emitted as `@keyframes ds-<name>`. */
 export type Keyframes = Readonly<Record<string, Readonly<Record<string, string>>>>;
@@ -287,13 +294,23 @@ export const LOOP_KEYFRAMES: Readonly<Record<LoopKeyframesName, Keyframes>> = {
   // so `-100%` starts it fully off the leading edge and `400%` carries it
   // fully past the trailing one.
   track: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(400%)' } },
+  // One quarter of a square, clockwise round its four positions. The quarter is
+  // half the box on each side, so 100% of its own size is one position.
+  quadrant: {
+    '0%, 100%': { transform: 'translate(0, 0)' },
+    '25%': { transform: 'translate(100%, 0)' },
+    '50%': { transform: 'translate(100%, 100%)' },
+    '75%': { transform: 'translate(0, 100%)' },
+  },
 };
 
-export const LOOPS: Readonly<Record<'spin' | 'spin-slow' | 'pulse' | 'track', Loop>> = {
+export const LOOPS: Readonly<Record<'spin' | 'spin-slow' | 'pulse' | 'track' | 'step' | 'step-slow', Loop>> = {
   spin: { keyframes: 'spin', periods: 3, easing: 'linear' },
   'spin-slow': { keyframes: 'spin', periods: 9, easing: 'linear' },
   pulse: { keyframes: 'pulse', periods: 4, easing: 'medium' },
   track: { keyframes: 'track', periods: 5, easing: 'medium' },
+  step: { keyframes: 'quadrant', periods: 4, easing: 'steps' },
+  'step-slow': { keyframes: 'quadrant', periods: 12, easing: 'steps' },
 };
 
 /** Type guard for a Medium arriving from an emitter flag or an env var. */

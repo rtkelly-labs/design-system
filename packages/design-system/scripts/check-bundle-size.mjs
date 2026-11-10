@@ -39,8 +39,12 @@ const BUDGETS = {
     // #422 adds the `delta` and `deltaGround` role groups (six roles, each
     // declared per level and aliased into @theme): 28,875 B raw, 5,369 B gzip
     // locally. Same ~2% headroom.
-    maxRaw: 29_450,
-    maxGzip: 5_480,
+    // The stepped quadrant (DESIGN.md §8, ADR 0007) adds the `step` and
+    // `step-slow` loops and the `ds-quadrant` keyframes, and the level variants
+    // gain the anchored exclusion that makes them match inside a nested
+    // provider: 29,531 B raw, 5,421 B gzip locally. Same ~2% headroom.
+    maxRaw: 30_120,
+    maxGzip: 5_530,
     desc: 'Design token CSS',
   },
 };

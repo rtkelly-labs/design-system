@@ -179,3 +179,49 @@ describe('semantic aliases resolve through the --ds-* layer', () => {
     }
   });
 });
+
+/**
+ * The `midnight:` and `sketch:` variants must match an element's *nearest*
+ * themed ancestor, because that is the Level the element is painted in. A
+ * scoped panel inside a page on the other Level is the case that matters: the
+ * custom properties already resolve there (above), and a component that varies
+ * its drawing by Level (ADR 0007) has to draw the panel's Level, not the
+ * page's. The selector used to exclude any element with a differently-themed
+ * ancestor anywhere above it, so inside a nested panel neither variant matched.
+ */
+describe('level variants match the nearest themed ancestor', () => {
+  const variant = (level: string): string => {
+    const line = css.split('\n').find((l) => l.startsWith(`@custom-variant ${level} (`));
+    if (!line) throw new Error(`no @custom-variant for ${level}`);
+    return line.slice(`@custom-variant ${level} (`.length, -2).replaceAll('&', '*');
+  };
+
+  /** Builds nested `data-theme` wrappers from the outside in and returns the innermost leaf. */
+  const leafIn = (...levels: string[]): Element => {
+    const root = document.createElement('div');
+    let at: Element = root;
+    for (const level of levels) {
+      const box = document.createElement('div');
+      box.setAttribute('data-theme', level);
+      at.appendChild(box);
+      at = box;
+    }
+    const leaf = document.createElement('span');
+    at.appendChild(leaf);
+    document.body.appendChild(root);
+    return leaf;
+  };
+
+  const [a, b] = THEME_LEVELS;
+
+  it.each([
+    ['a page on one level', [a], a],
+    ['a panel nested in a page on the other level', [a, b], b],
+    ['a panel nested twice, back out', [b, a], a],
+  ] as const)('%s', (_, chain, expected) => {
+    const leaf = leafIn(...chain);
+    for (const level of THEME_LEVELS) {
+      expect(leaf.matches(variant(level)), `${level} variant on ${chain.join(' > ')}`).toBe(level === expected);
+    }
+  });
+});

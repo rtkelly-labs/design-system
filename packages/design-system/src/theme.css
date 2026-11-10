@@ -40,15 +40,15 @@
    free. Reach for these only for what tokens genuinely cannot express, such as
    a different border weight on one level. */
 
-@custom-variant midnight (&:where([data-theme="midnight"], [data-theme="midnight"] *):not(:where([data-theme]:not([data-theme="midnight"]), [data-theme]:not([data-theme="midnight"]) *)));
-@custom-variant sketch (&:where([data-theme="sketch"], [data-theme="sketch"] *):not(:where([data-theme]:not([data-theme="sketch"]), [data-theme]:not([data-theme="sketch"]) *)));
+@custom-variant midnight (&:where([data-theme="midnight"], [data-theme="midnight"] *):not(:where([data-theme="midnight"] [data-theme]:not([data-theme="midnight"]), [data-theme="midnight"] [data-theme]:not([data-theme="midnight"]) *)));
+@custom-variant sketch (&:where([data-theme="sketch"], [data-theme="sketch"] *):not(:where([data-theme="sketch"] [data-theme]:not([data-theme="sketch"]), [data-theme="sketch"] [data-theme]:not([data-theme="sketch"]) *)));
 
 /* Polarity is a declared property of a level, so these are derived rather than
  * being the axis the system hangs off. Use them for non-colour utilities that
  * genuinely depend on light-vs-dark — a shadow spread, an image filter — never
  * for colour, which the tokens already handle. */
-@custom-variant dark (&:where([data-theme="midnight"], [data-theme="midnight"] *):not(:where([data-theme]:not([data-theme="midnight"]), [data-theme]:not([data-theme="midnight"]) *)));
-@custom-variant light (&:where([data-theme="sketch"], [data-theme="sketch"] *):not(:where([data-theme]:not([data-theme="sketch"]), [data-theme]:not([data-theme="sketch"]) *)));
+@custom-variant dark (&:where([data-theme="midnight"], [data-theme="midnight"] *):not(:where([data-theme="midnight"] [data-theme]:not([data-theme="midnight"]), [data-theme="midnight"] [data-theme]:not([data-theme="midnight"]) *)));
+@custom-variant light (&:where([data-theme="sketch"], [data-theme="sketch"] *):not(:where([data-theme="sketch"] [data-theme]:not([data-theme="sketch"]), [data-theme="sketch"] [data-theme]:not([data-theme="sketch"]) *)));
 
 /* `light:` is not declared here: a level named `light` already declares it
  * above, and the two would be the same rule. `dark:` still spans polarity
@@ -253,7 +253,7 @@
   --ease-brutalist: var(--ds-ease);
 }
 
-/* Looping animations — `animate-ds-spin`, `-spin-slow`, `-pulse`, `-track`.
+/* Looping animations — `animate-ds-step`, `-step-slow`, `-spin`, `-spin-slow`, `-pulse`, `-track`.
  * Declared in `src/theme/media.ts` (`LOOPS`); the period is a multiple of
  * the Medium's `considered` duration and the keyframes are invariant.
  * `prefers-reduced-motion` is answered at the call site with `motion-reduce:`. */
@@ -262,6 +262,8 @@
   --animate-ds-spin-slow: ds-spin calc(var(--ds-duration-considered) * 9) linear infinite;
   --animate-ds-pulse: ds-pulse calc(var(--ds-duration-considered) * 4) var(--ds-ease) infinite;
   --animate-ds-track: ds-track calc(var(--ds-duration-considered) * 5) var(--ds-ease) infinite;
+  --animate-ds-step: ds-quadrant calc(var(--ds-duration-considered) * 4) steps(1, end) infinite;
+  --animate-ds-step-slow: ds-quadrant calc(var(--ds-duration-considered) * 12) steps(1, end) infinite;
 
   @keyframes ds-spin {
     to {
@@ -284,6 +286,21 @@
     }
     100% {
       transform: translateX(400%);
+    }
+  }
+
+  @keyframes ds-quadrant {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(100%, 0);
+    }
+    50% {
+      transform: translate(100%, 100%);
+    }
+    75% {
+      transform: translate(0, 100%);
     }
   }
 }
