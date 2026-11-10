@@ -72,6 +72,9 @@ describe('verdictEntry', () => {
     expect(entry(`${P}src/components/Orphan.tsx`)).toBe('blob');
     expect(entry(`${P}src/stories/Intro.md`)).toBe('blob');
     expect(entry(`${P}src/components/Button.test.tsx`)).toBeNull();
+    expect(entry(`${P}src/bench/DataTable.bench.tsx`)).toBeNull();
+    expect(entry(`${P}src/bench/fixtures.ts`)).toBeNull();
+    expect(entry(`${P}vitest.bench.config.mts`)).toBeNull();
   });
 
   it('leaves out prose, other workflows, the second package and scripts the job cannot reach', () => {

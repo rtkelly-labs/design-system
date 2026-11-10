@@ -11,7 +11,7 @@ name: Testing Experiments
 #
 # - `workflow_dispatch`, once this file is on the default branch.
 # - A label on a pull request: adding `experiment:mutation` (or
-#   `experiment:properties`) runs that job
+#   `experiment:properties`, or `experiment:bench`) runs that job
 #   once, and while the label stays on, every push re-runs it. Remove the
 #   label to stop paying for it.
 on:
@@ -113,3 +113,52 @@ jobs:
           FC_NUM_RUNS: '1000'
         # Positional filters are substrings of the path, not globs.
         run: pnpm exec vitest run model.test --reporter=verbose
+
+  bench:
+    name: render bench
+    # `pnpm bench`: mount, update and unmount timings for DataTable, LogViewer,
+    # BarChart and TimeSeriesChart at two sizes each, in jsdom. Numbers, not a
+    # verdict — nothing fails on a slow run, because a shared runner moves
+    # tens of percent between identical runs. Compare two runs of this job,
+    # never this job with a laptop. The render-count tests that *can* gate run
+    # in ci.yml's `unit` job with the rest of the suite.
+    # On a pull request: when the label is added, or on a push while it is on.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'experiment:bench') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'experiment:bench'))
+    concurrency:
+      group: experiments-bench-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/design-system
+    # About a minute of benches on a 4-core machine; the ceiling is for a
+    # runner having a bad day, not for more benches.
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Render Benchmarks
+        env:
+          BENCH_JSON: telemetry/bench.json
+        run: pnpm bench
+
+      - name: Summary
+        if: success() || failure()
+        run: node scripts/bench-summary.mjs telemetry/bench.json >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Bench Report
+        if: success() || failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          # Per attempt: re-running the same commit is how its noise is measured.
+          name: bench-report-${{ github.run_attempt }}
+          path: packages/design-system/telemetry/bench.json
+          retention-days: 30
