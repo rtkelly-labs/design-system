@@ -58,6 +58,7 @@ import * as FieldsetStories from '../../design-system/src/stories/Fieldset.stori
 import * as ErrorSummaryStories from '../../design-system/src/stories/ErrorSummary.stories';
 import * as ProgressStories from '../../design-system/src/stories/Progress.stories';
 import * as SpinnerStories from '../../design-system/src/stories/Spinner.stories';
+import * as WorkingLineStories from '../../design-system/src/stories/WorkingLine.stories';
 import * as SkeletonStories from '../../design-system/src/stories/Skeleton.stories';
 import * as EmptyStateStories from '../../design-system/src/stories/EmptyState.stories';
 import * as NotFoundPageStories from '../../design-system/src/stories/NotFoundPage.stories';
@@ -388,6 +389,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'ErrorSummary', group: 'Forms', height: 97, layout: 'side', states: fromStories(ErrorSummaryStories, ['Default']) },
   { component: 'Progress', clips: 'the fill is clipped by its track', group: 'Feedback', height: 24, layout: 'side', states: fromStories(ProgressStories, ['Determinate']) },
   { component: 'Spinner', group: 'Feedback', height: 24, layout: 'side', states: fromStories(SpinnerStories, ['Sizes']) },
+  { component: 'WorkingLine', group: 'Feedback', height: 40, layout: 'side', states: fromStories(WorkingLineStories, ['States']) },
   { component: 'Skeleton', group: 'Feedback', height: 64, layout: 'side', states: fromStories(SkeletonStories, ['Shapes']) },
   { component: 'EmptyState', group: 'Feedback', height: 65, layout: 'side', states: fromStories(EmptyStateStories, ['EmptySearchResult']) },
   { component: 'NotFoundPage', rungs: ['sketch'], group: 'Feedback', height: 86, layout: 'stack', states: fromStories(NotFoundPageStories, ['Standalone']) },

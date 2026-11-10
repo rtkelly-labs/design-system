@@ -2911,6 +2911,32 @@ declare const ToolCallGroup: react.ForwardRefExoticComponent<ToolCallGroupProps 
 
 declare function toolCallFromSpan(span: TraceSpan): Pick<ToolCallProps, 'name' | 'status' | 'startedAt' | 'endedAt' | 'args' | 'result' | 'error'>;
 
+type WorkingLineStatus = 'working' | 'waiting' | 'done' | 'failed';
+interface WorkingLineProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+
+    phase?: ReactNode;
+
+    phases?: readonly string[];
+
+    interval?: number;
+
+    status?: WorkingLineStatus;
+
+    startedAt?: number;
+
+    now?: number;
+
+    duration?: number;
+
+    summary?: ReactNode;
+
+    size?: 'xs' | 'sm';
+
+    still?: boolean;
+}
+
+declare const WorkingLine: react.ForwardRefExoticComponent<WorkingLineProps & react.RefAttributes<HTMLDivElement>>;
+
 interface TimeRange {
     from: number;
     to: number;
@@ -5437,6 +5463,9 @@ export {
   type VerdictBandProps,
   type VerdictTone,
   WEB_FLOOR,
+  WorkingLine,
+  type WorkingLineProps,
+  type WorkingLineStatus,
   XIcon,
   accentVar,
   ansiScheme,
