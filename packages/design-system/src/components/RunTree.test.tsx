@@ -24,7 +24,7 @@ describe('RunTree', () => {
 
   it('emphasises the one count that needs a person, and totals the cost', () => {
     const { container } = render(run);
-    const header = container.querySelector('[data-part="header"]')!;
+    const header = container.querySelector('[data-slot="run-tree-header"]')!;
     expect(header.textContent).toContain('4 agents');
     expect(header.textContent).toContain('! 1 needs you');
     expect(header.textContent).toMatch(/\$0\.\d\d/);
@@ -73,8 +73,15 @@ describe('RunTree', () => {
   it('keeps one live mark: the header steps, the rows hold still', () => {
     const op = { 'gen_ai.operation.name': 'invoke_agent' };
     const { container } = render(<RunTree spans={[{ id: 'a', name: 'a', start: 0, attributes: op }]} now={500} />);
-    expect(container.querySelector('[data-part="header"] [data-slot="spinner-quarter"]')?.className).toContain('animate-ds-step');
+    expect(container.querySelector('[data-slot="run-tree-header"] [data-slot="spinner-quarter"]')?.className).toContain('animate-ds-step');
     expect(container.querySelector('[role="treeitem"] [data-slot="spinner-quarter"]')?.className).not.toMatch(/animate-ds-step/);
+  });
+
+  it('carries a data-slot on every part', () => {
+    const { container } = render(run);
+    for (const slot of ['run-tree-header', 'run-tree-node', 'run-tree-toggle', 'run-tree-name', 'run-tree-task', 'run-tree-state', 'run-tree-cost']) {
+      expect(container.querySelector(`[data-slot="${slot}"]`), slot).not.toBeNull();
+    }
   });
 
   it('says so when a trace has no agents, and forwards its ref', () => {

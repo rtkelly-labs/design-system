@@ -197,7 +197,7 @@ export const RunTree = forwardRef<HTMLDivElement, RunTreeProps>(function RunTree
   const { summary } = tree;
   return (
     <div ref={ref} data-slot="run-tree" {...props} className={styles.root({ className })}>
-      <div data-part="header" className={styles.header()}>
+      <div data-slot="run-tree-header" className={styles.header()}>
         {summary.cost !== undefined ? <span className={styles.total()}>{formatTraceCost(summary.cost, currency)}</span> : null}
         <span className={styles.count()}>
           {summary.agents} {summary.agents === 1 ? 'agent' : 'agents'}
@@ -229,12 +229,13 @@ export const RunTree = forwardRef<HTMLDivElement, RunTreeProps>(function RunTree
                 aria-selected={selected}
                 aria-label={describeRunNode(node, currency)}
                 tabIndex={node.id === focusId ? 0 : -1}
+                data-slot="run-tree-node"
                 data-run-id={node.id}
                 data-status={node.status}
                 className={styles.row({ selected })}
                 onFocus={() => setActiveId(node.id)}
                 onClick={(event) => {
-                  if ((event.target as HTMLElement).closest('[data-part="toggle"]')) toggle(node);
+                  if ((event.target as HTMLElement).closest('[data-slot="run-tree-toggle"]')) toggle(node);
                   else setSelectedId(node.id);
                 }}
                 onKeyDown={(event) => onKeyDown(event, node)}
@@ -243,14 +244,14 @@ export const RunTree = forwardRef<HTMLDivElement, RunTreeProps>(function RunTree
                   {Array.from({ length: node.depth }, (_, index) => (
                     <span key={index} aria-hidden="true" className={styles.guide()} />
                   ))}
-                  <span aria-hidden="true" data-part="toggle" className={styles.toggle()}>
+                  <span aria-hidden="true" data-slot="run-tree-toggle" className={styles.toggle()}>
                     {hasChildren ? open ? <ChevronDown size={14} /> : <ChevronRight size={14} /> : null}
                   </span>
                   <span className={styles.label()}>
                     <span>
-                      <span className={styles.name()}>{node.name}</span> {node.model ? <span className={styles.model()}>{node.model}</span> : null}
+                      <span data-slot="run-tree-name" className={styles.name()}>{node.name}</span> {node.model ? <span className={styles.model()}>{node.model}</span> : null}
                     </span>
-                    <span className={styles.task()}>
+                    <span data-slot="run-tree-task" className={styles.task()}>
                       {node.task}
                       {node.toolCalls ? ` · ${node.toolCalls} tool ${node.toolCalls === 1 ? 'call' : 'calls'}` : ''}
                       {!open && node.descendants ? <span className={styles.folded()}> · +{node.descendants} {node.descendants === 1 ? 'agent' : 'agents'}</span> : null}
@@ -258,12 +259,12 @@ export const RunTree = forwardRef<HTMLDivElement, RunTreeProps>(function RunTree
                     </span>
                   </span>
                 </span>
-                <span aria-hidden="true" className={styles.state({ status: node.status })}>
+                <span aria-hidden="true" data-slot="run-tree-state" className={styles.state({ status: node.status })}>
                   {/* Separate elements, so the flex gap separates mark and word. */}
                   {node.status === 'running' ? <Spinner size="sm" accent="current" still label="" /> : <span>{node.status === 'waiting' ? '!' : node.status === 'done' ? '✓' : '✕'}</span>}
                   <span>{STATUS_WORD[node.status]}</span>
                 </span>
-                <span aria-hidden="true" className={styles.money()}>
+                <span aria-hidden="true" data-slot="run-tree-cost" className={styles.money()}>
                   {node.cost !== undefined ? <span className={styles.cost()}>{formatTraceCost(node.cost, currency)}</span> : null}
                   <span className={styles.time()}>
                     {formatTraceDuration(node.duration)}
