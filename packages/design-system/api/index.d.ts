@@ -2937,6 +2937,87 @@ interface WorkingLineProps extends Omit<HTMLAttributes<HTMLDivElement>, 'childre
 
 declare const WorkingLine: react.ForwardRefExoticComponent<WorkingLineProps & react.RefAttributes<HTMLDivElement>>;
 
+type RunNodeStatus = 'running' | 'waiting' | 'done' | 'failed';
+
+interface RunNode {
+
+    id: string;
+
+    name: string;
+
+    task: string;
+    model?: string;
+    status: RunNodeStatus;
+
+    depth: number;
+
+    parentId: string | null;
+
+    children: string[];
+
+    duration: number;
+
+    cost?: number;
+
+    tokens: number;
+
+    partial: boolean;
+
+    toolCalls: number;
+
+    modelCalls: number;
+
+    errors: number;
+
+    descendants: number;
+}
+interface RunTreeModel {
+
+    nodes: RunNode[];
+    byId: ReadonlyMap<string, RunNode>;
+
+    summary: {
+        agents: number;
+        running: number;
+        waiting: number;
+        cost?: number;
+    };
+}
+
+declare function buildRunTree(model: TraceModel): RunTreeModel;
+
+declare function visibleRunNodes(tree: RunTreeModel, collapsed?: ReadonlySet<string>): RunNode[];
+
+declare function describeRunNode(node: RunNode, currency?: string): string;
+interface RunTreeProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
+
+    spans: readonly TraceSpanInput[] | TraceModel;
+
+    now?: number;
+
+    price?: BuildTraceOptions['price'];
+
+    costAttribute?: string;
+
+    currency?: string;
+
+    selectedId?: string | null;
+
+    defaultSelectedId?: string | null;
+
+    onSelectedChange?: (id: string | null) => void;
+
+    collapsed?: readonly string[];
+
+    defaultCollapsed?: readonly string[];
+
+    onCollapsedChange?: (ids: string[]) => void;
+
+    label?: string;
+}
+
+declare const RunTree: react.ForwardRefExoticComponent<RunTreeProps & react.RefAttributes<HTMLDivElement>>;
+
 interface TimeRange {
     from: number;
     to: number;
@@ -5234,6 +5315,11 @@ export {
   type ReviewValue,
   type ReviewerState,
   type Rgb,
+  type RunNode,
+  type RunNodeStatus,
+  RunTree,
+  type RunTreeModel,
+  type RunTreeProps,
   SAMPLE_BASELINE_COMMIT,
   SAMPLE_CALLGRAPH_HUNKS,
   SAMPLE_DUPLICATION_HUNKS,
@@ -5479,6 +5565,7 @@ export {
   bucketIndex,
   bucketPercentile,
   bucketTimes,
+  buildRunTree,
   buildTrace,
   buttonGroupContext,
   childrenToText,
@@ -5493,6 +5580,7 @@ export {
   deltaTrend,
   describeFilter,
   describeLogEntry,
+  describeRunNode,
   describeToolCalls,
   describeTraceSpan,
   diffAnchor,
@@ -5593,5 +5681,6 @@ export {
   useToast,
   useTraceClock,
   useTraceReplay,
+  visibleRunNodes,
   visibleTraceSpans,
 };
