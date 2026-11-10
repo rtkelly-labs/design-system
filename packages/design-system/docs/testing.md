@@ -132,6 +132,36 @@ nobody thought to write.
 consumer builds on: narrowing, ref element types, rejected props. `check:api`
 sees the text of the surface; this file sees what that text allows.
 
+## ⏱️ Render counts and render benchmarks
+
+Two instruments for the components whose cost grows with their data —
+`DataTable`, `LogViewer`, `BarChart` and `TimeSeriesChart`.
+
+**Render counts** (`src/render-counts.test.tsx`) are ordinary unit tests, so
+they run in the `unit` job. Each one counts work an interaction causes, as a
+number that does not move between machines: commits under a React
+`<Profiler>`, cell renderers called, accessors run. Hovering a bar commits
+nothing, because the hover is CSS. Sorting 1,000 rows runs no accessor,
+because TanStack caches each row's values. A virtualised sort of 10,000 rows
+renders only the window. A bound is the measured value or the window's
+arithmetic. A bound with headroom is one a regression fits under.
+
+- **Profile the root, not the leaf.** A `<Profiler>` nested inside a context
+  provider did not report a commit caused by that context changing, though
+  the component under it re-rendered. Wrap the whole tree.
+- **Count what a caller can see.** A counting `accessorFn` or `cell` in the
+  column definitions, or a `Profiler`. Never a component's internals.
+
+**Render benchmarks** (`src/bench/*.bench.tsx`, `pnpm bench`) time mount and
+unmount, a sort, a filter and a hover at two sizes each, through `vitest
+bench` (tinybench). They run in jsdom, so a number covers React, TanStack and
+visx work and no layout or paint. They are not a gate. On a shared machine
+the same commit moves by 30–70% (`rme`), so a number is comparable only with
+another run on the same runner. They run in `experiments.yml` when a PR
+carries the `experiment:bench` label. That job uploads `bench.json` and puts
+a median table in the job summary (`scripts/bench-summary.mjs`). Locally,
+`BENCH_JSON=telemetry/bench.json pnpm bench` writes the same file.
+
 ## 🧬 Mutation testing
 
 `pnpm test:mutation` runs StrykerJS over the modules named in

@@ -120,7 +120,8 @@
     "check:tokens:list": "node scripts/check-tokens.mjs --list",
     "ansi:build": "node scripts/build-ansi.mjs",
     "ansi:check": "node scripts/build-ansi.mjs --check",
-    "test:mutation": "stryker run"
+    "test:mutation": "stryker run",
+    "bench": "vitest bench --run --config vitest.bench.config.mts"
   },
   "publishConfig": {
     "access": "public"
