@@ -708,7 +708,8 @@ for (const file of PROSE) {
  * Rules 5 and 9 — the render environment is one pinned image.
  *
  * A baseline is a claim about pixels in one environment, so every job that
- * renders — the gated suites, the snapshot writer, the walkthrough — runs in
+ * renders — the gated suites, the snapshot writer, the walkthrough, the
+ * Lighthouse experiment (`pnpm lighthouse`, a Chromium driven by LHCI) — runs in
  * the same official Playwright image, named by digest, at the version the
  * lockfile pins. Nothing installs a browser at run time: the image carries it.
  * Each of those is checked, because each has been wrong somewhere before — a
@@ -721,7 +722,7 @@ for (const file of PROSE) {
  * ------------------------------------------------------------------ */
 
 const RENDER_IMAGE = /^mcr\.microsoft\.com\/playwright:v(\d+\.\d+\.\d+)-noble@sha256:([0-9a-f]{64})$/;
-const RENDERS = /^\s*(?:-\s+)?run:.*(?:pnpm\s+(?:test:visual|test:a11y|walkthrough|manifesto|compendium)\b|playwright\s+test)/;
+const RENDERS = /^\s*(?:-\s+)?run:.*(?:pnpm\s+(?:test:visual|test:a11y|walkthrough|manifesto|compendium|lighthouse)\b|playwright\s+test)/;
 const lockedPlaywright = /^ {2}'@playwright\/test@(\d+\.\d+\.\d+)':/m.exec(
   readFileSync(path.join(GITHUB_ROOT, 'pnpm-lock.yaml'), 'utf8'),
 )?.[1];

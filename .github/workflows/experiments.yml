@@ -11,7 +11,7 @@ name: Testing Experiments
 #
 # - `workflow_dispatch`, once this file is on the default branch.
 # - A label on a pull request: adding `experiment:mutation` (or
-#   `experiment:properties`) runs that job
+#   `experiment:properties`, or `experiment:lighthouse`) runs that job
 #   once, and while the label stays on, every push re-runs it. Remove the
 #   label to stop paying for it.
 on:
@@ -113,3 +113,92 @@ jobs:
           FC_NUM_RUNS: '1000'
         # Positional filters are substrings of the path, not globs.
         run: pnpm exec vitest run model.test --reporter=verbose
+
+  lighthouse:
+    name: lighthouse
+    # Lighthouse CI against five pages of the applied site, built from this
+    # commit and served locally the way Vercel serves it (`--compress`
+    # included), three runs a page. Budgets are in `apps/site/lighthouserc.json`:
+    # byte weight, font bytes and CLS fail; LCP, TBT and the score only warn,
+    # because simulated timings on a shared runner move between runs of one
+    # build. Reports go to an artifact; nothing is uploaded anywhere else.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'experiment:lighthouse') ||
+      (github.event.action == 'synchronize' && contains(github.event.pull_request.labels.*.name, 'experiment:lighthouse'))
+    concurrency:
+      group: experiments-lighthouse-${{ github.event_name }}-${{ github.ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    # It drives Chromium, so it runs in the pinned image and installs none
+    # (rule 9): LHCI is pointed at the image's own Chromium through
+    # `CHROME_PATH`, resolved from the lockfile's Playwright.
+    container:
+      image: mcr.microsoft.com/playwright:v1.62.1-noble@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e
+      options: --ipc=host --init
+    defaults:
+      run:
+        shell: bash
+        working-directory: apps/site
+    # ~1 minute of builds and ~3–4 of Lighthouse locally; the rest is the
+    # image pull on a cold runner.
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Trust the Workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Build Site
+        run: |
+          pnpm --filter @rtkelly-labs/design-system build
+          pnpm build
+
+      # The image's Chromium, as the lockfile's Playwright names it. Fails
+      # closed: a path that does not exist would only surface as a launch error.
+      - name: Chromium
+        working-directory: packages/design-system
+        run: |
+          set -euo pipefail
+          chrome="$(node -e "import('@playwright/test').then((m) => console.log(m.chromium.executablePath()))")"
+          if ! [ -x "${chrome}" ]; then
+            echo "::error::Playwright names ${chrome}, which the image does not carry."
+            exit 1
+          fi
+          echo "CHROME_PATH=${chrome}" >> "$GITHUB_ENV"
+
+      - name: Collect
+        env:
+          SERVE_DEPLOY_QUIET: '1'
+        run: pnpm lighthouse collect
+
+      - name: Assert Budgets
+        run: pnpm lighthouse assert
+
+      - name: Summary
+        if: success() || failure()
+        continue-on-error: true
+        run: node scripts/lighthouse-summary.mjs >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Write Reports
+        if: success() || failure()
+        run: pnpm lighthouse upload
+
+      - name: Upload Lighthouse Reports
+        if: success() || failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: lighthouse-report-${{ github.run_attempt }}
+          # `lighthouse-report/` holds every run's HTML and JSON with a
+          # manifest; the raw results in `.lighthouseci/` are the same runs
+          # again, so only the assertion verdict is taken from there.
+          path: |
+            apps/site/lighthouse-report/
+            apps/site/.lighthouseci/assertion-results.json
+          include-hidden-files: true
+          retention-days: 30

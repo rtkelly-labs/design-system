@@ -14,7 +14,8 @@
     "start": "node ../../scripts/serve-deploy.mjs out --mount /site --port 8102",
     "typecheck": "pnpm generate && tsc --noEmit",
     "check:tokens": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-tokens.mjs",
-    "lint": "eslint --max-warnings 0 ."
+    "lint": "eslint --max-warnings 0 .",
+    "lighthouse": "pnpm dlx @lhci/cli@0.15.1"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
