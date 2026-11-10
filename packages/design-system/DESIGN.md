@@ -246,13 +246,83 @@ and report **46 of 296 pairs below minimum**. That is deliberate, not a regressi
 graphic artifact is emitted yet, and only the `web` run gates CI. If palette values ever move,
 those 46 are the number that moves first.
 
-## 8. Voice
+## 8. Motion
+
+Motion is the form, moving. Every rule in §6 has a counterpart in time, and a motion that breaks
+one reads as wrong in exactly the way a rounded corner does.
+
+| The form says | So motion |
+|---|---|
+| Zero radius, nothing blurred | **Steps, it does not glide.** A loop advances in discrete steps, as a cursor jumps cell to cell or a pen moves point to point. An eased or continuous loop is the soft shadow of time. |
+| Edges are drawn, not implied | **The moving part is a drawn mark**: a lit cell, an inked side, a hatched quarter. Never a gradient sweep, a shimmer or a cross-fade. |
+| Mono and brackets are spent rarely | **Motion is a budget: one live mark per region.** A group header, a working line, a pending button. Rows in it hold their first frame still, and their elapsed time is what moves. |
+| Offsets sit beside, not under | **Motion moves the mark, never the layout.** An animated mark has a fixed box, and nothing beside it shifts by a pixel. |
+| Two themes, each drawn on its own | **One clock, two drawings.** The box, the steps and the period belong to the Medium and are the same on both Levels. Only how a step is drawn belongs to the Level ([`docs/adr/0007`](./docs/adr/0007-drawing-varies-by-level.md)). |
+| Contrast is arithmetic | **Time is declared.** A period is a whole multiple of the Medium's `considered`, and a component takes `now` as a prop rather than reading the clock, so a story, a snapshot or a video frame is a function of its inputs. |
+
+**The quadrant is the reference mark.** A square in `border.subtle` with one quarter drawn in
+the accent, stepping clockwise round its four quarters, one step per `considered`, so a loop is
+four of them. On `midnight` the quarter is a lit cell, a block cursor on a CRT. On `sketch` it is
+hatched in pen with 45° section lines, over the square as a 2H construction line. Same box, same
+four steps, same clock.
+
+**Reduced motion slows an indicator to a third of its speed and never stops it**, because a
+spinner that has stopped is indistinguishable from a page that has hung. Motion that carries no
+information is removed outright.
+
+**Text is swapped, never animated.** A phase label is replaced. It does not type itself out,
+shimmer or cross-fade.
+
+**What does not follow this yet.** Three loops predate this section: `ds-spin`, the continuous
+rotation `Spinner` draws today; `ds-pulse`, an eased opacity on `Skeleton`; and `ds-track`, an
+eased slide on indeterminate `Progress`. Each is to be replaced, not grandfathered.
+
+## 9. Agent surfaces
+
+What an agent is doing is a surface of its own across the estate: a run, its tool calls, the
+sub-agents it started, the decisions it waits on. One vocabulary, so a run reads the same in
+every view.
+
+| Element | The question it answers |
+|---|---|
+| `TraceViewer`, with agent spans | Where did the time and the money go? |
+| `ToolCall`, `ToolCallGroup` | What did it just call, and what came back? |
+| `RunTree` | Who delegated to whom, and what is each branch costing? |
+| `WorkingLine` | Is it still working, and on what? |
+| `ContextBudget` | What is filling its context window? |
+| A run board (an example, not a component) | What needs me, across every run? |
+
+- **One run, one model, many views.** The span tree in `lib/trace.ts` holds model calls, tool
+  calls, sub-agents and decisions, and every view above reads it. A view never keeps a second
+  copy of the run.
+- **State is a word and a shape before it is a colour.**
+
+  | State | Mark | Bar | Word |
+  |---|---|---|---|
+  | running | the quadrant: live once per region, still elsewhere | hatched | `running` |
+  | done | `✓` | solid `accent.primary` | `done` |
+  | waiting on a person | `!` | outlined in `intent.warning` | `needs you` |
+  | failed | `✕` | solid `intent.danger` | `failed` |
+
+- **The one emphasised count is the one that needs a person.** Totals are plain; how many runs
+  need you is the number in `intent.warning`.
+- **Time and money sit together**, `duration · cost`, in tabular figures. Mono only at stat
+  scale, per §7.
+- **Identifiers are mono, descriptions are Inter.** A tool name or a model id is real code; the
+  sentence saying what it did is prose.
+- **A payload lives behind a disclosure, in a `surface.sunken` well**, capped with a plain
+  "Show all (N lines)" and never faded out.
+- **Bars are painted by outcome**, never by service or agent.
+- **Parts of a whole have no colour role yet.** A context window needs categorical colours, and
+  which ones is an open decision (#471). Until it is made, `ContextBudget` is not built.
+
+## 10. Voice
 
 Terse. Technical. Lowercase in code contexts, `UPPERCASE_SNAKE` for the rare terminal-flavoured
 label. Plain section headings; brackets are spent per §7. No exclamation marks, no marketing
 adjectives, no "seamlessly" or "effortlessly". A control says exactly what happens: `PUBLISH`, then `PUBLISHED`.
 
-## 9. If you are an agent building something on this brand
+## 11. If you are an agent building something on this brand
 
 1. Read the token files, not this prose, for values — `tokens/palette.<theme>.tokens.json`.
 2. Address Roles. If you find yourself writing a hue name in a component, stop.
@@ -264,3 +334,7 @@ adjectives, no "seamlessly" or "effortlessly". A control says exactly what happe
    declared value anywhere is `#0c0d0f`.
 7. Contrast is a gate, not a guideline. If `pnpm check:contrast` fails, the colour is wrong —
    not the gate.
+8. Motion steps, and it is spent once per region. If every row on a screen has a spinner, it is
+   wrong. If a loop glides or fades, it is wrong.
+9. Agent state is a word and a shape before it is a colour: `running`, `done`, `needs you`,
+   `failed`.

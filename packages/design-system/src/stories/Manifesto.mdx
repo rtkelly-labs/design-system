@@ -184,6 +184,41 @@ disagree, the specimen stops matching the figure printed beside it.
   <Story of={Manifesto.Motion} />
 </Specimen>
 
+## Motion is the form, moving
+
+Every rule of form has a counterpart in time, and a motion that breaks one reads as wrong in
+exactly the way a rounded corner does. Zero radius and no blur become **steps, not glides**: a
+loop jumps cell to cell like a cursor, and an eased loop is the soft shadow of time. Drawn edges
+become **a drawn moving part**, never a gradient sweep or a shimmer. The mono and bracket budget
+becomes **a motion budget**: one live mark per region, while the rows in it hold their first
+frame still and let their elapsed time do the moving. And an offset that sits beside rather than
+under becomes **motion that moves the mark, never the layout**.
+
+The two Levels keep one clock. The box, the steps and the period belong to the Medium; only how
+a step is drawn belongs to the Level. On `midnight` the quadrant's quarter is a lit cell, and on
+`sketch` it is hatched in pen over the square's construction line. Reduced motion slows an
+indicator to a third of its speed and never stops it, because a stopped spinner reads as a hung
+page.
+
+<Specimen
+  label="one clock, two drawings"
+  caption="Four stills per Level. The step is the web Medium's considered, read at render time; the drawing is chosen by the Level through the sketch: variant, as ADR 0007 permits."
+>
+  <Story of={Manifesto.Steps} />
+</Specimen>
+
+## Agent surfaces
+
+What an agent is doing is a surface of its own: a run, its tool calls, the sub-agents it
+started, the decisions it waits on. One span tree holds the run, and every view reads it: the
+waterfall, the run tree, the tool-call list and the board.
+
+State is a word and a shape before it is a colour. Running is the quadrant and a hatched bar;
+done is `✓` and a solid bar; waiting on a person is `!`, an outlined bar and the words "needs
+you"; failed is `✕` in the danger role. The one emphasised number on a screen is how many runs
+need a person. Time and money sit together, tool names and model ids are set in mono because
+they are code, and a payload stays behind a disclosure in a sunken well.
+
 ## One origin, many targets
 
 This is what the Hue layer is for. A **Target** is anything the system emits to, and some Targets
@@ -253,6 +288,8 @@ paint, so a reader who chose `sketch` never sees `midnight` flash and correct it
 4. Both levels, always. Test `sketch`; it is the one that breaks.
 5. Never use pure black as a page ground.
 6. Contrast is a gate, not a guideline. If the check fails, the colour is wrong — not the gate.
+7. Motion steps, and it is spent once per region. A spinner on every row is wrong.
+8. Agent state is a word and a shape before it is a colour.
 
 </ManifestoPage>
 </div>

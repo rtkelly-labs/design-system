@@ -72,3 +72,34 @@ Do not treat themes as an inverted "light and dark" switch. Neither theme is der
 * ✅ **DO** verify designs in both `midnight` (neon on dark slate) and `sketch` (ink on warm paper).
 * ✅ **DO** keep information density compact, structured, and legible for developer workflows.
 * ✅ **DO** ensure high contrast: all text-to-ground pairs must clear WCAG AA (4.5:1) floor minimums.
+* ❌ **DON'T** animate with glides, fades, shimmer or easing on a loop. A loop steps, like a cursor.
+* ❌ **DON'T** put a spinner on every row. One live mark per region; the rows hold still.
+* ✅ **DO** give agent state a word and a shape before a colour: `running`, `done`, `needs you`, `failed`.
+
+---
+
+## 6. Motion — the form, moving
+
+Every form rule above has a counterpart in time. Full rules: `DESIGN.md` §8.
+
+* **Steps, not glides.** A loop advances in discrete steps. An eased or continuous loop is the soft shadow of time.
+* **The moving part is a drawn mark**: a lit cell, an inked side, a hatched quarter. No gradient sweep, shimmer or cross-fade.
+* **One live mark per region.** A group header, a working line, a pending button. Rows show the still first frame, and their elapsed time does the moving.
+* **Motion moves the mark, never the layout.** Fixed box; nothing beside it shifts.
+* **One clock, two drawings.** Box, steps and period are the Medium's and identical on both themes; only the drawing differs (`docs/adr/0007`). The quadrant is the reference mark: a lit cell on `midnight`, a pen-hatched quarter over a pencil square on `sketch`, one step per `considered`.
+* **Time is declared.** Periods are whole multiples of `considered`; components take `now` as a prop and never read the clock.
+* **Reduced motion slows an indicator to a third, never stops it.** Decorative motion is removed.
+* **Text is swapped, never animated.** No typewriter, no shimmer.
+
+---
+
+## 7. Agent surfaces
+
+Agent activity (runs, tool calls, sub-agents, decisions) is a first-class surface. Full rules: `DESIGN.md` §9.
+
+* **One run, one model, many views.** Waterfall, run tree, tool calls and board all read the span tree in `lib/trace.ts`.
+* **State:** running is the quadrant and a hatched bar; done is `✓` and a solid bar; waiting is `!`, an outlined bar and `needs you`; failed is `✕` and `intent.danger`. Always with the word.
+* **The emphasised count is what needs a person.** Everything else is plain.
+* **`duration · cost` together**, tabular. Tool names and model ids in mono; their summaries in Inter.
+* **Payloads behind a disclosure** in a `surface.sunken` well, capped with "Show all (N lines)", never faded.
+* **Bars by outcome**, never by service or agent.

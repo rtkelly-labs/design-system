@@ -1,5 +1,5 @@
 /**
- * The Design Manifesto — the brand outline's eight claims as an A4 print publication.
+ * The Design Manifesto — the brand outline's ten claims as an A4 print publication.
  *
  * Editorial base: poster-scale display type, generous spacing, and the theme following the job a
  * page does. Midnight pages are full-bleed statements (cover, claim C, the type specimen, the back
@@ -13,12 +13,12 @@
  * Every value is fixed and deterministic; colours are roles only.
  */
 
-import type { ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { ThemeProvider, type ThemeLevel, AsciiGauge, Badge } from '@rtkelly-labs/design-system';
 
 const SET = 'DS-MFST-01';
 const REV = 'REV 2026.10';
-const PAGES = 8;
+const PAGES = 10;
 
 const CLAIMS = [
   { index: 'A', page: '02', title: 'The character, in one paragraph' },
@@ -28,7 +28,9 @@ const CLAIMS = [
   { index: 'E', page: '05', title: 'Background hierarchy' },
   { index: 'F', page: '05', title: 'Form' },
   { index: 'G', page: '06', title: 'Type' },
-  { index: 'H', page: '07', title: 'Voice' },
+  { index: 'H', page: '07', title: 'Motion is the form, moving' },
+  { index: 'I', page: '08', title: 'Agent surfaces' },
+  { index: 'J', page: '09', title: 'Voice' },
 ] as const;
 
 // ---------------------------------------------------------------------------------------------
@@ -186,6 +188,34 @@ function Rules({ head, rows, cols, className = '' }: { head: readonly string[]; 
   );
 }
 
+/** One still of the quadrant, in the drawing of the page's Level (ADR 0007). Passed in, since one page sets both Levels side by side. */
+const QUARTERS = [
+  [1, 1],
+  [8, 1],
+  [8, 8],
+  [1, 8],
+] as const;
+
+function QuadrantFrame({ step, drawing }: { step: number; drawing: 'cell' | 'hatch' }) {
+  const hatch = useId();
+  const [x, y] = QUARTERS[step];
+  return (
+    <svg viewBox="0 0 16 16" width="52" height="52" aria-hidden="true" className="text-accent-primary">
+      <defs>
+        <pattern id={hatch} width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="3" stroke="currentColor" strokeWidth="1.1" />
+        </pattern>
+      </defs>
+      <rect x="1" y="1" width="14" height="14" className="fill-none stroke-edge-subtle" strokeWidth="2" />
+      {drawing === 'cell' ? (
+        <rect x={x} y={y} width="7" height="7" className="fill-current" />
+      ) : (
+        <rect x={x + 0.5} y={y + 0.5} width="6" height="6" fill={`url(#${hatch})`} stroke="currentColor" strokeWidth="1" />
+      )}
+    </svg>
+  );
+}
+
 // ---------------------------------------------------------------------------------------------
 // The publication
 // ---------------------------------------------------------------------------------------------
@@ -196,9 +226,9 @@ export default function ManifestoC() {
       <PageBox />
 
       {/* 01 — COVER · midnight ----------------------------------------------------------- */}
-      <Page n={1} level="midnight" head="Ryan Kelly · ryankelly.dev" title="Cover & contents" claims="A–H" source="DESIGN.md" fill="grow">
+      <Page n={1} level="midnight" head="Ryan Kelly · ryankelly.dev" title="Cover & contents" claims="A–J" source="DESIGN.md" fill="grow">
         <div className="flex flex-col gap-5">
-          <Kicker className="text-accent-primary">[ The brand outline · eight claims ]</Kicker>
+          <Kicker className="text-accent-primary">[ The brand outline · ten claims ]</Kicker>
           <h1 className="m-0 font-display text-[7.25rem] font-bold uppercase leading-[0.86] tracking-[-0.02em]">
             Design
             <br />
@@ -208,7 +238,7 @@ export default function ManifestoC() {
             What this system believes, shown with the exact primitives and mechanics that enforce it.
           </p>
         </div>
-        <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-4 border-t-2 border-edge-strong">
+        <div className="grid min-h-0 flex-1 grid-cols-2 grid-rows-5 border-t-2 border-edge-strong">
           {CLAIMS.map((c, i) => (
             <a
               key={c.index}
@@ -583,12 +613,110 @@ export default function ManifestoC() {
         </div>
       </Page>
 
-      {/* 07 — H & §9 · sketch ------------------------------------------------------------ */}
-      <Page n={7} level="sketch" head="§8–9 · Voice & protocol" title="Voice & agent protocol" claims="H · §9" source="DESIGN.md §8–9">
+      {/* 07 — H · midnight: motion ----------------------------------------------------- */}
+      <Page n={7} level="midnight" head="§8 · Motion" title="Motion" claims="H" source="DESIGN.md §8">
+        <section id="claim-h" className="flex flex-col gap-4">
+          <Kicker className="text-accent-primary">Claim H · motion</Kicker>
+          <h2 className="m-0 font-display text-[4.2rem] font-bold leading-[0.95] tracking-tight">
+            Motion is the form, <span className="text-accent-primary">moving.</span>
+          </h2>
+          <p className="m-0 max-w-[36rem] font-sans text-lg leading-snug text-content-secondary">
+            Every rule of form has a counterpart in time. A motion that breaks one reads as wrong in exactly the way a rounded corner does.
+          </p>
+        </section>
+        <Rules
+          cols="grid-cols-[13rem_1fr]"
+          head={['The form says', 'So motion']}
+          rows={[
+            ['Zero radius, no blur', 'Steps; it does not glide. An eased or continuous loop is the soft shadow of time.'],
+            ['Edges are drawn', 'The moving part is a drawn mark: a lit cell, an inked side, a hatched quarter. No sweep, no shimmer, no cross-fade.'],
+            ['Mono is spent rarely', 'One live mark per region. Rows hold their first frame still; their elapsed time is what moves.'],
+            ['Offsets sit beside', 'Motion moves the mark, never the layout. A fixed box; nothing beside it shifts.'],
+            ['Two drawings', 'One clock. Box, steps and period are the Medium\'s; only the drawing is the Level\'s.'],
+            ['Arithmetic', 'Time is declared: periods are multiples of considered, and now is a prop.'],
+          ]}
+        />
+        <section className="flex flex-col gap-3">
+          <Kicker>The quadrant · four steps of considered · one loop · both Levels</Kicker>
+          <div className="grid grid-cols-2 border-2 border-edge-strong">
+            {(['midnight', 'sketch'] as const).map((lvl) => (
+              <ThemeProvider key={lvl} scoped defaultLevel={lvl} className="flex flex-col gap-3 bg-surface-base p-3.5 text-content-primary">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-display text-2xl font-bold uppercase leading-none">{lvl}</span>
+                  <Kicker>{lvl === 'midnight' ? 'a lit cell' : 'pen hatching · 2H square'}</Kicker>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div key={i} className="flex flex-col gap-1">
+                      <QuadrantFrame step={i} drawing={lvl === 'sketch' ? 'hatch' : 'cell'} />
+                      <Kicker>step {i + 1}</Kicker>
+                    </div>
+                  ))}
+                </div>
+              </ThemeProvider>
+            ))}
+          </div>
+          <Body className="text-[0.875rem]">
+            Reduced motion slows an indicator to a third of its speed and never stops it: a stopped spinner reads as a hung page. Text is swapped, never
+            animated.
+          </Body>
+        </section>
+      </Page>
+
+      {/* 08 — I · sketch: agent surfaces ----------------------------------------------- */}
+      <Page n={8} level="sketch" head="§9 · Agent surfaces" title="Agent surfaces" claims="I" source="DESIGN.md §9">
         <section className="flex flex-col gap-4">
-          <ClaimHead index="H" title={CLAIMS[7].title} section="§8 · voice" />
+          <ClaimHead index="I" title={CLAIMS[8].title} section="§9 · one run, many views" />
+          <Body>
+            What an agent is doing is a surface of its own: a run, its tool calls, the sub-agents it started, the decisions it waits on. One span tree holds
+            the run, and every view reads it. A view never keeps a second copy.
+          </Body>
+        </section>
+        <Rules
+          cols="grid-cols-[7.5rem_7rem_10rem_1fr]"
+          head={['State', 'Mark', 'Bar', 'Word']}
+          rows={[
+            ['running', 'the quadrant', 'hatched', 'running'],
+            ['done', '✓', 'solid accent', 'done'],
+            ['waiting', '!', 'outlined, warning', 'needs you'],
+            ['failed', '✕', 'solid danger', 'failed'],
+          ]}
+        />
+        <Rules
+          cols="grid-cols-[12rem_1fr]"
+          head={['Element', 'The question it answers']}
+          rows={[
+            ['TraceViewer', 'Where did the time and the money go?'],
+            ['ToolCall', 'What did it just call, and what came back?'],
+            ['RunTree', 'Who delegated to whom, and what is each branch costing?'],
+            ['WorkingLine', 'Is it still working, and on what?'],
+            ['ContextBudget', 'What is filling its context window? Waits on a colour decision.'],
+            ['run board', 'What needs me, across every run? An example, not a component.'],
+          ]}
+        />
+        <Inset label="[ a tool call, one line ]">
+          <div className="flex flex-col gap-1.5 font-mono text-[0.8125rem]">
+            <span className="text-content-primary">
+              ▸ dotnet_test <span className="font-sans text-content-secondary">Parquet.Test, 2,412 tests</span> <span className="text-intent-success">✓ done</span>{' '}
+              <span className="text-content-muted">8.8s · $0.00</span>
+            </span>
+            <span className="text-content-primary">
+              ▸ conformance <span className="font-sans text-content-secondary">parquet-cpp, both directions</span>{' '}
+              <span className="text-intent-danger">✕ failed</span> <span className="text-content-muted">2.4s</span>
+            </span>
+            <span className="text-content-primary">
+              ! <span className="font-sans text-intent-warning">1 needs you</span> <span className="text-content-muted">· 4 agents · $0.61</span>
+            </span>
+          </div>
+        </Inset>
+      </Page>
+
+      {/* 09 — J & §11 · sketch ----------------------------------------------------------- */}
+      <Page n={9} level="sketch" head="§10–11 · Voice & protocol" title="Voice & agent protocol" claims="J · §11" source="DESIGN.md §10–11">
+        <section className="flex flex-col gap-4">
+          <ClaimHead index="J" title={CLAIMS[9].title} section="§10 · voice" />
           <div className="grid grid-cols-[1.3fr_1fr] gap-6">
-            <p className="m-0 font-sans text-[1.0625rem] leading-[1.55] text-content-primary">
+            <p className="m-0 font-sans text-base leading-[1.5] text-content-primary">
               Terse. Technical. Lowercase in code contexts, <Code>UPPERCASE_SNAKE</Code> for the rare terminal-flavoured label. Plain section headings; brackets are spent per §7. No
               exclamation marks, no marketing adjectives, no &ldquo;seamlessly&rdquo; or &ldquo;effortlessly&rdquo;.
             </p>
@@ -615,7 +743,7 @@ export default function ManifestoC() {
         />
         <section className="flex flex-col gap-1">
           <div className="flex flex-col gap-1 border-b border-edge-default pb-3">
-            <Kicker>§9 · protocol</Kicker>
+            <Kicker>§11 · protocol</Kicker>
             <h2 className="m-0 font-display text-[1.75rem] font-bold leading-[1.1] tracking-tight">If you are an agent building on this brand</h2>
           </div>
           <ol className="m-0 grid list-none grid-cols-2 gap-x-6 p-0">
@@ -626,11 +754,13 @@ export default function ManifestoC() {
               ['Both themes, always', 'Test sketch; it is the one that breaks.', 'claim B'],
               ['No pure black page ground', 'surface.base on dark is a near-black, never fixed.black. Nothing declared is darker than the darkest ground.', 'claim E'],
               ['Contrast is a gate', 'If pnpm check:contrast fails, the colour is wrong — not the gate.', 'claim D'],
+              ['Motion is a budget', 'A loop steps, once per region.', 'claim H'],
+              ['State is worded', 'A word and a shape before a colour.', 'claim I'],
             ].map(([title, rule, ref], i) => (
-              <li key={title} className="grid grid-cols-[3rem_1fr] items-start gap-3 border-b border-edge-subtle py-3">
-                <span className="font-display text-[2.25rem] font-bold leading-none text-content-muted">{String(i + 1).padStart(2, '0')}</span>
+              <li key={title} className="grid grid-cols-[2.5rem_1fr] items-start gap-3 border-b border-edge-subtle py-2">
+                <span className="font-display text-[1.75rem] font-bold leading-none text-content-muted">{String(i + 1).padStart(2, '0')}</span>
                 <span className="flex flex-col gap-1">
-                  <span className="font-display text-lg font-bold uppercase leading-tight text-content-primary">{title}</span>
+                  <span className="font-display text-base font-bold uppercase leading-tight text-content-primary">{title}</span>
                   <span className="font-sans text-[0.875rem] leading-snug text-content-secondary">{rule}</span>
                   <Kicker>→ {ref}</Kicker>
                 </span>
@@ -640,8 +770,8 @@ export default function ManifestoC() {
         </section>
       </Page>
 
-      {/* 08 — BACK COVER · midnight ------------------------------------------------------ */}
-      <Page n={8} level="midnight" head="Colophon" title="Enforcement & colophon" claims="§9" source="DESIGN.md §9">
+      {/* 10 — BACK COVER · midnight ----------------------------------------------------- */}
+      <Page n={10} level="midnight" head="Colophon" title="Enforcement & colophon" claims="§11" source="DESIGN.md §11">
         <section className="flex flex-col gap-3">
           <Kicker className="text-accent-primary">[ Enforcement in pipelines ]</Kicker>
           <h2 className="m-0 font-display text-[4.6rem] font-bold leading-[0.95] tracking-tight">

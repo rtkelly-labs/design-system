@@ -12,6 +12,7 @@ import {
   AnsiTarget,
   GraphicTarget,
   MotionSpecimen,
+  StepSpecimen,
   UsageTabs,
   VoiceSpecimen,
 } from './manifesto';
@@ -64,4 +65,5 @@ export const Ansi: Story = { tags: ['!dev'], render: () => <AnsiTarget /> };
 export const Voice: Story = { tags: ['!dev'], render: () => <VoiceSpecimen /> };
 export const Graphic: Story = { tags: ['!dev'], render: () => <GraphicTarget /> };
 export const Motion: Story = { tags: ['!dev'], render: () => <MotionSpecimen /> };
+export const Steps: Story = { tags: ['!dev'], render: () => <StepSpecimen /> };
 export const Usage: Story = { tags: ['!dev'], render: () => <UsageTabs /> };
