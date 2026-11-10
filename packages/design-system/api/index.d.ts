@@ -2684,6 +2684,8 @@ interface TraceSpanInput {
     attributes?: Record<string, TraceAttributeValue>;
 
     agentKind?: TraceAgentKind;
+
+    cost?: number;
 }
 
 interface TraceSpan {

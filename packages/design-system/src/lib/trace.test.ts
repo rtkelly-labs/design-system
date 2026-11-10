@@ -237,6 +237,19 @@ describe('agent runs', () => {
     expect(buildTrace(replayTrace(run(), 5000)).byId.get('r1')?.agentKind).toBe('tool');
   });
 
+  it('keeps a priced model\'s costs through a replay, without the pricing options', () => {
+    const priced = run();
+    const replayed = buildTrace(replayTrace(priced, 12_000), { now: 12_000 });
+    expect(replayed.byId.get('o1')!.usage.cost).toBeCloseTo(priced.byId.get('o1')!.usage.cost!, 10);
+    expect(replayed.byId.get('rep')!.total.cost).toBeCloseTo(priced.byId.get('r3')!.usage.cost!, 10);
+    expect(replayed.usage.cost).toBeGreaterThan(0);
+  });
+
+  it('takes an explicit cost on the input over an attribute and a price', () => {
+    const model = buildTrace([{ id: 'a', name: 'a', start: 0, end: 1, cost: 0.2, attributes: { 'gen_ai.operation.name': 'chat', 'billing.usd': 0.5 } }], { costAttribute: 'billing.usd', price: () => 0.9 });
+    expect(model.byId.get('a')!.usage.cost).toBe(0.2);
+  });
+
   it('formats tokens and cost', () => {
     expect([640, 3800, 9949, 13_900, 81_000, 1_240_000].map(formatTraceTokens)).toEqual(['640', '3.8k', '9.9k', '14k', '81k', '1.2M']);
     expect(formatTraceCost(0.35)).toBe('$0.35');

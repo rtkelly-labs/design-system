@@ -77,6 +77,8 @@ export interface TraceSpanInput {
   attributes?: Record<string, TraceAttributeValue>;
   /** What the span is in an agent run. Read from `gen_ai.operation.name` when absent. */
   agentKind?: TraceAgentKind;
+  /** The span's own cost, when the caller already knows it. Read before `costAttribute` and `price`. */
+  cost?: number;
 }
 
 /** A span after layout. Offsets are relative to the trace start. */
@@ -253,7 +255,7 @@ export function buildTrace(input: readonly TraceSpanInput[] | TraceModel, option
       partial: inFlight,
     };
     const named = options.costAttribute ? laid.attributes[options.costAttribute] : undefined;
-    const cost = typeof named === 'number' ? named : options.price?.(laid);
+    const cost = finite(span.cost) ? span.cost : typeof named === 'number' ? named : options.price?.(laid);
     if (finite(cost) && cost >= 0) laid.usage = { ...laid.usage, cost };
     byId.set(span.id, laid);
     spans.push(laid);
@@ -578,7 +580,9 @@ export function replayTrace(input: readonly TraceSpanInput[] | TraceModel, elaps
         // Usage, like status, is reported when a span finishes.
         attributes: done ? span.attributes : withoutUsage(span.attributes),
         start: span.offset,
-        ...(done ? { end: span.offset + span.duration, status: span.status } : {}),
+        // A priced model replays priced: the cost travels with the span, so the
+        // rebuild needs no `price` or `costAttribute` to recover it.
+        ...(done ? { end: span.offset + span.duration, status: span.status, cost: span.usage.cost } : {}),
       };
     });
 }
