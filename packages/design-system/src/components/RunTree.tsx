@@ -145,14 +145,25 @@ export const RunTree = forwardRef<HTMLDivElement, RunTreeProps>(function RunTree
   const styles = runTree();
 
   const [activeId, setActiveId] = useState<string | null>(null);
-  const focusId = rows.some((row) => row.id === activeId) ? activeId : ((rows.find((row) => row.id === selectedId) ?? rows[0])?.id ?? null);
+  const visibleAncestor = (id: string | null) => {
+    for (let node = id ? tree.byId.get(id) : undefined; node; node = node.parentId ? tree.byId.get(node.parentId) : undefined) {
+      if (rows.some((row) => row.id === node!.id)) return node.id;
+    }
+    return null;
+  };
+  // A row hidden by a fold, controlled or not, hands the tab stop to its nearest visible ancestor.
+  const focusId = visibleAncestor(activeId) ?? (rows.find((row) => row.id === selectedId) ?? rows[0])?.id ?? null;
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
   const pendingFocus = useRef(false);
+  const focusWithin = useRef(false);
   useEffect(() => {
-    if (!pendingFocus.current || !focusId) return;
+    if (!focusId) return;
+    // The focused row was unmounted (focus fell to the body) while focus was in the tree: keep it there.
+    const dropped = focusWithin.current && (!document.activeElement || document.activeElement === document.body);
+    if (!pendingFocus.current && !dropped) return;
     pendingFocus.current = false;
     rowRefs.current.get(focusId)?.focus();
-  }, [focusId]);
+  }, [focusId, rows]);
   const moveTo = (id: string | undefined) => {
     if (!id) return;
     setActiveId(id);
@@ -198,20 +209,32 @@ export const RunTree = forwardRef<HTMLDivElement, RunTreeProps>(function RunTree
   return (
     <div ref={ref} data-slot="run-tree" {...props} className={styles.root({ className })}>
       <div data-slot="run-tree-header" className={styles.header()}>
-        {summary.cost !== undefined ? <span className={styles.total()}>{formatTraceCost(summary.cost, currency)}</span> : null}
-        <span className={styles.count()}>
+        {summary.cost !== undefined ? <span data-slot="run-tree-total" className={styles.total()}>{formatTraceCost(summary.cost, currency)}</span> : null}
+        <span data-slot="run-tree-count" className={styles.count()}>
           {summary.agents} {summary.agents === 1 ? 'agent' : 'agents'}
         </span>
         {summary.running ? (
-          <span className={styles.running()}>
+          <span data-slot="run-tree-running" className={styles.running()}>
             <Spinner size="sm" accent="current" label="" aria-hidden="true" />
             {summary.running} running
           </span>
         ) : null}
-        {summary.waiting ? <span className={styles.waiting()}>! {summary.waiting} needs you</span> : null}
+        {summary.waiting ? <span data-slot="run-tree-waiting" className={styles.waiting()}>! {summary.waiting} needs you</span> : null}
       </div>
       {rows.length ? (
-        <div role="tree" aria-label={label} className={styles.tree()}>
+        <div
+          role="tree"
+          aria-label={label}
+          data-slot="run-tree-items"
+          className={styles.tree()}
+          onFocus={() => {
+            focusWithin.current = true;
+          }}
+          onBlur={(event) => {
+            // A null relatedTarget is focus falling to the body, as when the focused row unmounts.
+            if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget as Node)) focusWithin.current = false;
+          }}
+        >
           {rows.map((node) => {
             const hasChildren = node.children.length > 0;
             const open = hasChildren && !collapsed.has(node.id);
@@ -240,22 +263,22 @@ export const RunTree = forwardRef<HTMLDivElement, RunTreeProps>(function RunTree
                 }}
                 onKeyDown={(event) => onKeyDown(event, node)}
               >
-                <span className={styles.who()}>
+                <span data-slot="run-tree-who" className={styles.who()}>
                   {Array.from({ length: node.depth }, (_, index) => (
-                    <span key={index} aria-hidden="true" className={styles.guide()} />
+                    <span key={index} aria-hidden="true" data-slot="run-tree-guide" className={styles.guide()} />
                   ))}
                   <span aria-hidden="true" data-slot="run-tree-toggle" className={styles.toggle()}>
                     {hasChildren ? open ? <ChevronDown size={14} /> : <ChevronRight size={14} /> : null}
                   </span>
-                  <span className={styles.label()}>
+                  <span data-slot="run-tree-label" className={styles.label()}>
                     <span>
-                      <span data-slot="run-tree-name" className={styles.name()}>{node.name}</span> {node.model ? <span className={styles.model()}>{node.model}</span> : null}
+                      <span data-slot="run-tree-name" className={styles.name()}>{node.name}</span> {node.model ? <span data-slot="run-tree-model" className={styles.model()}>{node.model}</span> : null}
                     </span>
                     <span data-slot="run-tree-task" className={styles.task()}>
                       {node.task}
                       {node.toolCalls ? ` · ${node.toolCalls} tool ${node.toolCalls === 1 ? 'call' : 'calls'}` : ''}
-                      {!open && node.descendants ? <span className={styles.folded()}> · +{node.descendants} {node.descendants === 1 ? 'agent' : 'agents'}</span> : null}
-                      {node.errors ? <span className={styles.errors()}> · {node.errors} failed below</span> : null}
+                      {!open && node.descendants ? <span data-slot="run-tree-folded" className={styles.folded()}> · +{node.descendants} {node.descendants === 1 ? 'agent' : 'agents'}</span> : null}
+                      {node.errors ? <span data-slot="run-tree-errors" className={styles.errors()}> · {node.errors} failed below</span> : null}
                     </span>
                   </span>
                 </span>
@@ -265,8 +288,8 @@ export const RunTree = forwardRef<HTMLDivElement, RunTreeProps>(function RunTree
                   <span>{STATUS_WORD[node.status]}</span>
                 </span>
                 <span aria-hidden="true" data-slot="run-tree-cost" className={styles.money()}>
-                  {node.cost !== undefined ? <span className={styles.cost()}>{formatTraceCost(node.cost, currency)}</span> : null}
-                  <span className={styles.time()}>
+                  {node.cost !== undefined ? <span data-slot="run-tree-amount" className={styles.cost()}>{formatTraceCost(node.cost, currency)}</span> : null}
+                  <span data-slot="run-tree-time" className={styles.time()}>
                     {formatTraceDuration(node.duration)}
                     {node.tokens ? ` · ${formatTraceTokens(node.tokens)} tokens` : ''}
                   </span>
@@ -276,7 +299,7 @@ export const RunTree = forwardRef<HTMLDivElement, RunTreeProps>(function RunTree
           })}
         </div>
       ) : (
-        <p className={styles.empty()}>No agents in this run.</p>
+        <p data-slot="run-tree-empty" className={styles.empty()}>No agents in this run.</p>
       )}
     </div>
   );

@@ -77,9 +77,21 @@ describe('RunTree', () => {
     expect(container.querySelector('[role="treeitem"] [data-slot="spinner-quarter"]')?.className).not.toMatch(/animate-ds-step/);
   });
 
+  it('keeps focus in the tree when a controlled fold hides the focused row', () => {
+    const rootId = agentRunTrace.find((span) => !span.parentId)!.id;
+    const { rerender } = render(<RunTree spans={agentRunTrace} now={AGENT_RUN_NOW} collapsed={[]} />);
+    const child = screen.getAllByRole('treeitem')[2];
+    child.focus();
+    expect(document.activeElement).toBe(child);
+    rerender(<RunTree spans={agentRunTrace} now={AGENT_RUN_NOW} collapsed={[rootId]} />);
+    const [root] = screen.getAllByRole('treeitem');
+    expect(document.activeElement).toBe(root);
+    expect(root.tabIndex).toBe(0);
+  });
+
   it('carries a data-slot on every part', () => {
     const { container } = render(run);
-    for (const slot of ['run-tree-header', 'run-tree-node', 'run-tree-toggle', 'run-tree-name', 'run-tree-task', 'run-tree-state', 'run-tree-cost']) {
+    for (const slot of ['run-tree-header', 'run-tree-node', 'run-tree-toggle', 'run-tree-name', 'run-tree-task', 'run-tree-state', 'run-tree-cost', 'run-tree-total', 'run-tree-count', 'run-tree-waiting', 'run-tree-items', 'run-tree-who', 'run-tree-guide', 'run-tree-label', 'run-tree-model', 'run-tree-amount', 'run-tree-time']) {
       expect(container.querySelector(`[data-slot="${slot}"]`), slot).not.toBeNull();
     }
   });
