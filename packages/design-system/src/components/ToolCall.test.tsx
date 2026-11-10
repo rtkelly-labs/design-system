@@ -20,7 +20,9 @@ describe('ToolCall', () => {
   it('is one line naming the tool, its state and its time, and says it once to a screen reader', () => {
     render(<ToolCall name="search_web" summary="CRM pricing" status="ok" duration={1500} />);
     const trigger = screen.getByRole('button');
-    expect(trigger.getAttribute('aria-label')).toBe('search_web, done, in 1.5s. Show details');
+    // Named by its own text, so the summary is heard too, not only the tool and the state.
+    expect(trigger.hasAttribute('aria-label')).toBe(false);
+    expect(screen.getByRole('button', { name: /search_web.*CRM pricing.*done.*in.*1\.5s/ })).toBe(trigger);
     expect(trigger.textContent).toContain('search_web');
     expect(trigger.textContent).toContain('CRM pricing');
     expect(trigger.textContent).toContain('1.5s');
@@ -34,7 +36,10 @@ describe('ToolCall', () => {
     expect(screen.getByRole('button').textContent).toContain('600ms');
     rerender(<ToolCall name="t" status="running" startedAt={1000} now={3400} />);
     expect(screen.getByRole('button').textContent).toContain('2.4s');
-    expect(screen.getByRole('button').getAttribute('aria-label')).toBe('t, running. Show details');
+    // A running call's time ticks, so it is hidden from the name: it would be read out every frame.
+    const name = screen.getByRole('button', { name: /running/ });
+    expect(name.textContent).toContain('2.4s');
+    expect(screen.queryByRole('button', { name: /2\.4s/ })).toBeNull();
   });
 
   it('opens to the arguments and the result, each with a copy action', () => {
@@ -66,6 +71,25 @@ describe('ToolCall', () => {
     fireEvent.click(screen.getByRole('button', { name: 'retry' }));
     expect(onRetry).toHaveBeenCalledOnce();
     expect(screen.getByRole('region', { name: 'Error' }).textContent).toContain('pyarrow not found');
+  });
+
+  it('names a failed call by its reason, so calls to the same tool can be told apart', () => {
+    render(
+      <>
+        <ToolCall name="conformance" summary="parquet-cpp" status="error" error="pyarrow not found" />
+        <ToolCall name="conformance" summary="retry inside .venv" status="ok" duration={4300} />
+      </>,
+    );
+    expect(screen.getByRole('button', { name: /conformance.*pyarrow not found.*failed/ })).toBeDefined();
+    expect(screen.getByRole('button', { name: /conformance.*retry inside \.venv.*done/ })).toBeDefined();
+  });
+
+  it('shows an error given as an element in the panel as itself, and copies its text', () => {
+    render(<ToolCall name="t" status="error" error={<span>Permission <b>denied</b></span>} defaultOpen />);
+    const well = screen.getByRole('region', { name: 'Error' });
+    expect(well.textContent).toContain('Permission denied');
+    expect(well.textContent).not.toContain('[object Object]');
+    expect(well.querySelector('b')?.textContent).toBe('denied');
   });
 
   it('is controllable, and forwards its ref and props', () => {

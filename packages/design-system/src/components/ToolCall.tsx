@@ -2,7 +2,7 @@
 
 import { Collapsible } from '@base-ui/react/collapsible';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { Children, cloneElement, forwardRef, isValidElement, useId, useMemo, useState, type HTMLAttributes, type ReactElement, type ReactNode } from 'react';
+import { Children, cloneElement, forwardRef, isValidElement, useId, useMemo, useRef, useState, type HTMLAttributes, type ReactElement, type ReactNode } from 'react';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { recipe } from '../lib/recipe';
 import { formatTraceDuration, type TraceSpan } from '../lib/trace';
@@ -71,9 +71,15 @@ export function formatToolPayload(value: unknown): string {
   }
 }
 
-/** A payload well: title, copy, and the text capped at `maxLines` until asked for all of it. */
+/**
+ * A payload well: title, copy, and the text capped at `maxLines` until asked
+ * for all of it. A React element (an `error` given as markup) is shown as
+ * itself, not stringified, and copy takes its text.
+ */
 function Payload({ title, value, maxLines, tone }: { title: string; value: unknown; maxLines: number; tone?: 'danger' }) {
-  const text = useMemo(() => formatToolPayload(value), [value]);
+  const element = isValidElement(value) ? value : null;
+  const rendered = useRef<HTMLPreElement>(null);
+  const text = useMemo(() => (element ? '' : formatToolPayload(value)), [element, value]);
   const lines = text.split('\n');
   const [all, setAll] = useState(false);
   const { copied, copy } = useCopyToClipboard();
@@ -83,11 +89,13 @@ function Payload({ title, value, maxLines, tone }: { title: string; value: unkno
     <section aria-label={title} data-part="payload" className={styles.well()}>
       <header className={styles.wellHead()}>
         <span>{title}</span>
-        <InlineAction tone="quiet" onClick={() => void copy(text)}>
+        <InlineAction tone="quiet" onClick={() => void copy(element ? (rendered.current?.textContent ?? '') : text)}>
           {copied ? 'copied' : 'copy'}
         </InlineAction>
       </header>
-      <pre className={styles.pre({ class: tone === 'danger' ? 'text-intent-danger' : undefined })}>{capped ? lines.slice(0, maxLines).join('\n') : text}</pre>
+      <pre ref={rendered} className={styles.pre({ class: tone === 'danger' ? 'text-intent-danger' : undefined })}>
+        {element ?? (capped ? lines.slice(0, maxLines).join('\n') : text)}
+      </pre>
       {/* Capped with words, never faded out (DESIGN.md §9). */}
       {capped ? (
         <span className={styles.more()}>
@@ -169,7 +177,6 @@ export const ToolCall = forwardRef<HTMLDivElement, ToolCallProps>(function ToolC
   const styles = toolCall({ status, open: isOpen });
   const elapsed = toolCallDuration({ status, startedAt, endedAt, duration, now });
   const time = elapsed === undefined ? '' : formatTraceDuration(elapsed);
-  const spoken = [name, STATUS_WORD[status], status !== 'running' && time ? `in ${time}` : ''].filter(Boolean).join(', ');
 
   return (
     <Collapsible.Root
@@ -184,25 +191,39 @@ export const ToolCall = forwardRef<HTMLDivElement, ToolCallProps>(function ToolC
       {...props}
       className={styles.root({ className })}
     >
-      <Collapsible.Trigger aria-label={`${spoken}. ${isOpen ? 'Hide' : 'Show'} details`} className={styles.trigger()}>
+      {/*
+       * Named by its own text: tool, summary (or why it failed), state word and,
+       * once finished, its time. `aria-expanded` says open or closed. A running
+       * call's time ticks, so it is hidden: it would be read out every frame.
+       */}
+      <Collapsible.Trigger className={styles.trigger()}>
         <span aria-hidden="true" className={styles.chevron()}>
           {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         </span>
         <span className={styles.name()}>{name}</span>
         <span className={styles.summary()}>{status === 'error' && error && !isOpen ? error : summary}</span>
-        <span aria-hidden="true" className={styles.state()}>
+        <span className={styles.state()}>
           {/* Its own element, so the flex gap separates mark and word: two bare text nodes merge into one item. */}
-          {status === 'running' ? <Spinner size="sm" accent="current" still={still} label="" /> : <span>{status === 'ok' ? '✓' : status === 'error' ? '✕' : '–'}</span>}
+          {status === 'running' ? (
+            <span aria-hidden="true" className="inline-flex">
+              <Spinner size="sm" accent="current" still={still} label="" />
+            </span>
+          ) : (
+            <span aria-hidden="true">{status === 'ok' ? '✓' : status === 'error' ? '✕' : '–'}</span>
+          )}
           <span>{STATUS_WORD[status]}</span>
         </span>
-        <span aria-hidden="true" className={styles.time()}>{time}</span>
+        <span aria-hidden={status === 'running' || !time ? true : undefined} className={styles.time()}>
+          {time && status !== 'running' ? <span className="sr-only">in </span> : null}
+          {time}
+        </span>
       </Collapsible.Trigger>
       <Collapsible.Panel data-part="panel" className={styles.panel()}>
         {args !== undefined || result !== undefined || (status === 'error' && error) ? (
           <div className={styles.wells()}>
             {args !== undefined ? <Payload title="Arguments" value={args} maxLines={maxLines} /> : null}
             {status === 'error' && error ? (
-              <Payload title="Error" value={typeof error === 'string' ? error : String(error)} maxLines={maxLines} tone="danger" />
+              <Payload title="Error" value={error} maxLines={maxLines} tone="danger" />
             ) : result !== undefined ? (
               <Payload title="Result" value={result} maxLines={maxLines} />
             ) : null}
