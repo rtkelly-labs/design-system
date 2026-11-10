@@ -69,6 +69,7 @@ import * as BarChartStories from '../../design-system/src/stories/BarChart.stori
 import * as TraceWaterfallStories from '../../design-system/src/stories/TraceWaterfall.stories';
 import * as TraceViewerStories from '../../design-system/src/stories/TraceViewer.stories';
 import * as ToolCallStories from '../../design-system/src/stories/ToolCall.stories';
+import * as RunTreeStories from '../../design-system/src/stories/RunTree.stories';
 import * as TimeRangePickerStories from '../../design-system/src/stories/TimeRangePicker.stories';
 import * as SeverityBadgeStories from '../../design-system/src/stories/SeverityBadge.stories';
 import * as TimeSeriesChartStories from '../../design-system/src/stories/TimeSeriesChart.stories';
@@ -405,6 +406,7 @@ export const PLATES: readonly PlateSpec[] = [
   { component: 'TraceWaterfall', group: 'Data display', height: 120, layout: 'stack', states: fromStories(TraceWaterfallStories, ['Checkout']) },
   { component: 'TraceViewer', rungs: ['sketch'], group: 'Data display', height: 142, layout: 'stack', states: fromStories(TraceViewerStories, ['Checkout']) },
   { component: 'ToolCall', group: 'Data display', height: 108, layout: 'stack', states: fromStories(ToolCallStories, ['Group']) },
+  { component: 'RunTree', group: 'Data display', height: 123, layout: 'stack', states: fromStories(RunTreeStories, ['Waiting']) },
   { component: 'LogViewer', clips: 'a fixed-height log window: the tail scrolls inside it by design', rungs: ['sketch'], group: 'Data display', height: 84, layout: 'stack', states: fromStories(LogViewerStories, ['Tail']) },
   { component: 'FilterBar', group: 'Data display', height: 42, layout: 'stack', states: fromStories(FilterBarStories, ['Default']) },
   { component: 'ServiceMap', rungs: ['sketch'], group: 'Data display', height: 65, layout: 'stack', states: fromStories(ServiceMapStories, ['Checkout']) },
