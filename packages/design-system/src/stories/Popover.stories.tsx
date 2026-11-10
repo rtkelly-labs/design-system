@@ -4,6 +4,8 @@ import { Popover } from '../components/Popover';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/Button';
 import { cn } from '../lib/recipe';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expectOnTop, expectClosed, pressAt } from './play';
 
 const meta: Meta<typeof Popover> = {
   title: 'Components/Overlays/Popover',
@@ -107,4 +109,23 @@ export const Interactive: Story = {
       </Popover>
     </Stage>
   ),
+  // `pnpm test:interactions`: opens on screen beside its trigger with focus
+  // inside, and a press on the page — not on the popup — closes it and hands
+  // focus back. Ends closed, as the story starts.
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    const trigger = within(canvasElement).getByRole('button', { name: /what is a level/i });
+
+    await userEvent.click(trigger);
+    const popup = await page.findByRole('dialog', { name: /about levels/i });
+    await waitFor(() => expect(popup.contains(document.activeElement)).toBe(true));
+    await expectOnTop(popup);
+    // Anchored to the trigger: it opens below it, not somewhere else on the page.
+    await expect(popup.getBoundingClientRect().top).toBeGreaterThanOrEqual(trigger.getBoundingClientRect().bottom);
+
+    const corner = window.innerWidth - 4;
+    await pressAt(corner, window.innerHeight - 4, popup);
+    await expectClosed(popup);
+    await waitFor(() => expect(trigger).toHaveFocus());
+  },
 };
