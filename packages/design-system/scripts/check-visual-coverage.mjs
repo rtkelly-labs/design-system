@@ -82,7 +82,7 @@ const EXCLUDED = {
     'Low-level compound Table primitives; asserted in walkthrough suite.',
 
   /*
-   * The manifesto's eleven specimens.
+   * The manifesto's specimens.
    *
    * They are stories only so the `Level` toolbar reaches the landing page —
    * decorators wrap stories, and a docs page carrying none of them cannot be
@@ -118,6 +118,8 @@ const EXCLUDED = {
     'An SVG palette card in `viewBox` units. Its colours are gated by `check:contrast --medium=graphic` and its layout is arithmetic over `MEDIA_DEFINITIONS.graphic`; a raster diff of vector output would churn on font metrics alone.',
   'manifesto--motion':
     'A transition. Its resting state is the only deterministic frame, and what the specimen exists to show — the durations — is exactly what a still cannot capture.',
+  'manifesto--steps':
+    'Four still frames of the quadrant per Level, drawn as inline SVG from `MEDIA_DEFINITIONS.web`. The mark itself is asserted where it ships, in the `Spinner` baselines, on both Levels.',
   'manifesto--usage':
     'Code samples in `CodeTabs` and `CodeBlock`, both asserted by their own baselines (`codetabs-merged`, `codeblock-with-title-and-language`).',
 };

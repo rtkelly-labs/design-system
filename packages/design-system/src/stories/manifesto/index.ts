@@ -15,6 +15,7 @@ export {
   AnsiTarget,
   GraphicTarget,
   MotionSpecimen,
+  StepSpecimen,
   UsageTabs,
   VoiceSpecimen,
 } from './specimens';

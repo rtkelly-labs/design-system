@@ -54,7 +54,7 @@ const EXCLUDED = {
 /** Specimen components that live inside the manifesto page and take no props. */
 const MANIFESTO_SPECIMENS = [
   'AnsiTarget', 'CodeBlockAttachment', 'DocsLink', 'FormSpecimen', 'HueLadder',
-  'LevelDiptych', 'MediumTable', 'RoleLookup', 'SystemFacts', 'VoiceSpecimen',
+  'LevelDiptych', 'MediumTable', 'RoleLookup', 'StepSpecimen', 'SystemFacts', 'VoiceSpecimen',
 ];
 for (const name of MANIFESTO_SPECIMENS) {
   EXCLUDED[name] ??= 'A manifesto specimen — rendered inside one page, takes no props.';

@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import { ThemeProvider } from '../../components/ThemeProvider';
 import { Button } from '../../components/Button';
@@ -803,6 +803,88 @@ export function MotionSpecimen() {
         {Math.round((video.considered / FRAME_RATE) * 1000)}ms. Close to the web&apos;s numbers,
         and deliberately not derived from them.
       </NoteBlock>
+    </div>
+  );
+}
+
+/**
+ * The quadrant, as four still frames per Level: what `DESIGN.md` §8 calls one
+ * clock and two drawings.
+ *
+ * Drawn as stills on purpose. The claim is about the steps, and a looping
+ * specimen is one the screenshot walkthrough catches mid-step. The step length
+ * is read from `MEDIA_DEFINITIONS.web` at render time, so the labels cannot
+ * drift from the Medium.
+ *
+ * Midnight lights a cell; sketch hatches the quarter in pen over the square's
+ * construction line, the variation ADR 0007 permits. The drawing is passed per
+ * Level here because the specimen sets both Levels side by side; a component
+ * takes it from the `sketch:` variant instead. Box, strokes and steps are
+ * identical on both.
+ */
+const QUARTERS = [
+  [1, 1],
+  [8, 1],
+  [8, 8],
+  [1, 8],
+] as const;
+
+function QuadrantFrame({ step, drawing }: { step: number; drawing: 'cell' | 'hatch' }) {
+  const hatch = useId();
+  const [x, y] = QUARTERS[step];
+  return (
+    <svg viewBox="0 0 16 16" width="40" height="40" aria-hidden="true" className="text-accent-primary">
+      <defs>
+        <pattern id={hatch} width="3" height="3" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="3" stroke="currentColor" strokeWidth="1.1" />
+        </pattern>
+      </defs>
+      <rect x="1" y="1" width="14" height="14" className="fill-none stroke-edge-subtle" strokeWidth="2" />
+      {drawing === 'cell' ? (
+        <rect x={x} y={y} width="7" height="7" className="fill-current" />
+      ) : (
+        <rect x={x + 0.5} y={y + 0.5} width="6" height="6" fill={`url(#${hatch})`} stroke="currentColor" strokeWidth="1" />
+      )}
+    </svg>
+  );
+}
+
+export function StepSpecimen() {
+  const step = MEDIA_DEFINITIONS.web.motion.considered;
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      {THEME_LEVELS.map((level) => (
+        <ThemeProvider
+          key={level}
+          scoped
+          defaultLevel={level}
+          persist={false}
+          followSystem={false}
+          className="flex flex-col gap-4 border-2 border-edge-strong bg-surface-base p-5 text-content-primary"
+        >
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-title font-bold" style={DISPLAY}>
+              {LEVELS[level].label}
+            </span>
+            <span className="text-caption text-content-muted">
+              {level === 'sketch' ? 'pen hatching over a pencil square' : 'a lit cell, like a block cursor'}
+            </span>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {QUARTERS.map((_, i) => (
+              <div key={i} className="flex flex-col items-start gap-2">
+                <QuadrantFrame step={i} drawing={level === 'sketch' ? 'hatch' : 'cell'} />
+                <span className="text-caption text-content-secondary">
+                  step {i + 1} · {i * step}ms
+                </span>
+              </div>
+            ))}
+          </div>
+          <span className="text-caption text-content-muted">
+            One loop is four steps of considered: {4 * step}ms, the same on every Level.
+          </span>
+        </ThemeProvider>
+      ))}
     </div>
   );
 }
