@@ -20,7 +20,7 @@
 export const MANIFEST = {
   '@fontsource-variable/inter': {
     kind: 'runtime',
-    why: 'Self-hosted Inter (variable). `styles.css` imports it, so it resolves from the consumer\u2019s install \u2014 see the banner in that file for why these are not fetched from Google.',
+    why: 'Self-hosted Inter (variable). `styles.css` imports it, so it resolves from the consumer’s install — see the banner in that file for why these are not fetched from Google.',
   },
   '@fontsource-variable/space-grotesk': {
     kind: 'runtime',
@@ -44,7 +44,7 @@ export const MANIFEST = {
   },
   '@tanstack/react-hotkeys': {
     kind: 'runtime',
-    why: 'Keyboard bindings for SlideDeck and the DocsLayout drawer (#205). Same exemption as react-table and react-virtual: a binding engine with no DOM of its own, no focus model and no ARIA — it listens, matches and fires; the components keep every keystroke\u2019s consequence. The binding tables it feeds are also the single source the docs cheatsheet renders from.',
+    why: 'Keyboard bindings for SlideDeck and the DocsLayout drawer (#205). Same exemption as react-table and react-virtual: a binding engine with no DOM of its own, no focus model and no ARIA — it listens, matches and fires; the components keep every keystroke’s consequence. The binding tables it feeds are also the single source the docs cheatsheet renders from.',
   },
   '@tanstack/react-table': {
     kind: 'runtime',
@@ -52,7 +52,7 @@ export const MANIFEST = {
   },
   '@tanstack/react-virtual': {
     kind: 'runtime',
-    why: 'Row windowing for DataTable\u2019s `virtualize` prop. Same exemption as react-table and for the same reason: it is a measurement and range-computation engine with no DOM of its own, no focus model and no ARIA. DataTable decides which `<tr>`s mount and how they are spaced; the virtualizer never renders or styles anything, so it does not become a second primitive library under rule 4. Adopted under issue #204.',
+    why: 'Row windowing for DataTable’s `virtualize` prop. Same exemption as react-table and for the same reason: it is a measurement and range-computation engine with no DOM of its own, no focus model and no ARIA. DataTable decides which `<tr>`s mount and how they are spaced; the virtualizer never renders or styles anything, so it does not become a second primitive library under rule 4. Adopted under issue #204.',
   },
   '@base-ui/react': {
     kind: 'runtime',
@@ -114,6 +114,10 @@ export const MANIFEST = {
 
   '@playwright/test': { kind: 'dev', why: 'Visual regression suite and the screenshot walkthrough.' },
   '@storybook/addon-docs': { kind: 'dev', why: 'MDX docs pages in Storybook.' },
+  '@storybook/addon-vitest': {
+    kind: 'dev',
+    why: 'Runs the stories’ `play` functions as Vitest tests for `pnpm test:interactions` (`vitest.interactions.config.mts`). Not registered in `.storybook/main.ts`: the CLI run needs only its Vite plugin, and leaving the Storybook build untouched keeps every visual baseline as it was.',
+  },
   '@storybook/react': { kind: 'dev', why: 'Story types (Meta, StoryObj).' },
   '@storybook/react-vite': { kind: 'dev', why: 'Storybook framework adapter for the Vite builder.' },
   '@tanstack/intent': {
@@ -134,15 +138,15 @@ export const MANIFEST = {
   },
   'eslint-plugin-react-hooks': {
     kind: 'dev',
-    why: 'The Rules of Hooks, reported as warnings and held by `check:lint-budget` rather than as errors \u2014 4 violations exist today and PR #58 proved that landing this set as errors alongside its own fixes does not merge. Registered as a plugin object because the recommended set is still eslintrc-shaped and flat config rejects its `plugins` array.',
+    why: 'The Rules of Hooks, reported as warnings and held by `check:lint-budget` rather than as errors — 4 violations exist today and PR #58 proved that landing this set as errors alongside its own fixes does not merge. Registered as a plugin object because the recommended set is still eslintrc-shaped and flat config rejects its `plugins` array.',
   },
   'eslint-plugin-jsx-a11y': {
     kind: 'dev',
-    why: 'Static accessibility rules \u2014 interactive handlers on non-interactive elements, ambiguous anchor text. Complements #52\u2019s runtime axe gate rather than replacing it: this reads source, that renders the component.',
+    why: 'Static accessibility rules — interactive handlers on non-interactive elements, ambiguous anchor text. Complements #52’s runtime axe gate rather than replacing it: this reads source, that renders the component.',
   },
   '@axe-core/playwright': {
     kind: 'dev',
-    why: 'Runs axe against a rendered story in `tests/a11y.spec.ts` \u2014 the runtime half of the accessibility surface, where `eslint-plugin-jsx-a11y` is the static half. Nine gates could measure colour to two decimal places and none could observe an accessibility regression until this landed.',
+    why: 'Runs axe against a rendered story in `tests/a11y.spec.ts` — the runtime half of the accessibility surface, where `eslint-plugin-jsx-a11y` is the static half. Nine gates could measure colour to two decimal places and none could observe an accessibility regression until this landed.',
   },
   '@types/node': {
     kind: 'dev',
@@ -161,6 +165,14 @@ export const MANIFEST = {
     why: 'Unit suite over lib, hooks and the generated theme. Complements the Playwright suites, which assert rendering rather than logic.',
   },
   '@vitest/coverage-v8': { kind: 'dev', why: 'Coverage reporting for `pnpm test:coverage`.' },
+  '@vitest/browser-playwright': {
+    kind: 'dev',
+    why: 'Vitest browser mode’s Playwright provider, for `pnpm test:interactions`. Drives the Chromium the pinned Playwright image carries; installs none.',
+  },
+  playwright: {
+    kind: 'dev',
+    why: 'Peer of `@vitest/browser-playwright`, declared so it resolves to the same version as `@playwright/test` — and so to the Chromium the pinned image carries — rather than to whatever a peer auto-install picks.',
+  },
   '@stryker-mutator/core': {
     kind: 'dev',
     why: 'Mutation testing for `pnpm test:mutation`: which changes to a module no test notices. An instrument read for its survivor list, not a score to gate on; it runs in `experiments.yml` on request, never as a PR check.',

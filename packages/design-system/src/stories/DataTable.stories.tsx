@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-table';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
+import { expect, userEvent, within } from 'storybook/test';
 import { Badge } from '../components/Badge';
 import { DataTable, type Column } from '../components/DataTable';
 import { ThemeProvider } from '../components/ThemeProvider';
@@ -212,6 +213,40 @@ export const HeadlessTanStackTable: Story = {
     }
 
     return <ControlledExample />;
+  },
+  // `pnpm test:interactions`: a header's sort button, pressed, reorders the
+  // rows and moves `aria-sort`, a second press reverses them; Shift adds a
+  // second key under the first, and a plain press drops it again. Read as a
+  // user reads it: the first column of the body, top to bottom.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const sort = (name: string) => canvas.getByRole('button', { name: new RegExp(name, 'i') });
+    const header = (name: string) => canvas.getByRole('columnheader', { name: new RegExp(name, 'i') });
+    const branches = () =>
+      canvas.getAllByRole('row').slice(1).map((row) => within(row).getAllByRole('cell')[0]!.textContent);
+
+    await expect(branches()).toEqual(['main', 'preview', 'fix/theme', 'feat/headless-primitives']);
+
+    await userEvent.click(sort('commits'));
+    const firstOrder = branches();
+    await expect(firstOrder).not.toEqual(['main', 'preview', 'fix/theme', 'feat/headless-primitives']);
+    await expect(header('commits')).toHaveAttribute('aria-sort');
+    await userEvent.click(sort('commits'));
+    await expect(branches()).toEqual([...firstOrder].reverse());
+
+    // One `setup()` session, so the held Shift is still down for the click.
+    const user = userEvent.setup();
+    await user.keyboard('{Shift>}');
+    await user.click(sort('status'));
+    await user.keyboard('{/Shift}');
+    // The primary key keeps `aria-sort`; the secondary carries none (ARIA 1.2).
+    await expect(header('commits')).toHaveAttribute('aria-sort');
+    await expect(header('status')).not.toHaveAttribute('aria-sort');
+
+    // A plain press on the primary key collapses the sort back to that key.
+    await userEvent.click(sort('commits'));
+    await expect(header('status')).not.toHaveAttribute('aria-sort');
+    await expect([firstOrder, [...firstOrder].reverse()]).toContainEqual(branches());
   },
 };
 

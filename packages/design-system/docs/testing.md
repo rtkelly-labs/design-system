@@ -98,6 +98,43 @@ such file existed. Note it runs before `pnpm build`, so `dist/` is asserted to b
 *declared*, not to be present.
 
 
+## 🖱️ Interaction tests
+
+`pnpm test:interactions` runs the stories' `play` functions as tests, in
+Chromium, through `@storybook/addon-vitest` and Vitest browser mode
+(`vitest.interactions.config.mts`). It is a separate config, not a project in
+`vitest.config.mts`, so `pnpm test` stays the jsdom suite and stays fast. CI
+runs it in the `visual` job, on shard 1, in the pinned image.
+
+**It is for what jsdom cannot see.** jsdom has no layout: every box is zero
+and `elementFromPoint` returns nothing. A play asks the questions that need
+one — is the popup on screen and painted on top (`expectOnTop`), does a press
+at a point outside it land on the backdrop (`pressAt`), did the exit animation
+run so the popup is gone (`expectClosed`), does focus move as a real browser
+moves it. The helpers are in `src/stories/play.ts`. Roles, keys and callbacks
+are already pinned by the co-located `*.test.tsx` files; do not restate them
+in a play.
+
+**A `play` function runs wherever its story renders** — in the Storybook UI,
+in the walkthrough, and in every `iframe.html?id=` load the visual, a11y and
+edges suites make. A play on a story those suites name would screenshot,
+scan or measure the state it left behind. So plays go only on stories they do
+not name, and `pnpm check:visual-coverage` fails when one does (Storybook tags
+every story with a play `play-fn` in `index.json`). A play ends in the state
+its story documents, so the walkthrough's capture still shows that.
+
+- **Only story files containing a `play` are loaded.** The `play-fn` tag
+  filter acts after a file is imported, and importing all ~130 story files to
+  run eight tests took 32s; the config excludes the rest, read from source.
+- **One file at a time** (`fileParallelism: false`): browser mode runs files
+  in iframes of one page, only one of which can hold focus.
+- **Past either end of a focus trap, Tab lands on a Base UI focus guard**,
+  which hands focus on in a later task. Assert the wrap in `waitFor`.
+- **A held modifier needs one `userEvent.setup()` session**: the direct
+  `userEvent.keyboard('{Shift>}')` does not carry into the next call.
+- Locally, `PW_CHROMIUM_PATH` points the provider at a Chromium Playwright does
+  not find by itself. CI never sets it.
+
 ## 🎲 Model-based tests
 
 `*.model.test.tsx` files check an interactive component against a small model

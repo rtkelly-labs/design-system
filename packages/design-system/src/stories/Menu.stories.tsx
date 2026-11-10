@@ -5,6 +5,8 @@ import { Menu, MenuItem, MenuRadioGroup, MenuRadioItem, MenuSeparator } from '..
 import { Modal } from '../components/Modal';
 import { Button } from '../components/Button';
 import { cn } from '../lib/recipe';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expectOnTop, expectClosed } from './play';
 
 const meta: Meta<typeof Menu> = {
   title: 'Components/Overlays/Menu',
@@ -121,4 +123,27 @@ export const InsideAModal: Story = {
       </Menu>
     </Modal>
   ),
+  // `pnpm test:interactions`: the menu paints above the dialog it opened in,
+  // Escape closes the menu and not the dialog, and the keyboard opens it
+  // again on its first item — ending open, as the story starts.
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    const dialog = await page.findByRole('dialog', { name: /deployments/i });
+    const menu = await page.findByRole('menu');
+    await expectOnTop(menu);
+
+    const trigger = within(dialog).getByRole('button', { name: /build actions/i });
+    await waitFor(() => expect(menu.contains(document.activeElement)).toBe(true));
+    await userEvent.keyboard('{Escape}');
+    await expectClosed(menu);
+    await expect(dialog).toBeInTheDocument();
+    await waitFor(() => expect(trigger).toHaveFocus());
+
+    await userEvent.keyboard('{ArrowDown}');
+    const reopened = await page.findByRole('menu');
+    await waitFor(() =>
+      expect(within(reopened).getByRole('menuitem', { name: 'Re-run failed gates' })).toHaveFocus(),
+    );
+    await expectOnTop(reopened);
+  },
 };
