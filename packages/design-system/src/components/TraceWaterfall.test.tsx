@@ -3,6 +3,7 @@ import { createRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type { TraceSpanInput } from '../lib/trace';
 import { TraceWaterfall } from './TraceWaterfall';
+import { AGENT_RUN_NOW, agentRunTrace, checkoutTrace, samplePrice } from '../stories/traceFixtures';
 
 const spans: TraceSpanInput[] = [
   { id: 'a', name: 'GET /checkout', service: 'web', start: 0, end: 400 },
@@ -119,5 +120,44 @@ describe('TraceWaterfall', () => {
   it('renders an empty state', () => {
     render(<TraceWaterfall spans={[]} />);
     expect(screen.getByText('No spans to display.')).toBeTruthy();
+  });
+});
+
+describe('TraceWaterfall on an agent run', () => {
+  const row = (container: HTMLElement, id: string) => container.querySelector(`[data-span-id="${id}"]`)!;
+
+  it('names each span\'s kind, model, tokens and cost for a screen reader', () => {
+    const { container } = render(<TraceWaterfall spans={agentRunTrace} now={AGENT_RUN_NOW} price={samplePrice} />);
+    const label = row(container, 'o2').getAttribute('aria-label')!;
+    expect(label).toContain('model call');
+    expect(label).toContain('opus-5.5');
+    expect(label).toContain('42k tokens');
+    expect(label).toContain('costs $0.25');
+    expect(label).toContain('costliest');
+    expect(row(container, 'b1').getAttribute('aria-label')).toContain('slowest');
+  });
+
+  it('shows duration · cost, a kind glyph on every agent span, and marks in words', () => {
+    const { container } = render(<TraceWaterfall spans={agentRunTrace} now={AGENT_RUN_NOW} price={samplePrice} />);
+    expect(row(container, 'o2').textContent).toContain('1.3s · $0.25');
+    expect(container.querySelectorAll('[data-part="agent-kind"]')).toHaveLength(agentRunTrace.length);
+    expect(row(container, 'b1').querySelector('[data-part="mark"]')?.textContent).toBe('slowest');
+    expect(row(container, 'o2').querySelector('[data-part="mark"]')?.textContent).toBe('costliest');
+  });
+
+  it('outlines a waiting decision and says it needs you, and hatches what is still in flight', () => {
+    const { container } = render(<TraceWaterfall spans={agentRunTrace} now={AGENT_RUN_NOW} price={samplePrice} />);
+    expect(row(container, 'o3').querySelector('[data-part="waiting"]')).not.toBeNull();
+    expect(row(container, 'o3').textContent).toContain('needs you');
+    expect(row(container, 'o3').getAttribute('aria-label')).toContain('waiting on you');
+    const hatched = row(container, 'orch').querySelector('[data-part="in-flight"]');
+    expect(hatched?.getAttribute('fill')).toMatch(/^url\(#.+\)$/);
+    expect(container.querySelector(`pattern[id="${hatched!.getAttribute('fill')!.slice(5, -1)}"]`)).not.toBeNull();
+  });
+
+  it('draws a trace that is not an agent run exactly as before', () => {
+    const { container } = render(<TraceWaterfall spans={checkoutTrace} />);
+    expect(container.querySelector('[data-part="agent-kind"], [data-part="mark"], [data-part="in-flight"], [data-part="waiting"]')).toBeNull();
+    expect(container.textContent).not.toContain('·');
   });
 });

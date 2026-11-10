@@ -2650,6 +2650,17 @@ type TraceAttributeValue = string | number | boolean;
 
 type TraceSpanStatus = 'ok' | 'error' | 'unset';
 
+type TraceAgentKind = 'agent' | 'llm' | 'tool' | 'decision';
+
+interface TraceUsage {
+    inputTokens: number;
+    outputTokens: number;
+
+    cost?: number;
+
+    partial: boolean;
+}
+
 interface TraceSpanInput {
 
     id: string;
@@ -2671,6 +2682,10 @@ interface TraceSpanInput {
     kind?: string;
 
     attributes?: Record<string, TraceAttributeValue>;
+
+    agentKind?: TraceAgentKind;
+
+    cost?: number;
 }
 
 interface TraceSpan {
@@ -2695,6 +2710,18 @@ interface TraceSpan {
     inFlight: boolean;
 
     critical: boolean;
+
+    agentKind?: TraceAgentKind;
+
+    model?: string;
+
+    usage: TraceUsage;
+
+    total: TraceUsage;
+
+    slowest: boolean;
+
+    costliest: boolean;
 }
 
 interface TraceModel {
@@ -2711,11 +2738,25 @@ interface TraceModel {
     inFlightCount: number;
 
     criticalPath: string[];
+
+    agentic: boolean;
+
+    usage: TraceUsage & {
+        modelCalls: number;
+        toolCalls: number;
+        agents: number;
+    };
 }
 interface BuildTraceOptions {
 
     now?: number;
+
+    costAttribute?: string;
+
+    price?: (span: TraceSpan) => number | undefined;
 }
+
+declare function traceAgentKind(attributes: Readonly<Record<string, TraceAttributeValue>>): TraceAgentKind | undefined;
 
 declare function buildTrace(input: readonly TraceSpanInput[] | TraceModel, options?: BuildTraceOptions): TraceModel;
 
@@ -2725,13 +2766,17 @@ declare function matchTraceSpan(span: TraceSpan, query: string): boolean;
 
 declare function formatTraceDuration(ms: number): string;
 
+declare function formatTraceTokens(tokens: number): string;
+
+declare function formatTraceCost(cost: number, currency?: string): string;
+
 declare function parseOtlpTrace(document: unknown): TraceSpanInput[];
 
 declare function parseTraceDocument(input: unknown): TraceSpanInput[];
 
 declare function replayTrace(input: readonly TraceSpanInput[] | TraceModel, elapsed: number): TraceSpanInput[];
 
-declare function describeTraceSpan(span: TraceSpan): string;
+declare function describeTraceSpan(span: TraceSpan, currency?: string): string;
 interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
 
     spans: readonly TraceSpanInput[] | TraceModel;
@@ -2761,6 +2806,12 @@ interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSe
     animate?: boolean;
 
     label?: string;
+
+    price?: BuildTraceOptions['price'];
+
+    costAttribute?: string;
+
+    currency?: string;
 }
 
 declare const TraceWaterfall: react.ForwardRefExoticComponent<TraceWaterfallProps & react.RefAttributes<HTMLDivElement>>;
@@ -2784,6 +2835,12 @@ interface TraceViewerProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
     loop?: boolean;
 
     defaultSpeed?: number;
+
+    price?: BuildTraceOptions['price'];
+
+    costAttribute?: string;
+
+    currency?: string;
 }
 
 declare const TraceViewer: react.ForwardRefExoticComponent<TraceViewerProps & react.RefAttributes<HTMLElement>>;
@@ -5274,12 +5331,14 @@ export {
   type TokenTableProps,
   Tooltip,
   type TooltipProps,
+  type TraceAgentKind,
   type TraceAttributeValue,
   type TraceModel,
   type TraceReplay,
   type TraceSpan,
   type TraceSpanInput,
   type TraceSpanStatus,
+  type TraceUsage,
   TraceViewer,
   type TraceViewerProps,
   TraceWaterfall,
@@ -5355,7 +5414,9 @@ export {
   formatShare,
   formatTimeTick,
   formatTimestamp,
+  formatTraceCost,
   formatTraceDuration,
+  formatTraceTokens,
   getRecommendedColours,
   getThemeInitScript,
   heatmapCells,
@@ -5410,6 +5471,7 @@ export {
   surfaceVar,
   textVar,
   timeTicks,
+  traceAgentKind,
   trendTone,
   truncateId,
   tryParseFilter,

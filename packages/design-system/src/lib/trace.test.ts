@@ -1,3 +1,4 @@
+import { agentRunTrace, AGENT_RUN_NOW, samplePrice, checkoutTrace } from '../stories/traceFixtures';
 import { describe, expect, it } from 'vitest';
 import {
   buildTrace,
@@ -7,8 +8,7 @@ import {
   parseTraceDocument,
   replayTrace,
   visibleTraceSpans,
-  type TraceSpanInput,
-} from './trace';
+  type TraceSpanInput, formatTraceCost, formatTraceTokens, traceAgentKind } from './trace';
 
 const checkout: TraceSpanInput[] = [
   { id: 'a', name: 'GET /checkout', service: 'web', start: 1000, end: 1400 },
@@ -135,5 +135,127 @@ describe('replayTrace', () => {
     expect(at(200).byId.get('e')).toMatchObject({ inFlight: true, status: 'unset' });
     expect(at(400).byId.get('e')).toMatchObject({ inFlight: false, status: 'error' });
     expect(at(400).duration).toBe(400);
+  });
+});
+
+describe('agent runs', () => {
+  const run = (options: Parameters<typeof buildTrace>[1] = {}) => buildTrace(agentRunTrace, { now: AGENT_RUN_NOW, price: samplePrice, ...options });
+
+  it('maps gen_ai.operation.name to an agent kind, and takes an explicit one over it', () => {
+    expect(traceAgentKind({ 'gen_ai.operation.name': 'chat' })).toBe('llm');
+    expect(traceAgentKind({ 'gen_ai.operation.name': 'embeddings' })).toBe('llm');
+    expect(traceAgentKind({ 'gen_ai.operation.name': 'execute_tool' })).toBe('tool');
+    expect(traceAgentKind({ 'gen_ai.operation.name': 'invoke_agent' })).toBe('agent');
+    expect(traceAgentKind({ 'gen_ai.operation.name': 'create_agent' })).toBe('agent');
+    expect(traceAgentKind({ 'gen_ai.operation.name': 'something_else' })).toBeUndefined();
+    expect(traceAgentKind({})).toBeUndefined();
+
+    const model = run();
+    expect(model.byId.get('o1')?.agentKind).toBe('llm');
+    expect(model.byId.get('o3')?.agentKind).toBe('decision');
+    expect(buildTrace([{ id: 'x', name: 'x', start: 0, end: 1, agentKind: 'tool', attributes: { 'gen_ai.operation.name': 'chat' } }]).byId.get('x')?.agentKind).toBe('tool');
+  });
+
+  it('reads tokens and the model, preferring the response model', () => {
+    const model = buildTrace([
+      { id: 'a', name: 'a', start: 0, end: 1, attributes: { 'gen_ai.operation.name': 'chat', 'gen_ai.request.model': 'asked', 'gen_ai.response.model': 'served', 'gen_ai.usage.input_tokens': 10, 'gen_ai.usage.output_tokens': 4 } },
+    ]);
+    const span = model.byId.get('a')!;
+    expect(span.model).toBe('served');
+    expect(span.usage).toMatchObject({ inputTokens: 10, outputTokens: 4 });
+    expect(span.usage.cost).toBeUndefined();
+  });
+
+  it('rolls tokens and cost up every subtree, through nested sub-agents', () => {
+    const model = run();
+    const ver = model.byId.get('ver')!;
+    expect(ver.usage.inputTokens).toBe(0);
+    expect(ver.total.inputTokens).toBe(8000);
+    expect(ver.total.outputTokens).toBe(600);
+    expect(ver.total.cost).toBeCloseTo((8000 * 3 + 600 * 15) / 1e6, 10);
+
+    const leaves = agentRunTrace.reduce((sum, span) => sum + Number(span.attributes?.['gen_ai.usage.input_tokens'] ?? 0), 0);
+    expect(model.byId.get('orch')!.total.inputTokens).toBe(leaves);
+    expect(model.usage.inputTokens).toBe(leaves);
+    expect(model.usage.cost).toBeCloseTo(model.byId.get('orch')!.total.cost!, 10);
+  });
+
+  it('marks a subtree partial while anything under it is in flight', () => {
+    const model = run();
+    expect(model.byId.get('o3')!.inFlight).toBe(true);
+    expect(model.byId.get('orch')!.total.partial).toBe(true);
+    expect(model.byId.get('ver')!.total.partial).toBe(false);
+    expect(model.usage.partial).toBe(true);
+  });
+
+  it('counts model calls, tool calls and agents, and flags the trace agentic', () => {
+    const model = run();
+    expect(model.agentic).toBe(true);
+    expect(model.usage).toMatchObject({ modelCalls: 5, toolCalls: 7, agents: 4 });
+    expect(buildTrace(checkoutTrace).agentic).toBe(false);
+  });
+
+  it('takes cost from a named attribute before the price function', () => {
+    const model = buildTrace(
+      [
+        { id: 'a', name: 'a', start: 0, end: 1, attributes: { 'gen_ai.operation.name': 'chat', 'billing.usd': 0.5, 'gen_ai.usage.input_tokens': 1 } },
+        { id: 'b', name: 'b', start: 0, end: 1, attributes: { 'gen_ai.operation.name': 'chat', 'gen_ai.usage.input_tokens': 1 } },
+      ],
+      { costAttribute: 'billing.usd', price: () => 0.25 },
+    );
+    expect(model.byId.get('a')!.usage.cost).toBe(0.5);
+    expect(model.byId.get('b')!.usage.cost).toBe(0.25);
+    expect(model.usage.cost).toBe(0.75);
+  });
+
+  it('marks the slowest and the costliest finished leaf, never an in-flight one', () => {
+    const model = run();
+    const slowest = model.spans.filter((span) => span.slowest).map((span) => span.id);
+    const costliest = model.spans.filter((span) => span.costliest).map((span) => span.id);
+    expect(slowest).toEqual(['b1']);
+    expect(costliest).toEqual(['o2']);
+    expect(model.byId.get('o3')!.slowest).toBe(false);
+  });
+
+  it('marks no outliers on a trace that is not an agent run', () => {
+    const model = buildTrace(checkoutTrace);
+    expect(model.spans.some((span) => span.slowest || span.costliest)).toBe(false);
+    expect(model.usage).toMatchObject({ inputTokens: 0, outputTokens: 0, modelCalls: 0, toolCalls: 0, agents: 0 });
+    expect(model.usage.cost).toBeUndefined();
+  });
+
+  it('replays usage only once a span has finished, so totals never fall', () => {
+    let previous = -1;
+    for (let elapsed = 0; elapsed <= AGENT_RUN_NOW; elapsed += 500) {
+      const model = buildTrace(replayTrace(run(), elapsed), { now: elapsed, price: samplePrice });
+      const tokens = model.usage.inputTokens + model.usage.outputTokens;
+      expect(tokens).toBeGreaterThanOrEqual(previous);
+      previous = tokens;
+      for (const span of model.spans) if (span.inFlight) expect(span.usage.inputTokens).toBe(0);
+    }
+    expect(previous).toBeGreaterThan(0);
+    expect(buildTrace(replayTrace(run(), 5000)).byId.get('r1')?.agentKind).toBe('tool');
+  });
+
+  it('keeps a priced model\'s costs through a replay, without the pricing options', () => {
+    const priced = run();
+    const replayed = buildTrace(replayTrace(priced, 12_000), { now: 12_000 });
+    expect(replayed.byId.get('o1')!.usage.cost).toBeCloseTo(priced.byId.get('o1')!.usage.cost!, 10);
+    expect(replayed.byId.get('rep')!.total.cost).toBeCloseTo(priced.byId.get('r3')!.usage.cost!, 10);
+    expect(replayed.usage.cost).toBeGreaterThan(0);
+  });
+
+  it('takes an explicit cost on the input over an attribute and a price', () => {
+    const model = buildTrace([{ id: 'a', name: 'a', start: 0, end: 1, cost: 0.2, attributes: { 'gen_ai.operation.name': 'chat', 'billing.usd': 0.5 } }], { costAttribute: 'billing.usd', price: () => 0.9 });
+    expect(model.byId.get('a')!.usage.cost).toBe(0.2);
+  });
+
+  it('formats tokens and cost', () => {
+    expect([640, 3800, 9949, 13_900, 81_000, 1_240_000].map(formatTraceTokens)).toEqual(['640', '3.8k', '9.9k', '14k', '81k', '1.2M']);
+    expect(formatTraceCost(0.35)).toBe('$0.35');
+    expect(formatTraceCost(0.004)).toBe('$0.004');
+    expect(formatTraceCost(0)).toBe('$0.00');
+    expect(formatTraceCost(1.2, 'EUR')).toBe('€1.20');
+    expect(formatTraceCost(Number.NaN)).toBe('—');
   });
 });

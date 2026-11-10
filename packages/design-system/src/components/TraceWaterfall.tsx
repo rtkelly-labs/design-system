@@ -1,13 +1,17 @@
 'use client';
 
-import { ChevronDown, ChevronRight, Diamond } from 'lucide-react';
-import { forwardRef, useCallback, useEffect, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent } from 'react';
+import { ChevronDown, ChevronRight, Diamond, Hand, MessageSquareText, Workflow, Wrench, type LucideIcon } from 'lucide-react';
+import { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState, type HTMLAttributes, type KeyboardEvent } from 'react';
 import { cn, recipe } from '../lib/recipe';
 import {
   buildTrace,
+  formatTraceCost,
   formatTraceDuration,
+  formatTraceTokens,
   matchTraceSpan,
   visibleTraceSpans,
+  type BuildTraceOptions,
+  type TraceAgentKind,
   type TraceModel,
   type TraceSpan,
   type TraceSpanInput,
@@ -29,8 +33,17 @@ const traceWaterfall = recipe({
     bar: 'h-3 w-full overflow-visible',
     duration: 'text-right tabular-nums text-content-secondary',
     empty: 'text-content-muted',
+    kind: 'shrink-0 text-content-muted',
+    mark: 'shrink-0 border border-current px-1 text-[0.625rem] font-bold uppercase leading-4 tracking-wide text-intent-warning',
   },
   variants: {
+    // An agent run's right-hand cell carries `duration · cost`, so it is wider.
+    agentic: {
+      true: {
+        axis: 'grid-cols-[minmax(8rem,16rem)_minmax(0,1fr)_8.5rem]',
+        row: 'grid-cols-[minmax(8rem,16rem)_minmax(0,1fr)_8.5rem]',
+      },
+    },
     selected: { true: { row: 'border-accent-primary bg-surface-raised' } },
     // A row fades in from the left as it mounts — `@starting-style`, so no
     // keyframes and no timer. Off by default: a static trace should not move.
@@ -51,15 +64,45 @@ function barFill(span: TraceSpan): string {
   return 'fill-accent-primary';
 }
 
+/**
+ * In an agent run the bar is also a state mark (`DESIGN.md` §9): solid when
+ * done, hatched while in flight, an outline in `intent.warning` while a
+ * decision waits on a person. The shape says it before the colour does.
+ */
+function waitingOnPerson(span: TraceSpan): boolean {
+  return span.agentKind === 'decision' && span.inFlight;
+}
+
+const AGENT_KIND: Record<TraceAgentKind, { icon: LucideIcon; word: string }> = {
+  agent: { icon: Workflow, word: 'agent' },
+  llm: { icon: MessageSquareText, word: 'model call' },
+  tool: { icon: Wrench, word: 'tool call' },
+  decision: { icon: Hand, word: 'decision' },
+};
+
+/** The glyph for what a span is. Decorative: the row's name says it in words. */
+function AgentKindIcon({ kind, className }: { kind: TraceAgentKind; className: string }) {
+  const Icon = AGENT_KIND[kind].icon;
+  return <Icon aria-hidden="true" size={12} data-part="agent-kind" className={className} />;
+}
+
 /** What a screen reader hears for one row — the bar's geometry, said in words. */
-export function describeTraceSpan(span: TraceSpan): string {
+export function describeTraceSpan(span: TraceSpan, currency?: string): string {
+  if (waitingOnPerson(span)) return [span.name, 'decision', `waiting on you for ${formatTraceDuration(span.duration)}`].join(', ');
+  const tokens = span.total.inputTokens + span.total.outputTokens;
   return [
     span.name,
+    ...(span.agentKind ? [AGENT_KIND[span.agentKind].word] : []),
+    ...(span.model ? [span.model] : []),
     span.service,
     `starts at ${formatTraceDuration(span.offset)}`,
     span.inFlight ? `running for ${formatTraceDuration(span.duration)}` : `takes ${formatTraceDuration(span.duration)}`,
+    ...(tokens ? [`${formatTraceTokens(tokens)} tokens`] : []),
+    ...(span.total.cost !== undefined ? [`costs ${formatTraceCost(span.total.cost, currency)}`] : []),
     ...(span.status === 'error' ? ['error'] : []),
     ...(span.critical ? ['on the critical path'] : []),
+    ...(span.slowest ? ['slowest'] : []),
+    ...(span.costliest ? ['costliest'] : []),
   ].join(', ');
 }
 
@@ -110,6 +153,12 @@ export interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>
   animate?: boolean;
   /** Accessible name for the span tree. Default `Trace waterfall`. */
   label?: string;
+  /** Each span's cost, for an agent run. See `buildTrace`. Ignored when `spans` is a model. */
+  price?: BuildTraceOptions['price'];
+  /** A numeric attribute holding each span's cost. Ignored when `spans` is a model. */
+  costAttribute?: string;
+  /** The currency costs are shown in. Default `USD`. */
+  currency?: string;
 }
 
 /**
@@ -121,6 +170,11 @@ export interface TraceWaterfallProps extends Omit<HTMLAttributes<HTMLDivElement>
  * one-interaction-library rule. Bars are SVG, so placing them takes no inline
  * style. In-flight spans (no end) are drawn to `now`; feed it a clock and the
  * waterfall is live. `◆` marks the critical path.
+ *
+ * An agent run (any span with an agent kind, see `buildTrace`) also shows what
+ * each span is, its `duration · cost`, the slowest and costliest finished
+ * calls, and its state in the bar's shape: hatched in flight, an outline while
+ * a decision waits on a person. Any other trace draws exactly as before.
  */
 export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(function TraceWaterfall(
   {
@@ -138,12 +192,17 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
     playhead,
     animate = false,
     label = 'Trace waterfall',
+    price,
+    costAttribute,
+    currency,
     className,
     ...props
   },
   ref,
 ) {
-  const model = useMemo(() => buildTrace(spans, { now }), [spans, now]);
+  const model = useMemo(() => buildTrace(spans, { now, price, costAttribute }), [spans, now, price, costAttribute]);
+  const hatchId = `${useId()}hatch`;
+  const agentic = model.agentic;
   const [selectedId, setSelectedId] = useControllable<string | null>(selectedProp, defaultSelectedId, onSelectedChange);
   const [collapsedList, setCollapsedList] = useControllable<readonly string[]>(collapsedProp, defaultCollapsed, onCollapsedChange as ((ids: readonly string[]) => void) | undefined);
   const collapsed = useMemo(() => new Set(collapsedList), [collapsedList]);
@@ -214,7 +273,7 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
     event.preventDefault();
   };
 
-  const styles = traceWaterfall();
+  const styles = traceWaterfall({ agentic });
   const summary = `${model.spans.length} spans across ${model.services.length} services over ${formatTraceDuration(model.duration)}${model.errorCount ? `, ${model.errorCount} with errors` : ''}${model.inFlightCount ? `, ${model.inFlightCount} in flight` : ''}.`;
 
   if (!model.spans.length) {
@@ -256,7 +315,7 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
               aria-level={span.depth + 1}
               aria-expanded={hasChildren ? open : undefined}
               aria-selected={selected}
-              aria-label={describeTraceSpan(span)}
+              aria-label={describeTraceSpan(span, currency)}
               tabIndex={span.id === focusId ? 0 : -1}
               data-span-id={span.id}
               data-status={span.status}
@@ -274,18 +333,41 @@ export const TraceWaterfall = forwardRef<HTMLDivElement, TraceWaterfallProps>(fu
                 {Array.from({ length: span.depth }, (_, index) => <span key={index} aria-hidden="true" className={styles.guide()} />)}
                 <span aria-hidden="true" data-part="toggle" className={styles.toggle()}>{hasChildren ? (open ? <ChevronDown size={12} className="inline-block" /> : <ChevronRight size={12} className="inline-block" />) : null}</span>
                 {span.critical ? <Diamond aria-hidden="true" size={10} className="shrink-0 fill-current text-accent-primary" /> : null}
-                <span className={styles.name({ critical: span.critical })} title={`${span.name} · ${span.service}`}>{span.name}</span>
+                {agentic && span.agentKind ? <AgentKindIcon kind={span.agentKind} className={styles.kind()} /> : null}
+                <span className={styles.name({ critical: span.critical })} title={`${span.name} · ${span.model ?? span.service}`}>{span.name}</span>
+                {span.slowest ? <span aria-hidden="true" data-part="mark" className={styles.mark()}>slowest</span> : null}
+                {span.costliest ? <span aria-hidden="true" data-part="mark" className={styles.mark()}>costliest</span> : null}
               </span>
               <svg aria-hidden="true" viewBox={`0 0 ${SCALE} 12`} preserveAspectRatio="none" className={styles.bar()}>
                 {axis.slice(1).map((tick, index) => {
                   const at = extent > 0 ? (tick / extent) * SCALE : 0;
                   return <line key={index} x1={at} x2={at} y1={0} y2={12} vectorEffect="non-scaling-stroke" className="stroke-edge-subtle" strokeDasharray="2 2" />;
                 })}
-                <rect x={Math.min(x, SCALE - width)} y={1} width={width} height={10} className={cn(barFill(span), span.inFlight && 'opacity-70')} />
+                {agentic && span.inFlight ? (
+                  <defs>
+                    <pattern id={`${hatchId}-${span.id}`} width={8} height={8} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <rect width={2.5} height={8} className="fill-intent-info" />
+                    </pattern>
+                  </defs>
+                ) : null}
+                {agentic && waitingOnPerson(span) ? (
+                  <rect data-part="waiting" x={Math.min(x, SCALE - width)} y={1} width={width} height={10} vectorEffect="non-scaling-stroke" strokeWidth={2} className="fill-none stroke-intent-warning" />
+                ) : agentic && span.inFlight ? (
+                  <rect data-part="in-flight" x={Math.min(x, SCALE - width)} y={1} width={width} height={10} fill={`url(#${hatchId}-${span.id})`} vectorEffect="non-scaling-stroke" strokeWidth={1} className="stroke-intent-info" />
+                ) : (
+                  <rect x={Math.min(x, SCALE - width)} y={1} width={width} height={10} className={cn(barFill(span), span.inFlight && 'opacity-70')} />
+                )}
                 {playheadX === null ? null : <line data-part="playhead" x1={playheadX} x2={playheadX} y1={-2} y2={14} vectorEffect="non-scaling-stroke" className="stroke-content-primary" strokeWidth={1.5} />}
               </svg>
               <span className={styles.duration({ error: span.status === 'error' })}>
-                {formatTraceDuration(span.duration)}{span.inFlight ? '…' : ''}
+                {agentic && waitingOnPerson(span) ? (
+                  <span className="text-intent-warning">needs you</span>
+                ) : (
+                  <>
+                    {formatTraceDuration(span.duration)}{span.inFlight ? '…' : ''}
+                    {agentic && span.total.cost !== undefined ? <span className="text-content-muted"> · {formatTraceCost(span.total.cost, currency)}</span> : null}
+                  </>
+                )}
               </span>
             </div>
           );

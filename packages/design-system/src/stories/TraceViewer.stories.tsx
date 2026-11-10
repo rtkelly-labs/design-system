@@ -4,7 +4,7 @@ import { TextArea } from '../components/Input';
 import { parseTraceDocument } from '../lib/trace';
 import { TraceViewer } from '../components/TraceViewer';
 import { useTraceClock } from '../hooks/useTraceClock';
-import { checkoutTrace, deployTrace, orderTrace } from './traceFixtures';
+import { AGENT_RUN_NOW, agentRunTrace, checkoutTrace, deployTrace, orderTrace, samplePrice } from './traceFixtures';
 
 const meta: Meta<typeof TraceViewer> = {
   title: 'Components/Data/TraceViewer',
@@ -26,6 +26,18 @@ type Story = StoryObj<typeof TraceViewer>;
 export const Checkout: Story = {
   args: { spans: checkoutTrace, title: 'GET /checkout · 4f2a91', defaultSelectedId: 'e1' },
   parameters: { docs: { description: { story: 'The payment span is selected: its self time, status and attributes show beside the waterfall.' } } },
+};
+
+/** An agent run three seconds into the decision it waits on. */
+export const AgentRun: Story = {
+  args: { spans: agentRunTrace, now: AGENT_RUN_NOW, price: samplePrice, title: 'Rebaseline onto upstream 5.4', defaultSelectedId: 'ver' },
+  parameters: { docs: { description: { story: 'Every kind, model and token count is read from the OpenTelemetry GenAI attributes on the spans; costs come from a `price` function the caller passes, here with sample prices. The strip leads with what the run cost and how many decisions need you; the selected sub-agent shows its own usage and its subtree\'s, marked "so far" while anything under it runs.' } } },
+};
+
+/** The same run played back: usage appears as each call finishes. Not snapshotted: it moves. */
+export const AgentRunReplay: Story = {
+  args: { spans: agentRunTrace, now: AGENT_RUN_NOW, price: samplePrice, title: 'Rebaseline · replay', replay: true, autoPlay: true, loop: true, defaultSelectedId: 'orch' },
+  parameters: { docs: { description: { story: 'Tokens and cost are reported when a call finishes, like its status, so the totals only ever grow.' } } },
 };
 
 /** Played back in real time, with transport controls. Not snapshotted: it moves. */
