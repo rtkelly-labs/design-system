@@ -154,4 +154,17 @@ describe('toolCallFromSpan', () => {
     expect(toolCallFromSpan(model.byId.get('v2')!)).toMatchObject({ name: 'conformance', status: 'error', error: 'pyarrow not found on PATH', startedAt: 16600, endedAt: 19000 });
     expect(toolCallFromSpan(model.byId.get('r2')!)).toMatchObject({ name: 'git_rebase', status: 'ok' });
   });
+
+  it('carries a data-slot on every part', () => {
+    const { container } = render(
+      <ToolCallGroup defaultOpen>
+        <ToolCall name="conformance" summary="both directions" status="error" duration={2400} args={{ suite: 'all' }} error="pyarrow not found" onRetry={() => undefined} maxLines={1} defaultOpen />
+        <ToolCall name="read_file" summary="a record" status="ok" duration={120} result={'one\ntwo\nthree'} maxLines={1} defaultOpen />
+      </ToolCallGroup>,
+    );
+    for (const slot of ['tool-call-group-trigger', 'tool-call-group-meta', 'tool-call-group-failed', 'tool-call-group-list', 'tool-call-trigger', 'tool-call-chevron', 'tool-call-name', 'tool-call-summary', 'tool-call-state', 'tool-call-time', 'tool-call-panel', 'tool-call-wells', 'tool-call-payload', 'tool-call-payload-head', 'tool-call-payload-title', 'tool-call-payload-body', 'tool-call-payload-more', 'tool-call-retry']) {
+      expect(container.querySelector(`[data-slot="${slot}"]`), slot).not.toBeNull();
+    }
+    expect(container.querySelector('[data-part]')).toBeNull();
+  });
 });
