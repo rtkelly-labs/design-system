@@ -39,15 +39,14 @@ describe('Progress', () => {
     expect(bar.getAttribute('aria-valuetext')).toBe('indeterminate progress');
   });
 
-  it('sweeps the indicator while indeterminate, and pulses it in place under reduced motion', () => {
+  it('marches the indicator in steps while indeterminate, slower and never stopped under reduced motion', () => {
     const { container } = render(<Progress label="Rebuilding tokens" />);
     const indicator = container.querySelector('[data-slot="progress-indicator"]');
 
-    expect(indicator?.className).toContain('data-[indeterminate]:animate-ds-track');
-    expect(indicator?.className).toContain('motion-reduce:data-[indeterminate]:animate-ds-pulse');
-    // A third of a track standing still reads as "33% done"; the reduced-motion
-    // bar fills the track instead.
-    expect(indicator?.className).toContain('motion-reduce:data-[indeterminate]:w-full');
+    expect(indicator?.className).toContain('data-[indeterminate]:animate-ds-march');
+    expect(indicator?.className).toContain('motion-reduce:data-[indeterminate]:animate-ds-march-slow');
+    // Neither eased loop from before DESIGN.md §8 is worn any more.
+    expect(indicator?.className).not.toMatch(/animate-ds-(track|pulse)/);
   });
 
   it('marks the indeterminate state on the parts, which is what the styling keys off', () => {

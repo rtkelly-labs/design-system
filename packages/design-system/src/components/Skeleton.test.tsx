@@ -15,11 +15,11 @@ describe('Skeleton', () => {
   // The issue's own requirement, and the one clause of it that a screenshot
   // cannot show: a shimmer is the canonical vestibular trigger, so the
   // animation has to come off entirely under the preference.
-  it('drops the pulse under prefers-reduced-motion', () => {
+  it('blinks in steps, and drops the blink under prefers-reduced-motion', () => {
     const { container } = render(<Skeleton />);
     const box = container.querySelector('[data-slot="skeleton"]');
 
-    expect(box?.className).toContain('animate-ds-pulse');
+    expect(box?.className).toContain('animate-ds-blink');
     expect(box?.className).toContain('motion-reduce:animate-none');
   });
 

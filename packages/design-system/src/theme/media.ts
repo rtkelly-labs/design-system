@@ -272,6 +272,21 @@ export const MEDIA_DEFINITIONS: Readonly<Record<Medium, MediumDefinition>> = {
  * `step-slow` is its reduced-motion partner, a third of the speed, never
  * stopped. `spin` and `spin-slow` no longer draw any component and stay only
  * because `theme.css` is a consumer contract; §8 names them for retirement.
+ *
+ * `march` is indeterminate `Progress`: a third of the track, a cell, jumping
+ * through the track's three cells, one per `considered`. A terminal's
+ * `[■  ] [ ■ ] [  ■]`, stepped rather than swept. `march-slow` is its
+ * reduced-motion partner, a third of the speed and never stopped, because
+ * there the motion is the message.
+ *
+ * `blink` is `Skeleton` and the live `FreshnessIndicator` dot: lit for two
+ * `considered`, dimmed for two, as a block cursor blinks. Two held states and
+ * a jump, never a fade. Under reduced motion it is removed at the call site,
+ * because a placeholder's geometry already says what is coming (§8: motion
+ * that carries no information is removed outright).
+ *
+ * `pulse` and `track`, the eased loops those three wore before §8, no longer
+ * draw any component and stay only because `theme.css` is a consumer contract.
  */
 export interface Loop {
   /** Which entry of `LOOP_KEYFRAMES` it runs. Two loops may share one shape. */
@@ -282,7 +297,7 @@ export interface Loop {
   readonly easing: 'linear' | 'medium' | 'steps';
 }
 
-export type LoopKeyframesName = 'spin' | 'pulse' | 'track' | 'quadrant';
+export type LoopKeyframesName = 'spin' | 'pulse' | 'track' | 'quadrant' | 'march' | 'blink';
 
 /** A keyframe as selector → declarations. Emitted as `@keyframes ds-<name>`. */
 export type Keyframes = Readonly<Record<string, Readonly<Record<string, string>>>>;
@@ -302,15 +317,27 @@ export const LOOP_KEYFRAMES: Readonly<Record<LoopKeyframesName, Keyframes>> = {
     '50%': { transform: 'translate(100%, 100%)' },
     '75%': { transform: 'translate(0, 100%)' },
   },
+  // A cell a third of the track wide, through the track's three cells. Each
+  // keyframe is held until the next (`steps`), so each cell shows for a third.
+  march: {
+    '0%': { transform: 'translateX(0)' },
+    '33.333%': { transform: 'translateX(100%)' },
+    '66.667%, 100%': { transform: 'translateX(200%)' },
+  },
+  // Lit, then dimmed, each held for half the period: a cursor's blink.
+  blink: { '0%': { opacity: '1' }, '50%, 100%': { opacity: '0.45' } },
 };
 
-export const LOOPS: Readonly<Record<'spin' | 'spin-slow' | 'pulse' | 'track' | 'step' | 'step-slow', Loop>> = {
+export const LOOPS: Readonly<Record<'spin' | 'spin-slow' | 'pulse' | 'track' | 'step' | 'step-slow' | 'march' | 'march-slow' | 'blink', Loop>> = {
   spin: { keyframes: 'spin', periods: 3, easing: 'linear' },
   'spin-slow': { keyframes: 'spin', periods: 9, easing: 'linear' },
   pulse: { keyframes: 'pulse', periods: 4, easing: 'medium' },
   track: { keyframes: 'track', periods: 5, easing: 'medium' },
   step: { keyframes: 'quadrant', periods: 4, easing: 'steps' },
   'step-slow': { keyframes: 'quadrant', periods: 12, easing: 'steps' },
+  march: { keyframes: 'march', periods: 3, easing: 'steps' },
+  'march-slow': { keyframes: 'march', periods: 9, easing: 'steps' },
+  blink: { keyframes: 'blink', periods: 4, easing: 'steps' },
 };
 
 /** Type guard for a Medium arriving from an emitter flag or an env var. */

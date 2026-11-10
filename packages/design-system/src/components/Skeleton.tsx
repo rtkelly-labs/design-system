@@ -9,9 +9,12 @@ import { recipe } from '../lib/recipe';
  * that does not look like this system's boxes is a grey pill borrowed from
  * another system, which is the drift this component exists to stop.
  *
- * The pulse is opacity only. A shimmer sweeping a gradient across the box is
- * the canonical vestibular trigger, and it also needs a second surface colour
- * to sweep *with* — two reasons not to have one.
+ * It blinks: lit, then dimmed, each held for two `considered`, as a block
+ * cursor blinks (`DESIGN.md` §8, steps, never a glide). Opacity only. A shimmer
+ * sweeping a gradient across the box is the canonical vestibular trigger, and
+ * it also needs a second surface colour to sweep *with* — two reasons not to
+ * have one. Skeletons mounted together blink on one clock, so a page of them
+ * reads as one live mark rather than many.
  */
 const skeleton = recipe({
   slots: {
@@ -19,11 +22,11 @@ const skeleton = recipe({
      * `motion-reduce:animate-none` — the rule the issue names, and the one case
      * in this package where the preference removes the animation rather than
      * slowing it. Nothing is lost: a skeleton says "content of this shape is
-     * coming" by its geometry, and the pulse only ever said "still coming".
+     * coming" by its geometry, and the blink only ever said "still coming".
      * `Spinner` slows instead of stopping, because there the motion *is* the
      * message.
      */
-    root: 'block animate-ds-pulse border border-edge-subtle bg-surface-sunken motion-reduce:animate-none',
+    root: 'block animate-ds-blink border border-edge-subtle bg-surface-sunken motion-reduce:animate-none',
   },
   variants: {
     /**

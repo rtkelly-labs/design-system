@@ -86,19 +86,19 @@ function Payload({ title, value, maxLines, tone }: { title: string; value: unkno
   const capped = !all && lines.length > maxLines;
   const styles = toolCall();
   return (
-    <section aria-label={title} data-part="payload" className={styles.well()}>
-      <header className={styles.wellHead()}>
-        <span>{title}</span>
+    <section aria-label={title} data-slot="tool-call-payload" className={styles.well()}>
+      <header data-slot="tool-call-payload-head" className={styles.wellHead()}>
+        <span data-slot="tool-call-payload-title">{title}</span>
         <InlineAction tone="quiet" onClick={() => void copy(element ? (rendered.current?.textContent ?? '') : text)}>
           {copied ? 'copied' : 'copy'}
         </InlineAction>
       </header>
-      <pre ref={rendered} className={styles.pre({ class: tone === 'danger' ? 'text-intent-danger' : undefined })}>
+      <pre ref={rendered} data-slot="tool-call-payload-body" className={styles.pre({ class: tone === 'danger' ? 'text-intent-danger' : undefined })}>
         {element ?? (capped ? lines.slice(0, maxLines).join('\n') : text)}
       </pre>
       {/* Capped with words, never faded out (DESIGN.md §9). */}
       {capped ? (
-        <span className={styles.more()}>
+        <span data-slot="tool-call-payload-more" className={styles.more()}>
           <InlineAction tone="quiet" onClick={() => setAll(true)}>
             show all ({lines.length} lines)
           </InlineAction>
@@ -196,13 +196,13 @@ export const ToolCall = forwardRef<HTMLDivElement, ToolCallProps>(function ToolC
        * once finished, its time. `aria-expanded` says open or closed. A running
        * call's time ticks, so it is hidden: it would be read out every frame.
        */}
-      <Collapsible.Trigger className={styles.trigger()}>
-        <span aria-hidden="true" className={styles.chevron()}>
+      <Collapsible.Trigger data-slot="tool-call-trigger" className={styles.trigger()}>
+        <span aria-hidden="true" data-slot="tool-call-chevron" className={styles.chevron()}>
           {isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         </span>
-        <span className={styles.name()}>{name}</span>
-        <span className={styles.summary()}>{status === 'error' && error && !isOpen ? error : summary}</span>
-        <span className={styles.state()}>
+        <span data-slot="tool-call-name" className={styles.name()}>{name}</span>
+        <span data-slot="tool-call-summary" className={styles.summary()}>{status === 'error' && error && !isOpen ? error : summary}</span>
+        <span data-slot="tool-call-state" className={styles.state()}>
           {/* Its own element, so the flex gap separates mark and word: two bare text nodes merge into one item. */}
           {status === 'running' ? (
             <span aria-hidden="true" className="inline-flex">
@@ -213,14 +213,14 @@ export const ToolCall = forwardRef<HTMLDivElement, ToolCallProps>(function ToolC
           )}
           <span>{STATUS_WORD[status]}</span>
         </span>
-        <span aria-hidden={status === 'running' || !time ? true : undefined} className={styles.time()}>
+        <span aria-hidden={status === 'running' || !time ? true : undefined} data-slot="tool-call-time" className={styles.time()}>
           {time && status !== 'running' ? <span className="sr-only">in </span> : null}
           {time}
         </span>
       </Collapsible.Trigger>
-      <Collapsible.Panel data-part="panel" className={styles.panel()}>
+      <Collapsible.Panel data-slot="tool-call-panel" className={styles.panel()}>
         {args !== undefined || result !== undefined || (status === 'error' && error) ? (
-          <div className={styles.wells()}>
+          <div data-slot="tool-call-wells" className={styles.wells()}>
             {args !== undefined ? <Payload title="Arguments" value={args} maxLines={maxLines} /> : null}
             {status === 'error' && error ? (
               <Payload title="Error" value={error} maxLines={maxLines} tone="danger" />
@@ -230,7 +230,7 @@ export const ToolCall = forwardRef<HTMLDivElement, ToolCallProps>(function ToolC
           </div>
         ) : null}
         {status === 'error' && onRetry ? (
-          <p className={styles.error()}>
+          <p data-slot="tool-call-retry" className={styles.error()}>
             <span>The call failed.</span>
             <InlineAction onClick={onRetry}>retry</InlineAction>
           </p>
@@ -308,18 +308,18 @@ export const ToolCallGroup = forwardRef<HTMLDivElement, ToolCallGroupProps>(func
 
   return (
     <div ref={ref} data-slot="tool-call-group" {...props} className={styles.root({ className })}>
-      <button type="button" aria-expanded={isOpen} aria-controls={listId} onClick={toggle} className={styles.trigger()}>
+      <button type="button" aria-expanded={isOpen} aria-controls={listId} onClick={toggle} data-slot="tool-call-group-trigger" className={styles.trigger()}>
         <span aria-hidden="true">{isOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</span>
         {summary.running ? <Spinner size="sm" label="" aria-hidden="true" /> : null}
         <span>{summary.count} tool {summary.count === 1 ? 'call' : 'calls'}</span>
-        <span className={styles.meta()}>{summary.running ? `${summary.running} running` : formatTraceDuration(summary.total)}</span>
-        {summary.failed ? <span className={styles.failed()}>{summary.failed} failed</span> : null}
+        <span data-slot="tool-call-group-meta" className={styles.meta()}>{summary.running ? `${summary.running} running` : formatTraceDuration(summary.total)}</span>
+        {summary.failed ? <span data-slot="tool-call-group-failed" className={styles.failed()}>{summary.failed} failed</span> : null}
       </button>
       <p className="sr-only" role="status">
         {summary.text}
         {summary.failed ? `, ${summary.failed} failed` : ''}
       </p>
-      <div id={listId} hidden={!isOpen} className={styles.list()}>
+      <div id={listId} hidden={!isOpen} data-slot="tool-call-group-list" className={styles.list()}>
         {calls.map((call) => cloneElement(call, { still: call.props.still ?? true }))}
       </div>
     </div>

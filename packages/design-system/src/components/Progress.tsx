@@ -21,9 +21,8 @@ const progress = recipe({
     label: 'text-xs font-bold uppercase tracking-wider text-content-secondary',
     value: 'text-xs font-bold tabular-nums text-content-primary',
     /*
-     * `overflow-hidden` is load-bearing rather than tidy: the indeterminate
-     * indicator is a third of the track's width translated from `-100%` to
-     * `400%`, so without it the bar sweeps out through both ends of the well.
+     * `overflow-hidden` keeps the indeterminate cell inside the well: it is a
+     * third of the track, stepped through the track's three cells.
      */
     track: 'relative h-3 w-full overflow-hidden border-2 border-edge-strong bg-surface-sunken',
     /*
@@ -33,17 +32,18 @@ const progress = recipe({
      * Determinate: Base UI writes the width as an inline percentage, so the
      * class only has to supply the height and the fill.
      *
-     * Indeterminate: there is no width to write, so the class supplies one and
-     * sweeps it. Under `prefers-reduced-motion` the sweep becomes the same
-     * opacity pulse `Skeleton` uses and the bar fills the track — a *full*
-     * static bar rather than a third of one, because a third of a track
-     * sitting still reads as "33% done", which is a number this component does
-     * not have. Pulsing says "working, amount unknown", which is what
+     * Indeterminate: there is no width to write, so the class supplies a third
+     * and marches it, one cell per `considered`, left to right and back to the
+     * start: a terminal's `[■  ] [ ■ ] [  ■]`. It steps rather than sweeps
+     * (`DESIGN.md` §8). Under `prefers-reduced-motion` it marches at a third of
+     * the speed and never stops, because a still third of a track reads as
+     * "33% done", a number this component does not have, and a still bar reads
+     * as hung. Moving says "working, amount unknown", which is what
      * `aria-valuetext` says too.
      */
     indicator:
-      'h-full bg-current data-[indeterminate]:w-1/3 data-[indeterminate]:animate-ds-track '
-      + 'motion-reduce:data-[indeterminate]:w-full motion-reduce:data-[indeterminate]:animate-ds-pulse',
+      'h-full bg-current data-[indeterminate]:w-1/3 data-[indeterminate]:animate-ds-march '
+      + 'motion-reduce:data-[indeterminate]:animate-ds-march-slow',
   },
 });
 

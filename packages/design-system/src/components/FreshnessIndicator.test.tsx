@@ -28,13 +28,13 @@ describe('FreshnessIndicator', () => {
     expect(screen.getByText('Updated 3m ago')).toBeTruthy();
   });
 
-  it('pulses only when live and fresh, with reduced motion respected', () => {
+  it('blinks only when live and fresh, with reduced motion respected', () => {
     const { container, rerender } = render(<FreshnessIndicator updatedAt={now - 1000} now={now} live />);
     const dot = () => container.querySelector('[data-slot="freshness-indicator-dot"]');
-    expect(dot()?.className).toContain('animate-ds-pulse');
+    expect(dot()?.className).toContain('animate-ds-blink');
     expect(dot()?.className).toContain('motion-reduce:animate-none');
     rerender(<FreshnessIndicator updatedAt={now - 120_000} now={now} live />);
-    expect(dot()?.className).not.toContain('animate-ds-pulse');
+    expect(dot()?.className).not.toContain('animate-ds-blink');
     rerender(<FreshnessIndicator updatedAt={now - 1000} now={now} />);
     expect(dot()).toBeNull();
   });
