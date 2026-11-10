@@ -24,6 +24,9 @@ describe('ToolCall', () => {
     expect(trigger.textContent).toContain('search_web');
     expect(trigger.textContent).toContain('CRM pricing');
     expect(trigger.textContent).toContain('1.5s');
+    // Mark and word are separate elements, so the gap between them renders.
+    const state = trigger.querySelector('.inline-flex.whitespace-nowrap');
+    expect(Array.from(state?.children ?? []).map((child) => child.textContent)).toEqual(['✓', 'done']);
   });
 
   it('ticks a running call from now and startedAt, and never reads the clock', () => {

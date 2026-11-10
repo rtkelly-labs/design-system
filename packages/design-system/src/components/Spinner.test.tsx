@@ -39,7 +39,7 @@ describe('Spinner', () => {
 
   // The rule the issue names for `Skeleton` applies here in the opposite
   // direction: a stopped spinner reads as a hung page, so the preference slows
-  // the rotation rather than removing it.
+  // the stepping rather than removing it.
   it('slows rather than stops under prefers-reduced-motion', () => {
     const { container } = render(<Spinner />);
     const quarter = container.querySelector('[data-slot="spinner-quarter"]');

@@ -191,8 +191,9 @@ export const ToolCall = forwardRef<HTMLDivElement, ToolCallProps>(function ToolC
         <span className={styles.name()}>{name}</span>
         <span className={styles.summary()}>{status === 'error' && error && !isOpen ? error : summary}</span>
         <span aria-hidden="true" className={styles.state()}>
-          {status === 'running' ? <Spinner size="sm" accent="current" still={still} label="" /> : status === 'ok' ? '✓' : status === 'error' ? '✕' : '–'}
-          {STATUS_WORD[status]}
+          {/* Its own element, so the flex gap separates mark and word: two bare text nodes merge into one item. */}
+          {status === 'running' ? <Spinner size="sm" accent="current" still={still} label="" /> : <span>{status === 'ok' ? '✓' : status === 'error' ? '✕' : '–'}</span>}
+          <span>{STATUS_WORD[status]}</span>
         </span>
         <span aria-hidden="true" className={styles.time()}>{time}</span>
       </Collapsible.Trigger>
