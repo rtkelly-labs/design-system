@@ -43,6 +43,7 @@ Everything is a `pnpm` script; these are the ones whose names do not give them a
 | `pnpm test:visual` | Playwright snapshots — **in the pinned image only**, see [`docs/visual-regression.md`](./docs/visual-regression.md) |
 | `pnpm test:a11y` | axe over every asserted story, on both Levels |
 | `pnpm test:edges` | heavy panels and box nesting per asserted story, against `tests/edges.baseline.json` — see [`docs/edge-hierarchy.md`](./docs/edge-hierarchy.md) |
+| `pnpm test:cross-browser` | Firefox and WebKit: axe at one Level plus `tests/overlays.spec.ts` (Base UI focus), no screenshots — opt-in, label `experiment:cross-browser`; see [`docs/testing.md`](./docs/testing.md) |
 | `pnpm walkthrough` | screenshot every story on every level, for review rather than assertion |
 
 `pnpm lint` reports colour literals at the site that wrote them; in CI its errors are read out of `check:lint-budget`'s pass rather than a second one. `pnpm check:deps`,

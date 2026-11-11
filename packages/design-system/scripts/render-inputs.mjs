@@ -70,7 +70,7 @@ export const GLOBAL_PATHS = [
   [/^\.github\/actions\//, 'an action the suites run under'],
   [new RegExp(`^${PKG}src/.*\\.css$`), 'a stylesheet: Tailwind compiles one sheet for every story'],
   [new RegExp(`^${PKG}\\.storybook/`), 'Storybook configuration'],
-  [new RegExp(`^${PKG}tests/(?!__snapshots__/)(?!(visual|a11y)\\.spec\\.ts$)`), 'the test harness'],
+  [new RegExp(`^${PKG}tests/(?!__snapshots__/)(?!(visual|a11y|overlays)\\.spec\\.ts$)`), 'the test harness'],
   [new RegExp(`^${PKG}(playwright\\.config\\.ts|serve\\.json|tsconfig\\.json)$`), 'suite or server configuration'],
 ];
 
@@ -83,6 +83,7 @@ export const INERT_PATHS = [
   [new RegExp(`^${PKG}(api|skills|terminal)/`), 'published artefacts no story imports'],
   [new RegExp(`^${PKG}(vitest\\.config\\.mts|eslint\\.config\\.mjs|knip\\.json|licenses\\.baseline\\.json|tsup\\.config\\.ts|LICENSE)$`), 'unit, lint or package-build configuration'],
   [new RegExp(`^${PKG}playwright\\.walkthrough\\.config\\.ts$`), 'the walkthrough, which is not a gate'],
+  [new RegExp(`^${PKG}(playwright\\.cross-browser\\.config\\.ts|tests/overlays\\.spec\\.ts)$`), 'the cross-browser experiment; no gated step runs it'],
   [/^packages\/design-system-report\//, 'the second package, which depends on this one'],
   [/^(README\.md|LICENSE|vercel\.json|reference\/|docs\/)/, 'repository metadata and prose'],
   // Release train, drift, walkthrough, snapshot commands: none runs the gated
