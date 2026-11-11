@@ -13,6 +13,7 @@ on:
   # aimed. The push trigger keeps its filter because that one is the post-merge
   # signal for the default branch specifically.
   pull_request:
+  merge_group:
   # Manual re-run, for the one case the two triggers above cannot cover: the
   # snapshot workflow commits baselines with `GITHUB_TOKEN`, and GitHub does not
   # start workflow runs from those pushes. The PR then holds its previous visual

@@ -65,3 +65,24 @@ packages/design-system-report/.pdf-e2e-tmp/
 
 # Mutation testing (stryker.config.mjs) reports. Its scratch goes under /temp/.
 reports/mutation/
+
+# Bespoke agent instruction files. AGENTS.md is the single source of truth, and a per-tool copy shadows it.
+.github/copilot-instructions.md
+.github/instructions/
+.cursorrules
+.cursor/rules/
+.windsurfrules
+.windsurf/rules/
+.clinerules
+GEMINI.md
+codex.md
+.aider.conf.yml
+.aiderignore
+.continuerules
+.continue/rules/
+.roorules
+.roo/rules/
+.kiro/steering/
+.amazonq/rules/
+.junie/guidelines.md
+AGENT.md
