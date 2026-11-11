@@ -81,6 +81,7 @@ export const INERT_PATHS = [
   [new RegExp(`^${PKG}[^/]+\\.md$`), 'prose'],
   [new RegExp(`^${PKG}scripts/`), 'tooling; the index gates run in full whatever is selected'],
   [new RegExp(`^${PKG}(api|skills|terminal)/`), 'published artefacts no story imports'],
+  [new RegExp(`^${PKG}(type-tests/|vitest\\.types\\.config\\.mts$)`), 'type-level tests and type-cost fixtures; tsc reads them, no story imports them'],
   [new RegExp(`^${PKG}(vitest\\.config\\.mts|eslint\\.config\\.mjs|knip\\.json|licenses\\.baseline\\.json|tsup\\.config\\.ts|LICENSE)$`), 'unit, lint or package-build configuration'],
   [new RegExp(`^${PKG}playwright\\.walkthrough\\.config\\.ts$`), 'the walkthrough, which is not a gate'],
   [/^packages\/design-system-report\//, 'the second package, which depends on this one'],
