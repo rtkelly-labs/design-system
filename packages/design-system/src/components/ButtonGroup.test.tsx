@@ -13,10 +13,10 @@ const danger: ButtonColourRole = { kind: 'intent', role: 'danger' };
 const neutral: ButtonColourRole = { kind: 'neutral' };
 
 describe('findHueCollisions', () => {
-  it('flags danger beside tertiary on every Level, because both are pink/red there', () => {
+  it('flags danger beside tertiary on sketch, where both are red', () => {
     const hits = findHueCollisions([accent('tertiary'), danger]);
-    expect(hits.map((h) => h.level).sort()).toEqual(['midnight', 'sketch']);
-    expect(hits.map((h) => h.hue).sort()).toEqual(['pink', 'red']);
+    expect(hits.map((h) => h.level)).toEqual(['sketch']);
+    expect(hits.map((h) => h.hue)).toEqual(['red']);
     expect(hits[0]?.danger).toEqual([1]);
     expect(hits[0]?.others).toEqual([0]);
   });
@@ -63,9 +63,10 @@ describe('ButtonGroup', () => {
         <Button variant="tertiary">ALSO</Button>
       </ButtonGroup>,
     );
-    // One message naming both Levels, not repeated for the third button.
+    // One message, not repeated for the third button. Only sketch collides:
+    // midnight's danger is red and its tertiary pink (#398).
     expect(warn).toHaveBeenCalledTimes(1);
-    expect(String(warn.mock.calls[0]?.[0])).toContain('pink on midnight');
+    expect(String(warn.mock.calls[0]?.[0])).not.toContain('midnight');
     expect(String(warn.mock.calls[0]?.[0])).toContain('red on sketch');
     expect(String(warn.mock.calls[0]?.[0])).toContain('danger');
   });

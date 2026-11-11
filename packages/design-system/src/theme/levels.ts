@@ -133,8 +133,8 @@ export interface LevelDefinition {
    * and a removed one is not a danger; whether a change is acceptable is a
    * policy's call, and a renderer that paints it green or red has made that
    * call for the reader. The two groups may share a Hue, as `added` and
-   * `intent.success` do, and still diverge where the meanings would clash:
-   * `midnight`'s `removed` is red while its `danger` is pink.
+   * `intent.success` do, or `removed` and `intent.danger`, without sharing a
+   * meaning: the Role a renderer asks for says which job the colour is doing.
    */
   readonly delta: Readonly<Record<Delta, string>>;
   /**
@@ -229,11 +229,12 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       info: '#22d3ee',
       success: '#39ff14',
       warning: '#facc15',
-      danger: '#f955a4',
+      // Was #f955a4, accent.tertiary's pink, so danger read as decoration (#398).
+      danger: '#ff586e',
     },
     delta: {
       added: '#39ff14',
-      removed: '#ff586e', // red, not intent.danger's pink: a removal is not an alarm
+      removed: '#ff586e', // red, the same Hue as intent.danger, as on sketch
       moved: '#c3afff',
     },
     deltaGround: {
@@ -251,7 +252,7 @@ export const LEVELS: Readonly<Record<ThemeLevel, LevelDefinition>> = {
       info: 'cyan',
       success: 'green',
       warning: 'yellow',
-      danger: 'pink',
+      danger: 'red',
     },
     deltaHue: {
       added: 'green',

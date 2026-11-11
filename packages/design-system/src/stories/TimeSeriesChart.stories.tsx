@@ -98,7 +98,7 @@ const meta: Meta<typeof TimeSeriesChart> = {
     docs: {
       description: {
         component:
-          'The metrics chart of an observability dashboard: lines, areas or stacked areas over time, with dashed thresholds (danger tints the band above), annotations, a legend that hides series, a crosshair readout and drag-to-zoom. Inside a `TimeRangeProvider` it follows the shared window and cursor, so hovering one chart draws the same moment on all of them and a drag zooms them all. The plot is one tab stop: Left/Right step sample by sample, Home/End jump, Escape clears. Series colours are roles, cycling through five, never `accent-tertiary` — on midnight that is the danger pink. Every design choice is a prop; `TIME_SERIES_VARIANTS` lists their values.',
+          'The metrics chart of an observability dashboard: lines, areas or stacked areas over time, with dashed thresholds (danger tints the band above), annotations, a legend that hides series, a crosshair readout and drag-to-zoom. Inside a `TimeRangeProvider` it follows the shared window and cursor, so hovering one chart draws the same moment on all of them and a drag zooms them all. The plot is one tab stop: Left/Right step sample by sample, Home/End jump, Escape clears. Series colours are roles, cycling through five, never `accent-tertiary` — on sketch that is the danger red. Every design choice is a prop; `TIME_SERIES_VARIANTS` lists their values.',
       },
     },
   },

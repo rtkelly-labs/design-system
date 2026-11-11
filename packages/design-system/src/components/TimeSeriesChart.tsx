@@ -110,7 +110,7 @@ const TOOLTIP_WIDTH = 196;
  * The roles name fewer distinct colours than they look like: `intent.info`
  * is `accent.primary` on both levels, `intent.success` is `accent.secondary`
  * on sketch and `intent.warning` is on midnight, and `accent.tertiary` is
- * `intent.danger` on both (#398). Only primary and secondary are a pair that
+ * `intent.danger` on sketch. Only primary and secondary are a pair that
  * differs, and means nothing, on every level. So the cycle is those two and a
  * neutral, and from the fourth series on lines are told apart by dash pattern
  * rather than by a colour that would collide or claim a meaning. A series

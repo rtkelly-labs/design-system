@@ -20,6 +20,8 @@ are ButtonGroups. `sm` is 40px tall, as measured.
 
 `BarChart` with `onBarClick` renders `role="group"` with bar buttons named "LABEL: VALUE" instead of `role="img"`. Update any test that finds that chart by `img` role. Without `onBarClick` the bars no longer show a pointer cursor or hover fade.
 
+On midnight, `intent.danger` is red (`#ff586e`, the `delta.removed` red) rather than `accent.tertiary`'s pink, so a danger state no longer reads as decoration (#398). Re-baseline midnight snapshots of anything showing danger.
+
 ## 0.20.0
 
 Review surfaces and lighter page weight. Re-baseline snapshots of anything showing a page title,
