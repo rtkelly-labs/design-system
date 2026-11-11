@@ -30,15 +30,7 @@ We follow a strict, modern GitHub workflow across our repositories:
      ```
 
 3. **Code Quality & Testing**:
-   - Ensure your code passes all local linting, type checks, and automated tests.
-   - For Python projects:
-     ```bash
-     uv run ruff check .
-     uv run ruff format --check .
-     uv run pyright
-     uv run pytest
-     ```
-   - For TypeScript/Node projects:
+   - Ensure your code passes all local linting, type checks, and automated tests:
      ```bash
      pnpm lint
      pnpm typecheck
