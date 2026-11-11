@@ -77,7 +77,7 @@ const EXCLUDED = {
   'components-data-datatable--empty':
     'Empty state data table; asserted in walkthrough suite.',
   'components-data-datatable--headless-tan-stack-table':
-    'Controlled TanStack table state machine; asserted in unit tests.',
+    'Controlled TanStack table state machine; asserted in unit tests, and its sorting by the `play` function `pnpm test:interactions` runs — which is also why no Playwright suite may render it.',
   'components-data-datatable--compound-table':
     'Low-level compound Table primitives; asserted in walkthrough suite.',
 
@@ -165,7 +165,7 @@ try {
 
 const stories = Object.values(index.entries)
   .filter((entry) => entry.type === 'story')
-  .map(({ id, title, name }) => ({ id, title, name }));
+  .map(({ id, title, name, tags }) => ({ id, title, name, tags: tags ?? [] }));
 
 /**
  * Ids the spec asserts.
@@ -211,6 +211,20 @@ const staleExclusions = Object.keys(EXCLUDED).filter((id) => !stories.some((s) =
 // An id in the spec that Storybook does not build is a test asserting nothing.
 const phantom = [...asserted].filter((id) => !stories.some((s) => s.id === id));
 
+/*
+ * A `play` function runs wherever its story renders — including every
+ * `iframe.html?id=` load the Playwright suites make — so one on a story they
+ * name would screenshot, scan or measure the state the play left behind, and
+ * a play that opens a popup would rewrite a baseline. Storybook tags every
+ * story with a play `play-fn` in the index, so the overlap is read from there.
+ * `pnpm test:interactions` runs the plays; they go on other stories.
+ */
+const RENDERED = ['visual.spec.ts', 'a11y.spec.ts', 'edges.spec.ts'].map((file) =>
+  readFileSync(path.join(ROOT, 'tests', file), 'utf8'),
+);
+const renderedIds = new Set(RENDERED.flatMap((text) => [...text.matchAll(/'([a-z0-9-]+--[a-z0-9-]+)'/g)].map((m) => m[1])));
+const playing = stories.filter((s) => s.tags.includes('play-fn') && renderedIds.has(s.id));
+
 const covered = components.size - uncovered.length - excludedComponents.length;
 
 console.log('Visual coverage — components the gated suite asserts\n');
@@ -249,6 +263,11 @@ for (const id of staleExclusions) {
 }
 for (const id of phantom) {
   problems.push(`${id}: asserted in visual.spec.ts but Storybook builds no such story.`);
+}
+for (const { id } of playing) {
+  problems.push(
+    `${id}: has a \`play\` function and is rendered by the visual, a11y or edges suite, which would capture the state the play leaves. Move the play to a story those suites do not name.`,
+  );
 }
 
 if (problems.length > 0) {
