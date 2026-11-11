@@ -2,7 +2,7 @@
  * Serve a static directory the way the Vercel project serves the deployment,
  * so the assembled output can be checked locally before anything deploys.
  *
- *   node scripts/serve-deploy.mjs [dir] [--port 8104] [--mount /site]
+ *   node scripts/serve-deploy.mjs [dir] [--port 8104] [--mount /site] [--compress]
  *
  * `dir` defaults to `deploy-output/` (what `pnpm build:deploy` writes).
  * `--mount` serves `dir` under a prefix instead of at `/`, which is how
@@ -18,6 +18,12 @@
  *   no rule matches gets Vercel's static default,
  *   `public, max-age=0, must-revalidate`.
  *
+ * `--compress` gzips text responses for a client that accepts it, as Vercel
+ * compresses them (it serves Brotli; gzip is close enough and costs no
+ * dependency). Off by default. Lighthouse needs it: its simulated network
+ * prices transferred bytes, so an uncompressed bundle reads as a page several
+ * seconds slower than the deployed one (`apps/site/lighthouserc.json`).
+ *
  * No dependency: `serve` must not enter the lockfile (apps/site/AGENTS.md,
  * rule 6), and this is small enough not to need it.
  */
@@ -26,6 +32,7 @@ import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createGzip } from 'node:zlib';
 import { headersFor } from './vercel-headers.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -41,6 +48,8 @@ const flag = (name, fallback) => {
 };
 const port = Number(flag('--port', process.env.PORT ?? '8104'));
 const mount = (flag('--mount', '') ?? '').replace(/\/$/, '');
+const compress = args.includes('--compress');
+if (compress) args.splice(args.indexOf('--compress'), 1);
 const dir = path.resolve(args[0] ?? path.join(ROOT, 'deploy-output'));
 
 if (!existsSync(dir)) {
@@ -108,8 +117,12 @@ const server = createServer((req, res) => {
     'cache-control': DEFAULT_CACHE,
     ...headersFor(config, pathname),
   };
+  const gzip = compress && /^(text\/|application\/json|image\/svg)/.test(headers['content-type'])
+    && /\bgzip\b/.test(req.headers['accept-encoding'] ?? '');
+  if (gzip) Object.assign(headers, { 'content-encoding': 'gzip', vary: 'Accept-Encoding' });
   res.writeHead(200, headers);
   if (req.method === 'HEAD') res.end();
+  else if (gzip) createReadStream(file).pipe(createGzip()).pipe(res);
   else createReadStream(file).pipe(res);
   log(req, 200);
 });
