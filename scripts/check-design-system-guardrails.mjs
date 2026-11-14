@@ -37,6 +37,8 @@ const IGNORED_DIRS = new Set([
   'node_modules',
   'dist',
   'build',
+  'out',
+  '.output',
   'temp',
   '.temp',
   '.next',
