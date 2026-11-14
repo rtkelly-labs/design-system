@@ -175,7 +175,6 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
-    "@ls-lint/ls-lint": "^2.3.2",
     "@playwright/test": "^1.62.1",
     "@storybook/addon-docs": "^10.5.5",
     "@storybook/react": "^10.5.5",
