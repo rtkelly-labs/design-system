@@ -1,0 +1,5 @@
+/* ESCAPE_HATCH(webgl): Specialized 3D viewport canvas styles */
+.canvas-viewport {
+  aspect-ratio: 16 / 9;
+  perspective: 1200px;
+}

@@ -21,6 +21,8 @@
     "site": "pnpm --filter @rtkelly-labs/design-system build && pnpm --filter @rtkelly-labs/design-system-site dev",
     "site:build": "pnpm --filter @rtkelly-labs/design-system build && pnpm --filter @rtkelly-labs/design-system-site build",
     "build:deploy": "node scripts/assemble-deploy.mjs",
-    "serve:deploy": "node scripts/serve-deploy.mjs"
+    "serve:deploy": "node scripts/serve-deploy.mjs",
+    "check:guardrails": "node scripts/check-design-system-guardrails.mjs",
+    "test:guardrails": "node apps/guardrails-fixture/test/guardrails.test.mjs"
   }
 }
