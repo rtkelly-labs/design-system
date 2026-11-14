@@ -1,5 +1,6 @@
 # .ls-lint.yml
-# Estate-wide ban on shell (.sh, .bash, .zsh) and PowerShell (.ps1, .psm1) scripts.
+# Estate-wide ban on shell (.sh, .bash, .zsh) and PowerShell (.ps1, .psm1) scripts,
+# and estate-wide ban on ad-hoc CSS (.css) files to guard design-system tokens.
 # Exceptions must be explicitly listed in the `ignore:` section below.
 
 ls:
@@ -8,12 +9,14 @@ ls:
   .zsh: exists:0
   .ps1: exists:0
   .psm1: exists:0
+  .css: exists:0
   "**":
     .sh: exists:0
     .bash: exists:0
     .zsh: exists:0
     .ps1: exists:0
     .psm1: exists:0
+    .css: exists:0
   scripts:
     .dir: regex:.*
     .md: regex:.*
@@ -49,24 +52,20 @@ ls:
 
 ignore:
   - .git
-  - .git/**
   - node_modules
-  - node_modules/**
-  - "**/node_modules"
-  - "**/node_modules/**"
   - temp
-  - temp/**
-  - "**/temp"
-  - "**/temp/**"
+  - .temp
   - dist
-  - dist/**
-  - "**/dist/**"
   - build
-  - build/**
-  - "**/build/**"
   - coverage
-  - coverage/**
   - .turbo
-  - .turbo/**
   - storybook-static
-  - storybook-static/**
+  # Whitelisted design-system entrypoints:
+  - packages/design-system/.storybook/docs.css
+  - packages/design-system/src/theme.css
+  - packages/design-system/src/styles.css
+  - packages/design-system/src/prose.css
+  - apps/site/src/app/globals.css
+  # Whitelisted fixture styles (for test application):
+  - apps/guardrails-fixture/src/styles/app.src.css
+  - apps/guardrails-fixture/src/styles/escape-hatches/canvas-3d.css

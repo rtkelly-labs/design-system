@@ -111,6 +111,10 @@ export const MANIFEST = {
     alsoDev: true,
     why: 'styles.css does `@import "tailwindcss"`, and theme.css is a v4 `@theme` contract, so a consumer must be building with Tailwind v4. Declared so that requirement is stated rather than assumed. Also dev, for Storybook.',
   },
+  '@ls-lint/ls-lint': {
+    kind: 'peer',
+    why: 'Estate-wide filesystem governance and CSS confinement linter. Peer so consuming repositories are required to declare it locally.',
+  },
 
   '@playwright/test': { kind: 'dev', why: 'Visual regression suite and the screenshot walkthrough.' },
   '@storybook/addon-docs': { kind: 'dev', why: 'MDX docs pages in Storybook.' },

@@ -1,0 +1,16 @@
+{
+  "name": "@rtkelly-labs/guardrails-fixture",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@rtkelly-labs/design-system": "workspace:*"
+  },
+  "devDependencies": {
+    "@ls-lint/ls-lint": "^2.3.2"
+  },
+  "scripts": {
+    "test:guardrails": "node test/guardrails.test.mjs",
+    "lint:fs": "ls-lint"
+  }
+}

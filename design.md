@@ -2,6 +2,7 @@
 
 > **Mechanics & Stylesheet:** Implemented in `@rtkelly-labs/design-system/styles.css` and `theme.css`.  
 > **Machine-Readable Tokens:** [`machine.design.md`](./machine.design.md) & `packages/design-system/tokens/`.  
+> **Guardrails & Agent Steering:** [`docs/guardrails.md`](./docs/guardrails.md).  
 > **Storybook:** Served under `Guides/design.md`.
 
 This document is the visual contract and design judgment guide for `@rtkelly-labs`. It teaches autonomous coding agents (Claude Code, Cursor, Codex, Google Stitch) how to think like the brand and construct on-brand interfaces across the product estate (`oxbow`, `rig`, `Diffra`, `docs`, `blog`).
