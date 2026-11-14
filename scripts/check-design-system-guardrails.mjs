@@ -215,8 +215,48 @@ function checkLsLint() {
     });
     results.checks.filesystemLsLint.status = 'FAIL';
   } else {
-    results.checks.filesystemLsLint.status = 'PASS';
     results.checks.filesystemLsLint.details.push('.ls-lint.yml enforces closed CSS file rules (.css: exists:0).');
+  }
+
+  // Check that @ls-lint/ls-lint is declared as a local devDependency, and dlx is banned
+  const pkgPath = path.join(targetDir, 'package.json');
+  if (fs.existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+      const allDeps = { ...pkg.dependencies, ...pkg.devDependencies, ...pkg.peerDependencies };
+      const hasLsLint = allDeps['@ls-lint/ls-lint'];
+
+      if (!hasLsLint) {
+        results.violations.push({
+          type: 'LSLINT_DEV_DEPENDENCY',
+          file: 'package.json',
+          message: '@ls-lint/ls-lint must be declared in devDependencies. Running via pnpm dlx is strictly banned.',
+        });
+        results.checks.filesystemLsLint.status = 'FAIL';
+      } else {
+        results.checks.filesystemLsLint.details.push('package.json declares @ls-lint/ls-lint in devDependencies.');
+      }
+
+      // Check for any banned dlx usage in scripts
+      if (pkg.scripts) {
+        for (const [scriptName, scriptCmd] of Object.entries(pkg.scripts)) {
+          if (typeof scriptCmd === 'string' && scriptCmd.includes('dlx')) {
+            results.violations.push({
+              type: 'BANNED_DLX_USAGE',
+              file: `package.json -> scripts.${scriptName}`,
+              message: `pnpm dlx is banned in scripts ("${scriptCmd}"). Use local script "ls-lint" or "pnpm exec ls-lint".`,
+            });
+            results.checks.filesystemLsLint.status = 'FAIL';
+          }
+        }
+      }
+    } catch {
+      // Ignore unparseable package.json
+    }
+  }
+
+  if (results.checks.filesystemLsLint.status !== 'FAIL') {
+    results.checks.filesystemLsLint.status = 'PASS';
   }
 }
 

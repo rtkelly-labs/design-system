@@ -6,7 +6,17 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      '@ls-lint/ls-lint':
+        specifier: ^2.3.2
+        version: 2.3.2
+
+  apps/guardrails-fixture:
+    dependencies:
+      '@rtkelly-labs/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
 
   apps/site:
     dependencies:
@@ -27,7 +37,7 @@ importers:
         version: 1.28.0(react@19.2.8)
       next:
         specifier: ^16.3.6
-        version: 16.3.6(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 16.3.6(@playwright/test@1.62.1)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -1254,6 +1264,12 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@ls-lint/ls-lint@2.3.2':
+    resolution: {integrity: sha512-8GPo2oRjpEEX/soVzWqb692mwrt9iKs3Z9xK7abSonyizmSVsdLwSQWS4OmqPIwwKdungwhNkzsmPwNFg9gSgg==}
+    cpu: [x64, arm64, s390x, ppc64le]
+    os: [darwin, linux, win32]
+    hasBin: true
 
   '@mdx-js/loader@3.1.1':
     resolution: {integrity: sha512-0TTacJyZ9mDmY+VefuthVshaNIyCGZHJG2fMnGaDttCt8HmjUF7SizlHJpaCDoGnN635nK1wpzfpx/Xx5S4WnQ==}
@@ -6107,6 +6123,8 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
+  '@ls-lint/ls-lint@2.3.2': {}
+
   '@mdx-js/loader@3.1.1':
     dependencies:
       '@mdx-js/mdx': 3.1.1
@@ -9209,7 +9227,7 @@ snapshots:
 
   natural-compare@1.4.0: {}
 
-  next@16.3.6(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  next@16.3.6(@playwright/test@1.62.1)(@types/node@26.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@next/env': 16.3.6
       '@swc/helpers': 0.5.23
@@ -9218,7 +9236,7 @@ snapshots:
       postcss: 8.5.23
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
-      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.8)
+      styled-jsx: 5.1.6(react@19.2.8)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.3.6
       '@next/swc-darwin-x64': 16.3.6
@@ -9987,12 +10005,10 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.8):
+  styled-jsx@5.1.6(react@19.2.8):
     dependencies:
       client-only: 0.0.1
       react: 19.2.8
-    optionalDependencies:
-      '@babel/core': 7.29.7
 
   sucrase@3.35.1:
     dependencies:

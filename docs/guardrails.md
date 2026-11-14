@@ -36,7 +36,10 @@ When an agent writes UI in this estate, it must conform to these non-negotiable 
 ### Why `ls-lint`?
 When an AI agent is asked to build a custom component, its default instinct is to create `ComponentName.css` or dump ad-hoc rules into `index.css`/`App.css`. This quickly introduces un-tokenized CSS, custom border radii, and styling drift.
 
-`ls-lint` is a fast static Go binary that inspects the filesystem in under 15 milliseconds. It runs in pre-commit hooks, local scripts (`pnpm check:guardrails`), and CI jobs.
+`ls-lint` is a fast static Go binary that inspects the filesystem in under 15 milliseconds.
+
+> [!IMPORTANT]
+> **No `dlx` policy:** Running via `pnpm dlx` is strictly prohibited across the estate due to cold network roundtrips, floating untracked versions, and CI delays. Every consuming repository MUST declare `@ls-lint/ls-lint` in `devDependencies` (enforced as a peer dependency of `@rtkelly-labs/design-system`) and invoke it via `"lint:fs": "ls-lint"` or `pnpm exec ls-lint`.
 
 ### Configuration (`.ls-lint.yml`)
 Every consumer repository enforces a closed allowlist that bans `.css` files across the repository, with exceptions granted only to the single designated entrypoint:

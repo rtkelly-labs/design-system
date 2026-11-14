@@ -147,6 +147,7 @@
   "author": "Ryan Kelly",
   "license": "MIT",
   "peerDependencies": {
+    "@ls-lint/ls-lint": ">=2.0.0",
     "@tailwindcss/typography": "^0.5.16",
     "react": "^18.0.0 || ^19.0.0",
     "react-dom": "^18.0.0 || ^19.0.0",
@@ -174,6 +175,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@ls-lint/ls-lint": "^2.3.2",
     "@playwright/test": "^1.62.1",
     "@storybook/addon-docs": "^10.5.5",
     "@storybook/react": "^10.5.5",

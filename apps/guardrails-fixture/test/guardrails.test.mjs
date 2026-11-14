@@ -164,6 +164,26 @@ console.log('\n[Scenario 6] Valid Escape Hatch with Structured Annotation is Per
   }
 }
 
+// Test 7: Catch Banned dlx in scripts
+console.log('\n[Scenario 7] Catch Banned dlx Usage in package.json');
+{
+  const pkgPath = path.join(fixtureDir, 'package.json');
+  const originalPkg = fs.readFileSync(pkgPath, 'utf8');
+  const parsed = JSON.parse(originalPkg);
+  parsed.scripts['lint:bad'] = 'pnpm dlx @ls-lint/ls-lint';
+  fs.writeFileSync(pkgPath, JSON.stringify(parsed, null, 2));
+
+  try {
+    const result = runAudit(fixtureDir);
+    assert(result.passed === false, 'Audit correctly fails on banned dlx usage');
+    const dlxViolation = result.violations.find((v) => v.type === 'BANNED_DLX_USAGE');
+    assert(!!dlxViolation, 'BANNED_DLX_USAGE violation reported');
+    assert(dlxViolation.message.includes('pnpm dlx is banned'), 'Guidance instructs to use local script instead of dlx');
+  } finally {
+    fs.writeFileSync(pkgPath, originalPkg);
+  }
+}
+
 console.log('\n' + '='.repeat(70));
 console.log(`  ALL ${passedTests}/${totalTests} GUARDRAIL PROPAGATION TESTS PASSED CLEANLY!`);
 console.log('='.repeat(70));

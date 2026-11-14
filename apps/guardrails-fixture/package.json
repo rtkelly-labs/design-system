@@ -6,7 +6,11 @@
   "dependencies": {
     "@rtkelly-labs/design-system": "workspace:*"
   },
+  "devDependencies": {
+    "@ls-lint/ls-lint": "^2.3.2"
+  },
   "scripts": {
-    "test:guardrails": "node test/guardrails.test.mjs"
+    "test:guardrails": "node test/guardrails.test.mjs",
+    "lint:fs": "ls-lint"
   }
 }

@@ -52,27 +52,14 @@ ls:
 
 ignore:
   - .git
-  - .git/**
   - node_modules
-  - node_modules/**
-  - "**/node_modules"
-  - "**/node_modules/**"
   - temp
-  - temp/**
-  - "**/temp"
-  - "**/temp/**"
+  - .temp
   - dist
-  - dist/**
-  - "**/dist/**"
   - build
-  - build/**
-  - "**/build/**"
   - coverage
-  - coverage/**
   - .turbo
-  - .turbo/**
   - storybook-static
-  - storybook-static/**
   # Whitelisted design-system entrypoints:
   - packages/design-system/.storybook/docs.css
   - packages/design-system/src/theme.css
@@ -81,4 +68,4 @@ ignore:
   - apps/site/src/app/globals.css
   # Whitelisted fixture styles (for test application):
   - apps/guardrails-fixture/src/styles/app.src.css
-  - apps/guardrails-fixture/src/styles/escape-hatches/**
+  - apps/guardrails-fixture/src/styles/escape-hatches/canvas-3d.css
