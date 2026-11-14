@@ -175,7 +175,7 @@ When an agent or developer must bypass a rule in JSX/TSX:
    {/* eslint-disable-next-line shadcn/no-arbitrary-values -- ESCAPE_HATCH(canvas): fixed aspect ratio required for 3D viewer */}
    <div className="h-[420px] w-full">
    ```
-2. Any `eslint-disable` comment lacking `-- ESCAPE_HATCH(<domain>): <reason>` fails CI via `check-design-system-guardrails`.
+2. Any `eslint-disable` comment lacking `-- ESCAPE_HATCH(<domain>): <reason>` fails verification when checked with `check-design-system-guardrails`.
 
 ---
 

@@ -53,22 +53,46 @@ const IGNORED_DIRS = new Set([
   '__mocks__',
 ]);
 
-const ALLOWED_CSS_BASENAMES = new Set([
-  'app.src.css',
-  'gallery.src.css',
-  'c4.src.css',
-  'app.css',
-  'gallery.css',
-  'c4.css',
-  'globals.css',
-  'theme.css',
-  'styles.css',
-  'prose.css',
-  'docs.css',
-  'tailwind.css',
-  'index.css',
-  'studio.css',
+const APPROVED_CSS_PATHS = new Set([
+  'src/theme.css',
+  'src/globals.css',
+  'src/app/globals.css',
+  'app/globals.css',
+  'src/styles/app.src.css',
+  'web/styles/app.src.css',
+  'css/tailwind.css',
+  'src/index.css',
+  '.storybook/docs.css',
 ]);
+
+// Helper to extract explicitly ignored CSS paths from target's .ls-lint.yml
+function getLsLintIgnoredCss(dir) {
+  const lsLintPath = path.join(dir, '.ls-lint.yml');
+  const ignored = new Set();
+  if (fs.existsSync(lsLintPath)) {
+    const lines = fs.readFileSync(lsLintPath, 'utf8').split('\n');
+    let inIgnore = false;
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith('#')) continue;
+      if (line === 'ignore:') {
+        inIgnore = true;
+        continue;
+      }
+      if (inIgnore) {
+        if (line.startsWith('-')) {
+          const item = line.replace(/^-\s*/, '').replace(/['"]/g, '').trim();
+          if (item.endsWith('.css')) {
+            ignored.add(path.normalize(item));
+          }
+        } else if (!line.startsWith('#') && line.endsWith(':')) {
+          inIgnore = false;
+        }
+      }
+    }
+  }
+  return ignored;
+}
 
 // Patterns for negative guardrails in TSX / JSX
 const BANNED_PATTERNS = [
@@ -96,11 +120,6 @@ const BANNED_PATTERNS = [
     id: 'arbitrary-bracket-values',
     regex: /(?<![\w-])(?:p|m|px|py|pt|pb|pl|pr|w|h|text|border|top|left|right|bottom)-\[[^\]\s]+\]/g,
     message: 'Arbitrary bracket spacing/sizing is banned. Use tokens on the spacing scale.',
-  },
-  {
-    id: 'inline-styles',
-    regex: /style=\{\{[^}]*(?:background|color|border|radius)[^}]*\}\}/g,
-    message: 'Inline style attributes with appearance properties are banned. Use Tailwind role classes or component props.',
   },
 ];
 
@@ -188,7 +207,18 @@ function checkPackageScope() {
     }
   }
 
-  results.checks.packageScope.status = hasValidDsDep && results.violations.every(v => v.type !== 'PACKAGE_SCOPE') ? 'PASS' : 'WARN';
+  if (!hasValidDsDep) {
+    results.violations.push({
+      type: 'PACKAGE_SCOPE',
+      file: 'package.json',
+      message: 'Missing required dependency: "@rtkelly-labs/design-system". Consuming projects must depend on @rtkelly-labs/design-system.',
+    });
+    results.checks.packageScope.status = 'FAIL';
+  } else if (results.violations.some((v) => v.type === 'PACKAGE_SCOPE')) {
+    results.checks.packageScope.status = 'FAIL';
+  } else {
+    results.checks.packageScope.status = 'PASS';
+  }
 }
 
 // -------------------------------------------------------------
@@ -207,7 +237,10 @@ function checkLsLint() {
   }
 
   const content = fs.readFileSync(lsLintPath, 'utf8');
-  const hasCssBan = content.includes('.css: exists:0') || content.includes('.css: exists: 0');
+  const hasCssBan = content.split('\n').some((line) => {
+    const trimmed = line.trim();
+    return !trimmed.startsWith('#') && (trimmed === '.css: exists:0' || trimmed === '.css: exists: 0');
+  });
 
   if (!hasCssBan) {
     results.violations.push({
@@ -267,16 +300,26 @@ function checkLsLint() {
 // -------------------------------------------------------------
 function checkCssConfinement() {
   const rogueCssFiles = [];
+  const lsLintIgnoredCss = getLsLintIgnoredCss(targetDir);
+
   walkDir(targetDir, (filePath) => {
     if (filePath.endsWith('.css')) {
-      const baseName = path.basename(filePath);
       const relPath = path.relative(targetDir, filePath);
+      const normRel = path.normalize(relPath);
 
-      // Check if it's an allowed entrypoint or in escape-hatches folder
-      const isAllowedBase = ALLOWED_CSS_BASENAMES.has(baseName);
-      const isEscapeHatch = relPath.includes('escape-hatches') || relPath.includes('vendor');
+      // Check if explicitly ignored in .ls-lint.yml
+      const isLsLintIgnored = lsLintIgnoredCss.has(normRel);
 
-      if (!isAllowedBase && !isEscapeHatch) {
+      // Check if it's an approved standard entrypoint path
+      const isApprovedPath =
+        APPROVED_CSS_PATHS.has(normRel) ||
+        (normRel.endsWith('/globals.css') && (normRel.startsWith('src/app/') || normRel.startsWith('app/'))) ||
+        (normRel.endsWith('/app.src.css') && (normRel.startsWith('src/styles/') || normRel.startsWith('web/styles/')));
+
+      // Check if located within an approved escape-hatches or vendor directory segment
+      const isEscapeHatch = /(?:^|[\\/])(?:escape-hatches|vendor)[\\/]/.test(normRel);
+
+      if (!isLsLintIgnored && !isApprovedPath && !isEscapeHatch) {
         rogueCssFiles.push(relPath);
       }
     }
@@ -318,6 +361,32 @@ function checkCodeGuardrails() {
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split('\n');
 
+    // 1. Check for multi-line or variable-whitespace inline styles with appearance properties
+    const inlineStyleRegex = /style\s*=\s*\{\{[\s\S]*?(?:background|color|border|radius)[\s\S]*?\}\}/g;
+    let styleMatch;
+    while ((styleMatch = inlineStyleRegex.exec(content)) !== null) {
+      const matchIndex = styleMatch.index;
+      const lineIdx = content.slice(0, matchIndex).split('\n').length - 1;
+      const matchedLine = lines[lineIdx];
+      const prevLine = lineIdx > 0 ? lines[lineIdx - 1] : '';
+
+      const hasEscapeHatch =
+        ESCAPE_HATCH_REGEX.test(matchedLine) ||
+        ESCAPE_HATCH_REGEX.test(prevLine) ||
+        ESCAPE_HATCH_REGEX.test(styleMatch[0]);
+
+      if (!hasEscapeHatch) {
+        results.violations.push({
+          type: 'INLINE-STYLES',
+          file: `${relPath}:${lineIdx + 1}`,
+          matchedText: styleMatch[0].replace(/\s+/g, ' ').slice(0, 80),
+          message: 'Inline style attributes with appearance properties are banned. Use Tailwind role classes or component props.',
+        });
+        violationsCount++;
+      }
+    }
+
+    // 2. Line-by-line checks for banned utility classes and unannotated linter disables
     for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
       const line = lines[lineIdx];
       const prevLine = lineIdx > 0 ? lines[lineIdx - 1] : '';
@@ -344,8 +413,10 @@ function checkCodeGuardrails() {
         pattern.regex.lastIndex = 0;
         let match;
         while ((match = pattern.regex.exec(line)) !== null) {
-          // Special exception: SVG size variants like [&_svg]:size-3 are allowed
-          if (line.includes('[&_svg]')) continue;
+          // Special exception: SVG size variants like [&_svg]:size-3 are allowed for arbitrary-bracket-values
+          if (pattern.id === 'arbitrary-bracket-values' && match[0].includes('[&_svg]')) {
+            continue;
+          }
 
           results.violations.push({
             type: pattern.id.toUpperCase(),
@@ -379,6 +450,7 @@ results.passed = results.violations.length === 0;
 
 if (jsonOutput) {
   console.log(JSON.stringify(results, null, 2));
+  process.exit(results.passed ? 0 : 1);
 } else {
   console.log('='.repeat(70));
   console.log('  RTKELLY LABS DESIGN SYSTEM GUARDRAILS AUDIT');

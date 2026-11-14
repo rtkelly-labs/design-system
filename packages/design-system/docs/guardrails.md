@@ -1,6 +1,6 @@
 # Design System Guardrails & Agent Steering Contract
 
-See [Root Documentation](../../docs/guardrails.md) for full details.
+See [Root Documentation](../../../docs/guardrails.md) for full details.
 
 This document records the automated guardrail architecture for `@rtkelly-labs/design-system`:
 - **Filesystem Governance**: `.ls-lint.yml` closed allowlist banning rogue `.css` files (`.css: exists: 0`).

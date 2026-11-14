@@ -184,6 +184,81 @@ console.log('\n[Scenario 7] Catch Banned dlx Usage in package.json');
   }
 }
 
+// Test 8: Limit SVG exception to matched utility
+console.log('\n[Scenario 8] Limit SVG Exception to Matched Utility');
+{
+  const testFile = path.join(fixtureDir, 'src/TempSvgMix.tsx');
+  fs.writeFileSync(
+    testFile,
+    `import React from 'react';\nexport const TempSvgMix = () => <button className="[&_svg]:size-4 rounded-md">Icon</button>;\n`
+  );
+
+  try {
+    const result = runAudit(fixtureDir);
+    assert(result.passed === false, 'Audit fails when rounded-* accompanies SVG utility');
+    const roundedViolation = result.violations.find((v) => v.type === 'ROUNDED-CORNERS');
+    assert(!!roundedViolation, 'ROUNDED-CORNERS violation reported despite [&_svg]');
+    assert(roundedViolation.matchedText === 'rounded-md', 'Matches rounded-md');
+  } finally {
+    fs.unlinkSync(testFile);
+  }
+}
+
+// Test 9: Reject Unapproved CSS Paths Even If Basename Matches
+console.log('\n[Scenario 9] Catch CSS in Unapproved Path');
+{
+  const testCssPath = path.join(fixtureDir, 'src/components/styles.css');
+  fs.mkdirSync(path.dirname(testCssPath), { recursive: true });
+  fs.writeFileSync(testCssPath, '.test { color: red; }');
+
+  try {
+    const result = runAudit(fixtureDir);
+    assert(result.passed === false, 'Audit fails on unapproved CSS path');
+    const cssViolation = result.violations.find((v) => v.type === 'CSS_CONFINEMENT');
+    assert(!!cssViolation, 'CSS_CONFINEMENT violation reported for unapproved styles.css');
+  } finally {
+    fs.unlinkSync(testCssPath);
+  }
+}
+
+// Test 10: Catch Multi-Line Inline Styles with Appearance Properties
+console.log('\n[Scenario 10] Catch Multi-line Inline Styles');
+{
+  const testFile = path.join(fixtureDir, 'src/TempMultiLineStyle.tsx');
+  fs.writeFileSync(
+    testFile,
+    `import React from 'react';\nexport const TempMultiLineStyle = () => (\n  <div\n    style={{\n      backgroundColor: '#f43f5e',\n    }}\n  >\n    Multi\n  </div>\n);\n`
+  );
+
+  try {
+    const result = runAudit(fixtureDir);
+    assert(result.passed === false, 'Audit fails on multi-line inline style with background');
+    const styleViolation = result.violations.find((v) => v.type === 'INLINE-STYLES');
+    assert(!!styleViolation, 'INLINE-STYLES violation reported for multi-line block');
+  } finally {
+    fs.unlinkSync(testFile);
+  }
+}
+
+// Test 11: Missing Package Scope Dependency Fails
+console.log('\n[Scenario 11] Catch Missing Package Scope Dependency');
+{
+  const pkgPath = path.join(fixtureDir, 'package.json');
+  const originalPkg = fs.readFileSync(pkgPath, 'utf8');
+  const parsed = JSON.parse(originalPkg);
+  delete parsed.dependencies['@rtkelly-labs/design-system'];
+  fs.writeFileSync(pkgPath, JSON.stringify(parsed, null, 2));
+
+  try {
+    const result = runAudit(fixtureDir);
+    assert(result.passed === false, 'Audit fails when @rtkelly-labs/design-system is missing');
+    const scopeViolation = result.violations.find((v) => v.type === 'PACKAGE_SCOPE');
+    assert(!!scopeViolation, 'PACKAGE_SCOPE violation reported for missing dependency');
+  } finally {
+    fs.writeFileSync(pkgPath, originalPkg);
+  }
+}
+
 console.log('\n' + '='.repeat(70));
 console.log(`  ALL ${passedTests}/${totalTests} GUARDRAIL PROPAGATION TESTS PASSED CLEANLY!`);
 console.log('='.repeat(70));
