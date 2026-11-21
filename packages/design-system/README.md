@@ -213,6 +213,17 @@ utilities the compiled components use:
 `theme.css` is **generated** from `src/theme/levels.ts`, which is the single place
 any level name or colour is written.
 
+**Stricter surface (opt-in).** Import
+`@rtkelly-labs/design-system/theme.strict.css` instead to remove Tailwind's default colour,
+font-family, radius and shadow namespaces before the system aliases are declared. `bg-slate-*`,
+`text-indigo-*`, `font-serif` and `shadow-lg` then emit no rules, while the system surface
+(`bg-surface-raised`, `shadow-hard-sm`, `bg-palette-*`, zero-radius `rounded-sm`…`rounded-4xl`)
+keeps working. `styles.css` still bundles the regular `theme.css`, so a strict consumer composes
+`theme.strict.css` + `prose.css` + the font imports itself. This is a utility-generation
+boundary, not a security boundary: arbitrary values, static utilities and later namespace
+declarations still bypass it. Remaining escape hatches, and the planned lint and browser gates,
+are in [`docs/agent-guardrails.md`](./docs/agent-guardrails.md).
+
 `styles.css` = `theme.css` + `prose.css` + web-font imports + opinionated global
 resets (zero border-radius everywhere, base typography). Import that, or compose
 the pieces yourself — but not both.

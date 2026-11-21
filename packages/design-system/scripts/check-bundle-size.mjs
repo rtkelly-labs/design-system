@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Assert that the theme stylesheet stays within its byte budget, and report the
- * size of the ESM output without gating it.
+ * Assert that each theme stylesheet stays within its byte budget, and report
+ * the size of the ESM output without gating it.
  *
- * `src/theme.css` is the one asset every consumer ships whole: it is imported
- * as a stylesheet, so nothing shakes it. Its raw and gzipped sizes are a hard
- * ceiling.
+ * `src/theme.css` and its opt-in `src/theme.strict.css` mirror are the assets
+ * every consumer ships whole: each is imported as a stylesheet, so nothing
+ * shakes it. Their raw and gzipped sizes are a hard ceiling.
  *
  * The ESM output under `dist/` used to carry a ceiling too, on all of its
  * modules concatenated. It was retired in #379. That sum grows with every
@@ -50,6 +50,13 @@ const BUDGETS = {
     maxRaw: 30_760,
     maxGzip: 5_640,
     desc: 'Design token CSS',
+  },
+  'src/theme.strict.css': {
+    // The mirror carries the same tokens plus seven one-line namespace resets:
+    // 30,405 B raw, 5,611 B gzip locally. Same ~2% headroom as theme.css.
+    maxRaw: 30_980,
+    maxGzip: 5_720,
+    desc: 'Design token CSS, opt-in strict entrypoint',
   },
 };
 
@@ -108,13 +115,16 @@ if (problems.length) {
   console.error(`\nBundle size budget exceeded — ${problems.length} violation(s):\n`);
   for (const p of problems) console.error(`  - ${p}`);
   console.error(
-    '\nEvery consumer ships theme.css whole. If this increase was intentional, ' +
+    '\nEvery consumer ships one theme stylesheet whole. If this increase was intentional, ' +
       'justify it and update BUDGETS in scripts/check-bundle-size.mjs.',
   );
   process.exit(1);
 }
 
-console.log(`Bundle size OK — ${rows.length} asset within its raw and gzip budget.`);
+console.log(
+  `Bundle size OK — ${rows.length} asset${rows.length === 1 ? '' : 's'} within ` +
+    `${rows.length === 1 ? 'its' : 'their'} raw and gzip budget.`,
+);
 if (dist) {
   console.log(
     `  dist/**/*.js (reported, not gated): ${formatBytes(dist.length)} raw, ` +

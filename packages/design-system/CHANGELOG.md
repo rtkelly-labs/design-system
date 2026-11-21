@@ -9,7 +9,14 @@ Proper release notes start at 1.0. Until then this file records only what a
 consumer has to *do*, newest first. The reasoning lives in the pull requests and
 in [`docs/adr/`](./docs/adr/).
 
-## Unreleased
+## 0.21.0
+
+New opt-in `@rtkelly-labs/design-system/theme.strict.css` removes Tailwind default colour,
+font-family, radius and shadow namespaces before restoring system aliases. Replace the regular
+theme import to opt in: `bg-slate-*`, `font-serif` and `shadow-lg` then emit no rules.
+Spacing and type defaults remain for component compatibility, and `styles.css` still bundles the
+regular `theme.css`, so strict consumers compose `theme.strict.css` + `prose.css` + the font
+imports themselves. See `docs/agent-guardrails.md` for the audit and the next slices.
 
 `Button` defaults to the new `quiet` variant (it was `tertiary`), and `secondary` is now an
 outline with a hard shadow rather than an accent fill. Add `variant="tertiary"` where the old

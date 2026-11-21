@@ -23,10 +23,10 @@ import { LEVELS, THEME_LEVELS, FIXED_COLOURS, INK_WEIGHT } from '../src/theme/le
 import { CSS_MEDIUM, LOOPS, LOOP_KEYFRAMES, MEDIA_DEFINITIONS } from '../src/theme/media.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-// Generated straight into the file consumers already import, rather than into a
-// second file behind an @import — one fewer thing to copy at build time and one
-// fewer way for the two to disagree.
+// Both entrypoints use the same renderer; strict only resets Tailwind namespaces.
 const OUTPUT = path.join(ROOT, 'src', 'theme.css');
+const STRICT_OUTPUT = path.join(ROOT, 'src', 'theme.strict.css');
+const STRICT_RESETS = ['color', 'font', 'radius', 'shadow', 'inset-shadow', 'drop-shadow', 'text-shadow'];
 
 const BANNER = `/* GENERATED FILE — DO NOT EDIT.
  *
@@ -357,13 +357,17 @@ function loopTheme() {
   return lines.join('\n');
 }
 
-function render() {
+function render(strict = false) {
+  const resets = strict
+    ? '  /* Remove Tailwind defaults before restoring the system aliases. */\n' +
+      STRICT_RESETS.map((name) => `  --${name}-*: initial;`).join('\n') + '\n\n'
+    : '';
   const [firstLevel] = THEME_LEVELS;
   const byPolarity = (polarity) => THEME_LEVELS.filter((l) => LEVELS[l].polarity === polarity);
 
   const sections = [];
 
-  sections.push(BANNER);
+  sections.push(strict ? BANNER.replace('/theme.css', '/theme.strict.css') : BANNER);
   sections.push(`
 /* Tailwind v4 skips node_modules during automatic content detection, so the
  * utilities used inside the compiled components would never be generated in a
@@ -417,7 +421,7 @@ ${(['dark', 'light'])
    references; the literals live in the level blocks below. */
 
 @theme {
-${TAILWIND_ALIASES}
+${resets}${TAILWIND_ALIASES}
 
   --font-sans: var(--ds-font-body);
   --font-display: var(--ds-font-display);
@@ -548,27 +552,29 @@ ${TAILWIND_ALIASES}
   return `${sections.join('\n')}`.replace(/\n{3,}/g, '\n\n').trimStart() + '\n';
 }
 
-const css = render();
+const outputs = [[OUTPUT, render()], [STRICT_OUTPUT, render(true)]];
 const check = process.argv.includes('--check');
 
-if (check) {
-  let existing = '';
-  try {
-    existing = readFileSync(OUTPUT, 'utf8');
-  } catch {
-    console.error(`${path.basename(OUTPUT)} is missing. Run \`pnpm tokens:build\`.`);
-    process.exit(1);
-  }
-  if (existing !== css) {
-    console.error(
-      `${path.basename(OUTPUT)} is out of date with src/theme/levels.ts.\nRun \`pnpm tokens:build\` and commit the result.`,
+for (const [output, css] of outputs) {
+  if (check) {
+    let existing = '';
+    try {
+      existing = readFileSync(output, 'utf8');
+    } catch {
+      console.error(`${path.basename(output)} is missing. Run \`pnpm tokens:build\`.`);
+      process.exit(1);
+    }
+    if (existing !== css) {
+      console.error(
+        `${path.basename(output)} is out of date with src/theme/levels.ts.\nRun \`pnpm tokens:build\` and commit the result.`,
+      );
+      process.exit(1);
+    }
+    console.log(`${path.basename(output)} is up to date (${THEME_LEVELS.length} levels).`);
+  } else {
+    writeFileSync(output, css, 'utf8');
+    console.log(
+      `Wrote src/${path.basename(output)} — ${THEME_LEVELS.length} levels: ${THEME_LEVELS.join(', ')}`,
     );
-    process.exit(1);
   }
-  console.log(`${path.basename(OUTPUT)} is up to date (${THEME_LEVELS.length} levels).`);
-} else {
-  writeFileSync(OUTPUT, css, 'utf8');
-  console.log(
-    `Wrote src/${path.basename(OUTPUT)} — ${THEME_LEVELS.length} levels: ${THEME_LEVELS.join(', ')}`,
-  );
 }

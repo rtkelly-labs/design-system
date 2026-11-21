@@ -76,7 +76,7 @@ export default defineConfig({
   esbuildPlugins: [preserveModules()],
   async onSuccess() {
     const dist = path.join(ROOT, 'dist');
-    for (const file of ['styles.css', 'theme.css', 'prose.css']) cpSync(path.join(SRC, file), path.join(dist, file));
+    for (const file of ['styles.css', 'theme.css', 'theme.strict.css', 'prose.css']) cpSync(path.join(SRC, file), path.join(dist, file));
     cpSync(path.join(SRC, 'fonts'), path.join(dist, 'fonts'), { recursive: true });
     // Named, not `export *`, so a server component's import of the barrel
     // reaches only the client modules it uses. See the script's header.
