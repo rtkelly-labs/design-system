@@ -1,6 +1,6 @@
 {
   "name": "@rtkelly-labs/design-system",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "description": "Brutalist design system for Ryan Kelly websites: a two-level theme ladder, role-addressed tokens, and Base UI-backed components",
   "type": "module",
   "types": "./dist/index.d.ts",
@@ -12,6 +12,7 @@
     },
     "./styles.css": "./dist/styles.css",
     "./theme.css": "./dist/theme.css",
+    "./theme.strict.css": "./dist/theme.strict.css",
     "./prose.css": "./dist/prose.css",
     "./tokens/midnight.tokens.json": "./tokens/palette.midnight.tokens.json",
     "./tokens/sketch.tokens.json": "./tokens/palette.sketch.tokens.json",

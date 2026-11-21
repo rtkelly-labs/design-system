@@ -109,11 +109,11 @@ const FRAME_FLOOR = MEDIA_DEFINITIONS.video.contrastFloor;
  * sentence rather than to the bare number, so `(\d+) pairs` does not start
  * matching an unrelated count that happens to appear later.
  */
-/** Count regex hits under a set of paths, skipping tests. `sources()` is the doc
+/** Collect regex hits under a set of paths, skipping tests. `sources()` is the doc
  *  census and deliberately does not reach `src/components`, so these read the
  *  tree directly. */
-function countIn(roots, filePattern, needle) {
-  let n = 0;
+function hitsIn(roots, filePattern, needle) {
+  const hits = [];
   const visit = (rel) => {
     const abs = path.join(ROOT, rel);
     if (statSync(abs).isDirectory()) {
@@ -121,10 +121,14 @@ function countIn(roots, filePattern, needle) {
       return;
     }
     if (!filePattern.test(rel) || rel.includes('.test.')) return;
-    n += (readFileSync(abs, 'utf8').match(needle) ?? []).length;
+    hits.push(...(readFileSync(abs, 'utf8').match(needle) ?? []));
   };
   for (const r of roots) visit(r);
-  return n;
+  return hits;
+}
+
+function countIn(roots, filePattern, needle) {
+  return hitsIn(roots, filePattern, needle).length;
 }
 
 const CLAIMS = [
@@ -144,7 +148,14 @@ const CLAIMS = [
   {
     key: 'motion.keyframes',
     what: '@keyframes rules in the package',
-    actual: () => countIn(['src'], /\.css$/, /@keyframes/g),
+    /*
+     * Counted by *name*, not by rule. `src/theme.strict.css` is a generated
+     * mirror of `src/theme.css` — the same six animations, emitted twice so a
+     * consumer can import either entrypoint — and a rule count reads 12. The
+     * sentence means the animations a consumer ships, and a consumer imports
+     * one stylesheet.
+     */
+    actual: () => new Set(hitsIn(['src'], /\.css$/, /@keyframes\s+[-\w]+/g)).size,
     patterns: [/and \*\*(zero|\d+)\*\* `@keyframes`/g],
   },
   {
