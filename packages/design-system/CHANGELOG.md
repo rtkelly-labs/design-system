@@ -16,6 +16,12 @@ The type scale gains `ui` (0.875rem) and `heading` (1.25rem), and the weights ga
 `--ds-weight-semibold`. Nothing renders differently. Prefer them to `text-sm`, `text-xl` and
 Tailwind's own weights; [ADR 0008](./docs/adr/0008-type-is-addressed-by-step.md) says why.
 
+New: the type rules are published (`TYPE_RULES`, `scanTypeRules`, `typeExceptions`) beside the
+colour rules, and the package ships a `ds-lint` command that runs both over a consumer's own
+files at budget zero: `pnpm exec ds-lint web`. Wire it into CI rather than copying the rules.
+An exception is written at the site as `ds-allow-type: <reason>`. A later release closes
+Tailwind's default type scale, so `text-sm` stops compiling; running `ds-lint` now is the warning.
+
 `Button` defaults to the new `quiet` variant (it was `tertiary`), and `secondary` is now an
 outline with a hard shadow rather than an accent fill. Add `variant="tertiary"` where the old
 default was wanted, and re-baseline anything showing a button. New: `variant="danger"`, sizes

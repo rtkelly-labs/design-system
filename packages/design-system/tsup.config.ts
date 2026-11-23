@@ -54,7 +54,8 @@ export default defineConfig({
    * imports do not reach without having to prove a single statement pure.
    * `check:import-cost` holds the result.
    */
-  entry: reachableModules(),
+  // The consumer command is not reachable from the index, and is its own entry.
+  entry: [...reachableModules(), path.join(SRC, 'cli', 'dsLint.ts')],
   /*
    * ESM only. `"type": "module"` makes `.js` an ES module, so that is the
    * extension written. There is no CommonJS build: it was every module a

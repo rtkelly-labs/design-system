@@ -1151,6 +1151,24 @@ declare function scanRules<Id extends string>(source: string, rules: readonly {
 
 declare function scanTokenRules(source: string): Finding<TokenRule['id']>[];
 
+interface TypeRule {
+    id: 'tailwindSize' | 'tailwindWeight' | 'arbitraryType' | 'cssSize' | 'cssWeight' | 'cssShorthand' | 'inlineStyle';
+    label: string;
+
+    pattern: RegExp;
+    fix: string;
+}
+declare const TYPE_RULES: readonly TypeRule[];
+
+declare const TYPE_EXCEPTION_MARKER = "ds-allow-type:";
+
+declare function scanTypeRules(source: string): Finding<TypeRule['id']>[];
+
+declare function typeExceptions(source: string): {
+    line: number;
+    reason: string;
+}[];
+
 interface AvatarProps extends react__default.HTMLAttributes<HTMLDivElement> {
     src?: string;
     alt?: string;
@@ -5425,6 +5443,8 @@ export {
   TLDR,
   type TLDRProps,
   TOKEN_RULES,
+  TYPE_EXCEPTION_MARKER,
+  TYPE_RULES,
   Table,
   type TableAppearance,
   TableBody,
@@ -5534,6 +5554,7 @@ export {
   type TreeDiagramProps,
   type TreeNode,
   type TrustStatus,
+  type TypeRule,
   type TypeStep,
   type TypeStepName,
   type UptimeStatus,
@@ -5647,6 +5668,7 @@ export {
   sameFilter,
   scanRules,
   scanTokenRules,
+  scanTypeRules,
   semanticTokens,
   serviceEdgeMidpoint,
   serviceEdgePath,
@@ -5667,6 +5689,7 @@ export {
   trendTone,
   truncateId,
   tryParseFilter,
+  typeExceptions,
   useActiveHeading,
   useCopyToClipboard,
   useDocsLinkComponent,
