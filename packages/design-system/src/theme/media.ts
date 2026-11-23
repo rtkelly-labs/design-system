@@ -56,7 +56,7 @@ export interface TypeStep {
 }
 
 /** The type scale's steps, smallest first. Named, not indexed, so a step can be removed. */
-export type TypeStepName = 'caption' | 'body' | 'lead' | 'title' | 'display' | 'hero';
+export type TypeStepName = 'caption' | 'ui' | 'body' | 'lead' | 'heading' | 'title' | 'display' | 'hero';
 
 /** Motion. `graphic` has no time base, so its durations are zero rather than absent. */
 export interface Motion {
@@ -91,8 +91,12 @@ export interface MediumDefinition {
 
   readonly type: Readonly<Record<TypeStepName, TypeStep>>;
 
-  /** Font weights this Medium uses. Brutalism leans on 700/900, not 400/500. */
-  readonly weight: Readonly<Record<'regular' | 'bold' | 'black', number>>;
+  /**
+   * Font weights this Medium uses. Brutalism leans on 700/900, not 400/500.
+   * `semibold` is the one step between, for dense app text where 700 shouts:
+   * an unread row, a table header. See ADR 0008.
+   */
+  readonly weight: Readonly<Record<'regular' | 'semibold' | 'bold' | 'black', number>>;
 
   /**
    * Border width. The load-bearing weight is 2 on `web` — edges are drawn, not
@@ -150,13 +154,17 @@ export const MEDIA_DEFINITIONS: Readonly<Record<Medium, MediumDefinition>> = {
     spacing: [0, 0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 6, 8],
     type: {
       caption: { size: 0.75, lineHeight: 1.4 },
+      // Dense app text: rows, controls, table cells. What `text-sm` stood in for.
+      ui: { size: 0.875, lineHeight: 1.45 },
       body: { size: 1, lineHeight: 1.6 },
       lead: { size: 1.125, lineHeight: 1.55 },
+      // A section heading inside an app, between a lead paragraph and a page title.
+      heading: { size: 1.25, lineHeight: 1.3 },
       title: { size: 1.5, lineHeight: 1.2 },
       display: { size: 2.25, lineHeight: 1.05 },
       hero: { size: 3, lineHeight: 0.95 },
     },
-    weight: { regular: 400, bold: 700, black: 900 },
+    weight: { regular: 400, semibold: 600, bold: 700, black: 900 },
     borderWidth: { hairline: 1, edge: 2, heavy: 4 },
     shadowOffset: { sm: 2, md: 4, lg: 6 },
     radius: { none: 0, soft: 0 },
@@ -177,13 +185,15 @@ export const MEDIA_DEFINITIONS: Readonly<Record<Medium, MediumDefinition>> = {
     // and a 16px web page does not". Nothing here is the web's scale scaled.
     type: {
       caption: { size: 24, lineHeight: 1.35 },
+      ui: { size: 28, lineHeight: 1.45 },
       body: { size: 32, lineHeight: 1.5 },
       lead: { size: 40, lineHeight: 1.45 },
+      heading: { size: 48, lineHeight: 1.2 },
       title: { size: 56, lineHeight: 1.15 },
       display: { size: 88, lineHeight: 1.05 },
       hero: { size: 128, lineHeight: 0.95 },
     },
-    weight: { regular: 500, bold: 700, black: 900 },
+    weight: { regular: 500, semibold: 600, bold: 700, black: 900 },
     // Compression eats a 2px edge. 4 is the thinnest line that survives a
     // re-encode intact, which is why this is not the web's number.
     borderWidth: { hairline: 2, edge: 4, heavy: 8 },
@@ -208,13 +218,15 @@ export const MEDIA_DEFINITIONS: Readonly<Record<Medium, MediumDefinition>> = {
     spacing: [0, 2, 4, 8, 12, 16, 24, 32, 48, 64, 96],
     type: {
       caption: { size: 8, lineHeight: 1.3 },
+      ui: { size: 10, lineHeight: 1.35 },
       body: { size: 12, lineHeight: 1.4 },
       lead: { size: 14, lineHeight: 1.4 },
+      heading: { size: 17, lineHeight: 1.25 },
       title: { size: 20, lineHeight: 1.2 },
       display: { size: 32, lineHeight: 1.05 },
       hero: { size: 48, lineHeight: 1 },
     },
-    weight: { regular: 400, bold: 700, black: 900 },
+    weight: { regular: 400, semibold: 600, bold: 700, black: 900 },
     // A stroke in viewBox units scales with the drawing, so 1 is a real
     // hairline here rather than a sub-pixel risk.
     borderWidth: { hairline: 0.5, edge: 1, heavy: 2 },
