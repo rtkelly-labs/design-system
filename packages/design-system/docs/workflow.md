@@ -77,6 +77,7 @@ The rules in `AGENTS.md` § *Conventions*, with the reasoning and the incidents 
    - `pnpm test:edges` (heavy panels and box nesting per asserted story, as a ratchet)
    - `pnpm check:css` (styling-in-CSS ratchet)
    - `pnpm check:tokens` (hue-named call sites, budget 0)
+   - `pnpm check:type` (type written as a value, a per-rule ratchet; ADR 0008)
    - `pnpm ansi:check` (terminal slot coverage and the committed fixture diff)
    - `pnpm check:fonts` (every self-hosted family reachable from a `--ds-font-*` stack)
    - `pnpm check:deps` (dependency reasons, sections and usage)

@@ -38,6 +38,7 @@ Everything is a `pnpm` script; these are the ones whose names do not give them a
 | `pnpm ci:history` | where CI's minutes go: p50/p90 per job and step over recent runs, from GitHub's own timings — not a gate |
 | `pnpm release:train --dry-run` | why the last train did or did not depart — assessment only, moves nothing |
 | `pnpm check:tokens` | hue-named call sites, budget **0** — a colour is addressed by its job |
+| `pnpm check:type` | type written as a value rather than a step — a per-rule ratchet, the published `TYPE_RULES` (ADR 0008) |
 | `pnpm ansi:check` | terminal slot coverage **and** the committed fixture diff |
 | `pnpm test:leaks` | the unit suite shuffled with no per-file isolation, N times — the detector `isolate: false` stands on; not a gate |
 | `pnpm test:visual` | Playwright snapshots — **in the pinned image only**, see [`docs/visual-regression.md`](./docs/visual-regression.md) |

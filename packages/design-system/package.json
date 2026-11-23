@@ -118,6 +118,8 @@
     "check:fonts:list": "node scripts/check-fonts.mjs --list",
     "check:tokens": "node scripts/check-tokens.mjs",
     "check:tokens:list": "node scripts/check-tokens.mjs --list",
+    "check:type": "node scripts/check-type.mjs",
+    "check:type:list": "node scripts/check-type.mjs --list",
     "ansi:build": "node scripts/build-ansi.mjs",
     "ansi:check": "node scripts/build-ansi.mjs --check",
     "test:mutation": "stryker run"

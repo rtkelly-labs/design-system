@@ -235,6 +235,12 @@ jobs:
       - name: Hue-named call sites
         run: pnpm check:tokens
 
+      # A ratchet per rule (ADR 0008). The published TYPE_RULES, which consumers
+      # run at budget zero, run here against src/ with budgets set to the sites
+      # written before the ui and heading steps existed. A budget only goes down.
+      - name: Type by step
+        run: pnpm check:type
+
       # Slot coverage and the committed fixture diff — the two gates ADR 0001
       # says a fan-out map requires, because a wrong map emits confidently: a
       # terminal renders an unfilled slot as the foreground rather than erroring.
