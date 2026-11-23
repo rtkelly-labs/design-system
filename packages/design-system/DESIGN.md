@@ -240,7 +240,7 @@ shadow in the section's accent, a sunken well — not another bracket or another
 Weights are `regular` (400), `semibold` (600), `bold` (700) and `black` (900). Semibold is for
 emphasis inside dense text, such as an unread row or a table header, where bold would shout.
 Tailwind's own `text-sm`, `font-medium` and arbitrary sizes are debt, counted by
-`pnpm check:type`, and a consumer runs the same published rules over its own code at budget
+`check:type`, and a consumer runs the same published rules over its own code at budget
 zero. See [ADR 0008](./docs/adr/0008-type-is-addressed-by-step.md).
 
 **Geometry and time are the second axis, and they are declared.** A Level varies colour and is
