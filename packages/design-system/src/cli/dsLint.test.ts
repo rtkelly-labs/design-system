@@ -65,6 +65,40 @@ describe('main', () => {
     expect(run(bare).code).toBe(1);
   });
 
+  it('refuses every inline exception when they are turned off, reason or not', () => {
+    const root = tree({ 'a.css': '.a { font-size: 11px; } /* ds-allow-type: GitHub chip parity */' });
+    const { code, out } = run('--no-inline-exceptions', root);
+    expect(code).toBe(1);
+    expect(out).toContain('ds-allow-type: is not accepted here');
+  });
+
+  it('excuses a finding recorded in the exceptions file, and nothing else', () => {
+    const root = tree({ 'web/a.css': '.a { font-size: 11px; }\n.b { font-weight: 650; }' });
+    const file = path.join(root, 'exceptions.json');
+    const rel = path.relative(process.cwd(), path.join(root, 'web/a.css')).split(path.sep).join('/');
+    writeFileSync(file, JSON.stringify([{ file: rel, match: 'font-size: 11px', reason: 'GitHub chip parity' }]));
+    const { code, out } = run('--only', 'type', '--exceptions-file', file, root);
+    expect(code).toBe(1);
+    expect(out).toContain('font-weight: 650');
+    expect(out).not.toContain('font-size: 11px  [');
+  });
+
+  it('fails an exceptions-file entry with no reason, or one that excuses nothing', () => {
+    const root = tree({ 'a.css': '.a { font-size: var(--ds-type-ui); }' });
+    const file = path.join(root, 'exceptions.json');
+    writeFileSync(
+      file,
+      JSON.stringify([
+        { file: 'gone.css', match: 'font-size: 9px', reason: 'old' },
+        { file: 'a.css', match: 'x', reason: '' },
+      ]),
+    );
+    const { code, out } = run('--exceptions-file', file, path.join(root, 'a.css'));
+    expect(code).toBe(1);
+    expect(out).toContain('excuses nothing any more');
+    expect(out).toContain('needs a reason');
+  });
+
   it('rejects an unknown family and a missing target', () => {
     expect(() => run('--only', 'colour', '.')).toThrow(/--only takes/);
     expect(run().code).toBe(2);

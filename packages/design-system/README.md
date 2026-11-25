@@ -243,7 +243,9 @@ editing the component. Every pair is contrast-audited on every level by
 Address type by step, never by size: `text-ui`, not `text-sm` or `text-[13px]`. See
 [`DESIGN.md` §7](./DESIGN.md#the-type-scale--address-a-step-never-a-size).
 A consumer's CI holds it to that, and to colour by role, with the command this package ships:
-`pnpm exec ds-lint <dir>`, at budget zero. Run it; do not copy the rules.
+`pnpm exec ds-lint <dir>`, at budget zero. Run it; do not copy the rules. To make every exception
+pass review, add `--no-inline-exceptions --exceptions-file <json>`: the `ds-allow-type:` marker
+then fails, and the one way past a finding is an entry in that file.
 
 ```tsx
 import { Badge, Tag, accentVar, semanticTokens } from '@rtkelly-labs/design-system';

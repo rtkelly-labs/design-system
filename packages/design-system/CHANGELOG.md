@@ -19,7 +19,9 @@ Tailwind's own weights; [ADR 0008](./docs/adr/0008-type-is-addressed-by-step.md)
 New: the type rules are published (`TYPE_RULES`, `scanTypeRules`, `typeExceptions`) beside the
 colour rules, and the package ships a `ds-lint` command that runs both over a consumer's own
 files at budget zero: `pnpm exec ds-lint web`. Wire it into CI rather than copying the rules.
-An exception is written at the site as `ds-allow-type: <reason>`. A later release closes
+An exception is written at the site as `ds-allow-type: <reason>`, or, with
+`--no-inline-exceptions --exceptions-file <json>`, only in one reviewed file, where an entry that
+excuses nothing fails. A later release closes
 Tailwind's default type scale, so `text-sm` stops compiling; running `ds-lint` now is the warning.
 
 `Button` defaults to the new `quiet` variant (it was `tertiary`), and `secondary` is now an
