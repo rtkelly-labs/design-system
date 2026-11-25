@@ -128,7 +128,7 @@ interface TypeStep {
     readonly lineHeight: number;
 }
 
-type TypeStepName = 'caption' | 'body' | 'lead' | 'title' | 'display' | 'hero';
+type TypeStepName = 'caption' | 'ui' | 'body' | 'lead' | 'heading' | 'title' | 'display' | 'hero';
 
 interface Motion {
 
@@ -148,7 +148,7 @@ interface MediumDefinition {
     readonly spacing: readonly number[];
     readonly type: Readonly<Record<TypeStepName, TypeStep>>;
 
-    readonly weight: Readonly<Record<'regular' | 'bold' | 'black', number>>;
+    readonly weight: Readonly<Record<'regular' | 'semibold' | 'bold' | 'black', number>>;
 
     readonly borderWidth: Readonly<Record<'hairline' | 'edge' | 'heavy', number>>;
 
