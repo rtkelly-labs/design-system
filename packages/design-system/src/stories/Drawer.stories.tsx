@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Drawer } from '../components/Drawer';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/Button';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expectOnTop, expectClosed, pressAt, settled } from './play';
 
 const meta: Meta<typeof Drawer> = {
   title: 'Components/Overlays/Drawer',
@@ -65,6 +67,28 @@ export const FromTheLeft: Story = {
  */
 export const Toggleable: Story = {
   render: () => <ToggleableExample />,
+  // `pnpm test:interactions`: opened from the keyboard, the panel comes to
+  // rest against the left edge, a press on the page beside it closes it, and
+  // focus returns to the opener. Ends closed, as the story starts.
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    const trigger = within(canvasElement).getByRole('button', { name: /open drawer/i });
+
+    trigger.focus();
+    await userEvent.keyboard('{Enter}');
+    const drawer = await page.findByRole('dialog', { name: /navigation/i });
+    await waitFor(() => expect(drawer.contains(document.activeElement)).toBe(true));
+    await settled(drawer);
+    await expectOnTop(drawer);
+    const box = drawer.getBoundingClientRect();
+    await expect(box.left).toBe(0);
+    await expect(box.height).toBe(window.innerHeight);
+
+    // The page to the right of the panel is the backdrop's.
+    await pressAt(box.right + (window.innerWidth - box.right) / 2, window.innerHeight / 2, drawer);
+    await expectClosed(drawer);
+    await waitFor(() => expect(trigger).toHaveFocus());
+  },
 };
 
 /**

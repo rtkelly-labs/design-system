@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Select } from '../components/Select';
 import type { SelectOption, SelectProps } from '../components/Select';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
+import { expectOnTop, expectClosed } from './play';
 
 /** The regions every sample here chooses between. */
 const REGIONS: SelectOption[] = [
@@ -113,6 +115,29 @@ function ControlledExample() {
  */
 export const Controlled: Story = {
   render: () => <ControlledExample />,
+  // `pnpm test:interactions`: opened from the keyboard, the list is on screen
+  // and on top, the chosen row is where it opens, and Enter on the next row
+  // reaches the caller — then the same back again, ending where it started.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const page = within(canvasElement.ownerDocument.body);
+    const trigger = canvas.getByRole('combobox', { name: 'Deployment region' });
+
+    for (const [from, to] of [
+      ['EU North (Stockholm)', 'ap-south-1'],
+      ['AP South (Singapore)', 'eu-north-1'],
+    ] as const) {
+      trigger.focus();
+      await userEvent.keyboard('{ArrowDown}');
+      const list = await page.findByRole('listbox', { name: 'Deployment region' });
+      await expectOnTop(list);
+      await waitFor(() => expect(within(list).getByRole('option', { name: from })).toHaveFocus());
+      await userEvent.keyboard(to === 'ap-south-1' ? '{ArrowDown}{Enter}' : '{ArrowUp}{Enter}');
+      await expectClosed(list);
+      await expect(canvas.getByText(`> region: ${to}`)).toBeInTheDocument();
+      await waitFor(() => expect(trigger).toHaveFocus());
+    }
+  },
 };
 
 /**

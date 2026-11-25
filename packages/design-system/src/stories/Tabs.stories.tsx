@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Tabs, TabsList, TabsPanel, TabsTab } from '../components/Tabs';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 
 /**
  * Nothing on this page is about code, a language or a package manager, and
@@ -103,6 +104,35 @@ export const Vertical: Story = {
         </TabsPanel>
       </>
     ),
+  },
+  // `pnpm test:interactions`: ArrowDown and ArrowUp move the selection, the
+  // horizontal arrows do nothing, only the selected panel is visible — the
+  // browser's `checkVisibility`, not a `hidden` attribute — and Tab leaves the
+  // strip in one press. Home ends it on Members, as the story starts.
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const tab = (name: string) => canvas.getByRole('tab', { name });
+    const shown = () =>
+      canvas.getAllByRole('tabpanel', { hidden: true }).filter((panel) => panel.checkVisibility());
+
+    tab('Members').focus();
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    await waitFor(() => expect(tab('Audit log')).toHaveFocus());
+    await expect(tab('Audit log')).toHaveAttribute('aria-selected', 'true');
+    await userEvent.keyboard('{ArrowRight}{ArrowLeft}');
+    await expect(tab('Audit log')).toHaveFocus();
+    await userEvent.keyboard('{ArrowUp}');
+    await waitFor(() => expect(tab('Roles')).toHaveAttribute('aria-selected', 'true'));
+    await expect(shown().map((panel) => panel.textContent)).toEqual([
+      expect.stringContaining('Owner, maintainer and reader'),
+    ]);
+
+    // Tab leaves the strip rather than walking it: one stop per tablist.
+    await userEvent.tab();
+    await expect(canvas.getAllByRole('tab').some((t) => t === document.activeElement)).toBe(false);
+    tab('Roles').focus();
+    await userEvent.keyboard('{Home}');
+    await waitFor(() => expect(tab('Members')).toHaveAttribute('aria-selected', 'true'));
   },
 };
 
