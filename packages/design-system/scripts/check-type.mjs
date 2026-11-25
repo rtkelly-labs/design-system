@@ -12,11 +12,19 @@
  *   node scripts/check-type.mjs           fail if any rule's count rises
  *   node scripts/check-type.mjs --list    print every site
  *
+ * The budgets live in `type-budget.json`, and a budget can only fall: the
+ * script compares the file with the same file on the base branch and fails if
+ * any number in it went up. Raising a budget to make a red build green is the
+ * edit this check exists to refuse, whoever makes it. The base is
+ * `TYPE_BUDGET_BASE`, else `origin/$GITHUB_BASE_REF` on a pull request,
+ * else `origin/main`.
+ *
  * When every budget is zero, the `@theme` block resets Tailwind's `--text-*` and
  * `--font-weight-*` before declaring ours, and this script's budgets go with it:
  * `text-sm` then fails to compile instead of failing a count.
  */
 
+import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,17 +35,44 @@ const SRC = path.join(ROOT, 'src');
 
 /**
  * The budgets. Lower one in the same commit that removes its sites; never raise
- * one. A rule absent from this table has a budget of zero.
+ * one. A rule absent from the file has a budget of zero.
  */
-const BUDGET = {
-  tailwindSize: 310,
-  tailwindWeight: 19,
-  arbitraryType: 50,
-  cssSize: 13,
-  cssWeight: 12,
-  cssShorthand: 0,
-  inlineStyle: 57,
-};
+const BUDGET_FILE = path.join(ROOT, 'type-budget.json');
+const BUDGET = JSON.parse(readFileSync(BUDGET_FILE, 'utf8'));
+
+/**
+ * The same file on the base branch, or null when the base predates it. A base
+ * that cannot be read at all fails in CI, because a ratchet that quietly skips
+ * its comparison is one an agent can raise without anyone noticing.
+ */
+function baseBudget() {
+  const base =
+    process.env.TYPE_BUDGET_BASE ?? (process.env.GITHUB_BASE_REF ? `origin/${process.env.GITHUB_BASE_REF}` : 'origin/main');
+  const git = (...args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  try {
+    git('rev-parse', '--verify', '--quiet', `${base}^{commit}`);
+  } catch {
+    const message = `check:type: cannot read the base ${base} to compare type-budget.json against.`;
+    if (process.env.CI) {
+      console.error(`${message} Fetch it before this step.`);
+      process.exit(1);
+    }
+    console.warn(`${message} Skipping the no-raise check locally.`);
+    return null;
+  }
+  const top = git('rev-parse', '--show-toplevel').trim();
+  const rel = path.relative(top, BUDGET_FILE).split(path.sep).join('/');
+  try {
+    return { base, budget: JSON.parse(git('show', `${base}:${rel}`)) };
+  } catch {
+    return null; // The base has no budget file yet: this change introduces it.
+  }
+}
+
+const previous = baseBudget();
+const raised = previous
+  ? TYPE_RULES.filter((rule) => (BUDGET[rule.id] ?? 0) > (previous.budget[rule.id] ?? 0))
+  : [];
 
 /**
  * Files that define the scale rather than use it. `theme.css` is generated from
@@ -86,6 +121,17 @@ if (process.argv.includes('--list')) {
 const over = TYPE_RULES.filter((rule) => counts[rule.id] > (BUDGET[rule.id] ?? 0));
 const unexplained = exceptions.filter((e) => !e.reason);
 
+if (raised.length) {
+  for (const rule of raised) {
+    console.error(
+      `type-budget.json raises ${rule.id} from ${previous.budget[rule.id] ?? 0} to ${BUDGET[rule.id]} against ${previous.base}.`,
+    );
+  }
+  console.error('A type budget only falls. Put it back and move the new sites onto a step of the scale.');
+  for (const rule of raised) console.error(`  ${rule.fix}`);
+  process.exit(1);
+}
+
 if (over.length || unexplained.length) {
   for (const rule of over) {
     console.error(`${rule.label}: ${counts[rule.id]}, budget ${BUDGET[rule.id] ?? 0}.`);
@@ -104,5 +150,5 @@ const total = sites.length;
 const lower = TYPE_RULES.filter((rule) => counts[rule.id] < (BUDGET[rule.id] ?? 0));
 console.log(total === 0 ? 'No type written as a value.' : `Type written as a value: ${total}, within budget.`);
 for (const rule of lower) {
-  console.log(`  ${rule.id} is down to ${counts[rule.id]}: lower its budget from ${BUDGET[rule.id]}.`);
+  console.log(`  ${rule.id} is down to ${counts[rule.id]}: lower it in type-budget.json from ${BUDGET[rule.id]}.`);
 }
