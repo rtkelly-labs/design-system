@@ -224,6 +224,25 @@ every heading is no longer a mark, it is noise, and the page reads as a costume.
 When a design feels too plain without them, the fix is the form — a heavier border, an offset
 shadow in the section's accent, a sunken well — not another bracket or another mono label.
 
+### The type scale — address a step, never a size
+
+| Step | Utility | `web` size / leading | Use it for |
+|---|---|---|---|
+| `caption` | `text-caption` | 0.75rem / 1.4 | metadata, timestamps, chips. The floor: nothing smaller |
+| `ui` | `text-ui` | 0.875rem / 1.45 | dense app text: rows, controls, table cells, nav |
+| `body` | `text-body` | 1rem / 1.6 | running text |
+| `lead` | `text-lead` | 1.125rem / 1.55 | an introductory paragraph |
+| `heading` | `text-heading` | 1.25rem / 1.3 | a section heading inside an app |
+| `title` | `text-title` | 1.5rem / 1.2 | a page or panel title |
+| `display` | `text-display` | 2.25rem / 1.05 | a landing heading |
+| `hero` | `text-hero` | 3rem / 0.95 | one per page, at most |
+
+Weights are `regular` (400), `semibold` (600), `bold` (700) and `black` (900). Semibold is for
+emphasis inside dense text, such as an unread row or a table header, where bold would shout.
+Tailwind's own `text-sm`, `font-medium` and arbitrary sizes are debt, counted by
+a type ratchet script, and a consumer runs the same published rules over its own code at budget
+zero. See [ADR 0008](./docs/adr/0008-type-is-addressed-by-step.md).
+
 **Geometry and time are the second axis, and they are declared.** A Level varies colour and is
 picked at runtime; a **Medium** varies geometry and time and is picked at build time by which
 artifact is being emitted. There are three — `web` (CSS pixels, wall clock), `video` (a fixed

@@ -11,6 +11,11 @@ in [`docs/adr/`](./docs/adr/).
 
 ## Unreleased
 
+The type scale gains `ui` (0.875rem) and `heading` (1.25rem), and the weights gain `semibold`
+(600): `text-ui`, `text-heading`, `font-semibold`, `--ds-type-ui`, `--ds-type-heading`,
+`--ds-weight-semibold`. Nothing renders differently. Prefer them to `text-sm`, `text-xl` and
+Tailwind's own weights; [ADR 0008](./docs/adr/0008-type-is-addressed-by-step.md) says why.
+
 `Button` defaults to the new `quiet` variant (it was `tertiary`), and `secondary` is now an
 outline with a hard shadow rather than an accent fill. Add `variant="tertiary"` where the old
 default was wanted, and re-baseline anything showing a button. New: `variant="danger"`, sizes

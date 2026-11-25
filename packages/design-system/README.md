@@ -237,6 +237,11 @@ editing the component. Every pair is contrast-audited on every level by
 | `--ds-text-*` | `primary`, `secondary`, `muted`, `inverse` | Text prominence |
 | `--ds-border-*` | `strong`, `default`, `subtle` | Rule weight |
 | `--ds-font-*` | `display`, `body`, `mono`, `pixel` | Typography roles |
+| `--ds-type-*`, `--ds-leading-*` | `caption`, `ui`, `body`, `lead`, `heading`, `title`, `display`, `hero` | Type size and its leading, as `text-caption` … `text-hero` |
+| `--ds-weight-*` | `regular`, `semibold`, `bold`, `black` | Font weight, as `font-regular` … `font-black` |
+
+Address type by step, never by size: `text-ui`, not `text-sm` or `text-[13px]`. See
+[`DESIGN.md` §7](./DESIGN.md#the-type-scale--address-a-step-never-a-size).
 
 ```tsx
 import { Badge, Tag, accentVar, semanticTokens } from '@rtkelly-labs/design-system';
