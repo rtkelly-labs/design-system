@@ -49,7 +49,7 @@ consumer runs the published rules at budget zero.**
 - **The rules are published, like the colour rules.** A consumer imports them from the package
   and runs them over its own sources. It does not copy them. A copy is a rule that silently
   stops matching the original, which is how rig's gate came to check no type at all.
-- **This repository holds itself to the rules as a ratchet** (`check:type`), because its
+- **This repository holds itself to the rules as a ratchet** (a type ratchet script), because its
   ~460 existing sites are debt. The budget only goes down.
 - **Tailwind's default scale closes when that budget reaches zero.** The `@theme` block then
   resets `--text-*` and `--font-weight-*` before declaring ours, so `text-sm` stops existing
