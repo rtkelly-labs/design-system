@@ -24,6 +24,9 @@
     "./terminal/sketch.alacritty.toml": "./terminal/rtk-sketch.alacritty.toml",
     "./terminal/sketch.ghostty.conf": "./terminal/rtk-sketch.ghostty.conf"
   },
+  "bin": {
+    "ds-lint": "./dist/cli/dsLint.js"
+  },
   "files": [
     "dist",
     "tokens",

@@ -63,6 +63,10 @@ export * from './components/review';
 // lints at budget zero with exactly these.
 export { TOKEN_RULES, scanRules, scanTokenRules } from './lib/tokenRules';
 export type { Finding, TokenRule } from './lib/tokenRules';
+// The type rules (ADR 0008), published for the same reason. A consumer runs
+// them at budget zero, through `ds-lint` or `scanTypeRules`, and never copies them.
+export { TYPE_RULES, TYPE_EXCEPTION_MARKER, scanTypeRules, typeExceptions } from './lib/typeRules';
+export type { TypeRule } from './lib/typeRules';
 export * from './components/Avatar';
 export * from './components/PageTitle';
 export * from './components/PageHeader';

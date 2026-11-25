@@ -56,6 +56,7 @@
  */
 
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { isBuiltin } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -138,6 +139,9 @@ function readBundleImports() {
       if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier)) continue;
       const specifier = statement.moduleSpecifier.text;
       if (specifier.startsWith('.')) continue;
+      // A Node built-in is not a dependency a consumer installs or bundles: only
+      // the `ds-lint` command imports one, and nothing reachable from the index does.
+      if (isBuiltin(specifier)) continue;
       if (!bySpecifier.has(specifier)) bySpecifier.set(specifier, new Set());
       const bindings = bySpecifier.get(specifier);
       const clause = statement.importClause;
