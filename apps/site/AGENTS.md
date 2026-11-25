@@ -33,6 +33,7 @@ map, as an npm consumer would.
 | `pnpm generate` | rewrite `src/generated/docs-data.json` from the package (gitignored) |
 | `pnpm lint` | typescript-eslint, `react-hooks` and `jsx-a11y`, with zero warnings allowed |
 | `pnpm check:tokens` | the package's published `scanTokenRules` over `src/`, budget 0 |
+| `pnpm lighthouse <collect\|assert\|upload>` | Lighthouse CI over `out/`, budgets in `lighthouserc.json`; set `CHROME_PATH` to a Playwright Chromium. Runs in `experiments.yml` behind `experiment:lighthouse` |
 | `pnpm typecheck` | generate, then `tsc --noEmit` |
 
 ## Rules that are not discoverable

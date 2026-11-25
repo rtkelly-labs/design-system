@@ -197,6 +197,30 @@ walkthrough across runners with `--shard` and `merge-reports`. Worth roughly
 another 30s, at the cost of a merge job and three times the runner minutes.
 
 
+## 🔦 Lighthouse budgets (experiment)
+
+`experiments.yml`'s `lighthouse` job runs when a pull request carries the
+**`experiment:lighthouse`** label, like `experiment:mutation`. It builds the
+package and the applied site, serves `apps/site/out/` with
+`scripts/serve-deploy.mjs --compress` (Vercel compresses text, and Lighthouse's
+simulated network prices transferred bytes), and runs Lighthouse CI three times
+on each of five pages: home, docs, the Button page and two examples. It uses the
+pinned image's Chromium through `CHROME_PATH` and installs none.
+
+The budgets live in `apps/site/lighthouserc.json`, on the median run:
+
+- **Fail:** total byte weight and font bytes per page, and CLS. Bytes do not
+  move between runs of one build, so a breach is a real change.
+- **Warn:** LCP, total blocking time and the performance score. These are
+  simulated timings on a shared runner, and they move between runs of one build.
+
+LHCI is not in the lockfile. The site's `lighthouse` script is `pnpm dlx` at an exact
+version, so only this job pays for its install. A devDependency would add it to
+the `pnpm install` of every job on every push. The job summary prints the
+medians (`apps/site/scripts/lighthouse-summary.mjs`). The HTML and JSON reports
+are uploaded as `lighthouse-report-<attempt>`. Nothing goes to an LHCI server or
+to temporary public storage.
+
 ## 📸 Screenshot Walkthrough
 
 `pnpm walkthrough` captures every Storybook story on **every level**
