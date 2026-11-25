@@ -154,3 +154,25 @@ the number.
 - **Comparing two `mutation.json` files:** key each mutant by its start *and*
   end location. Start alone collides (`a && b` and `a` share one) and invents
   status changes.
+
+## 🌐 Cross-browser behaviour
+
+`pnpm test:cross-browser` runs `playwright.cross-browser.config.ts`: Firefox
+and WebKit, on a subset chosen to be cheap and to ask only what can differ
+between engines. It is an instrument, not a gate. It runs in `experiments.yml`
+when a PR carries the `experiment:cross-browser` label, in the pinned image,
+which already ships both browsers.
+
+- **`tests/a11y.spec.ts` at one Level, desktop viewport.** Level is a colour
+  axis, and Chromium already answers colour on both Levels. What can differ is
+  computed style as rendered, focus order and the keyboard flows.
+- **`tests/overlays.spec.ts`** drives Base UI's dialogs, drawer, popover,
+  menu, select and tooltip from the keyboard: focus moves in, Tab stays
+  trapped, Escape closes the top layer only, focus returns to the trigger. It
+  runs in Chromium too, as the reference. Red in WebKit and green in Chromium
+  is a finding. Red in all three is a broken test.
+- **No screenshots.** Per-engine baselines would triple the snapshot set and
+  every `/update-snapshots`, for pixels that are expected to differ.
+- **A focus trap is asserted where focus settles, not straight after the key.**
+  Base UI's focus guards hand focus back on their own `focus` event, so focus is
+  briefly on a guard outside the dialog in every engine.
