@@ -83,13 +83,13 @@ function walk(dir, test) {
  * from the entrypoint imports a test file. `tsup` bundles from `src/index.ts`,
  * so a stray `export` from a `.test.ts` could not pull the runner into `dist`
  * without also appearing in the published types — which rule 5 below would
- * catch.
+ * catch. Benches (`*.bench.tsx`, `pnpm bench`) are excluded on the same terms.
  */
 function shippedImports() {
   const files = walk(path.join(ROOT, 'src'), (f) => /\.tsx?$/.test(f)).filter(
     (f) =>
       !f.includes(`${path.sep}stories${path.sep}`) &&
-      !/\.test\.tsx?$/.test(f) &&
+      !/\.(test|bench)\.tsx?$/.test(f) &&
       !/test-setup\.tsx?$/.test(f),
   );
   const found = new Set();

@@ -57,7 +57,9 @@ export const PKG = 'packages/design-system/';
 const CI = '.github/workflows/ci.yml';
 const SCRIPT = /^packages\/design-system\/scripts\/[^/]+\.m?js$/;
 const SOURCE = new RegExp(`^${PKG}(src|\\.storybook)/`);
-const UNIT_TEST = new RegExp(`^${PKG}src/(.*\\.test\\.tsx?|test-setup\\.ts)$`);
+// Benches (`src/bench/`: `*.bench.tsx` and their fixtures) are Vitest's too:
+// `pnpm bench` runs them in jsdom, and no story imports them.
+const UNIT_TEST = new RegExp(`^${PKG}src/(.*\\.(test|bench)\\.tsx?|test-setup\\.ts|bench/.*)$`);
 
 /* ------------------------------------------------------------------ *
  * The path rules, shared with story selection
@@ -77,11 +79,11 @@ export const GLOBAL_PATHS = [
 /** Files that reach no gated story, each with the reason. */
 export const INERT_PATHS = [
   [new RegExp(`^${PKG}docs/`), 'prose'],
-  [UNIT_TEST, 'a unit test or its set-up; Vitest runs it, no story imports it'],
+  [UNIT_TEST, 'a unit test, a bench, or their set-up; Vitest runs it, no story imports it'],
   [new RegExp(`^${PKG}[^/]+\\.md$`), 'prose'],
   [new RegExp(`^${PKG}scripts/`), 'tooling; the index gates run in full whatever is selected'],
   [new RegExp(`^${PKG}(api|skills|terminal)/`), 'published artefacts no story imports'],
-  [new RegExp(`^${PKG}(vitest\\.config\\.mts|eslint\\.config\\.mjs|knip\\.json|licenses\\.baseline\\.json|tsup\\.config\\.ts|LICENSE)$`), 'unit, lint or package-build configuration'],
+  [new RegExp(`^${PKG}(vitest(\\.bench)?\\.config\\.mts|eslint\\.config\\.mjs|knip\\.json|licenses\\.baseline\\.json|tsup\\.config\\.ts|LICENSE)$`), 'unit, lint or package-build configuration'],
   [new RegExp(`^${PKG}playwright\\.walkthrough\\.config\\.ts$`), 'the walkthrough, which is not a gate'],
   [/^packages\/design-system-report\//, 'the second package, which depends on this one'],
   [/^(README\.md|LICENSE|vercel\.json|reference\/|docs\/)/, 'repository metadata and prose'],
